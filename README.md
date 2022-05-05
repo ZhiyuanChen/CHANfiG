@@ -70,10 +70,16 @@ if __name__ == '__main__':
     # config.json('config.json')  # in case you want to save a json
 ```
 
-All you needs to do:
+All you needs to do is just run a line:
 
 ```shell
 python main.py --model.encoder.num_layers 6 --model.dropout 0.2
+```
+
+You could also load a default configure file and make changs based on it:
+
+```shell
+python main.py --config meow.yaml --model.encoder.num_layers 6 --model.dropout 0.2
 ```
 
 If you have made it dump current configurations, this should be in the written file:
