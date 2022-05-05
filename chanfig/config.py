@@ -8,7 +8,8 @@ from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as _PathLike
-from typing import IO, Any, Callable, Iterable, MutableMapping, Union
+from typing import (IO, Any, Callable, Iterable, Mapping, MutableMapping,
+                    Tuple, Union)
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
@@ -17,9 +18,9 @@ from yaml import load as yaml_load
 PathLike = Union[str, _PathLike]
 File = Union[PathLike, IO]
 
-YAML_EXTENSIONS = ('.yml', '.yaml')
-JSON_EXTENSIONS = ('.json')
-PYTHON_EXTENSIONS = ('.py')
+YAML = ('yml', 'yaml')
+JSON = ('json')
+PYTHON = ('py')
 
 
 class Dumper(SafeDumper):
@@ -27,7 +28,7 @@ class Dumper(SafeDumper):
         return super().increase_indent(flow, False)
 
 
-class FileExtensionError(ValueError):
+class FileError(ValueError):
     pass
 
 
@@ -119,16 +120,14 @@ class Config(Namespace):
             kwargs['indent'] = self.indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
-    def merge(self, other: Union[Config, dict, str], reverse: bool = False):
-        if isinstance(other, dict):
-            other = type(self)(**other)
-        elif isinstance(other, str):
-            other = self.read(other)
-        if reverse:
-            self, other = other, self
-        for key, value in other.items():
-            self[key] = value
-        return self
+    def dump(self, file: File, method: str = "yaml", *args, **kwargs):
+        method = method.lower()
+        if method in YAML:
+            self.yaml(file=file, *args, **kwargs)
+        elif method in JSON:
+            self.json(file=file, *args, **kwargs)
+        else:
+            raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     def items(self, prefix: str = ''):
         for key, value in self.__dict__.items():
@@ -148,16 +147,31 @@ class Config(Namespace):
             else:
                 yield value
 
+    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs):
+        if isinstance(other, str):
+            other = self.read(other)
+        if isinstance(other, (Config, MutableMapping)):
+            for key, value in other.items():
+                self[key] = value
+        elif isinstance(other, Iterable):
+            for key, value in other:
+                self[key] = value
+        for key, value in kwargs.items():
+            self[key] = value
+        return self
+
+    merge = update
+
     @classmethod
     def read(cls, path: str, **kwargs) -> Config:
         path = path.lower()
         with cls.open(path) as fp:
-            if path.endswith(JSON_EXTENSIONS):
+            if path.endswith(JSON):
                 config = cls(**json_load(fp, **kwargs))
-            elif path.endswith(YAML_EXTENSIONS):
+            elif path.endswith(YAML):
                 config = cls.load(fp.read(), **kwargs)
             else:
-                raise FileExtensionError(f"path {path} should have extensions {JSON_EXTENSIONS} or {YAML_EXTENSIONS}")
+                raise FileError(f"file {path} should have extensions {JSON} or {YAML}")
         return config
 
     @classmethod
