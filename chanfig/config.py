@@ -68,8 +68,14 @@ class Config(Namespace):
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Iterable:
-        return iter(self.__dict__)
+    def __iter__(self, prefix=''):
+        for key, value in self.__dict__.items():
+            if prefix:
+                key = prefix + self.delimiter + key
+            if isinstance(value, Config):
+                yield from value.__iter__(key)
+            else:
+                yield key
 
     def __contains__(self, name: str) -> bool:
         return hasattr(self, name)
@@ -113,19 +119,52 @@ class Config(Namespace):
             kwargs['indent'] = self.indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
+    def merge(self, other: Union[Config, dict, str], reverse: bool = False):
+        if isinstance(other, dict):
+            other = type(self)(**other)
+        elif isinstance(other, str):
+            other = self.read(other)
+        if reverse:
+            self, other = other, self
+        for key, value in other.items():
+            self[key] = value
+        return self
+
+    def items(self, prefix: str = ''):
+        for key, value in self.__dict__.items():
+            if prefix:
+                key = prefix + self.delimiter + key
+            if isinstance(value, Config):
+                yield from value.items(key)
+            else:
+                yield key, value
+
+    keys = __iter__
+
+    def values(self):
+        for value in self.__dict__.values():
+            if isinstance(value, Config):
+                yield from value.values()
+            else:
+                yield value
+
     @classmethod
-    def load(cls, path: str, **kwargs) -> Config:
+    def read(cls, path: str, **kwargs) -> Config:
         path = path.lower()
         with cls.open(path) as fp:
             if path.endswith(JSON_EXTENSIONS):
                 config = cls(**json_load(fp, **kwargs))
             elif path.endswith(YAML_EXTENSIONS):
-                if 'Loader' not in kwargs:
-                    kwargs['Loader'] = SafeLoader
-                config = cls(**yaml_load(fp.read(), **kwargs))
+                config = cls.load(fp.read(), **kwargs)
             else:
                 raise FileExtensionError(f"path {path} should have extensions {JSON_EXTENSIONS} or {YAML_EXTENSIONS}")
         return config
+
+    @classmethod
+    def load(cls, yaml: str, **kwargs) -> Config:
+        if 'Loader' not in kwargs:
+            kwargs['Loader'] = SafeLoader
+        return cls(**yaml_load(yaml, **kwargs))
 
     @staticmethod
     @contextmanager
