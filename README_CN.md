@@ -67,10 +67,16 @@ if __name__ == '__main__':
     # config.json('config.json')  # 如果你想保存一个json
 ```
 
-所有你需要做的：
+所有你需要做的仅仅是运行一行：
 
 ```shell
 python main.py --model.encoder.num_layers 6 --model.dropout 0.2
+```
+
+当然，你也可以读取一个默认配置文件然后在他基础上修改：
+
+```shell
+python main.py --config meow.yaml --model.encoder.num_layers 6 --model.dropout 0.2
 ```
 
 如果你保存了配置文件，那他应该看起来像这样：
