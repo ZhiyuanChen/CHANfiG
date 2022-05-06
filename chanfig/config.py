@@ -68,14 +68,16 @@ class Config(Namespace):
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self, prefix=''):
-        for key, value in self.__dict__.items():
-            if prefix:
-                key = prefix + self.delimiter + key
-            if isinstance(value, Config):
-                yield from value.__iter__(key)
-            else:
-                yield key
+    def __iter__(self):
+        def iter(self, prefix=''):
+            for key, value in self.__dict__.items():
+                if prefix:
+                    key = prefix + self.delimiter + key
+                if isinstance(value, Config):
+                    yield from iter(value, key)
+                else:
+                    yield key
+        return iter(self)
 
     def __contains__(self, name: str) -> bool:
         return hasattr(self, name)
@@ -84,6 +86,9 @@ class Config(Namespace):
         if not isinstance(other, type(self)):
             return NotImplemented
         return self.dict() == other.dict()
+
+    def __bool__(self):
+        return bool(self)
 
     def __str__(self) -> str:
         return self.yamls()
@@ -161,6 +166,17 @@ class Config(Namespace):
 
     merge = update
     merge_from_file = update
+
+    def difference(self, other):
+        if isinstance(other, str):
+            other = self.read(other)
+        if isinstance(other, (Config, MutableMapping)):
+            return type(self)(**{key: value for key, value in other.items() if key not in self or self[key] != value})
+        elif isinstance(other, Iterable):
+            return type(self)(**{key: value for key, value in other if key not in self or self[key] != value})
+        return None
+
+    diff = difference
 
     @classmethod
     def read(cls, path: str, **kwargs) -> Config:
