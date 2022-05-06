@@ -161,6 +161,7 @@ class Config(Namespace):
         return self
 
     merge = update
+    merge_from_file = update
 
     @classmethod
     def read(cls, path: str, **kwargs) -> Config:
