@@ -8,8 +8,7 @@ from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as _PathLike
-from typing import (IO, Any, Callable, Iterable, Mapping, MutableMapping,
-                    Tuple, Union)
+from typing import IO, Any, Callable, Iterable, MutableMapping, Union
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
@@ -89,7 +88,7 @@ class Config(Namespace):
     def __str__(self) -> str:
         return self.yamls()
 
-    def dict(self, cls: Callable = OrderedDict) -> MutableMapping:
+    def dict(self, cls: Callable = dict) -> MutableMapping:
         dict = cls()
         for k, v in self.__dict__.items():
             if isinstance(v, Config):
