@@ -6,7 +6,7 @@ from .config import Config
 
 
 class ConfigParser(ArgumentParser):
-    def parse_config(self, args: List[str] = None, config: Config = None, config_name: str = 'config'):
+    def parse_config(self, args: List[str] = None, config: Config = None, config_name: str = 'config') -> Config:
         if args is None:
             args = sys.argv[1:]
         for arg in args:
@@ -15,11 +15,9 @@ class ConfigParser(ArgumentParser):
         if config is None:
             config = Config()
         if (path := getattr(config, config_name, None)) is not None:
-            raise ValueError(f"{config} is reserved for auto loading config file, but got {path}")
+            raise ValueError(f"--{config_name} is reserved for auto loading config file, but got {path}")
         config, _ = self.parse_known_args(args, config)
         if (path := getattr(config, config_name, None)) is not None:
-            # CLI arguments have higher priority than config file
-            other = Config.read(path)
-            config = other.update(config)
+            config = config.update(path)
         return config
     parse_all_args = parse_config
