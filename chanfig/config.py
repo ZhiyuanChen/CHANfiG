@@ -38,8 +38,11 @@ class Config(Namespace):
 
     delimiter: str = '.'
     indent: int = 2
+    frozen: bool = False
 
     def __setattr__(self, name: str, value: Any) -> None:
+        if self.frozen:
+            raise AttributeError(f"Attempting to set {name}={value} on a frozen config. Run config.defrost() to defrost first")
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
@@ -93,6 +96,23 @@ class Config(Namespace):
     def __str__(self) -> str:
         return self.yamls()
 
+    def apply(self, fn: Callable) -> Config:
+        for value in self.__dict__.values():
+            if isinstance(value, Config):
+                value.apply(fn)
+        fn(self)
+        return self
+
+    def freeze(self) -> None:
+        def _freeze(config: Config) -> None:
+            config.frozen = True
+        self.apply(_freeze)
+
+    def defrost(self) -> None:
+        def _defrost(config: Config) -> None:
+            config.frozen = False
+        self.apply(_defrost)
+
     def dict(self, cls: Callable = dict) -> MutableMapping:
         dict = cls()
         for k, v in self.__dict__.items():
@@ -102,29 +122,29 @@ class Config(Namespace):
                 dict[k] = v
         return dict
 
-    def json(self, file: File, *args, **kwargs):
+    def json(self, file: File, *args, **kwargs) -> None:
         if 'indent' not in kwargs:
             kwargs['indent'] = self.indent
         with self.open(file, mode='w') as fp:
             json_dump(self.dict(), fp, *args, **kwargs)
 
-    def jsons(self, *args, **kwargs):
+    def jsons(self, *args, **kwargs) -> str:
         if 'indent' not in kwargs:
             kwargs['indent'] = self.indent
         return json_dumps(self.dict(), *args, **kwargs)
 
-    def yaml(self, file: File, *args, **kwargs):
+    def yaml(self, file: File, *args, **kwargs) -> None:
         with self.open(file, mode='w') as fp:
             self.yamls(fp, *args, **kwargs)
 
-    def yamls(self, *args, **kwargs):
+    def yamls(self, *args, **kwargs) -> str:
         if 'Dumper' not in kwargs:
             kwargs['Dumper'] = Dumper
         if 'indent' not in kwargs:
             kwargs['indent'] = self.indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
-    def dump(self, file: File, method: str = "yaml", *args, **kwargs):
+    def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
         method = method.lower()
         if method in YAML:
             self.yaml(file=file, *args, **kwargs)
@@ -151,7 +171,7 @@ class Config(Namespace):
             else:
                 yield value
 
-    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs):
+    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
         if isinstance(other, str):
             other = self.read(other)
         if isinstance(other, (Config, MutableMapping)):
@@ -167,7 +187,7 @@ class Config(Namespace):
     merge = update
     merge_from_file = update
 
-    def difference(self, other):
+    def difference(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
         if isinstance(other, str):
             other = self.read(other)
         if isinstance(other, (Config, MutableMapping)):
