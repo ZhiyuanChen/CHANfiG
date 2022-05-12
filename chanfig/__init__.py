@@ -1,4 +1,3 @@
-from .config import Config
-from .parse import ConfigParser
+from .config import Config, ConfigParser
 
 __all__ = ['Config', 'ConfigParser']

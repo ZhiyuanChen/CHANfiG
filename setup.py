@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='chanfig',
-    version='0.0.6',
+    version='0.0.7',
     description='Easy Configuration',
     author='Zhiyuan Chen',
     author_email='this@zyc.ai',
