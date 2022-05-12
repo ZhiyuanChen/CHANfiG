@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from argparse import Namespace
+import sys
+from argparse import ArgumentParser, Namespace
 from ast import literal_eval
 from collections import OrderedDict
 from contextlib import contextmanager
@@ -13,8 +14,6 @@ from typing import IO, Any, Callable, Iterable, MutableMapping, Union
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
-
-from . import ConfigParser
 
 PathLike = Union[str, _PathLike]
 File = Union[PathLike, IO]
@@ -235,5 +234,24 @@ class Config(Namespace):
     def parse(self) -> Config:
         parser = ConfigParser()
         return parser.parse_config(config=self)
+
+    parse_config = parse
+
+
+class ConfigParser(ArgumentParser):
+    def parse(self, args: Iterable[str] = None, config: Config = None, config_name: str = 'config') -> Config:
+        if args is None:
+            args = sys.argv[1:]
+        for arg in args:
+            if arg.startswith('--') and args != '--' and arg not in self._option_string_actions:
+                self.add_argument(arg)
+        if config is None:
+            config = Config()
+        if (path := getattr(config, config_name, None)) is not None:
+            raise ValueError(f"--{config_name} is reserved for auto loading config file, but got {path}")
+        config, _ = self.parse_known_args(args, config)
+        if (path := getattr(config, config_name, None)) is not None:
+            config = config.update(path)
+        return config
 
     parse_config = parse
