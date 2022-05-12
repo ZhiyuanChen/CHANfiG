@@ -14,6 +14,8 @@ from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
+from . import ConfigParser
+
 PathLike = Union[str, _PathLike]
 File = Union[PathLike, IO]
 
@@ -46,10 +48,10 @@ class Config(Namespace):
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
-                setattr(self, name, type(self)())
+                setattr(self, name, Config())
             setattr(getattr(self, name), rest, value)
         elif isinstance(value, dict):
-            setattr(self, name, type(self)(**value))
+            setattr(self, name, Config(**value))
         else:
             if isinstance(value, str):
                 try:
@@ -86,7 +88,7 @@ class Config(Namespace):
         return hasattr(self, name)
 
     def __eq__(self, other: Config) -> bool:
-        if not isinstance(other, type(self)):
+        if not isinstance(other, Config):
             return NotImplemented
         return self.dict() == other.dict()
 
@@ -191,9 +193,9 @@ class Config(Namespace):
         if isinstance(other, str):
             other = self.read(other)
         if isinstance(other, (Config, MutableMapping)):
-            return type(self)(**{key: value for key, value in other.items() if key not in self or self[key] != value})
+            return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
         elif isinstance(other, Iterable):
-            return type(self)(**{key: value for key, value in other if key not in self or self[key] != value})
+            return Config(**{key: value for key, value in other if key not in self or self[key] != value})
         return None
 
     diff = difference
@@ -229,3 +231,9 @@ class Config(Namespace):
             yield file
         else:
             raise ValueError(f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}")
+
+    def parse(self) -> Config:
+        parser = ConfigParser()
+        return parser.parse_config(config=self)
+
+    parse_config = parse
