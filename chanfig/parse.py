@@ -6,7 +6,7 @@ from .config import Config
 
 
 class ConfigParser(ArgumentParser):
-    def parse_config(self, args: List[str] = None, config: Config = None, config_name: str = 'config') -> Config:
+    def parse(self, args: List[str] = None, config: Config = None, config_name: str = 'config') -> Config:
         if args is None:
             args = sys.argv[1:]
         for arg in args:
@@ -20,4 +20,5 @@ class ConfigParser(ArgumentParser):
         if (path := getattr(config, config_name, None)) is not None:
             config = config.update(path)
         return config
-    parse_all_args = parse_config
+
+    parse_config = parse
