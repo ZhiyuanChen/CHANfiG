@@ -134,6 +134,10 @@ class Config(Namespace):
             kwargs['indent'] = self.indent
         return json_dumps(self.dict(), *args, **kwargs)
 
+    @classmethod
+    def from_json(cls, string: str, **kwargs) -> Config:
+        return cls(**json_load(string, **kwargs))
+
     def yaml(self, file: File, *args, **kwargs) -> None:
         with self.open(file, mode='w') as fp:
             self.yamls(fp, *args, **kwargs)
@@ -144,6 +148,12 @@ class Config(Namespace):
         if 'indent' not in kwargs:
             kwargs['indent'] = self.indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
+
+    @classmethod
+    def from_yaml(cls, string: str, **kwargs) -> Config:
+        if 'Loader' not in kwargs:
+            kwargs['Loader'] = SafeLoader
+        return cls(**yaml_load(string, **kwargs))
 
     def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
         method = method.lower()
@@ -200,7 +210,7 @@ class Config(Namespace):
     diff = difference
 
     @classmethod
-    def read(cls, path: str, **kwargs) -> Config:
+    def load(cls, path: str, **kwargs) -> Config:
         path = path.lower()
         with cls.open(path) as fp:
             if path.endswith(JSON):
@@ -210,12 +220,6 @@ class Config(Namespace):
             else:
                 raise FileError(f"file {path} should have extensions {JSON} or {YAML}")
         return config
-
-    @classmethod
-    def load(cls, yaml: str, **kwargs) -> Config:
-        if 'Loader' not in kwargs:
-            kwargs['Loader'] = SafeLoader
-        return cls(**yaml_load(yaml, **kwargs))
 
     @staticmethod
     @contextmanager
