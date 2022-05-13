@@ -3,13 +3,13 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser, Namespace
 from ast import literal_eval
-from collections import OrderedDict
+from copy import copy, deepcopy
 from contextlib import contextmanager
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as _PathLike
-from typing import IO, Any, Callable, Iterable, MutableMapping, Union
+from typing import IO, Any, Callable, Iterable, MutableMapping, Optional, Union
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
@@ -41,7 +41,22 @@ class Config(Namespace):
     indent: int = 2
     frozen: bool = False
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __getattr__(self, name: str) -> Any:
+        if self.delimiter in name:
+            name, rest = name.split(self.delimiter, 1)
+            return getattr(self[name], rest)
+        else:
+            return super().__getattribute__(name)
+
+    __getitem__ = __getattr__
+
+    def get(self, name: str, default: Optional[Any] = None) -> Any:
+        try:
+            return getattr(self, name)
+        except AttributeError:
+            return default
+
+    def set(self, name: str, value: Any) -> None:
         if self.frozen:
             raise AttributeError(f"Attempting to set {name}={value} on a frozen config. Run config.defrost() to defrost first")
         if self.delimiter in name:
@@ -59,69 +74,107 @@ class Config(Namespace):
                     pass
             super().__setattr__(name, value)
 
-    def __getattr__(self, name: str) -> Any:
-        if self.delimiter in name:
-            name, rest = name.split(self.delimiter, 1)
-            return getattr(self[name], rest)
-        else:
-            return super().__getattribute__(name)
+    __setitem__ = set
+    __setattr__ = set
 
-    __setitem__ = __setattr__
-    __getitem__ = __getattr__
+    def remove(self, name: str) -> None:
+        if self.frozen:
+            raise AttributeError(f"Attempting to delete {name} on a frozen config. Run config.defrost() to defrost first")
+        del self.__dict__[name]
 
-    def __len__(self) -> int:
-        return len(self.__dict__)
+    __delitem__ = remove
+    __delattr__ = remove
+
+    def pop(self, name: str, default: Optional[Any] = None) -> Any:
+        if self.frozen:
+            raise AttributeError(f"Attempting to pop {name} on a frozen config. Run config.defrost() to defrost first")
+        attr = self.get(name, default)
+        self.remove(name)
+        return attr
 
     def __iter__(self):
-        def iter(self, prefix=''):
+        def _iter(self, prefix=''):
             for key, value in self.__dict__.items():
                 if prefix:
                     key = prefix + self.delimiter + key
                 if isinstance(value, Config):
-                    yield from iter(value, key)
+                    yield from _iter(value, key)
                 else:
                     yield key
-        return iter(self)
+        return _iter(self)
 
-    def __contains__(self, name: str) -> bool:
-        return hasattr(self, name)
-
-    def __eq__(self, other: Config) -> bool:
-        if not isinstance(other, Config):
-            return NotImplemented
-        return self.dict() == other.dict()
-
-    def __bool__(self):
-        return bool(self)
-
-    def __str__(self) -> str:
-        return self.yamls()
-
-    def apply(self, fn: Callable) -> Config:
-        for value in self.__dict__.values():
-            if isinstance(value, Config):
-                value.apply(fn)
-        fn(self)
-        return self
-
-    def freeze(self) -> None:
-        def _freeze(config: Config) -> None:
-            config.frozen = True
-        self.apply(_freeze)
-
-    def defrost(self) -> None:
-        def _defrost(config: Config) -> None:
-            config.frozen = False
-        self.apply(_defrost)
+    keys = __iter__
 
     def dict(self, cls: Callable = dict) -> MutableMapping:
-        dict = cls()
+        dic = cls()
         for k, v in self.__dict__.items():
             if isinstance(v, Config):
-                dict[k] = v.dict(cls)
+                dic[k] = v.dict(cls)
             else:
-                dict[k] = v
-        return dict
+                dic[k] = v
+        return dic
+
+    def items(self, prefix: str = ''):
+        for key, value in self.__dict__.items():
+            if prefix:
+                key = prefix + self.delimiter + key
+            if isinstance(value, Config):
+                yield from value.items(key)
+            else:
+                yield key, value
+
+    def values(self):
+        for value in self.__dict__.values():
+            if isinstance(value, Config):
+                yield from value.values()
+            else:
+                yield value
+
+    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
+        if isinstance(other, str):
+            other = self.read(other)
+        if isinstance(other, (Config, MutableMapping)):
+            for key, value in other.items():
+                self[key] = value
+        elif isinstance(other, Iterable):
+            for key, value in other:
+                self[key] = value
+        for key, value in kwargs.items():
+            self[key] = value
+        return self
+
+    merge = update
+    merge_from_file = update
+    union = update
+
+    def difference(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
+        if isinstance(other, str):
+            other = self.read(other)
+        if isinstance(other, (Config, MutableMapping)):
+            return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
+        elif isinstance(other, Iterable):
+            return Config(**{key: value for key, value in other if key not in self or self[key] != value})
+        return None
+
+    diff = difference
+
+    def intersection(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
+        if isinstance(other, str):
+            other = self.read(other)
+        if isinstance(other, (Config, MutableMapping)):
+            return Config(**{key: value for key, value in other.items() if key in self and self[key] == value})
+        elif isinstance(other, Iterable):
+            return Config(**{key: value for key, value in other if key in self and self[key] == value})
+        return None
+
+    def copy(self) -> Config:
+        return copy(self)
+
+    def deepcopy(self) -> Config:
+        return deepcopy(self)
+
+    def clear(self) -> None:
+        self.__dict__.clear()
 
     def json(self, file: File, *args, **kwargs) -> None:
         if 'indent' not in kwargs:
@@ -164,51 +217,6 @@ class Config(Namespace):
         else:
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
-    def items(self, prefix: str = ''):
-        for key, value in self.__dict__.items():
-            if prefix:
-                key = prefix + self.delimiter + key
-            if isinstance(value, Config):
-                yield from value.items(key)
-            else:
-                yield key, value
-
-    keys = __iter__
-
-    def values(self):
-        for value in self.__dict__.values():
-            if isinstance(value, Config):
-                yield from value.values()
-            else:
-                yield value
-
-    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
-        if isinstance(other, str):
-            other = self.read(other)
-        if isinstance(other, (Config, MutableMapping)):
-            for key, value in other.items():
-                self[key] = value
-        elif isinstance(other, Iterable):
-            for key, value in other:
-                self[key] = value
-        for key, value in kwargs.items():
-            self[key] = value
-        return self
-
-    merge = update
-    merge_from_file = update
-
-    def difference(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
-        if isinstance(other, str):
-            other = self.read(other)
-        if isinstance(other, (Config, MutableMapping)):
-            return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
-        elif isinstance(other, Iterable):
-            return Config(**{key: value for key, value in other if key not in self or self[key] != value})
-        return None
-
-    diff = difference
-
     @classmethod
     def load(cls, path: str, **kwargs) -> Config:
         path = path.lower()
@@ -224,7 +232,7 @@ class Config(Namespace):
     @staticmethod
     @contextmanager
     def open(file: File, *args, **kwargs):
-        if isinstance(file, (str, _PathLike )):
+        if isinstance(file, (str, _PathLike)):
             file = open(file, *args, **kwargs)
             try:
                 yield file
@@ -240,6 +248,40 @@ class Config(Namespace):
         return parser.parse_config(config=self)
 
     parse_config = parse
+
+    def apply(self, func: Callable) -> Config:
+        for value in self.__dict__.values():
+            if isinstance(value, Config):
+                value.apply(func)
+        func(self)
+        return self
+
+    def freeze(self) -> None:
+        def _freeze(config: Config) -> None:
+            config.frozen = True
+        self.apply(_freeze)
+
+    def defrost(self) -> None:
+        def _defrost(config: Config) -> None:
+            config.frozen = False
+        self.apply(_defrost)
+
+    def __len__(self) -> int:
+        return len(self.__dict__)
+
+    def __contains__(self, name: str) -> bool:
+        return hasattr(self, name)
+
+    def __eq__(self, other: Config) -> bool:
+        if not isinstance(other, Config):
+            return NotImplemented
+        return self.dict() == other.dict()
+
+    def __bool__(self):
+        return bool(self)
+
+    def __str__(self) -> str:
+        return self.yamls()
 
 
 class ConfigParser(ArgumentParser):
