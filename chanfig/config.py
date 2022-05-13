@@ -92,9 +92,21 @@ class Config(Namespace):
         self.remove(name)
         return attr
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable:
+        return iter(self.__dict__)
+
+    def keys(self) -> Iterable:
+        return self.__dict__.keys()
+
+    def values(self) -> Iterable:
+        return self.__dict__.values()
+
+    def items(self) -> Iterable:
+        return self.__dict__.items()
+
+    def all_keys(self):
         def _iter(self, prefix=''):
-            for key, value in self.__dict__.items():
+            for key, value in self.items():
                 if prefix:
                     key = prefix + self.delimiter + key
                 if isinstance(value, Config):
@@ -103,7 +115,23 @@ class Config(Namespace):
                     yield key
         return _iter(self)
 
-    keys = __iter__
+    def all_values(self):
+        for value in self.values():
+            if isinstance(value, Config):
+                yield from value.all_values()
+            else:
+                yield value
+
+    def all_items(self):
+        def _iter(self, prefix=''):
+            for key, value in self.items():
+                if prefix:
+                    key = prefix + self.delimiter + key
+                if isinstance(value, Config):
+                    yield from _iter(value, key)
+                else:
+                    yield key, value
+        return _iter(self)
 
     def dict(self, cls: Callable = dict) -> MutableMapping:
         dic = cls()
@@ -113,22 +141,6 @@ class Config(Namespace):
             else:
                 dic[k] = v
         return dic
-
-    def items(self, prefix: str = ''):
-        for key, value in self.__dict__.items():
-            if prefix:
-                key = prefix + self.delimiter + key
-            if isinstance(value, Config):
-                yield from value.items(key)
-            else:
-                yield key, value
-
-    def values(self):
-        for value in self.__dict__.values():
-            if isinstance(value, Config):
-                yield from value.values()
-            else:
-                yield value
 
     def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
         if isinstance(other, str):
