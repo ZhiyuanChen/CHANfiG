@@ -3,8 +3,9 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser, Namespace
 from ast import literal_eval
-from copy import copy, deepcopy
 from contextlib import contextmanager
+from copy import copy, deepcopy
+from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
@@ -103,6 +104,7 @@ class Config(Namespace):
         return self.__dict__.items()
 
     def all_keys(self):
+        @wraps(self.all_keys)
         def _iter(self, prefix=''):
             for key, value in self.items():
                 if prefix:
@@ -121,6 +123,7 @@ class Config(Namespace):
                 yield value
 
     def all_items(self):
+        @wraps(self.all_items)
         def _iter(self, prefix=''):
             for key, value in self.items():
                 if prefix:
