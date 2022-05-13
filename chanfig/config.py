@@ -64,8 +64,6 @@ class Config(Namespace):
             if not hasattr(self, name):
                 setattr(self, name, Config())
             setattr(getattr(self, name), rest, value)
-        elif isinstance(value, dict):
-            setattr(self, name, Config(**value))
         else:
             if isinstance(value, str):
                 try:
