@@ -33,6 +33,25 @@ class FileError(ValueError):
     pass
 
 
+class ConfigParser(ArgumentParser):
+    def parse(self, args: Iterable[str] = None, config: Config = None, config_name: str = 'config') -> Config:
+        if args is None:
+            args = sys.argv[1:]
+        for arg in args:
+            if arg.startswith('--') and args != '--' and arg not in self._option_string_actions:
+                self.add_argument(arg)
+        if config is None:
+            config = Config()
+        if (path := getattr(config, config_name, None)) is not None:
+            raise ValueError(f"--{config_name} is reserved for auto loading config file, but got {path}")
+        config, _ = self.parse_known_args(args, config)
+        if (path := getattr(config, config_name, None)) is not None:
+            config = config.update(path)
+        return config
+
+    parse_config = parse
+
+
 class Config(Namespace):
     """
     Basic Config
@@ -41,6 +60,7 @@ class Config(Namespace):
     delimiter: str = '.'
     indent: int = 2
     frozen: bool = False
+    parser: ConfigParser = ConfigParser()
 
     def __getattr__(self, name: str) -> Any:
         if self.delimiter in name:
@@ -235,9 +255,9 @@ class Config(Namespace):
         path = path.lower()
         with cls.open(path) as fp:
             if path.endswith(JSON):
-                config = cls(**json_load(fp, **kwargs))
+                config = cls.from_json(fp.read(), **kwargs)
             elif path.endswith(YAML):
-                config = cls.load(fp.read(), **kwargs)
+                config = cls.from_yaml(fp.read(), **kwargs)
             else:
                 raise FileError(f"file {path} should have extensions {JSON} or {YAML}")
         return config
@@ -257,8 +277,7 @@ class Config(Namespace):
             raise ValueError(f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}")
 
     def parse(self) -> Config:
-        parser = ConfigParser()
-        return parser.parse_config(config=self)
+        return self.parser.parse_config(config=self)
 
     parse_config = parse
 
@@ -295,22 +314,3 @@ class Config(Namespace):
 
     def __str__(self) -> str:
         return self.yamls()
-
-
-class ConfigParser(ArgumentParser):
-    def parse(self, args: Iterable[str] = None, config: Config = None, config_name: str = 'config') -> Config:
-        if args is None:
-            args = sys.argv[1:]
-        for arg in args:
-            if arg.startswith('--') and args != '--' and arg not in self._option_string_actions:
-                self.add_argument(arg)
-        if config is None:
-            config = Config()
-        if (path := getattr(config, config_name, None)) is not None:
-            raise ValueError(f"--{config_name} is reserved for auto loading config file, but got {path}")
-        config, _ = self.parse_known_args(args, config)
-        if (path := getattr(config, config_name, None)) is not None:
-            config = config.update(path)
-        return config
-
-    parse_config = parse
