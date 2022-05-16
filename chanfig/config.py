@@ -145,7 +145,7 @@ class Config(Namespace):
 
     def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
         if isinstance(other, str):
-            other = self.read(other)
+            other = self.load(other)
         if isinstance(other, (Config, MutableMapping)):
             for key, value in other.items():
                 self[key] = value
@@ -162,7 +162,7 @@ class Config(Namespace):
 
     def difference(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
         if isinstance(other, str):
-            other = self.read(other)
+            other = self.load(other)
         if isinstance(other, (Config, MutableMapping)):
             return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
         elif isinstance(other, Iterable):
@@ -173,7 +173,7 @@ class Config(Namespace):
 
     def intersection(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
         if isinstance(other, str):
-            other = self.read(other)
+            other = self.load(other)
         if isinstance(other, (Config, MutableMapping)):
             return Config(**{key: value for key, value in other.items() if key in self and self[key] == value})
         elif isinstance(other, Iterable):
