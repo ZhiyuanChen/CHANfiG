@@ -62,6 +62,10 @@ class Config(Namespace):
     frozen: bool = False
     parser: ConfigParser = ConfigParser()
 
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            self.set(key, value, convert_mapping=True)
+
     def __getattr__(self, name: str) -> Any:
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
@@ -77,14 +81,16 @@ class Config(Namespace):
         except AttributeError:
             return default
 
-    def set(self, name: str, value: Any) -> None:
+    def set(self, name: str, value: Any, convert_mapping: bool = False) -> None:
         if self.frozen:
             raise AttributeError(f"Attempting to set {name}={value} on a frozen config. Run config.defrost() to defrost first")
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
                 setattr(self, name, Config())
-            setattr(getattr(self, name), rest, value)
+            setattr(self[name], rest, value)
+        elif convert_mapping and isinstance(value, MutableMapping):
+            setattr(self, name, Config(**value))
         else:
             if isinstance(value, str):
                 try:
@@ -168,7 +174,10 @@ class Config(Namespace):
             other = self.load(other)
         if isinstance(other, (Config, MutableMapping)):
             for key, value in other.items():
-                self[key] = value
+                if isinstance(value, (Config, MutableMapping)) and isinstance(self[key], (Config, MutableMapping)):
+                    self[key].update(value)
+                else:
+                    self[key] = value
         elif isinstance(other, Iterable):
             for key, value in other:
                 self[key] = value
