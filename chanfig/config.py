@@ -12,6 +12,7 @@ from json import load as json_load
 from os import PathLike as PathLike
 from os.path import splittext
 from typing import Any, Callable, IO, Iterable, MutableMapping, Optional, Union
+from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
@@ -20,9 +21,9 @@ from yaml import load as yaml_load
 PathStr = Union[PathLike, str]
 File = Union[PathStr, IO]
 
-YAML = ('yml', 'yaml')
-JSON = ('json')
-PYTHON = ('py')
+YAML = ("yml", "yaml")
+JSON = ("json")
+PYTHON = ("py")
 
 
 class Dumper(SafeDumper):
@@ -35,19 +36,28 @@ class FileError(ValueError):
 
 
 class ConfigParser(ArgumentParser):
-    def parse(self, args: Iterable[str] = None, config: Config = None, config_name: str = 'config') -> Config:
+    r"""
+    Parse the arguments for config.
+    There are three levels of config:
+    1. The base config parsed into the function,
+    2. The config file located at the path of default_config (if specified),
+    3. The config specified in arguments.
+    Higher levels override lower levels (i.e. 3 > 2 > 1).
+    """
+    def parse(self, args: Iterable[str] = None, config: Config = None, default_config: str = None) -> Config:
         if args is None:
             args = sys.argv[1:]
         for arg in args:
-            if arg.startswith('--') and args != '--' and arg not in self._option_string_actions:
+            if arg.startswith("--") and args != "--" and arg not in self._option_string_actions:
                 self.add_argument(arg)
         if config is None:
             config = Config()
-        if (path := getattr(config, config_name, None)) is not None:
-            raise ValueError(f"--{config_name} is reserved for auto loading config file, but got {path}")
-        config, _ = self.parse_known_args(args, config)
-        if (path := getattr(config, config_name, None)) is not None:
-            config = config.update(path)
+        if default_config is not None and (path := getattr(config, default_config, None)) is not None:
+            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
+        parsed, _ = self.parse_known_args(args, config.clone())
+        if default_config is not None and (path := getattr(config, default_config, None)) is not None:
+            config = type(config).load(path)
+        config.update(parsed)
         return config
 
     parse_config = parse
@@ -58,7 +68,7 @@ class Config(Namespace):
     Basic Config
     """
 
-    delimiter: str = '.'
+    delimiter: str = "."
     indent: int = 2
     frozen: bool = False
     parser: ConfigParser = ConfigParser()
@@ -132,7 +142,7 @@ class Config(Namespace):
 
     def all_keys(self):
         @wraps(self.all_keys)
-        def _iter(self, prefix=''):
+        def _iter(self, prefix=""):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self.delimiter + key
@@ -151,7 +161,7 @@ class Config(Namespace):
 
     def all_items(self):
         @wraps(self.all_items)
-        def _iter(self, prefix=''):
+        def _iter(self, prefix=""):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self.delimiter + key
@@ -216,18 +226,20 @@ class Config(Namespace):
     def deepcopy(self) -> Config:
         return deepcopy(self)
 
+    clone = deepcopy
+
     def clear(self) -> None:
         self.__dict__.clear()
 
     def json(self, file: File, *args, **kwargs) -> None:
-        if 'indent' not in kwargs:
-            kwargs['indent'] = self.indent
-        with self.open(file, mode='w') as fp:
+        if "indent" not in kwargs:
+            kwargs["indent"] = self.indent
+        with self.open(file, mode="w") as fp:
             json_dump(self.dict(), fp, *args, **kwargs)
 
     def jsons(self, *args, **kwargs) -> str:
-        if 'indent' not in kwargs:
-            kwargs['indent'] = self.indent
+        if "indent" not in kwargs:
+            kwargs["indent"] = self.indent
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
@@ -235,20 +247,20 @@ class Config(Namespace):
         return cls(**json_load(string, **kwargs))
 
     def yaml(self, file: File, *args, **kwargs) -> None:
-        with self.open(file, mode='w') as fp:
+        with self.open(file, mode="w") as fp:
             self.yamls(fp, *args, **kwargs)
 
     def yamls(self, *args, **kwargs) -> str:
-        if 'Dumper' not in kwargs:
-            kwargs['Dumper'] = Dumper
-        if 'indent' not in kwargs:
-            kwargs['indent'] = self.indent
+        if "Dumper" not in kwargs:
+            kwargs["Dumper"] = Dumper
+        if "indent" not in kwargs:
+            kwargs["indent"] = self.indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
     @classmethod
     def from_yaml(cls, string: str, **kwargs) -> Config:
-        if 'Loader' not in kwargs:
-            kwargs['Loader'] = SafeLoader
+        if "Loader" not in kwargs:
+            kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
     def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
