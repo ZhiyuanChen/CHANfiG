@@ -9,15 +9,16 @@ from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
-from os import PathLike as _PathLike
-from typing import IO, Any, Callable, Iterable, MutableMapping, Optional, Union
+from os import PathLike as PathLike
+from os.path import splittext
+from typing import Any, Callable, IO, Iterable, MutableMapping, Optional, Union
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-PathLike = Union[str, _PathLike]
-File = Union[PathLike, IO]
+PathStr = Union[PathLike, str]
+File = Union[PathStr, IO]
 
 YAML = ('yml', 'yaml')
 JSON = ('json')
@@ -169,8 +170,8 @@ class Config(Namespace):
                 dic[k] = v
         return dic
 
-    def update(self, other: Union[str, Config, MutableMapping, Iterable], **kwargs) -> Config:
-        if isinstance(other, str):
+    def update(self, other: Union[PathStr, Config, MutableMapping, Iterable], **kwargs) -> Config:
+        if isinstance(other, (PathLike, str)):
             other = self.load(other)
         if isinstance(other, (Config, MutableMapping)):
             for key, value in other.items():
@@ -260,21 +261,21 @@ class Config(Namespace):
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     @classmethod
-    def load(cls, path: str, **kwargs) -> Config:
-        path = path.lower()
+    def load(cls, path: PathStr, **kwargs) -> Config:
+        extension = splittext(path)[1][1:].lower()
         with cls.open(path) as fp:
-            if path.endswith(JSON):
+            if extension in JSON:
                 config = cls.from_json(fp.read(), **kwargs)
-            elif path.endswith(YAML):
+            elif extension in YAML:
                 config = cls.from_yaml(fp.read(), **kwargs)
             else:
-                raise FileError(f"file {path} should have extensions {JSON} or {YAML}")
+                raise FileError(f"file {path} should have extensions {JSON} or {YAML}, but got {extension}")
         return config
 
     @staticmethod
     @contextmanager
     def open(file: File, *args, **kwargs):
-        if isinstance(file, (str, _PathLike)):
+        if isinstance(file, (PathLike, str)):
             file = open(file, *args, **kwargs)
             try:
                 yield file
