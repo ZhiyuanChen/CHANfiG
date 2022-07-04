@@ -60,8 +60,7 @@ if __name__ == '__main__':
     # config = Config.read('config.json')  # in case you want to read from a json
     existing_configs = {'a': 1, 'b.c': 2}
     config = Config(**existing_configs)
-    parser = ConfigParser()
-    config = parser.parse_config(config=config)
+    config = config.parse()
     # config.merge('dataset.yaml')
     config.activation = 'GELU'
     # config['meow.is.good'] = True
