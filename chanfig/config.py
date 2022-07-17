@@ -326,10 +326,12 @@ class Config(Namespace):
     def __contains__(self, name: str) -> bool:
         return hasattr(self, name)
 
-    def __eq__(self, other: Config) -> bool:
-        if not isinstance(other, Config):
-            return NotImplemented
-        return self.dict() == other.dict()
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Config):
+            return self.dict() == other.dict()
+        if isinstance(other, Mapping):
+            return self.dict() == other
+        raise NotImplementedError
 
     def __bool__(self):
         return bool(self)
