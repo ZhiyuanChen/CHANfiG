@@ -10,7 +10,7 @@ from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as PathLike
-from os.path import splittext
+from os.path import splitext
 from typing import Any, Callable, IO, Iterable, MutableMapping, Optional, Union
 from warnings import warn
 
@@ -274,7 +274,7 @@ class Config(Namespace):
 
     @classmethod
     def load(cls, path: PathStr, **kwargs) -> Config:
-        extension = splittext(path)[1][1:].lower()
+        extension = splitext(path)[-1][1:].lower()
         with cls.open(path) as fp:
             if extension in JSON:
                 config = cls.from_json(fp.read(), **kwargs)
