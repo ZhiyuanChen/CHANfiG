@@ -180,8 +180,8 @@ class Config(Namespace):
                 dic[k] = v
         return dic
 
-    def update(self, other: Union[PathStr, Config, Mapping, Iterable], **kwargs) -> Config:
-        if isinstance(other, (PathLike, str)):
+    def update(self, other: Union[File, Config, Mapping, Iterable], **kwargs) -> Config:
+        if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
             for key, value in other.items():
@@ -201,7 +201,7 @@ class Config(Namespace):
     union = update
 
     def difference(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
-        if isinstance(other, str):
+        if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
             return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
@@ -212,7 +212,7 @@ class Config(Namespace):
     diff = difference
 
     def intersection(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
-        if isinstance(other, str):
+        if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
             return Config(**{key: value for key, value in other.items() if key in self and self[key] == value})
@@ -273,7 +273,7 @@ class Config(Namespace):
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     @classmethod
-    def load(cls, path: PathStr, **kwargs) -> Config:
+    def load(cls, path: File, **kwargs) -> Config:
         extension = splitext(path)[-1][1:].lower()
         with cls.open(path) as fp:
             if extension in JSON:
