@@ -11,7 +11,7 @@ from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as PathLike
 from os.path import splitext
-from typing import Any, Callable, IO, Iterable, MutableMapping, Optional, Union
+from typing import Any, Callable, IO, Iterable, Mapping, Optional, Union
 from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
@@ -100,7 +100,7 @@ class Config(Namespace):
             if not hasattr(self, name):
                 setattr(self, name, Config())
             setattr(self[name], rest, value)
-        elif convert_mapping and isinstance(value, MutableMapping):
+        elif convert_mapping and isinstance(value, Mapping):
             setattr(self, name, Config(**value))
         else:
             if isinstance(value, str):
@@ -171,7 +171,7 @@ class Config(Namespace):
                     yield key, value
         return _iter(self)
 
-    def dict(self, cls: Callable = dict) -> MutableMapping:
+    def dict(self, cls: Callable = dict) -> Mapping:
         dic = cls()
         for k, v in self.__dict__.items():
             if isinstance(v, Config):
@@ -180,12 +180,12 @@ class Config(Namespace):
                 dic[k] = v
         return dic
 
-    def update(self, other: Union[PathStr, Config, MutableMapping, Iterable], **kwargs) -> Config:
+    def update(self, other: Union[PathStr, Config, Mapping, Iterable], **kwargs) -> Config:
         if isinstance(other, (PathLike, str)):
             other = self.load(other)
-        if isinstance(other, (Config, MutableMapping)):
+        if isinstance(other, (Config, Mapping)):
             for key, value in other.items():
-                if isinstance(value, (Config, MutableMapping)) and isinstance(self[key], (Config, MutableMapping)):
+                if isinstance(value, (Config, Mapping)) and isinstance(self[key], (Config, Mapping)):
                     self[key].update(value)
                 else:
                     self[key] = value
@@ -200,10 +200,10 @@ class Config(Namespace):
     merge_from_file = update
     union = update
 
-    def difference(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
+    def difference(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
         if isinstance(other, str):
             other = self.load(other)
-        if isinstance(other, (Config, MutableMapping)):
+        if isinstance(other, (Config, Mapping)):
             return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
         elif isinstance(other, Iterable):
             return Config(**{key: value for key, value in other if key not in self or self[key] != value})
@@ -211,10 +211,10 @@ class Config(Namespace):
 
     diff = difference
 
-    def intersection(self, other: Union[File, Config, MutableMapping, Iterable]) -> Config:
+    def intersection(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
         if isinstance(other, str):
             other = self.load(other)
-        if isinstance(other, (Config, MutableMapping)):
+        if isinstance(other, (Config, Mapping)):
             return Config(**{key: value for key, value in other.items() if key in self and self[key] == value})
         elif isinstance(other, Iterable):
             return Config(**{key: value for key, value in other if key in self and self[key] == value})
