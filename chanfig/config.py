@@ -85,20 +85,23 @@ class Config(Namespace):
             func(self, *args, **kwargs)
         return decorator
 
-    def __getattr__(self, name: str) -> Any:
-        if self.delimiter in name:
-            name, rest = name.split(self.delimiter, 1)
-            return getattr(self[name], rest)
-        else:
-            return super().__getattribute__(name)
-
-    __getitem__ = __getattr__
-
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        try:
-            return getattr(self, name)
-        except AttributeError:
-            return default
+        @wraps(self.get)
+        def get(self, name):
+            if self.delimiter in name:
+                name, rest = name.split(self.delimiter, 1)
+                return getattr(self[name], rest)
+            else:
+                return super().__getattribute__(name)
+        if default is not None:
+            try:
+                return get(self, name)
+            except AttributeError:
+                return default
+        return get(self, name)
+
+    __getitem__ = get
+    __getattr__ = get
 
     @test
     def set(self, name: str, value: Any, convert_mapping: bool = False) -> None:
