@@ -70,12 +70,20 @@ class Config(Namespace):
 
     delimiter: str = "."
     indent: int = 2
-    frozen: bool = False
+    _frozen: bool = False
     parser: ConfigParser = ConfigParser()
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
+
+    def test(func: Callable):
+        @wraps(func)
+        def decorator(self, *args, **kwargs):
+            if self._frozen and not ('_frozen' in args or '_frozen' in kwargs):
+                raise AttributeError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
+            func(self, *args, **kwargs)
+        return decorator
 
     def __getattr__(self, name: str) -> Any:
         if self.delimiter in name:
@@ -92,9 +100,8 @@ class Config(Namespace):
         except AttributeError:
             return default
 
+    @test
     def set(self, name: str, value: Any, convert_mapping: bool = False) -> None:
-        if self.frozen:
-            raise AttributeError(f"Attempting to set {name}={value} on a frozen config. Run config.defrost() to defrost first")
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
@@ -113,17 +120,15 @@ class Config(Namespace):
     __setitem__ = set
     __setattr__ = set
 
+    @test
     def remove(self, name: str) -> None:
-        if self.frozen:
-            raise AttributeError(f"Attempting to delete {name} on a frozen config. Run config.defrost() to defrost first")
         del self.__dict__[name]
 
     __delitem__ = remove
     __delattr__ = remove
 
+    @test
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
-        if self.frozen:
-            raise AttributeError(f"Attempting to pop {name} on a frozen config. Run config.defrost() to defrost first")
         attr = self.get(name, default)
         self.remove(name)
         return attr
@@ -310,15 +315,21 @@ class Config(Namespace):
         func(self)
         return self
 
-    def freeze(self) -> None:
-        def _freeze(config: Config) -> None:
-            config.frozen = True
-        self.apply(_freeze)
+    def freeze(self, recursive: Optional[bool] = True) -> None:
+        if recursive:
+            def _freeze(config: Config) -> None:
+                config._frozen = True
+            self.apply(_freeze)
+        else:
+            self._frozen = True
 
-    def defrost(self) -> None:
-        def _defrost(config: Config) -> None:
-            config.frozen = False
-        self.apply(_defrost)
+    def defrost(self, recursive: Optional[bool] = True) -> None:
+        if recursive:
+            def _defrost(config: Config) -> None:
+                del config._frozen
+            self.apply(_defrost)
+        else:
+            del self._frozen
 
     def __len__(self) -> int:
         return len(self.__dict__)
