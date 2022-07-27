@@ -27,8 +27,8 @@ PYTHON = ("py")
 
 
 class Dumper(SafeDumper):
-    def increase_indent(self, flow=False, indentless=False):
-        return super().increase_indent(flow, False)
+    def increase_indent(self, flow: Optional[bool] = False, indentless: Optional[bool] = False):
+        return super().increase_indent(flow, indentless)
 
 
 class FileError(ValueError):
@@ -44,7 +44,10 @@ class ConfigParser(ArgumentParser):
     3. The config specified in arguments.
     Higher levels override lower levels (i.e. 3 > 2 > 1).
     """
-    def parse(self, args: Iterable[str] = None, config: Config = None, default_config: str = None) -> Config:
+    def parse(self,
+              args: Optional[Iterable[str]] = None,
+              config: Optional[Config] = None,
+              default_config: Optional[str] = None) -> Config:
         if args is None:
             args = sys.argv[1:]
         for arg in args:
@@ -104,7 +107,7 @@ class Config(Namespace):
     __getattr__ = get
 
     @test
-    def set(self, name: str, value: Any, convert_mapping: bool = False) -> None:
+    def set(self, name: str, value: Any, convert_mapping: Optional[bool] = False) -> None:
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
@@ -271,7 +274,7 @@ class Config(Namespace):
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
-    def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
+    def dump(self, file: File, method: Optional[str] = "yaml", *args, **kwargs) -> None:
         method = method.lower()
         if method in YAML:
             self.yaml(file=file, *args, **kwargs)
