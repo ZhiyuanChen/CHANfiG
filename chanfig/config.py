@@ -319,20 +319,22 @@ class Config(Namespace):
         return self
 
     def freeze(self, recursive: Optional[bool] = True) -> None:
+        @wraps(self.freeze)
+        def freeze(config: Config) -> None:
+            config._frozen = True
         if recursive:
-            def _freeze(config: Config) -> None:
-                config._frozen = True
-            self.apply(_freeze)
+            self.apply(freeze)
         else:
-            self._frozen = True
+            freeze(self)
 
     def defrost(self, recursive: Optional[bool] = True) -> None:
+        @wraps(self.defrost)
+        def defrost(config: Config) -> None:
+            del config._frozen
         if recursive:
-            def _defrost(config: Config) -> None:
-                del config._frozen
-            self.apply(_defrost)
+            self.apply(defrost)
         else:
-            del self._frozen
+            defrost(self)
 
     def __len__(self) -> int:
         return len(self.__dict__)
