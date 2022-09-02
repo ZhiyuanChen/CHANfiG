@@ -22,12 +22,14 @@ PathStr = Union[PathLike, str]
 File = Union[PathStr, IO]
 
 YAML = ("yml", "yaml")
-JSON = ("json")
-PYTHON = ("py")
+JSON = ("json",)
+PYTHON = ("py",)
 
 
 class Dumper(SafeDumper):
-    def increase_indent(self, flow: Optional[bool] = False, indentless: Optional[bool] = False):
+    def increase_indent(
+        self, flow: Optional[bool] = False, indentless: Optional[bool] = False
+    ):
         return super().increase_indent(flow, indentless)
 
 
@@ -44,21 +46,36 @@ class ConfigParser(ArgumentParser):
     3. The config specified in arguments.
     Higher levels override lower levels (i.e. 3 > 2 > 1).
     """
-    def parse(self,
-              args: Optional[Iterable[str]] = None,
-              config: Optional[Config] = None,
-              default_config: Optional[str] = None) -> Config:
+
+    def parse(
+        self,
+        args: Optional[Iterable[str]] = None,
+        config: Optional[Config] = None,
+        default_config: Optional[str] = None,
+    ) -> Config:
         if args is None:
             args = sys.argv[1:]
         for arg in args:
-            if arg.startswith("--") and args != "--" and arg not in self._option_string_actions:
+            if (
+                arg.startswith("--")
+                and args != "--"
+                and arg not in self._option_string_actions
+            ):
                 self.add_argument(arg)
         if config is None:
             config = Config()
-        if default_config is not None and (path := getattr(config, default_config, None)) is not None:
-            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
+        if (
+            default_config is not None
+            and (path := getattr(config, default_config, None)) is not None
+        ):
+            warn(
+                f"Config has 'default_config={path}' specified, its values will override values in Config"
+            )
         parsed, _ = self.parse_known_args(args, config.clone())
-        if default_config is not None and (path := getattr(config, default_config, None)) is not None:
+        if (
+            default_config is not None
+            and (path := getattr(config, default_config, None)) is not None
+        ):
             config = type(config).load(path)
         config.update(parsed)
         return config
@@ -66,27 +83,18 @@ class ConfigParser(ArgumentParser):
     parse_config = parse
 
 
-class Config(Namespace):
+class Dict(Namespace):
     """
     Basic Config
     """
 
     delimiter: str = "."
     indent: int = 2
-    _frozen: bool = False
-    parser: ConfigParser = ConfigParser()
+    convert_mapping: bool = False
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
-
-    def test(func: Callable):
-        @wraps(func)
-        def decorator(self, *args, **kwargs):
-            if self._frozen and not ('_frozen' in args or '_frozen' in kwargs):
-                raise AttributeError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
-            func(self, *args, **kwargs)
-        return decorator
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         @wraps(self.get)
@@ -96,6 +104,7 @@ class Config(Namespace):
                 return getattr(self[name], rest)
             else:
                 return super().__getattribute__(name)
+
         if default is not None:
             try:
                 return get(self, name)
@@ -106,8 +115,11 @@ class Config(Namespace):
     __getitem__ = get
     __getattr__ = get
 
-    @test
-    def set(self, name: str, value: Any, convert_mapping: Optional[bool] = False) -> None:
+    def set(
+        self, name: str, value: Any, convert_mapping: Optional[bool] = True
+    ) -> None:
+        if convert_mapping is None:
+            convert_mapping = self.convert_mapping
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
@@ -126,14 +138,12 @@ class Config(Namespace):
     __setitem__ = set
     __setattr__ = set
 
-    @test
     def remove(self, name: str) -> None:
         del self.__dict__[name]
 
     __delitem__ = remove
     __delattr__ = remove
 
-    @test
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
         attr = self.get(name, default)
         self.remove(name)
@@ -161,6 +171,7 @@ class Config(Namespace):
                     yield from _iter(value, key)
                 else:
                     yield key
+
         return _iter(self)
 
     def all_values(self):
@@ -180,6 +191,7 @@ class Config(Namespace):
                     yield from _iter(value, key)
                 else:
                     yield key, value
+
         return _iter(self)
 
     def dict(self, cls: Callable = dict) -> Mapping:
@@ -196,7 +208,9 @@ class Config(Namespace):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
             for key, value in other.items():
-                if isinstance(value, (Config, Mapping)) and isinstance(self[key], (Config, Mapping)):
+                if isinstance(value, (Config, Mapping)) and isinstance(
+                    self[key], (Config, Mapping)
+                ):
                     self[key].update(value)
                 else:
                     self[key] = value
@@ -215,9 +229,21 @@ class Config(Namespace):
         if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
-            return Config(**{key: value for key, value in other.items() if key not in self or self[key] != value})
+            return Config(
+                **{
+                    key: value
+                    for key, value in other.items()
+                    if key not in self or self[key] != value
+                }
+            )
         elif isinstance(other, Iterable):
-            return Config(**{key: value for key, value in other if key not in self or self[key] != value})
+            return Config(
+                **{
+                    key: value
+                    for key, value in other
+                    if key not in self or self[key] != value
+                }
+            )
         return None
 
     diff = difference
@@ -226,9 +252,21 @@ class Config(Namespace):
         if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
         if isinstance(other, (Config, Mapping)):
-            return Config(**{key: value for key, value in other.items() if key in self and self[key] == value})
+            return Config(
+                **{
+                    key: value
+                    for key, value in other.items()
+                    if key in self and self[key] == value
+                }
+            )
         elif isinstance(other, Iterable):
-            return Config(**{key: value for key, value in other if key in self and self[key] == value})
+            return Config(
+                **{
+                    key: value
+                    for key, value in other
+                    if key in self and self[key] == value
+                }
+            )
         return None
 
     def copy(self) -> Config:
@@ -292,7 +330,9 @@ class Config(Namespace):
             elif extension in YAML:
                 config = cls.from_yaml(fp.read(), **kwargs)
             else:
-                raise FileError(f"file {path} should have extensions {JSON} or {YAML}, but got {extension}")
+                raise FileError(
+                    f"file {path} should have extensions {JSON} or {YAML}, but got {extension}"
+                )
         return config
 
     @staticmethod
@@ -304,10 +344,12 @@ class Config(Namespace):
                 yield file
             finally:
                 file.close()
-        elif isinstance(file, (IO, )):
+        elif isinstance(file, (IO,)):
             yield file
         else:
-            raise ValueError(f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}")
+            raise ValueError(
+                f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"
+            )
 
     def parse(self) -> Config:
         return self.parser.parse_config(config=self)
@@ -325,6 +367,7 @@ class Config(Namespace):
         @wraps(self.freeze)
         def freeze(config: Config) -> None:
             config._frozen = True
+
         if recursive:
             self.apply(freeze)
         else:
@@ -334,6 +377,7 @@ class Config(Namespace):
         @wraps(self.defrost)
         def defrost(config: Config) -> None:
             del config._frozen
+
         if recursive:
             self.apply(defrost)
         else:
@@ -357,3 +401,85 @@ class Config(Namespace):
 
     def __str__(self) -> str:
         return self.yamls()
+
+
+class Config(Dict):
+    """
+    Basic Config
+    """
+
+    _frozen: bool = False
+    parser: ConfigParser = ConfigParser()
+    convert_mapping: bool = True
+
+    def test(func: Callable):
+        @wraps(func)
+        def decorator(self, *args, **kwargs):
+            if self._frozen and not ("_frozen" in args or "_frozen" in kwargs):
+                raise AttributeError(
+                    "Attempting to alter a frozen config. Run config.defrost() to defrost first"
+                )
+            func(self, *args, **kwargs)
+
+        return decorator
+
+    def get(self, name: str, default: Optional[Any] = None) -> Any:
+        @wraps(self.get)
+        def get(self, name):
+            if self.delimiter in name:
+                name, rest = name.split(self.delimiter, 1)
+                return getattr(self[name], rest)
+            else:
+                try:
+                    return super().__getattribute__(name)
+                except AttributeError:
+                    self.set(name, type(self)())
+                    return self[name]
+
+        if default is not None:
+            try:
+                return get(self, name)
+            except AttributeError:
+                return default
+        return get(self, name)
+
+    __getitem__ = get
+    __getattr__ = get
+
+    @test
+    def set(
+        self, name: str, value: Any, convert_mapping: Optional[bool] = True
+    ) -> None:
+        if convert_mapping is None:
+            convert_mapping = self.convert_mapping
+        # __import__("pdb").set_trace()
+        if self.delimiter in name:
+            name, rest = name.split(self.delimiter, 1)
+            if not hasattr(self, name):
+                setattr(self, name, Config())
+            setattr(self[name], rest, value)
+        elif convert_mapping and isinstance(value, Mapping):
+            setattr(self, name, Config(**value))
+        else:
+            if isinstance(value, str):
+                try:
+                    value = literal_eval(value)
+                except (ValueError, SyntaxError):
+                    pass
+            super().__setattr__(name, value)
+
+    __setitem__ = set
+    __setattr__ = set
+
+    @test
+    def remove(self, name: str) -> None:
+        del self.__dict__[name]
+
+    __delitem__ = remove
+    __delattr__ = remove
+
+    @test
+    def pop(self, name: str, default: Optional[Any] = None) -> Any:
+        attr = self.get(name, default)
+        self.remove(name)
+        return attr
