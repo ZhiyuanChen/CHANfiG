@@ -1,14 +1,4 @@
----
-title: CHANfiG
-summary: Easy Configuration
-authors:
-    - Zhiyuan Chen
-date: 2022-05-04 00:00:00
-categories:
-    - README
-tags:
-    - README
----
+# CHANfiG
 
 ## Introduction
 
@@ -23,8 +13,6 @@ Using `argparse` could relief the burdens to some extent, however, it takes a lo
 CHANfiG would like to make a change.
 
 You just run your experiment, with arguments.
-
-[^incountable]: fun fact: time is always incountable.
 
 CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs).
 Different to the paradigm of YACS(
@@ -48,22 +36,22 @@ class Model:
         self.activation = getattr(Activation, activation)
 
 def main(config):
-    model = Model(**config.model.dict())
-    optimizer = Optimizer(**config.optimizer.dict())
-    scheduler = Scheduler(**config.scheduler.dict())
-    dataset = Dataset(**config.dataset.dict())
-    dataloader = Dataloader(**config.dataloader.dict())
+    model = Model(**config.model)
+    optimizer = Optimizer(**config.optimizer)
+    scheduler = Scheduler(**config.scheduler)
+    dataset = Dataset(**config.dataset)
+    dataloader = Dataloader(**config.dataloader)
 
 
 if __name__ == '__main__':
     # config = Config.read('config.yaml')  # in case you want to read from a yaml
     # config = Config.read('config.json')  # in case you want to read from a json
-    existing_configs = {'a': 1, 'b.c': 2}
+    existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
     config = Config(**existing_configs)
     config = config.parse()
+    # CLI arguments: python xxx.py --activation GELU
     # config.merge('dataset.yaml')
-    config.activation = 'GELU'
-    # config['meow.is.good'] = True
+    config.model.decoder.num_layers = 8
     main(config)
     # config.yaml('config.yaml')  # in case you want to save a yaml
     # config.json('config.json')  # in case you want to save a json
@@ -72,38 +60,40 @@ if __name__ == '__main__':
 All you needs to do is just run a line:
 
 ```shell
-python main.py --model.encoder.num_layers 6 --model.dropout 0.2
+python main.py --model.decoder.num_layers 8
 ```
 
 You could also load a default configure file and make changs based on it:
 
 ```shell
-python main.py --config meow.yaml --model.encoder.num_layers 6 --model.dropout 0.2
+python main.py --config meow.yaml --model.decoder.num_layers 8
 ```
 
 If you have made it dump current configurations, this should be in the written file:
 
 ```yaml
-a: 1
-b:
-  c: 2
-model:                                                                                                                                dropout: 0.2
+data:
+  batch_size: 64
+model:
   encoder:
-    num_layers: 6
+    num_layers: 8
+  decoder:
+    num_layers: 8
   activation: GELU
 ```
 
 ```json
 {
-  "a": 1,
-  "b": {
-    "c": 2
+  "data": {
+    "batch_size": 64
   },
   "model": {
     "encoder": {
-      "num_layers": 6
+      "num_layers": 8
     },
-  "dropout": 0.2,
+    "decoder": {
+      "num_layers": 8
+    },
   "activation": "GELU"
   }
 }
@@ -112,3 +102,5 @@ model:                                                                          
 Defing the default arguments in function, put alteration in CLI, and leave the rest to CHANfiG.
 
 It works the way it should have worked.
+
+[^incountable]: fun fact: time is always incountable.

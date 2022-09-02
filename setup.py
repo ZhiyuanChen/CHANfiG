@@ -1,15 +1,15 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='chanfig',
-    version='0.0.11',
-    description='Easy Configuration',
+    name="chanfig",
+    version="0.0.12",
+    description="Easy Configuration",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     keywords="deep learning",
-    author='Zhiyuan Chen',
-    author_email='this@zyc.ai',
-    url='http://github.com/ZhiyuanChen/chanfig',
+    author="Zhiyuan Chen",
+    author_email="this@zyc.ai",
+    url="http://github.com/ZhiyuanChen/chanfig",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
