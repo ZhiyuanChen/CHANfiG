@@ -2,17 +2,18 @@
 
 ## Introduction
 
-CHANfiG aims to make your confuration easier.
+CHANfiG aims to make your configuration easier.
 
 There are tons of configurable parameters in training a Machine Learning model.
-To configure all these parameters, researchers usually need to write giant config files, somtimes even thousdands of lines.
-Most of the configs are just replicates of the default arguments of certain functions, resuling many unnessary declarations.
-It is also very hard to alter the configurations, one needs to navigade and open the right configuration file, make changes, save and exit.
-These had wasted an incountable[^incountable] amount of precisious time ~~and is no doubt a crime~~.
-Using `argparse` could relief the burdens to some extent, however, it takes a lot of works to make it compatible with existing config files, and it's lack of nesting limits it's potentials.
+To configure all these parameters, researchers usually need to write gigantic config files, sometimes even thousands of lines.
+Most of the configs are just replicates of the default arguments of certain functions, resulting in many unnecessary declarations.
+It is also very hard to alter the configurations.
+One needs to navigate and open the right configuration file, make changes, save and exit.
+These had wasted an incountable[^incountable] amount of precious time ~~and is no doubt a crime~~.
+Using `argparse` could relieve the burdens to some extent, however, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
 CHANfiG would like to make a change.
 
-You just run your experiment, with arguments.
+You just run your experiment with arguments, and leave everything else to CHANfiG.
 
 CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs).
 Different to the paradigm of YACS(
@@ -23,10 +24,14 @@ The paradigm of CHANfiG is:
 
 ## Usage
 
-Existing code:
+CHANfiG has great backward compatibility with previous configs.
+
+No matter your old config is json or yaml, you could directly read from them.
+
+And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
 ```python
-from chanfig import Config, ConfigParser
+from chanfig import Config
 
 
 class Model:
@@ -43,14 +48,24 @@ def main(config):
     dataloader = Dataloader(**config.dataloader)
 
 
+class TestConfig(Config):
+    def __init__(self):
+        self.model.encoder.num_layers = 6
+        self.model.decoder.num_layers = 6
+        self.optim.lr = 1e-3
+
+
 if __name__ == '__main__':
     # config = Config.read('config.yaml')  # in case you want to read from a yaml
     # config = Config.read('config.json')  # in case you want to read from a json
-    existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
-    config = Config(**existing_configs)
+    # existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
+    # config = Config(**existing_configs)  # in case you have some config in dict to load
+    config = TestConfig()
     config = config.parse()
     # CLI arguments: python xxx.py --activation GELU
-    # config.merge('dataset.yaml')
+    # config.merge('dataset.yaml')  # in case you want to merge a yaml
+    # config.merge('dataset.json')  # in case you want to merge a json
+    # note that the value of merge will surpass current values
     config.model.decoder.num_layers = 8
     main(config)
     # config.yaml('config.yaml')  # in case you want to save a yaml
@@ -100,6 +115,22 @@ model:
 ```
 
 Defing the default arguments in function, put alteration in CLI, and leave the rest to CHANfiG.
+
+## Install
+
+Install most recent stable version on pypi:
+
+```shell
+pip install chanfig
+```
+
+Install the latest version from source:
+
+```shell
+pip install git+https://github.com/ZhiyuanChen/chanfig
+```
+
+
 
 It works the way it should have worked.
 
