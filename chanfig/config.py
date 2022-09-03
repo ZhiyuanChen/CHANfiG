@@ -399,8 +399,43 @@ class Dict(Namespace):
     def __bool__(self):
         return bool(self)
 
-    def __str__(self) -> str:
-        return self.yamls()
+    def extra_repr(self) -> str:
+        return ""
+
+    def __repr__(self):
+        extra_lines = []
+        extra_repr = self.extra_repr()
+        # empty string will be split into list ['']
+        if extra_repr:
+            extra_lines = extra_repr.split("\n")
+        child_lines = []
+        for key, value in self.items():
+            value_str = repr(value)
+            value_str = self._addindent(value_str)
+            child_lines.append("(" + key + "): " + value_str)
+        lines = extra_lines + child_lines
+
+        main_str = self.__class__.__name__ + "("
+        if lines:
+            # simple one-liner info, which most builtin Modules will use
+            if len(extra_lines) == 1 and not child_lines:
+                main_str += extra_lines[0]
+            else:
+                main_str += "\n  " + "\n  ".join(lines) + "\n"
+
+        main_str += ")"
+        return main_str
+
+    def _addindent(self, s):
+        st = s.split("\n")
+        # don't do anything for single-line stuff
+        if len(st) == 1:
+            return s
+        first = st.pop(0)
+        st = [(self.indent * " ") + line for line in st]
+        st = "\n".join(st)
+        st = first + "\n" + st
+        return st
 
 
 class Config(Dict):
@@ -433,7 +468,7 @@ class Config(Dict):
                 try:
                     return super().__getattribute__(name)
                 except AttributeError:
-                    self.set(name, type(self)())
+                    super().__setattr__(name, Config())
                     return self[name]
 
         if default is not None:
