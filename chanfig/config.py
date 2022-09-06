@@ -4,14 +4,14 @@ import sys
 from argparse import ArgumentParser, Namespace
 from ast import literal_eval
 from contextlib import contextmanager
-from copy import copy, deepcopy
+from copy import deepcopy
 from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
 from os import PathLike as PathLike
 from os.path import splitext
-from typing import Any, Callable, IO, Iterable, Mapping, Optional, Union
+from typing import IO, Any, Callable, Iterable, Mapping, Optional, Union
 from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
@@ -163,16 +163,16 @@ class Dict(Namespace):
 
     def all_keys(self):
         @wraps(self.all_keys)
-        def _iter(self, prefix=""):
+        def all_keys(self, prefix=""):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self.delimiter + key
                 if isinstance(value, Config):
-                    yield from _iter(value, key)
+                    yield from all_keys(value, key)
                 else:
                     yield key
 
-        return _iter(self)
+        return all_keys(self)
 
     def all_values(self):
         for value in self.values():
@@ -183,16 +183,16 @@ class Dict(Namespace):
 
     def all_items(self):
         @wraps(self.all_items)
-        def _iter(self, prefix=""):
+        def all_items(self, prefix=""):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self.delimiter + key
                 if isinstance(value, Config):
-                    yield from _iter(value, key)
+                    yield from all_items(value, key)
                 else:
                     yield key, value
 
-        return _iter(self)
+        return all_items(self)
 
     def dict(self, cls: Callable = dict) -> Mapping:
         dic = cls()
@@ -270,10 +270,14 @@ class Dict(Namespace):
         return None
 
     def copy(self) -> Config:
-        return copy(self)
+        return Config(**self)
+
+    __copy__ = copy
 
     def deepcopy(self) -> Config:
-        return deepcopy(self)
+        return Config(**{k: deepcopy(v) for k, v in self.all_items()})
+
+    __deepcopy__ = deepcopy
 
     clone = deepcopy
 
@@ -447,7 +451,7 @@ class Config(Dict):
     parser: ConfigParser = ConfigParser()
     convert_mapping: bool = True
 
-    def test(func: Callable):
+    def frozen_check(func: Callable):
         @wraps(func)
         def decorator(self, *args, **kwargs):
             if self._frozen and not ("_frozen" in args or "_frozen" in kwargs):
@@ -481,7 +485,7 @@ class Config(Dict):
     __getitem__ = get
     __getattr__ = get
 
-    @test
+    @frozen_check
     def set(
         self, name: str, value: Any, convert_mapping: Optional[bool] = True
     ) -> None:
@@ -506,14 +510,14 @@ class Config(Dict):
     __setitem__ = set
     __setattr__ = set
 
-    @test
+    @frozen_check
     def remove(self, name: str) -> None:
         del self.__dict__[name]
 
     __delitem__ = remove
     __delattr__ = remove
 
-    @test
+    @frozen_check
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
         attr = self.get(name, default)
         self.remove(name)

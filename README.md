@@ -62,7 +62,6 @@ if __name__ == '__main__':
     # config = Config(**existing_configs)  # in case you have some config in dict to load
     config = TestConfig()
     config = config.parse()
-    # CLI arguments: python xxx.py --activation GELU
     # config.merge('dataset.yaml')  # in case you want to merge a yaml
     # config.merge('dataset.json')  # in case you want to merge a json
     # note that the value of merge will surpass current values

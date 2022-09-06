@@ -1,14 +1,5 @@
----
-title: CHANfiG
-summary: Easy Configuration
-authors:
-    - Zhiyuan Chen
-date: 2022-05-04 00:00:00
-categories:
-    - README
-tags:
-    - README
----
+# CHANfiG
+
 ## 介绍
 
 CHANfiG希望能让你的配置更加简单。
@@ -65,7 +56,6 @@ if __name__ == '__main__':
     # config = Config(**existing_configs)  # 如果你有些config需要读取
     config = TestConfig()
     config = config.parse()
-    # CLI arguments: python xxx.py --activation GELU
     # config.merge('dataset.yaml')  # 如果你想合并一个 yaml
     # config.merge('dataset.json')  # 如果你想合并一个 json
     # 注意被合并的值具有更高的优先级
