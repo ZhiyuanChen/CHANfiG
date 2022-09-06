@@ -468,12 +468,13 @@ class Config(Dict):
             if self.delimiter in name:
                 name, rest = name.split(self.delimiter, 1)
                 return getattr(self[name], rest)
-            else:
+            elif getattr(self, "_frozen", False):
                 try:
                     return super().__getattribute__(name)
                 except AttributeError:
                     super().__setattr__(name, Config())
                     return self[name]
+            return super().__getattribute__(name)
 
         if default is not None:
             try:
@@ -491,7 +492,6 @@ class Config(Dict):
     ) -> None:
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
-        # __import__("pdb").set_trace()
         if self.delimiter in name:
             name, rest = name.split(self.delimiter, 1)
             if not hasattr(self, name):
