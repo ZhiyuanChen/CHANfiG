@@ -10,7 +10,7 @@ CHANfiG希望能让你的配置更加简单。
 此外，调节这些参数同样很繁琐，需要定位并打开配置文件，作出修改，然后保存关闭。
 这个过程浪费了无数的宝贵时间~~甚至是一种犯罪~~。
 使用 `argparse`可以在一定程度上缓解调参的不变，但是，要让他和配置文件适配依然需要很多工作，并且缺乏嵌套也限制了他的潜力。
-CHANfiG旨在减轻带来改变。
+CHANfiG旨在带来改变。
 
 你只需要在命令行中运行你的实验。
 
@@ -21,6 +21,10 @@ CHANfiG的范式是：
 `代码 + 命令行参数 (+ 可选的CHANfiG配置文件 + 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E (+ 可选的CHANfiG配置文件)`
 
 ## 使用
+
+CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于yaml和json的配置文件。
+
+如果你此前使用yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有CHANfiG所提供的便利。
 
 现有代码：
 
@@ -44,8 +48,11 @@ def main(config):
 
 class TestConfig(Config):
     def __init__(self):
+        super().__init__()
+        self.data.batch_size = 64
         self.model.encoder.num_layers = 6
         self.model.decoder.num_layers = 6
+        self.activation = "GELU"
         self.optim.lr = 1e-3
 
 
@@ -60,7 +67,9 @@ if __name__ == '__main__':
     # config.merge('dataset.json')  # 如果你想合并一个 json
     # 注意被合并的值具有更高的优先级
     config.model.decoder.num_layers = 8
-    main(config)
+    config.freeze()
+    print(config)
+    # main(config)
     # config.yaml('config.yaml')  # 如果你想保存一个 yaml
     # config.json('config.json')  # 如果你想保存一个 json
 ```
@@ -68,13 +77,13 @@ if __name__ == '__main__':
 所有你需要做的仅仅是运行一行：
 
 ```shell
-python main.py --model.decoder.num_layers 8
+python main.py --model.encoder.num_layers 8
 ```
 
 当然，你也可以读取一个默认配置文件然后在他基础上修改：
 
 ```shell
-python main.py --config meow.yaml --model.decoder.num_layers 8
+python main.py --config meow.yaml --model.encoder.num_layers 8
 ```
 
 如果你保存了配置文件，那他应该看起来像这样：

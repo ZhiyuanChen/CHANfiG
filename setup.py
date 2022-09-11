@@ -2,13 +2,15 @@ from setuptools import find_packages, setup
 
 setup(
     name="chanfig",
-    version="0.0.14post1",
+    version="0.0.15",
     description="Easy Configuration",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     keywords="deep learning",
-    author="Zhiyuan Chen",
-    author_email="this@zyc.ai",
+    maintainer="Zhiyuan Chen",
+    maintainer_email="this@zyc.ai",
+    author="Zhiyuan Chen, Evian C. Liu",
+    author_email="this@zyc.ai, evian.liu@outlook.com",
     url="http://github.com/ZhiyuanChen/chanfig",
     packages=find_packages(),
     classifiers=[
