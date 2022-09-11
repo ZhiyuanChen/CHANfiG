@@ -50,8 +50,11 @@ def main(config):
 
 class TestConfig(Config):
     def __init__(self):
+        super().__init__()
+        self.data.batch_size = 64
         self.model.encoder.num_layers = 6
         self.model.decoder.num_layers = 6
+        self.activation = "GELU"
         self.optim.lr = 1e-3
 
 
@@ -66,7 +69,9 @@ if __name__ == '__main__':
     # config.merge('dataset.json')  # in case you want to merge a json
     # note that the value of merge will surpass current values
     config.model.decoder.num_layers = 8
-    main(config)
+    config.freeze()
+    print(config)
+    # main(config)
     # config.yaml('config.yaml')  # in case you want to save a yaml
     # config.json('config.json')  # in case you want to save a json
 ```
@@ -74,13 +79,13 @@ if __name__ == '__main__':
 All you needs to do is just run a line:
 
 ```shell
-python main.py --model.decoder.num_layers 8
+python main.py --model.encoder.num_layers 8
 ```
 
-You could also load a default configure file and make changs based on it:
+You could also load a default configure file and make changes based on it:
 
 ```shell
-python main.py --config meow.yaml --model.decoder.num_layers 8
+python main.py --config meow.yaml --model.encoder.num_layers 8
 ```
 
 If you have made it dump current configurations, this should be in the written file:
@@ -113,7 +118,7 @@ model:
 }
 ```
 
-Defing the default arguments in function, put alteration in CLI, and leave the rest to CHANfiG.
+Define the default arguments in function, put alteration in CLI, and leave the rest to CHANfiG.
 
 ## Install
 

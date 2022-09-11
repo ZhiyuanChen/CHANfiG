@@ -3,13 +3,14 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser, Namespace
 from ast import literal_eval
+from collections import OrderedDict
 from contextlib import contextmanager
 from copy import deepcopy
 from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
-from os import PathLike as PathLike
+from os import PathLike
 from os.path import splitext
 from typing import IO, Any, Callable, Iterable, Mapping, Optional, Union
 from warnings import warn
@@ -83,25 +84,37 @@ class ConfigParser(ArgumentParser):
     parse_config = parse
 
 
-class Dict(Namespace):
+class NestedDict(Namespace):
     """
     Basic Config
     """
 
-    delimiter: str = "."
-    indent: int = 2
-    convert_mapping: bool = False
+    _delimiter: str
+    _indent: int
+    _convert_mapping: bool
+    storage: OrderedDict
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super().__setattr__("_delimiter", ".")
+        super().__setattr__("_indent", 2)
+        super().__setattr__("_convert_mapping", False)
+        super().__setattr__("storage", OrderedDict())
+        for key, value in args:
+            self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
+        if "_delimiter" not in self.__dict__:
+            raise AttributeError("cannot access value before Config.__init__() call")
+
         @wraps(self.get)
         def get(self, name):
-            if self.delimiter in name:
-                name, rest = name.split(self.delimiter, 1)
+            if self._delimiter in name:
+                name, rest = name.split(self._delimiter, 1)
                 return getattr(self[name], rest)
+            elif name in self.storage:
+                return self.storage[name]
             else:
                 return super().__getattribute__(name)
 
@@ -116,12 +129,18 @@ class Dict(Namespace):
     __getattr__ = get
 
     def set(
-        self, name: str, value: Any, convert_mapping: Optional[bool] = True
+        self,
+        name: str,
+        value: Any,
+        convert_mapping: Optional[bool] = None,
+        set_attribute: Optional[bool] = False,
     ) -> None:
+        if "_delimiter" not in self.__dict__:
+            raise AttributeError("cannot assign value before Config.__init__() call")
         if convert_mapping is None:
-            convert_mapping = self.convert_mapping
-        if self.delimiter in name:
-            name, rest = name.split(self.delimiter, 1)
+            convert_mapping = self._convert_mapping
+        if self._delimiter in name:
+            name, rest = name.split(self._delimiter, 1)
             if not hasattr(self, name):
                 setattr(self, name, Config())
             setattr(self[name], rest, value)
@@ -133,13 +152,16 @@ class Dict(Namespace):
                     value = literal_eval(value)
                 except (ValueError, SyntaxError):
                     pass
-            super().__setattr__(name, value)
+            if set_attribute:
+                super().__setattr__(name, value)
+            else:
+                self.storage[name] = value
 
     __setitem__ = set
     __setattr__ = set
 
     def remove(self, name: str) -> None:
-        del self.__dict__[name]
+        del self.storage[name]
 
     __delitem__ = remove
     __delattr__ = remove
@@ -150,23 +172,23 @@ class Dict(Namespace):
         return attr
 
     def __iter__(self) -> Iterable:
-        return iter(self.__dict__)
+        return iter(self.storage)
 
     def keys(self) -> Iterable:
-        return self.__dict__.keys()
+        return self.storage.keys()
 
     def values(self) -> Iterable:
-        return self.__dict__.values()
+        return self.storage.values()
 
     def items(self) -> Iterable:
-        return self.__dict__.items()
+        return self.storage.items()
 
     def all_keys(self):
         @wraps(self.all_keys)
         def all_keys(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self.delimiter + key
+                    key = prefix + self._delimiter + key
                 if isinstance(value, Config):
                     yield from all_keys(value, key)
                 else:
@@ -186,7 +208,7 @@ class Dict(Namespace):
         def all_items(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self.delimiter + key
+                    key = prefix + self._delimiter + key
                 if isinstance(value, Config):
                     yield from all_items(value, key)
                 else:
@@ -196,7 +218,7 @@ class Dict(Namespace):
 
     def dict(self, cls: Callable = dict) -> Mapping:
         dic = cls()
-        for k, v in self.__dict__.items():
+        for k, v in self.storage.items():
             if isinstance(v, Config):
                 dic[k] = v.dict(cls)
             else:
@@ -282,17 +304,17 @@ class Dict(Namespace):
     clone = deepcopy
 
     def clear(self) -> None:
-        self.__dict__.clear()
+        self.storage.clear()
 
     def json(self, file: File, *args, **kwargs) -> None:
         if "indent" not in kwargs:
-            kwargs["indent"] = self.indent
+            kwargs["indent"] = self._indent
         with self.open(file, mode="w") as fp:
             json_dump(self.dict(), fp, *args, **kwargs)
 
     def jsons(self, *args, **kwargs) -> str:
         if "indent" not in kwargs:
-            kwargs["indent"] = self.indent
+            kwargs["indent"] = self._indent
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
@@ -307,7 +329,7 @@ class Dict(Namespace):
         if "Dumper" not in kwargs:
             kwargs["Dumper"] = Dumper
         if "indent" not in kwargs:
-            kwargs["indent"] = self.indent
+            kwargs["indent"] = self._indent
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
     @classmethod
@@ -361,34 +383,14 @@ class Dict(Namespace):
     parse_config = parse
 
     def apply(self, func: Callable) -> Config:
-        for value in self.__dict__.values():
+        for value in self.storage.values():
             if isinstance(value, Config):
                 value.apply(func)
         func(self)
         return self
 
-    def freeze(self, recursive: Optional[bool] = True) -> None:
-        @wraps(self.freeze)
-        def freeze(config: Config) -> None:
-            config._frozen = True
-
-        if recursive:
-            self.apply(freeze)
-        else:
-            freeze(self)
-
-    def defrost(self, recursive: Optional[bool] = True) -> None:
-        @wraps(self.defrost)
-        def defrost(config: Config) -> None:
-            del config._frozen
-
-        if recursive:
-            self.apply(defrost)
-        else:
-            defrost(self)
-
     def __len__(self) -> int:
-        return len(self.__dict__)
+        return len(self.storage)
 
     def __contains__(self, name: str) -> bool:
         return hasattr(self, name)
@@ -415,7 +417,7 @@ class Dict(Namespace):
         child_lines = []
         for key, value in self.items():
             value_str = repr(value)
-            value_str = self._addindent(value_str)
+            value_str = self._add_indent(value_str)
             child_lines.append("(" + key + "): " + value_str)
         lines = extra_lines + child_lines
 
@@ -430,26 +432,30 @@ class Dict(Namespace):
         main_str += ")"
         return main_str
 
-    def _addindent(self, s):
+    def _add_indent(self, s):
         st = s.split("\n")
         # don't do anything for single-line stuff
         if len(st) == 1:
             return s
         first = st.pop(0)
-        st = [(self.indent * " ") + line for line in st]
+        st = [(self._indent * " ") + line for line in st]
         st = "\n".join(st)
         st = first + "\n" + st
         return st
 
 
-class Config(Dict):
+class Config(NestedDict):
     """
     Basic Config
     """
 
-    _frozen: bool = False
+    _frozen: bool
     parser: ConfigParser = ConfigParser()
-    convert_mapping: bool = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__dict__["_frozen"] = False
+        self.__dict__["_convert_mapping"] = True
 
     def frozen_check(func: Callable):
         @wraps(func)
@@ -463,62 +469,58 @@ class Config(Dict):
         return decorator
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        @wraps(self.get)
-        def get(self, name):
-            if self.delimiter in name:
-                name, rest = name.split(self.delimiter, 1)
-                return getattr(self[name], rest)
-            elif getattr(self, "_frozen", False):
-                try:
-                    return super().__getattribute__(name)
-                except AttributeError:
-                    super().__setattr__(name, Config())
-                    return self[name]
-            return super().__getattribute__(name)
-
-        if default is not None:
+        if not super().get("_frozen", False):
             try:
-                return get(self, name)
+                return super().get(name, default)
             except AttributeError:
-                return default
-        return get(self, name)
+                super().__setattr__(name, Config())
+                return self[name]
+        return super().get(name, default)
 
     __getitem__ = get
     __getattr__ = get
 
     @frozen_check
     def set(
-        self, name: str, value: Any, convert_mapping: Optional[bool] = True
+        self,
+        name: str,
+        value: Any,
+        convert_mapping: Optional[bool] = None,
+        set_attribute: Optional[bool] = False,
     ) -> None:
-        if convert_mapping is None:
-            convert_mapping = self.convert_mapping
-        if self.delimiter in name:
-            name, rest = name.split(self.delimiter, 1)
-            if not hasattr(self, name):
-                setattr(self, name, Config())
-            setattr(self[name], rest, value)
-        elif convert_mapping and isinstance(value, Mapping):
-            setattr(self, name, Config(**value))
-        else:
-            if isinstance(value, str):
-                try:
-                    value = literal_eval(value)
-                except (ValueError, SyntaxError):
-                    pass
-            super().__setattr__(name, value)
+        return super().set(name, value, convert_mapping, set_attribute)
 
     __setitem__ = set
     __setattr__ = set
 
     @frozen_check
     def remove(self, name: str) -> None:
-        del self.__dict__[name]
+        super().remove(name)
 
     __delitem__ = remove
     __delattr__ = remove
 
     @frozen_check
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
-        attr = self.get(name, default)
-        self.remove(name)
-        return attr
+        super().pop(name, default)
+
+    def freeze(self, recursive: Optional[bool] = True) -> Config:
+        @wraps(self.freeze)
+        def freeze(config: Config) -> None:
+            config.__dict__["_frozen"] = True
+
+        if recursive:
+            self.apply(freeze)
+        else:
+            freeze(self)
+        return self
+
+    def defrost(self, recursive: Optional[bool] = True) -> None:
+        @wraps(self.defrost)
+        def defrost(config: Config) -> None:
+            config.__dict__["_frozen"] = False
+
+        if recursive:
+            self.apply(defrost)
+        else:
+            defrost(self)
