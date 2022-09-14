@@ -89,23 +89,20 @@ class NestedDict(Namespace):
     Basic Config
     """
 
-    _delimiter: str
-    _indent: int
-    _convert_mapping: bool
-    storage: OrderedDict
+    _delimiter: str = "."
+    _indent: int = 2
+    _convert_mapping: bool = False
+    _storage: OrderedDict
 
     def __init__(self, *args, **kwargs):
-        super().__setattr__("_delimiter", ".")
-        super().__setattr__("_indent", 2)
-        super().__setattr__("_convert_mapping", False)
-        super().__setattr__("storage", OrderedDict())
+        super().__setattr__("_storage", OrderedDict())
         for key, value in args:
             self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        if "_delimiter" not in self.__dict__:
+        if "_storage" not in self.__dict__:
             raise AttributeError("cannot access value before Config.__init__() call")
 
         @wraps(self.get)
@@ -113,10 +110,12 @@ class NestedDict(Namespace):
             if self._delimiter in name:
                 name, rest = name.split(self._delimiter, 1)
                 return getattr(self[name], rest)
-            elif name in self.storage:
-                return self.storage[name]
+            elif name in self._storage:
+                return self._storage[name]
             else:
-                return super().__getattribute__(name)
+                raise AttributeError(
+                    f"{self.__class__.__name__} has no attribute {name}"
+                )
 
         if default is not None:
             try:
@@ -128,14 +127,16 @@ class NestedDict(Namespace):
     __getitem__ = get
     __getattr__ = get
 
+    def getattr(self, name: str, default: Optional[Any] = None):
+        return getattr(self, name, default)
+
     def set(
         self,
         name: str,
         value: Any,
         convert_mapping: Optional[bool] = None,
-        set_attribute: Optional[bool] = False,
     ) -> None:
-        if "_delimiter" not in self.__dict__:
+        if "_storage" not in self.__dict__:
             raise AttributeError("cannot assign value before Config.__init__() call")
         if convert_mapping is None:
             convert_mapping = self._convert_mapping
@@ -152,16 +153,16 @@ class NestedDict(Namespace):
                     value = literal_eval(value)
                 except (ValueError, SyntaxError):
                     pass
-            if set_attribute:
-                super().__setattr__(name, value)
-            else:
-                self.storage[name] = value
+            self._storage[name] = value
 
     __setitem__ = set
     __setattr__ = set
 
+    def setattr(self, name: str, value: Any):
+        super().__setattr__(name, value)
+
     def remove(self, name: str) -> None:
-        del self.storage[name]
+        del self._storage[name]
 
     __delitem__ = remove
     __delattr__ = remove
@@ -172,16 +173,16 @@ class NestedDict(Namespace):
         return attr
 
     def __iter__(self) -> Iterable:
-        return iter(self.storage)
+        return iter(self._storage)
 
     def keys(self) -> Iterable:
-        return self.storage.keys()
+        return self._storage.keys()
 
     def values(self) -> Iterable:
-        return self.storage.values()
+        return self._storage.values()
 
     def items(self) -> Iterable:
-        return self.storage.items()
+        return self._storage.items()
 
     def all_keys(self):
         @wraps(self.all_keys)
@@ -218,7 +219,7 @@ class NestedDict(Namespace):
 
     def dict(self, cls: Callable = dict) -> Mapping:
         dic = cls()
-        for k, v in self.storage.items():
+        for k, v in self._storage.items():
             if isinstance(v, Config):
                 dic[k] = v.dict(cls)
             else:
@@ -304,7 +305,7 @@ class NestedDict(Namespace):
     clone = deepcopy
 
     def clear(self) -> None:
-        self.storage.clear()
+        self._storage.clear()
 
     def json(self, file: File, *args, **kwargs) -> None:
         if "indent" not in kwargs:
@@ -378,19 +379,19 @@ class NestedDict(Namespace):
             )
 
     def parse(self) -> Config:
-        return self.parser.parse_config(config=self)
+        return self._parser.parse_config(config=self)
 
     parse_config = parse
 
     def apply(self, func: Callable) -> Config:
-        for value in self.storage.values():
+        for value in self._storage.values():
             if isinstance(value, Config):
                 value.apply(func)
         func(self)
         return self
 
     def __len__(self) -> int:
-        return len(self.storage)
+        return len(self._storage)
 
     def __contains__(self, name: str) -> bool:
         return hasattr(self, name)
@@ -449,13 +450,12 @@ class Config(NestedDict):
     Basic Config
     """
 
-    _frozen: bool
-    parser: ConfigParser = ConfigParser()
+    _frozen: bool = False
+    _convert_mapping: bool = True
+    _parser: ConfigParser = ConfigParser()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__dict__["_frozen"] = False
-        self.__dict__["_convert_mapping"] = True
 
     def frozen_check(func: Callable):
         @wraps(func)
@@ -469,7 +469,7 @@ class Config(NestedDict):
         return decorator
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        if not super().get("_frozen", False):
+        if not self._frozen:
             try:
                 return super().get(name, default)
             except AttributeError:
@@ -486,9 +486,8 @@ class Config(NestedDict):
         name: str,
         value: Any,
         convert_mapping: Optional[bool] = None,
-        set_attribute: Optional[bool] = False,
     ) -> None:
-        return super().set(name, value, convert_mapping, set_attribute)
+        return super().set(name, value, convert_mapping)
 
     __setitem__ = set
     __setattr__ = set
