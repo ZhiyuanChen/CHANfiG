@@ -297,7 +297,7 @@ class NestedDict(Namespace):
 
     __copy__ = copy
 
-    def deepcopy(self) -> Config:
+    def deepcopy(self, memo=None) -> Config:
         return Config(**{k: deepcopy(v) for k, v in self.all_items()})
 
     __deepcopy__ = deepcopy
