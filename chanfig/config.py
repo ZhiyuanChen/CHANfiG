@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from ast import literal_eval
 from collections import OrderedDict
+from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from functools import wraps
@@ -84,7 +85,7 @@ class ConfigParser(ArgumentParser):
     parse_config = parse
 
 
-class NestedDict(Namespace):
+class NestedDict(Mapping):
     """
     Basic Config
     """
@@ -145,7 +146,7 @@ class NestedDict(Namespace):
             if not hasattr(self, name):
                 setattr(self, name, Config())
             setattr(self[name], rest, value)
-        elif convert_mapping and isinstance(value, Mapping):
+        elif convert_mapping and not isinstance(value, Config) and isinstance(value, Mapping):
             setattr(self, name, Config(**value))
         else:
             if isinstance(value, str):
