@@ -399,7 +399,7 @@ class NestedDict(Namespace):
         raise NotImplementedError
 
     def __bool__(self):
-        return bool(self)
+        return bool(self._storage)
 
     def extra_repr(self) -> str:
         return ""
