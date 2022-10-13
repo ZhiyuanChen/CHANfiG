@@ -378,15 +378,6 @@ class NestedDict(Namespace):
                 f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"
             )
 
-    def parse(
-        self,
-        args: Optional[Iterable[str]] = None,
-        default_config: Optional[str] = None,
-    ) -> Config:
-        return self._parser.parse_config(args, self, default_config)
-
-    parse_config = parse
-
     def apply(self, func: Callable) -> Config:
         for value in self._storage.values():
             if isinstance(value, Config):
@@ -527,3 +518,15 @@ class Config(NestedDict):
             self.apply(defrost)
         else:
             defrost(self)
+
+    def parse(
+        self,
+        args: Optional[Iterable[str]] = None,
+        default_config: Optional[str] = None,
+    ) -> Config:
+        return self._parser.parse_config(args, self, default_config)
+
+    parse_config = parse
+
+    add_argument = _parser.add_argument
+
