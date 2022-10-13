@@ -72,13 +72,13 @@ class ConfigParser(ArgumentParser):
             warn(
                 f"Config has 'default_config={path}' specified, its values will override values in Config"
             )
-        parsed, _ = self.parse_known_args(args, config.clone())
+        parsed, _ = self.parse_known_args(args)
         if (
             default_config is not None
-            and (path := getattr(config, default_config, None)) is not None
+            and (path := getattr(parsed, default_config, None)) is not None
         ):
             config = type(config).load(path)
-        config.update(parsed)
+        config.update(vars(parsed))
         return config
 
     parse_config = parse
