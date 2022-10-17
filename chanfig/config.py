@@ -87,7 +87,7 @@ class ConfigParser(ArgumentParser):
 
 class NestedDict(Mapping):
     """
-    Basic Config
+    Nested Dict
     """
 
     _delimiter: str = "."
@@ -104,7 +104,7 @@ class NestedDict(Mapping):
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         if "_storage" not in self.__dict__:
-            raise AttributeError("cannot access value before Config.__init__() call")
+            raise AttributeError("cannot access value before NestedDict.__init__() call")
 
         @wraps(self.get)
         def get(self, name):
@@ -129,7 +129,7 @@ class NestedDict(Mapping):
     __getattr__ = get
 
     def getattr(self, name: str, default: Optional[Any] = None):
-        return getattr(self, name, default)
+        return super().__getattr__(self, name, default)
 
     def set(
         self,
@@ -138,16 +138,16 @@ class NestedDict(Mapping):
         convert_mapping: Optional[bool] = None,
     ) -> None:
         if "_storage" not in self.__dict__:
-            raise AttributeError("cannot assign value before Config.__init__() call")
+            raise AttributeError("cannot assign value before NestedDict.__init__() call")
         if convert_mapping is None:
             convert_mapping = self._convert_mapping
         if self._delimiter in name:
             name, rest = name.split(self._delimiter, 1)
             if not hasattr(self, name):
-                setattr(self, name, Config())
+                setattr(self, name, type(self)())
             setattr(self[name], rest, value)
-        elif convert_mapping and not isinstance(value, Config) and isinstance(value, Mapping):
-            setattr(self, name, Config(**value))
+        elif convert_mapping and not isinstance(value, NestedDict) and isinstance(value, Mapping):
+            setattr(self, name, type(self)(**value))
         else:
             if isinstance(value, str):
                 try:
@@ -191,7 +191,7 @@ class NestedDict(Mapping):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self._delimiter + key
-                if isinstance(value, Config):
+                if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
                 else:
                     yield key
@@ -200,7 +200,7 @@ class NestedDict(Mapping):
 
     def all_values(self):
         for value in self.values():
-            if isinstance(value, Config):
+            if isinstance(value, NestedDict):
                 yield from value.all_values()
             else:
                 yield value
@@ -211,7 +211,7 @@ class NestedDict(Mapping):
             for key, value in self.items():
                 if prefix:
                     key = prefix + self._delimiter + key
-                if isinstance(value, Config):
+                if isinstance(value, NestedDict):
                     yield from all_items(value, key)
                 else:
                     yield key, value
@@ -221,20 +221,18 @@ class NestedDict(Mapping):
     def dict(self, cls: Callable = dict) -> Mapping:
         dic = cls()
         for k, v in self._storage.items():
-            if isinstance(v, Config):
+            if isinstance(v, NestedDict):
                 dic[k] = v.dict(cls)
             else:
                 dic[k] = v
         return dic
 
-    def update(self, other: Union[File, Config, Mapping, Iterable], **kwargs) -> Config:
+    def update(self, other: Union[File, Mapping, Iterable], **kwargs) -> NestedDict:
         if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
-        if isinstance(other, (Config, Mapping)):
+        if isinstance(other, (Mapping,)):
             for key, value in other.items():
-                if isinstance(value, (Config, Mapping)) and isinstance(
-                    self[key], (Config, Mapping)
-                ):
+                if isinstance(value, (Mapping,)) and isinstance(self[key], (Mapping,)):
                     self[key].update(value)
                 else:
                     self[key] = value
@@ -249,11 +247,11 @@ class NestedDict(Mapping):
     merge_from_file = update
     union = update
 
-    def difference(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
+    def difference(self, other: Union[File, Mapping, Iterable]) -> NestedDict:
         if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
-        if isinstance(other, (Config, Mapping)):
-            return Config(
+        if isinstance(other, (Mapping,)):
+            return type(self)(
                 **{
                     key: value
                     for key, value in other.items()
@@ -261,7 +259,7 @@ class NestedDict(Mapping):
                 }
             )
         elif isinstance(other, Iterable):
-            return Config(
+            return type(self)(
                 **{
                     key: value
                     for key, value in other
@@ -272,11 +270,11 @@ class NestedDict(Mapping):
 
     diff = difference
 
-    def intersection(self, other: Union[File, Config, Mapping, Iterable]) -> Config:
+    def intersection(self, other: Union[File, Mapping, Iterable]) -> Mapping:
         if isinstance(other, (PathLike, str, IO)):
             other = self.load(other)
-        if isinstance(other, (Config, Mapping)):
-            return Config(
+        if isinstance(other, (Mapping,)):
+            return type(self)(
                 **{
                     key: value
                     for key, value in other.items()
@@ -284,7 +282,7 @@ class NestedDict(Mapping):
                 }
             )
         elif isinstance(other, Iterable):
-            return Config(
+            return type(self)(
                 **{
                     key: value
                     for key, value in other
@@ -293,13 +291,13 @@ class NestedDict(Mapping):
             )
         return None
 
-    def copy(self) -> Config:
-        return Config(**self)
+    def copy(self) -> NestedDict:
+        return type(self)(**self)
 
     __copy__ = copy
 
-    def deepcopy(self, memo=None) -> Config:
-        return Config(**{k: deepcopy(v) for k, v in self.all_items()})
+    def deepcopy(self, memo=None) -> NestedDict:
+        return type(self)(**{k: deepcopy(v) for k, v in self.all_items()})
 
     __deepcopy__ = deepcopy
 
@@ -320,7 +318,7 @@ class NestedDict(Mapping):
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
-    def from_json(cls, string: str, **kwargs) -> Config:
+    def from_json(cls, string: str, **kwargs) -> NestedDict:
         return cls(**json_load(string, **kwargs))
 
     def yaml(self, file: File, *args, **kwargs) -> None:
@@ -335,7 +333,7 @@ class NestedDict(Mapping):
         return yaml_dump(self.dict(dict), *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, string: str, **kwargs) -> Config:
+    def from_yaml(cls, string: str, **kwargs) -> NestedDict:
         if "Loader" not in kwargs:
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
@@ -350,7 +348,7 @@ class NestedDict(Mapping):
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     @classmethod
-    def load(cls, path: File, **kwargs) -> Config:
+    def load(cls, path: File, **kwargs) -> NestedDict:
         extension = splitext(path)[-1][1:].lower()
         with cls.open(path) as fp:
             if extension in JSON:
@@ -379,9 +377,9 @@ class NestedDict(Mapping):
                 f"file {file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"
             )
 
-    def apply(self, func: Callable) -> Config:
+    def apply(self, func: Callable) -> NestedDict:
         for value in self._storage.values():
-            if isinstance(value, Config):
+            if isinstance(value, NestedDict):
                 value.apply(func)
         func(self)
         return self
@@ -390,10 +388,10 @@ class NestedDict(Mapping):
         return len(self._storage)
 
     def __contains__(self, name: str) -> bool:
-        return hasattr(self, name)
+        return name in self._storage
 
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Config):
+    def __eq__(self, other: Mapping) -> bool:
+        if isinstance(other, NestedDict):
             return self.dict() == other.dict()
         if isinstance(other, Mapping):
             return self.dict() == other
@@ -469,7 +467,7 @@ class Config(NestedDict):
             try:
                 return super().get(name, default)
             except AttributeError:
-                super().__setattr__(name, Config())
+                super().__setattr__(name, type(self)())
                 return self[name]
         return super().get(name, default)
 
