@@ -1,3 +1,3 @@
-from .config import Config, ConfigParser, NestedDict
+from .config import Config, ConfigParser, Dict, NestedDict
 
-__all__ = ["Config", "ConfigParser", "NestedDict"]
+__all__ = ["Config", "ConfigParser", "Dict", "NestedDict"]
