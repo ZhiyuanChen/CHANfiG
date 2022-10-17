@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="chanfig",
-    version="0.0.20",
+    version="0.0.21",
     description="Easy Configuration",
     long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
