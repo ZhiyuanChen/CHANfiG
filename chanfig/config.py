@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser
 from ast import literal_eval
-from collections import OrderedDict
+from collections import OrderedDict as OrderedDict_
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
@@ -86,7 +86,7 @@ class ConfigParser(ArgumentParser):
     parse_config = parse
 
 
-class Dict(OrderedDict):
+class OrderedDict(OrderedDict_):
     """
     Default OrderedDict with attributes
     """
@@ -108,7 +108,7 @@ class Dict(OrderedDict):
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
-        Get value from Dict.
+        Get value from OrderedDict.
         __getitem__ and __getattr__ are alias of this method.
         Note that default here will override the default_factory if specified.
 
@@ -116,18 +116,18 @@ class Dict(OrderedDict):
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
-        >>> d = Dict(a=1)
-        >>> d.get('a')
-        1
-        >>> d['a']
-        1
-        >>> d.a
-        1
-        >>> d.get('b', 2)
+        >>> d = OrderedDict(d=1013)
+        >>> d.get('d')
+        1013
+        >>> d['d']
+        1013
+        >>> d.d
+        1013
+        >>> d.get('f', 2)
         2
-        >>> d.get('c')
+        >>> d.get('e')
         Traceback (most recent call last):
-        KeyError: 'c'
+        KeyError: 'OrderedDict does not contain e'
         """
         return (
             super().__getitem__(name)
@@ -140,48 +140,50 @@ class Dict(OrderedDict):
 
     def getattr(self, name: str, default: Optional[Any] = None):
         r"""
-        Get attribute of Dict object.
-        Note that if won't return value in the Dict, nor will it create new one if default_factory is specified.
+        Get attribute of OrderedDict.
+        Note that if won't return value in the OrderedDict, nor will it create new one if default_factory is specified.
 
         Args:
             name (str): Key name.
             default (Any, optional): Default value if name does not present.
 
-        >>> d = Dict(a=1, default_factory=list)
+        >>> d = OrderedDict(a=1, default_factory=list)
         >>> d.getattr('default_factory')
         <class 'list'>
         >>> d.getattr('b', 2)
         2
         >>> d.getattr('a')
         Traceback (most recent call last):
-        AttributeError: a
+        AttributeError: OrderedDict has no attribute a
         """
         try:
             return self.__dict__[name]
         except KeyError:
             if default is not None:
                 return default
-            raise AttributeError(name) from None
+            raise AttributeError(
+                f"{self.__class__.__name__} has no attribute {name}"
+            ) from None
 
     def set(self, name: str, value: Any) -> None:
         r"""
-        Set value of Dict.
+        Set value of OrderedDict.
         __setitem__ and __setattr__ are alias of this method.
 
         Args:
             name (str): Key name.
             value (Any): Value to set.
 
-        >>> d = Dict()
-        >>> d.set('a', 1)
-        >>> d.get('a')
-        1
-        >>> d['b'] = 2
-        >>> d['b']
-        2
-        >>> d.c = 3
-        >>> d.c
-        3
+        >>> d = OrderedDict()
+        >>> d.set('d', 1013)
+        >>> d.get('d')
+        1013
+        >>> d['d'] = 1031
+        >>> d['d']
+        1031
+        >>> d.d = 'chang'
+        >>> d.d
+        'chang'
         """
         if isinstance(value, str):
             try:
@@ -195,45 +197,45 @@ class Dict(OrderedDict):
 
     def setattr(self, name: str, value: Any):
         r"""
-        Set attribute of Dict object.
-        Note that it won't alter values in the Dict.
+        Set attribute of OrderedDict.
+        Note that it won't alter values in the OrderedDict.
 
         Args:
             name (str): Key name.
             value (Any): Value to set.
 
-        >>> d = Dict()
-        >>> d.setattr('attr', 1)
+        >>> d = OrderedDict()
+        >>> d.setattr('attr', 'value')
         >>> d.getattr('attr')
-        1
+        'value'
         """
         self.__dict__[name] = value
 
     def delete(self, name: str) -> None:
         r"""
-        Remove value from Dict.
+        Remove value from OrderedDict.
         __delitem__, __delattr__ and remove are alias of this method.
 
         Args:
             name (str): Key name.
             value (Any): Value to set.
 
-        >>> d = Dict(a=1, b=2)
-        >>> d.a
-        1
-        >>> d.b
-        2
-        >>> d.delete('a')
-        >>> d.a
+        >>> d = OrderedDict(d=1016, n='chang')
+        >>> d.d
+        1016
+        >>> d.n
+        'chang'
+        >>> d.delete('d')
+        >>> d.d
         Traceback (most recent call last):
-        KeyError: 'a'
-        >>> del d.b
-        >>> d.b
+        KeyError: 'OrderedDict does not contain d'
+        >>> del d.n
+        >>> d.n
         Traceback (most recent call last):
-        KeyError: 'b'
-        >>> del d.c
+        KeyError: 'OrderedDict does not contain n'
+        >>> del d.f
         Traceback (most recent call last):
-        KeyError: 'c'
+        KeyError: 'f'
         """
         super().__delitem__(name)
 
@@ -243,20 +245,20 @@ class Dict(OrderedDict):
 
     def delattr(self, name: str) -> None:
         r"""
-        Remove attribute of Dict object.
-        Note that it won't remove values in the Dict.
+        Remove attribute of OrderedDict.
+        Note that it won't remove values in the OrderedDict.
 
         Args:
             name (str): Key name.
 
-        >>> d = Dict()
-        >>> d.setattr('attr', 1)
-        >>> d.getattr('attr')
-        1
-        >>> d.delattr('attr')
-        >>> d.getattr('attr')
+        >>> d = OrderedDict()
+        >>> d.setattr('name', 'chang')
+        >>> d.getattr('name')
+        'chang'
+        >>> d.delattr('name')
+        >>> d.getattr('name')
         Traceback (most recent call last):
-        AttributeError: attr
+        AttributeError: OrderedDict has no attribute name
         """
         del self.__dict__[name]
 
@@ -268,29 +270,29 @@ class Dict(OrderedDict):
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
-        >>> d = Dict(default_factory=list)
-        >>> d.a
+        >>> d = OrderedDict(default_factory=list)
+        >>> d.n
         []
-        >>> d.get('a', 1)
-        1
-        >>> d.__missing__('a', 1)
-        1
+        >>> d.get('d', 1031)
+        1031
+        >>> d.__missing__('d', 1031)
+        1031
         """
         if default is None:
             if self.getattr("default_factory") is None:
-                raise KeyError(name)
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
             default = self.getattr("default_factory")()
         self.set(name, default)
         return default
 
     def convert(self, cls: Callable = dict) -> Mapping:
         r"""
-        Convert Dict to other Mapping.
+        Convert OrderedDict to other Mapping.
 
         Args:
             cls (Callable): Target class to be convereted to.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.convert(dict)
         {'a': 1, 'b': 2, 'c': 3}
         """
@@ -299,14 +301,14 @@ class Dict(OrderedDict):
     to = convert
     dict = convert
 
-    def update(self, other: Union[File, Mapping, Iterable]) -> Dict:
+    def update(self, other: Union[File, Mapping, Iterable]) -> OrderedDict:
         r"""
-        Update Dict values w.r.t. other.
+        Update OrderedDict values w.r.t. other.
 
         Args:
             other (File | Mapping | Iterable): Other values to update.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.update(n).dict()
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
@@ -335,14 +337,14 @@ class Dict(OrderedDict):
     merge_from_file = update
     union = update
 
-    def difference(self, other: Union[File, Mapping, Iterable]) -> Dict:
+    def difference(self, other: Union[File, Mapping, Iterable]) -> OrderedDict:
         r"""
-        Difference between Dict values and other.
+        Difference between OrderedDict values and other.
 
         Args:
             other (File | Mapping | Iterable): Other values to compare.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.difference(n).dict()
         {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -373,12 +375,12 @@ class Dict(OrderedDict):
 
     def intersection(self, other: Union[File, Mapping, Iterable]) -> Mapping:
         r"""
-        Intersection between Dict values and other.
+        Intersection between OrderedDict values and other.
 
         Args:
             other (File | Mapping | Iterable): Other values to join.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.intersection(n).dict()
         {}
@@ -401,12 +403,12 @@ class Dict(OrderedDict):
             **{key: value for key, value in other if key in self and self[key] == value}
         )
 
-    def copy(self) -> Dict:
+    def copy(self) -> OrderedDict:
         return type(self)(**self)
 
     __copy__ = copy
 
-    def deepcopy(self, memo=None) -> Dict:
+    def deepcopy(self, memo=None) -> OrderedDict:
         return type(self)(**{k: deepcopy(v) for k, v in self.items()})
 
     __deepcopy__ = deepcopy
@@ -417,30 +419,30 @@ class Dict(OrderedDict):
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
         with self.open(file, mode="w") as fp:
-            json_dump(self.dict(), fp, *args, **kwargs)
+            json_dump(self.to(dict), fp, *args, **kwargs)
 
     @classmethod
-    def from_json(cls, string: str, **kwargs) -> Dict:
+    def from_json(cls, string: str, **kwargs) -> OrderedDict:
         return cls(**json_load(string, **kwargs))
 
     def jsons(self, *args, **kwargs) -> str:
         r"""
-        Dump Dict to json string.
+        Dump OrderedDict to json string.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.jsons()
         '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
         """
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return json_dumps(self.dict(), *args, **kwargs)
+        return json_dumps(self.to(dict), *args, **kwargs)
 
     @classmethod
-    def from_jsons(cls, string: str, **kwargs) -> Dict:
+    def from_jsons(cls, string: str, **kwargs) -> OrderedDict:
         r"""
-        Construct Dict from json string.
+        Construct OrderedDict from json string.
 
-        >>> d = Dict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
+        >>> d = OrderedDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
         >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
         """
@@ -451,16 +453,16 @@ class Dict(OrderedDict):
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, string: str, **kwargs) -> Dict:
+    def from_yaml(cls, string: str, **kwargs) -> OrderedDict:
         if "Loader" not in kwargs:
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
     def yamls(self, *args, **kwargs) -> str:
         r"""
-        Dump Dict to yaml string.
+        Dump OrderedDict to yaml string.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.yamls()
         'a: 1\nb: 2\nc: 3\n'
         """
@@ -468,14 +470,14 @@ class Dict(OrderedDict):
             kwargs["Dumper"] = Dumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return yaml_dump(self.dict(), *args, **kwargs)
+        return yaml_dump(self.to(dict), *args, **kwargs)
 
     @classmethod
-    def from_yamls(cls, string: str, **kwargs) -> Dict:
+    def from_yamls(cls, string: str, **kwargs) -> OrderedDict:
         r"""
-        Construct Dict from yaml string.
+        Construct OrderedDict from yaml string.
 
-        >>> d = Dict.from_yamls('a: 1\nb: 2\nc: 3\n')
+        >>> d = OrderedDict.from_yamls('a: 1\nb: 2\nc: 3\n')
         >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
         """
@@ -493,7 +495,7 @@ class Dict(OrderedDict):
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     @classmethod
-    def load(cls, path: PathStr, **kwargs) -> Dict:
+    def load(cls, path: PathStr, **kwargs) -> OrderedDict:
         extension = splitext(path)[-1][1:].lower()
         with cls.open(path) as fp:
             if extension in JSON:
@@ -527,11 +529,11 @@ class Dict(OrderedDict):
 
     def __repr__(self):
         r"""
-        Representation of Dict object.
+        Representation of OrderedDict.
 
-        >>> d = Dict(a=1, b=2, c=3)
+        >>> d = OrderedDict(a=1, b=2, c=3)
         >>> repr(d)
-        'Dict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
+        'OrderedDict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
         """
         extra_lines = []
         extra_repr = self.extra_repr()
@@ -568,53 +570,66 @@ class Dict(OrderedDict):
         return st
 
 
-class NestedDict(Mapping):
+class NestedDict(OrderedDict):
     """
     Nested Dict
     """
 
-    _delimiter: str = "."
-    _indent: int = 2
-    _convert_mapping: bool = False
-    _storage: Dict
+    convert_mapping: bool
+    delimiter: str
 
     def __init__(self, *args, **kwargs):
-        super().__setattr__("_storage", Dict())
+        self.setattr("convert_mapping", False)
+        self.setattr("delimiter", ".")
+        self.setattr("indent", 2)
         for key, value in args:
             self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        if "_storage" not in self.__dict__:
-            raise AttributeError(
-                "cannot access value before NestedDict.__init__() call"
-            )
+        r"""
+        Get value from NestedDict.
+        __getitem__ and __getattr__ are alias of this method.
+
+        Args:
+            name (str): Key name.
+            default (Optional[Any]): Default value if name does not present.
+
+        >>> d = NestedDict()
+        >>> d['i.d'] = 1013
+        >>> d.get('i.d')
+        1013
+        >>> d['i.d']
+        1013
+        >>> d.i.d
+        1013
+        >>> d.get('c', 2)
+        2
+        >>> d.get('c')
+        Traceback (most recent call last):
+        KeyError: 'NestedDict does not contain c'
+        """
 
         @wraps(self.get)
         def get(self, name):
-            if self._delimiter in name:
-                name, rest = name.split(self._delimiter, 1)
+            if self.getattr("delimiter") in name:
+                name, rest = name.split(self.getattr("delimiter"), 1)
                 return getattr(self[name], rest)
-            elif name in self._storage:
-                return self._storage[name]
+            elif name in self:
+                return super().__getitem__(name)
             else:
-                raise AttributeError(
-                    f"{self.__class__.__name__} has no attribute {name}"
-                )
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
 
         if default is not None:
             try:
                 return get(self, name)
-            except AttributeError:
+            except KeyError:
                 return default
         return get(self, name)
 
     __getitem__ = get
     __getattr__ = get
-
-    def getattr(self, name: str, default: Optional[Any] = None):
-        return super().__getattr__(self, name, default)
 
     def set(
         self,
@@ -622,66 +637,60 @@ class NestedDict(Mapping):
         value: Any,
         convert_mapping: Optional[bool] = None,
     ) -> None:
-        if "_storage" not in self.__dict__:
-            raise AttributeError(
-                "cannot assign value before NestedDict.__init__() call"
-            )
+        r"""
+        Set value of NestedDict.
+        __setitem__ and __setattr__ are alias of this method.
+
+        Args:
+            name (str): Key name.
+            value (Any): Value to set.
+
+        >>> d = NestedDict()
+        >>> d.set('i.d', 1031)
+        >>> d.i.d
+        1031
+        >>> d['b.c'] = 'chang'
+        >>> d.b.c
+        'chang'
+        """
         if convert_mapping is None:
-            convert_mapping = self._convert_mapping
-        if self._delimiter in name:
-            name, rest = name.split(self._delimiter, 1)
-            if not hasattr(self, name):
-                setattr(self, name, type(self)())
-            setattr(self[name], rest, value)
+            convert_mapping = self.convert_mapping
+        if self.getattr("delimiter") in name:
+            name, rest = name.split(self.getattr("delimiter"), 1)
+            if name not in self:
+                super().set(name, type(self)())
+            self[name][rest] = value
         elif (
             convert_mapping
             and not isinstance(value, NestedDict)
             and isinstance(value, Mapping)
         ):
-            setattr(self, name, type(self)(**value))
+            self[name] = type(self)(**value)
         else:
             if isinstance(value, str):
                 try:
                     value = literal_eval(value)
                 except (ValueError, SyntaxError):
                     pass
-            self._storage[name] = value
+            super().__setitem__(name, value)
 
     __setitem__ = set
     __setattr__ = set
 
-    def setattr(self, name: str, value: Any):
-        super().__setattr__(name, value)
-
-    def remove(self, name: str) -> None:
-        del self._storage[name]
-
-    __delitem__ = remove
-    __delattr__ = remove
-
-    def pop(self, name: str, default: Optional[Any] = None) -> Any:
-        attr = self.get(name, default)
-        self.remove(name)
-        return attr
-
-    def __iter__(self) -> Iterable:
-        return iter(self._storage)
-
-    def keys(self) -> Iterable:
-        return self._storage.keys()
-
-    def values(self) -> Iterable:
-        return self._storage.values()
-
-    def items(self) -> Iterable:
-        return self._storage.items()
-
     def all_keys(self):
+        r"""
+        Get all keys of NestedDict.
+
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_keys())
+        ['a', 'b.c', 'b.d']
+        """
+
         @wraps(self.all_keys)
         def all_keys(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self._delimiter + key
+                    key = prefix + self.getattr("delimiter") + key
                 if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
                 else:
@@ -690,6 +699,13 @@ class NestedDict(Mapping):
         return all_keys(self)
 
     def all_values(self):
+        r"""
+        Get all values of NestedDict.
+
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_values())
+        [1, 2, 3]
+        """
         for value in self.values():
             if isinstance(value, NestedDict):
                 yield from value.all_values()
@@ -697,11 +713,19 @@ class NestedDict(Mapping):
                 yield value
 
     def all_items(self):
+        r"""
+        Get all items of NestedDict.
+
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_items())
+        [('a', 1), ('b.c', 2), ('b.d', 3)]
+        """
+
         @wraps(self.all_items)
         def all_items(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self._delimiter + key
+                    key = prefix + self.getattr("delimiter") + key
                 if isinstance(value, NestedDict):
                     yield from all_items(value, key)
                 else:
@@ -709,225 +733,12 @@ class NestedDict(Mapping):
 
         return all_items(self)
 
-    def dict(self, cls: Callable = dict) -> Mapping:
-        dic = cls()
-        for k, v in self._storage.items():
-            if isinstance(v, NestedDict):
-                dic[k] = v.dict(cls)
-            else:
-                dic[k] = v
-        return dic
-
-    def update(self, other: Union[File, Mapping, Iterable], **kwargs) -> NestedDict:
-        if isinstance(other, (PathLike, str, bytes, IO)):
-            other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            for key, value in other.items():
-                if isinstance(value, (Mapping,)) and isinstance(self[key], (Mapping,)):
-                    self[key].update(value)
-                else:
-                    self[key] = value
-        elif isinstance(other, Iterable):
-            for key, value in other:
-                self[key] = value
-        for key, value in kwargs.items():
-            self[key] = value
-        return self
-
-    merge = update
-    merge_from_file = update
-    union = update
-
-    def difference(self, other: Union[File, Mapping, Iterable]) -> NestedDict:
-        if isinstance(other, (PathLike, str, bytes, IO)):
-            other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            return type(self)(
-                **{
-                    key: value
-                    for key, value in other.items()
-                    if key not in self or self[key] != value
-                }
-            )
-        elif isinstance(other, Iterable):
-            return type(self)(
-                **{
-                    key: value
-                    for key, value in other
-                    if key not in self or self[key] != value
-                }
-            )
-        return None
-
-    diff = difference
-
-    def intersection(self, other: Union[File, Mapping, Iterable]) -> Mapping:
-        if isinstance(other, (PathLike, str, bytes, IO)):
-            other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            return type(self)(
-                **{
-                    key: value
-                    for key, value in other.items()
-                    if key in self and self[key] == value
-                }
-            )
-        elif isinstance(other, Iterable):
-            return type(self)(
-                **{
-                    key: value
-                    for key, value in other
-                    if key in self and self[key] == value
-                }
-            )
-        return None
-
-    def copy(self) -> NestedDict:
-        return type(self)(**self)
-
-    __copy__ = copy
-
-    def deepcopy(self, memo=None) -> NestedDict:
-        return type(self)(**{k: deepcopy(v) for k, v in self.all_items()})
-
-    __deepcopy__ = deepcopy
-
-    clone = deepcopy
-
-    def clear(self) -> None:
-        self._storage.clear()
-
-    def json(self, file: File, *args, **kwargs) -> None:
-        if "indent" not in kwargs:
-            kwargs["indent"] = self._indent
-        with self.open(file, mode="w") as fp:
-            json_dump(self.dict(), fp, *args, **kwargs)
-
-    def jsons(self, *args, **kwargs) -> str:
-        if "indent" not in kwargs:
-            kwargs["indent"] = self._indent
-        return json_dumps(self.dict(), *args, **kwargs)
-
-    @classmethod
-    def from_json(cls, string: str, **kwargs) -> NestedDict:
-        return cls(**json_load(string, **kwargs))
-
-    def yaml(self, file: File, *args, **kwargs) -> None:
-        with self.open(file, mode="w") as fp:
-            self.yamls(fp, *args, **kwargs)
-
-    def yamls(self, *args, **kwargs) -> str:
-        if "Dumper" not in kwargs:
-            kwargs["Dumper"] = Dumper
-        if "indent" not in kwargs:
-            kwargs["indent"] = self._indent
-        return yaml_dump(self.dict(dict), *args, **kwargs)
-
-    @classmethod
-    def from_yaml(cls, string: str, **kwargs) -> NestedDict:
-        if "Loader" not in kwargs:
-            kwargs["Loader"] = SafeLoader
-        return cls(**yaml_load(string, **kwargs))
-
-    def dump(self, file: File, method: Optional[str] = "yaml", *args, **kwargs) -> None:
-        method = method.lower()
-        if method in YAML:
-            self.yaml(file=file, *args, **kwargs)
-        elif method in JSON:
-            self.json(file=file, *args, **kwargs)
-        else:
-            raise FileError(f"method {method} should be in {JSON} or {YAML}")
-
-    @classmethod
-    def load(cls, path: File, **kwargs) -> NestedDict:
-        extension = splitext(path)[-1][1:].lower()
-        with cls.open(path) as fp:
-            if extension in JSON:
-                config = cls.from_json(fp.read(), **kwargs)
-            elif extension in YAML:
-                config = cls.from_yaml(fp.read(), **kwargs)
-            else:
-                raise FileError(
-                    f"file {path} should have extensions {JSON} or {YAML}, but got {extension}"
-                )
-        return config
-
-    @staticmethod
-    @contextmanager
-    def open(file: File, *args, **kwargs):
-        if isinstance(file, (PathLike, str)):
-            file = open(file, *args, **kwargs)
-            try:
-                yield file
-            finally:
-                file.close()
-        elif isinstance(file, (IO,)):
-            yield file
-        else:
-            raise TypeError(
-                f"file={file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"
-            )
-
     def apply(self, func: Callable) -> NestedDict:
-        for value in self._storage.values():
+        for value in self.values():
             if isinstance(value, NestedDict):
                 value.apply(func)
         func(self)
         return self
-
-    def __len__(self) -> int:
-        return len(self._storage)
-
-    def __contains__(self, name: str) -> bool:
-        return name in self._storage
-
-    def __eq__(self, other: Mapping) -> bool:
-        if isinstance(other, NestedDict):
-            return self.dict() == other.dict()
-        if isinstance(other, Mapping):
-            return self.dict() == other
-        raise NotImplementedError
-
-    def __bool__(self):
-        return bool(self._storage)
-
-    def extra_repr(self) -> str:
-        return ""
-
-    def __repr__(self):
-        extra_lines = []
-        extra_repr = self.extra_repr()
-        # empty string will be split into list ['']
-        if extra_repr:
-            extra_lines = extra_repr.split("\n")
-        child_lines = []
-        for key, value in self.items():
-            value_str = repr(value)
-            value_str = self._add_indent(value_str)
-            child_lines.append("(" + key + "): " + value_str)
-        lines = extra_lines + child_lines
-
-        main_str = self.__class__.__name__ + "("
-        if lines:
-            # simple one-liner info, which most builtin Modules will use
-            if len(extra_lines) == 1 and not child_lines:
-                main_str += extra_lines[0]
-            else:
-                main_str += "\n  " + "\n  ".join(lines) + "\n"
-
-        main_str += ")"
-        return main_str
-
-    def _add_indent(self, s):
-        st = s.split("\n")
-        # don't do anything for single-line stuff
-        if len(st) == 1:
-            return s
-        first = st.pop(0)
-        st = [(self._indent * " ") + line for line in st]
-        st = "\n".join(st)
-        st = first + "\n" + st
-        return st
 
 
 class Config(NestedDict):
@@ -935,18 +746,21 @@ class Config(NestedDict):
     Basic Config
     """
 
-    _frozen: bool = False
-    _convert_mapping: bool = True
-    _parser: ConfigParser = ConfigParser()
+    frozen: bool
+    convert_mapping: bool
+    parser: ConfigParser
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setattr("frozen", False)
+        self.setattr("convert_mapping", True)
+        self.setattr("parser", ConfigParser())
 
     def frozen_check(func: Callable):
         @wraps(func)
         def decorator(self, *args, **kwargs):
-            if self._frozen and not ("_frozen" in args or "_frozen" in kwargs):
-                raise AttributeError(
+            if self.getattr("frozen"):
+                raise ValueError(
                     "Attempting to alter a frozen config. Run config.defrost() to defrost first"
                 )
             func(self, *args, **kwargs)
@@ -954,13 +768,11 @@ class Config(NestedDict):
         return decorator
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
-        if not self._frozen:
-            try:
-                return super().get(name, default)
-            except AttributeError:
-                super().__setattr__(name, type(self)())
-                return self[name]
-        return super().get(name, default)
+        try:
+            return super().get(name, default)
+        except KeyError:
+            super().__setitem__(name, type(self)())
+            return self[name]
 
     __getitem__ = get
     __getattr__ = get
@@ -991,7 +803,7 @@ class Config(NestedDict):
     def freeze(self, recursive: Optional[bool] = True) -> Config:
         @wraps(self.freeze)
         def freeze(config: Config) -> None:
-            config.__dict__["_frozen"] = True
+            config.setattr("frozen", True)
 
         if recursive:
             self.apply(freeze)
@@ -1002,7 +814,7 @@ class Config(NestedDict):
     def defrost(self, recursive: Optional[bool] = True) -> None:
         @wraps(self.defrost)
         def defrost(config: Config) -> None:
-            config.__dict__["_frozen"] = False
+            config.setattr("frozen", False)
 
         if recursive:
             self.apply(defrost)
@@ -1014,11 +826,12 @@ class Config(NestedDict):
         args: Optional[Iterable[str]] = None,
         default_config: Optional[str] = None,
     ) -> Config:
-        return self._parser.parse_config(args, self, default_config)
+        return self.getattr("parser").parse_config(args, self, default_config)
 
     parse_config = parse
 
-    add_argument = _parser.add_argument
+    def add_argument(self, *args, **kwargs) -> None:
+        self.getattr("parser").add_argument(*args, **kwargs)
 
 
 if __name__ == "__main__":
