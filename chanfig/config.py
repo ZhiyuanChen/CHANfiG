@@ -95,6 +95,7 @@ class OrderedDict(OrderedDict_):
     indent: int
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
+        super().__init__()
         if default_factory is not None and not isinstance(default_factory, Callable):
             raise TypeError(
                 f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
@@ -576,12 +577,15 @@ class NestedDict(OrderedDict):
     """
 
     convert_mapping: bool
+    default_factory: Callable
     delimiter: str
+    indent: int
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         self.setattr("convert_mapping", False)
         self.setattr("delimiter", ".")
         self.setattr("indent", 2)
+        self.setattr("default_factory", default_factory)
         for key, value in args:
             self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
@@ -616,10 +620,8 @@ class NestedDict(OrderedDict):
             if self.getattr("delimiter") in name:
                 name, rest = name.split(self.getattr("delimiter"), 1)
                 return getattr(self[name], rest)
-            elif name in self:
-                return super().__getitem__(name)
             else:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+                return super().get(name)
 
         if default is not None:
             try:
@@ -755,6 +757,7 @@ class Config(NestedDict):
         self.setattr("frozen", False)
         self.setattr("convert_mapping", True)
         self.setattr("parser", ConfigParser())
+        self.setattr("default_factory", NestedDict)
 
     def frozen_check(func: Callable):
         @wraps(func)
@@ -766,16 +769,6 @@ class Config(NestedDict):
             func(self, *args, **kwargs)
 
         return decorator
-
-    def get(self, name: str, default: Optional[Any] = None) -> Any:
-        try:
-            return super().get(name, default)
-        except KeyError:
-            super().__setitem__(name, type(self)())
-            return self[name]
-
-    __getitem__ = get
-    __getattr__ = get
 
     @frozen_check
     def set(
