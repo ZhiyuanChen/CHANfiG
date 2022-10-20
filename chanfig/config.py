@@ -85,14 +85,17 @@ class ConfigParser(ArgumentParser):
 
     parse_config = parse
 
+    @staticmethod
+    def identity(string):
+        return string
 
 class OrderedDict(OrderedDict_):
     """
     Default OrderedDict with attributes
     """
 
-    default_factory: Callable
-    indent: int
+    default_factory: Callable = None
+    indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         super().__init__()
@@ -576,10 +579,10 @@ class NestedDict(OrderedDict):
     Nested Dict
     """
 
-    convert_mapping: bool
-    default_factory: Callable
-    delimiter: str
-    indent: int
+    convert_mapping: bool = False
+    default_factory: Callable = None
+    delimiter: str = '.'
+    indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         self.setattr("convert_mapping", False)
@@ -748,8 +751,11 @@ class Config(NestedDict):
     Basic Config
     """
 
-    frozen: bool
-    convert_mapping: bool
+    frozen: bool = False
+    convert_mapping: bool = False
+    default_factory: Callable = None
+    delimiter: str = '.'
+    indent: int = 2
     parser: ConfigParser
 
     def __init__(self, *args, **kwargs):
