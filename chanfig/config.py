@@ -573,6 +573,10 @@ class OrderedDict(OrderedDict_):
         st = first + "\n" + st
         return st
 
+    def __setstate__(self, states, *args, **kwargs):
+        for name, value in states.items():
+            self.setattr(name, value)
+
 
 class NestedDict(OrderedDict):
     """
