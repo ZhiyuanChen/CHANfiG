@@ -14,14 +14,15 @@ from json import load as json_load
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Optional, Union
+from typing import IO, Any, Callable, Iterable, Optional, Sequence, Union
+from typing_extensions import LiteralString
 from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-PathStr = Union[PathLike, str, bytes]
+PathStr = Union[PathLike, str, bytes, LiteralString]
 File = Union[PathStr, IO]
 
 YAML = ("yml", "yaml")
@@ -52,7 +53,7 @@ class ConfigParser(ArgumentParser):
 
     def parse(
         self,
-        args: Optional[Iterable[str]] = None,
+        args: Optional[Sequence[str]] = None,
         config: Optional[Config] = None,
         default_config: Optional[str] = None,
     ) -> Config:
@@ -89,12 +90,13 @@ class ConfigParser(ArgumentParser):
     def identity(string):
         return string
 
+
 class OrderedDict(OrderedDict_):
     """
     Default OrderedDict with attributes
     """
 
-    default_factory: Callable = None
+    default_factory: Optional[Callable] = None
     indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
@@ -305,12 +307,12 @@ class OrderedDict(OrderedDict_):
     to = convert
     dict = convert
 
-    def update(self, other: Union[File, Mapping, Iterable]) -> OrderedDict:
+    def update(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
         r"""
         Update OrderedDict values w.r.t. other.
 
         Args:
-            other (File | Mapping | Iterable): Other values to update.
+            other (Mapping | Iterable | PathStr): Other values to update.
 
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -320,7 +322,7 @@ class OrderedDict(OrderedDict_):
         >>> d.update(l).dict()
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
         """
-        if isinstance(other, (PathLike, str, bytes, IO)):
+        if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
             for key, value in other.items():
@@ -341,12 +343,12 @@ class OrderedDict(OrderedDict_):
     merge_from_file = update
     union = update
 
-    def difference(self, other: Union[File, Mapping, Iterable]) -> OrderedDict:
+    def difference(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
         r"""
         Difference between OrderedDict values and other.
 
         Args:
-            other (File | Mapping | Iterable): Other values to compare.
+            other (Mapping | Iterable | PathStr): Other values to compare.
 
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -357,15 +359,15 @@ class OrderedDict(OrderedDict_):
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or File, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
         """
-        if isinstance(other, (PathLike, str, bytes, IO)):
+        if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(
-                f"other={other} should be of type Mapping, Iterable or File, but got {type(other)}"
+                f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
             )
         return type(self)(
             **{
@@ -377,12 +379,12 @@ class OrderedDict(OrderedDict_):
 
     diff = difference
 
-    def intersection(self, other: Union[File, Mapping, Iterable]) -> Mapping:
+    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> Mapping:
         r"""
         Intersection between OrderedDict values and other.
 
         Args:
-            other (File | Mapping | Iterable): Other values to join.
+            other (Mapping | Iterable | PathStr): Other values to join.
 
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -393,15 +395,15 @@ class OrderedDict(OrderedDict_):
         {'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or File, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
         """
-        if isinstance(other, (PathLike, str, bytes, IO)):
+        if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(
-                f"other={other} should be of type Mapping, Iterable or File, but got {type(other)}"
+                f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
             )
         return type(self)(
             **{key: value for key, value in other if key in self and self[key] == value}
@@ -426,8 +428,9 @@ class OrderedDict(OrderedDict_):
             json_dump(self.to(dict), fp, *args, **kwargs)
 
     @classmethod
-    def from_json(cls, string: str, **kwargs) -> OrderedDict:
-        return cls(**json_load(string, **kwargs))
+    def from_json(cls, file: File, **kwargs) -> OrderedDict:
+        with cls.open(file) as fp:
+            return cls(**json_load(fp, **kwargs))
 
     def jsons(self, *args, **kwargs) -> str:
         r"""
@@ -489,7 +492,7 @@ class OrderedDict(OrderedDict_):
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
-    def dump(self, file: File, method: Optional[str] = "yaml", *args, **kwargs) -> None:
+    def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
         method = method.lower()
         if method in YAML:
             self.yaml(file=file, *args, **kwargs)
@@ -584,8 +587,8 @@ class NestedDict(OrderedDict):
     """
 
     convert_mapping: bool = False
-    default_factory: Callable = None
-    delimiter: str = '.'
+    default_factory: Optional[Callable] = None
+    delimiter: str = "."
     indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
@@ -750,6 +753,18 @@ class NestedDict(OrderedDict):
         return self
 
 
+def frozen_check(func: Callable):
+    @wraps(func)
+    def decorator(self, *args, **kwargs):
+        if self.getattr("frozen"):
+            raise ValueError(
+                "Attempting to alter a frozen config. Run config.defrost() to defrost first"
+            )
+        func(self, *args, **kwargs)
+
+    return decorator
+
+
 class Config(NestedDict):
     """
     Basic Config
@@ -757,8 +772,8 @@ class Config(NestedDict):
 
     frozen: bool = False
     convert_mapping: bool = False
-    default_factory: Callable = None
-    delimiter: str = '.'
+    default_factory: Optional[Callable] = None
+    delimiter: str = "."
     indent: int = 2
     parser: ConfigParser
 
@@ -768,17 +783,6 @@ class Config(NestedDict):
         self.setattr("convert_mapping", True)
         self.setattr("parser", ConfigParser())
         self.setattr("default_factory", NestedDict)
-
-    def frozen_check(func: Callable):
-        @wraps(func)
-        def decorator(self, *args, **kwargs):
-            if self.getattr("frozen"):
-                raise ValueError(
-                    "Attempting to alter a frozen config. Run config.defrost() to defrost first"
-                )
-            func(self, *args, **kwargs)
-
-        return decorator
 
     @frozen_check
     def set(
