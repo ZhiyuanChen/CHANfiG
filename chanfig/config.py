@@ -107,6 +107,9 @@ class OrderedDict(OrderedDict_):
             )
         self.setattr("default_factory", default_factory)
         self.setattr("indent", 2)
+        self.init(*args, **kwargs)
+
+    def init(self, *args, **kwargs) -> None:
         for key, value in args:
             self.set(key, value)
         for key, value in kwargs.items():
@@ -163,7 +166,10 @@ class OrderedDict(OrderedDict_):
         AttributeError: OrderedDict has no attribute a
         """
         try:
-            return self.__dict__[name]
+            try:
+                return self.__dict__[name]
+            except KeyError:
+                return self.__class__.__dict__[name]
         except KeyError:
             if default is not None:
                 return default
@@ -372,7 +378,7 @@ class OrderedDict(OrderedDict_):
             raise TypeError(
                 f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
             )
-        return type(self)(
+        return self.empty(
             **{
                 key: value
                 for key, value in other
@@ -408,7 +414,7 @@ class OrderedDict(OrderedDict_):
             raise TypeError(
                 f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
             )
-        return type(self)(
+        return self.empty(
             **{key: value for key, value in other if key in self and self[key] == value}
         )
 
@@ -429,7 +435,7 @@ class OrderedDict(OrderedDict_):
         """
         return copy(self)
 
-    def deepcopy(self, memo: Optional[Mapping] = None) -> OrderedDict:
+    def deepcopy(self, memo: Optional[Mapping] = None, *args, **kwargs) -> OrderedDict:
         r"""
         Create a deep copy of OrderedDict.
 
@@ -446,8 +452,7 @@ class OrderedDict(OrderedDict_):
         """
         if memo is not None and id(self) in memo:
             return memo[id(self)]
-        ret = type(self)()
-        ret.__dict__.update(self.__dict__)
+        ret = self.empty_like()
         for k, v in self.items():
             if isinstance(v, OrderedDict):
                 ret[k] = v.deepcopy(memo=memo)
@@ -458,6 +463,39 @@ class OrderedDict(OrderedDict_):
     __deepcopy__ = deepcopy
 
     clone = deepcopy
+
+    @classmethod
+    def empty(cls, *args, **kwargs):
+        r"""
+        Initialise an empty OrderedDict.
+        This method is helpful when you inheriting the OrderedDict with default values.
+        Use type(self)() in this case would copy the redundant default values.
+
+        >>> d = OrderedDict(a=[])
+        >>> c = d.empty()
+        >>> c.dict()
+        {}
+        """
+        empty = cls(*args, **kwargs)
+        empty.clear()
+        return empty
+
+    def empty_like(self, *args, **kwargs):
+        r"""
+        Initialise an empty copy of OrderedDict.
+        This method will preserve everything in __dict__.
+
+        >>> d = OrderedDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.empty_like()
+        >>> c.dict()
+        {}
+        >>> c.getattr("name")
+        'Chang'
+        """
+        empty = self.empty(*args, **kwargs)
+        empty.__dict__.update(self.__dict__)
+        return empty
 
     def json(self, file: File, *args, **kwargs) -> None:
         if "indent" not in kwargs:
@@ -630,10 +668,11 @@ class NestedDict(OrderedDict):
     indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        self.setattr("convert_mapping", False)
         self.setattr("delimiter", ".")
-        self.setattr("indent", 2)
-        self.setattr("default_factory", default_factory)
+        self.setattr("convert_mapping", False)
+        super().__init__(*args, default_factory=default_factory, **kwargs)
+
+    def init(self, *args, **kwargs) -> None:
         for key, value in args:
             self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
@@ -708,14 +747,14 @@ class NestedDict(OrderedDict):
         if self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
             if name not in self:
-                super().set(name, type(self)())
+                super().set(name, self.empty_like())
             self[name][rest] = value
         elif (
             convert_mapping
             and not isinstance(value, NestedDict)
             and isinstance(value, Mapping)
         ):
-            self[name] = type(self)(**value)
+            self[name] = self.empty_like(**value)
         else:
             if isinstance(value, str):
                 try:
