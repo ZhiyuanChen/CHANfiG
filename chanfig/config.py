@@ -476,8 +476,9 @@ class OrderedDict(OrderedDict_):
         >>> c.dict()
         {}
         """
-        empty = cls(*args, **kwargs)
+        empty = cls()
         empty.clear()
+        empty.init(*args, **kwargs)
         return empty
 
     def empty_like(self, *args, **kwargs):
