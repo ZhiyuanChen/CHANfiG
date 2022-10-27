@@ -6,7 +6,7 @@ from ast import literal_eval
 from collections import OrderedDict as OrderedDict_
 from collections.abc import Mapping
 from contextlib import contextmanager
-from copy import deepcopy
+from copy import copy, deepcopy
 from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
@@ -285,9 +285,12 @@ class OrderedDict(OrderedDict_):
         1031
         """
         if default is None:
-            if self.getattr("default_factory") is None:
+            default_factory = self.getattr("default_factory")
+            if default_factory is None:
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}")
-            default = self.getattr("default_factory")()
+            default = default_factory()
+            if isinstance(default, OrderedDict):
+                default.__dict__.update(self.__dict__)
         self.set(name, default)
         return default
 
@@ -410,12 +413,47 @@ class OrderedDict(OrderedDict_):
         )
 
     def copy(self) -> OrderedDict:
-        return type(self)(**self)
+        r"""
+        Create a shallow copy of OrderedDict.
 
-    __copy__ = copy
+        >>> d = OrderedDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.copy()
+        >>> c.dict()
+        {'a': []}
+        >>> d.a.append(1)
+        >>> c.dict()
+        {'a': [1]}
+        >>> c.getattr("name")
+        'Chang'
+        """
+        return copy(self)
 
-    def deepcopy(self, memo=None) -> OrderedDict:
-        return type(self)(**{k: deepcopy(v) for k, v in self.items()})
+    def deepcopy(self, memo: Optional[Mapping] = None) -> OrderedDict:
+        r"""
+        Create a deep copy of OrderedDict.
+
+        >>> d = OrderedDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.deepcopy()
+        >>> c.dict()
+        {'a': []}
+        >>> d.a.append(1)
+        >>> c.dict()
+        {'a': []}
+        >>> c.getattr("name")
+        'Chang'
+        """
+        if memo is not None and id(self) in memo:
+            return memo[id(self)]
+        ret = type(self)()
+        ret.__dict__.update(self.__dict__)
+        for k, v in self.items():
+            if isinstance(v, OrderedDict):
+                ret[k] = v.deepcopy(memo=memo)
+            else:
+                ret[k] = deepcopy(v)
+        return ret
 
     __deepcopy__ = deepcopy
 
@@ -772,7 +810,7 @@ class Config(NestedDict):
 
     frozen: bool = False
     convert_mapping: bool = False
-    default_factory: Optional[Callable] = None
+    default_factory: Optional[Callable] = NestedDict
     delimiter: str = "."
     indent: int = 2
     parser: ConfigParser
