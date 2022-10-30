@@ -1,0 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Cascadia+Code&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Noto+Sans+SC:wght@100..900&display=swap");
+
+:root {
+  --md-text-font: "Noto Sans", "Noto Sans SC";
+  --md-code-font: "Cascadia Code";
+}

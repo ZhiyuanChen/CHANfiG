@@ -405,6 +405,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-# example files
+# mkdocs
+site/
 
+# example files
 example*

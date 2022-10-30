@@ -1,7 +1,10 @@
-# CHANfiG
-
-Read this in other language: [English](README.md)
-在其他语言中阅读本文：[简体中文](README.cn.md)
+---
+title: CHANfiG
+summary: Easier Configuration
+authors:
+    - Zhiyuan Chen
+date: 2022-05-04
+---
 
 ## Introduction
 

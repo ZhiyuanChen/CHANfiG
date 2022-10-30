@@ -7,7 +7,7 @@ from collections import OrderedDict as OrderedDict_
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
-from functools import wraps, partial
+from functools import wraps
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
@@ -15,9 +15,9 @@ from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
 from typing import IO, Any, Callable, Iterable, Optional, Sequence, Union
-from typing_extensions import LiteralString
 from warnings import warn
 
+from typing_extensions import LiteralString  # type: ignore
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
@@ -31,9 +31,7 @@ PYTHON = ("py",)
 
 
 class Dumper(SafeDumper):
-    def increase_indent(
-        self, flow: Optional[bool] = False, indentless: Optional[bool] = False
-    ):
+    def increase_indent(self, flow: Optional[bool] = False, indentless: Optional[bool] = False):
         return super().increase_indent(flow, indentless)
 
 
@@ -51,9 +49,11 @@ class ConfigParser(ArgumentParser):
         r"""
         Parse the arguments for config.
         There are three levels of config:
+
         1. The base config parsed into the function,
         2. The config file located at the path of default_config (if specified),
         3. The config specified in arguments.
+
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
         Args:
@@ -75,29 +75,18 @@ class ConfigParser(ArgumentParser):
         if args is None:
             args = sys.argv[1:]
         for arg in args:
-            if (
-                arg.startswith("--")
-                and args != "--"
-                and arg not in self._option_string_actions
-            ):
+            if arg.startswith("--") and args != "--" and arg not in self._option_string_actions:
                 self.add_argument(arg)
         if config is None:
             config = Config()
-        if (
-            default_config is not None
-            and (path := getattr(config, default_config, None)) is not None
-        ):
-            warn(
-                f"Config has 'default_config={path}' specified, its values will override values in Config"
-            )
+        path = getattr(config, default_config, None) if default_config is not None else None
+        if path is not None:
+            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
         parsed, _ = self.parse_known_args(args)
-        if (
-            default_config is not None
-            and (path := getattr(parsed, default_config, None)) is not None
-        ):
-            config = type(config).load(path)
-        config.update(vars(parsed))
-        return config
+        if path is not None:
+            config = config.update(path)  # type: ignore
+        config = config.update(vars(parsed))  # type: ignore
+        return config  # type: ignore
 
     parse_config = parse
 
@@ -116,7 +105,7 @@ class OrderedDict(OrderedDict_):
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         super().__init__()
-        if default_factory is not None and not isinstance(default_factory, Callable):
+        if default_factory is not None and not callable(default_factory):
             raise TypeError(
                 f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
             )
@@ -125,6 +114,16 @@ class OrderedDict(OrderedDict_):
         self.init(*args, **kwargs)
 
     def init(self, *args, **kwargs) -> None:
+        r"""
+        Initialise values for OrderedDict.
+        This method is called in `__init__`.
+        You can overwrite this method to avoid call `super().__init__()` in `__init__`.
+
+        Args:
+            *args: [(key1, value1), (key2, value2)].
+            **kwargs: {key1: value1, key2: value2}.
+
+        """
         for key, value in args:
             self.set(key, value)
         for key, value in kwargs.items():
@@ -133,7 +132,9 @@ class OrderedDict(OrderedDict_):
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
         Get value from OrderedDict.
-        __getitem__ and __getattr__ are alias of this method.
+
+        `__getitem__` and `__getattr__` are alias of this method.
+
         Note that default here will override the default_factory if specified.
 
         Args:
@@ -158,11 +159,7 @@ class OrderedDict(OrderedDict_):
         ```
         """
 
-        return (
-            super().__getitem__(name)
-            if default is None
-            else self.__missing__(name, default)
-        )
+        return super().__getitem__(name) if default is None else self.__missing__(name, default)
 
     __getitem__ = get
     __getattr__ = get
@@ -198,14 +195,13 @@ class OrderedDict(OrderedDict_):
         except KeyError:
             if default is not None:
                 return default
-            raise AttributeError(
-                f"{self.__class__.__name__} has no attribute {name}"
-            ) from None
+            raise AttributeError(f"{self.__class__.__name__} has no attribute {name}") from None
 
     def set(self, name: str, value: Any) -> None:
         r"""
         Set value of OrderedDict.
-        __setitem__ and __setattr__ are alias of this method.
+
+        `__setitem__` and `__setattr__` are alias of this method.
 
         Args:
             name (str): Key name.
@@ -261,11 +257,11 @@ class OrderedDict(OrderedDict_):
     def delete(self, name: str) -> None:
         r"""
         Remove value from OrderedDict.
-        __delitem__, __delattr__ and remove are alias of this method.
+
+        `__delitem__`, `__delattr__` and `remove` are alias of this method.
 
         Args:
             name (str): Key name.
-            value (Any): Value to set.
 
         Example:
         ```python
@@ -353,10 +349,11 @@ class OrderedDict(OrderedDict_):
     def convert(self, cls: Callable = dict) -> Mapping:
         r"""
         Convert OrderedDict to other Mapping.
-        to and dict are alias of this method.
+
+        `to` and `dict` are alias of this method.
 
         Args:
-            cls (Callable): Target class to be converted to.
+            cls (Callable): Target class to be converted to. Defaults to dict.
 
         Example:
         ```python
@@ -372,7 +369,7 @@ class OrderedDict(OrderedDict_):
     to = convert
     dict = convert
 
-    def update(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
+    def update(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:  # type: ignore
         r"""
         Update OrderedDict values w.r.t. other.
 
@@ -396,16 +393,12 @@ class OrderedDict(OrderedDict_):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
             for key, value in other.items():
-                if (
-                    key in self
-                    and isinstance(self[key], (Mapping,))
-                    and isinstance(value, (Mapping,))
-                ):
+                if key in self and isinstance(self[key], (Mapping,)) and isinstance(value, (Mapping,)):
                     self[key].update(value)
                 else:
                     self[key] = value
         elif isinstance(other, Iterable):
-            for key, value in other:
+            for key, value in other:  # type: ignore
                 self[key] = value
         return self
 
@@ -441,15 +434,9 @@ class OrderedDict(OrderedDict_):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(
-                f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
-            )
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
         return self.empty(
-            **{
-                key: value
-                for key, value in other
-                if key not in self or self[key] != value
-            }
+            **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
     diff = difference
@@ -482,12 +469,8 @@ class OrderedDict(OrderedDict_):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(
-                f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}"
-            )
-        return self.empty(
-            **{key: value for key, value in other if key in self and self[key] == value}
-        )
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+        return self.empty(**{key: value for key, value in other if key in self and self[key] == value})  # type: ignore
 
     def copy(self) -> OrderedDict:
         r"""
@@ -511,7 +494,7 @@ class OrderedDict(OrderedDict_):
 
         return copy(self)
 
-    def deepcopy(self, memo: Optional[Mapping] = None, *args, **kwargs) -> OrderedDict:
+    def deepcopy(self, memo: Optional[Mapping] = None) -> OrderedDict:
         r"""
         Create a deep copy of OrderedDict.
 
@@ -703,7 +686,7 @@ class OrderedDict(OrderedDict_):
             kwargs["Dumper"] = Dumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return yaml_dump(self.convert(dict), *args, **kwargs)
+        return yaml_dump(self.convert(dict), *args, **kwargs)  # type: ignore
 
     @classmethod
     def from_yamls(cls, string: str, **kwargs) -> OrderedDict:
@@ -723,18 +706,32 @@ class OrderedDict(OrderedDict_):
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
-    def dump(self, file: File, method: str = "yaml", *args, **kwargs) -> None:
-        method = method.lower()
+    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:
+        r"""
+        Dump OrderedDict to file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d.dump("example.yaml")
+
+        ```
+        """
+        if method is None:
+            if isinstance(file, IO):
+                raise ValueError("method must be specified when dumping to file-like object")
+            method = splitext(file)[-1][1:]  # type: ignore
+        method = method.lower()  # type: ignore
         if method in YAML:
-            self.yaml(file=file, *args, **kwargs)
+            self.yaml(file=file, *args, **kwargs)  # type: ignore
         elif method in JSON:
-            self.json(file=file, *args, **kwargs)
+            self.json(file=file, *args, **kwargs)  # type: ignore
         else:
             raise FileError(f"method {method} should be in {JSON} or {YAML}")
 
     @classmethod
     def load(cls, path: PathStr, **kwargs) -> OrderedDict:
-        extension = splitext(path)[-1][1:].lower()
+        extension = splitext(path)[-1][1:].lower()  # type: ignore
         with cls.open(path) as fp:
             if extension in JSON:
                 config = cls.from_json(fp.read(), **kwargs)
@@ -742,7 +739,7 @@ class OrderedDict(OrderedDict_):
                 config = cls.from_yaml(fp.read(), **kwargs)
             else:
                 raise FileError(
-                    f"file {path} should have extensions {JSON} or {YAML}, but got {extension}"
+                    f"file {path} should have extensions {JSON} or {YAML}, but got {extension}"  # type: ignore
                 )
         return config
 
@@ -759,7 +756,7 @@ class OrderedDict(OrderedDict_):
             yield file
         else:
             raise TypeError(
-                f"file={file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"
+                f"file={file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"  # type: ignore
             )
 
     def extra_repr(self) -> str:
@@ -841,7 +838,8 @@ class NestedDict(OrderedDict):
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
         Get value from NestedDict.
-        __getitem__ and __getattr__ are alias of this method.
+
+        `__getitem__` and `__getattr__` are alias of this method.
 
         Args:
             name (str): Key name.
@@ -892,7 +890,8 @@ class NestedDict(OrderedDict):
     ) -> None:
         r"""
         Set value of NestedDict.
-        __setitem__ and __setattr__ are alias of this method.
+
+        `__setitem__` and `__setattr__` are alias of this method.
 
         Args:
             name (str): Key name.
@@ -918,11 +917,7 @@ class NestedDict(OrderedDict):
             if name not in self:
                 super().set(name, self.empty_like())
             self[name][rest] = value
-        elif (
-            convert_mapping
-            and not isinstance(value, NestedDict)
-            and isinstance(value, Mapping)
-        ):
+        elif convert_mapping and not isinstance(value, NestedDict) and isinstance(value, Mapping):
             self[name] = self.empty_like(**value)
         else:
             if isinstance(value, str):
@@ -1044,7 +1039,8 @@ class NestedDict(OrderedDict):
     def convert(self, cls: Callable = dict) -> Mapping:
         r"""
         Convert NestedDict to other Mapping.
-        to and dict are alias of this method.
+
+        `to` and `dict` are alias of this method.
 
         Args:
             cls (Callable): Target class to be converted to.
@@ -1074,9 +1070,7 @@ def frozen_check(func: Callable):
     @wraps(func)
     def decorator(self, *args, **kwargs):
         if self.getattr("frozen"):
-            raise ValueError(
-                "Attempting to alter a frozen config. Run config.defrost() to defrost first"
-            )
+            raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
         return func(self, *args, **kwargs)
 
     return decorator
@@ -1110,7 +1104,8 @@ class Config(NestedDict):
     ) -> None:
         r"""
         Set value of Config.
-        __setitem__ and __setattr__ are alias of this method.
+
+        `__setitem__` and `__setattr__` are alias of this method.
 
         Args:
             name (str): Key name.
@@ -1253,14 +1248,15 @@ class Config(NestedDict):
         r"""
         Parse the arguments for config.
         There are three levels of config:
+
         1. The base config parsed into the function,
         2. The config file located at the path of default_config (if specified),
         3. The config specified in arguments.
+
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
         Args:
             args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
-            config (Optional[Config]): The base config. Defaults to an empty Config.
             default_config (Optional[str]): The path to a config file.
 
         Example:

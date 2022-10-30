@@ -1,0 +1,22 @@
+name: lint
+on:
+  push:
+    branches:
+      - master
+      - main
+jobs:
+  lint:
+    environment: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ricardochaves/python-lint@v1.4.0
+        with:
+          use-pylint: false
+          python-root-list: "chanfig"
+          extra-pylint-options: "--max-line-length 120"
+          extra-pycodestyle-options: "--max-line-length 120"
+          extra-flake8-options: "--max-line-length 120"
+          extra-black-options: "--line-length 120"
+          extra-mypy-options: ""
+          extra-isort-options: ""
