@@ -7,7 +7,7 @@ from collections import OrderedDict as OrderedDict_
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
-from functools import wraps
+from functools import wraps, partial
 from json import dump as json_dump
 from json import dumps as json_dumps
 from json import load as json_load
@@ -42,21 +42,36 @@ class FileError(ValueError):
 
 
 class ConfigParser(ArgumentParser):
-    r"""
-    Parse the arguments for config.
-    There are three levels of config:
-    1. The base config parsed into the function,
-    2. The config file located at the path of default_config (if specified),
-    3. The config specified in arguments.
-    Higher levels override lower levels (i.e. 3 > 2 > 1).
-    """
-
     def parse(
         self,
         args: Optional[Sequence[str]] = None,
         config: Optional[Config] = None,
         default_config: Optional[str] = None,
     ) -> Config:
+        r"""
+        Parse the arguments for config.
+        There are three levels of config:
+        1. The base config parsed into the function,
+        2. The config file located at the path of default_config (if specified),
+        3. The config specified in arguments.
+        Higher levels override lower levels (i.e. 3 > 2 > 1).
+
+        Args:
+            args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
+            config (Optional[Config]): The base config. Defaults to an empty Config.
+            default_config (Optional[str]): The path to a config file.
+
+        Example:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.convert()
+        {'a': 0}
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).convert()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
         if args is None:
             args = sys.argv[1:]
         for arg in args:
@@ -125,6 +140,8 @@ class OrderedDict(OrderedDict_):
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
+        Example:
+        ```python
         >>> d = OrderedDict(d=1013)
         >>> d.get('d')
         1013
@@ -137,7 +154,10 @@ class OrderedDict(OrderedDict_):
         >>> d.get('e')
         Traceback (most recent call last):
         KeyError: 'OrderedDict does not contain e'
+
+        ```
         """
+
         return (
             super().__getitem__(name)
             if default is None
@@ -154,8 +174,10 @@ class OrderedDict(OrderedDict_):
 
         Args:
             name (str): Key name.
-            default (Any, optional): Default value if name does not present.
+            default (Optional[Any]): Default value if name does not present.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, default_factory=list)
         >>> d.getattr('default_factory')
         <class 'list'>
@@ -164,7 +186,10 @@ class OrderedDict(OrderedDict_):
         >>> d.getattr('a')
         Traceback (most recent call last):
         AttributeError: OrderedDict has no attribute a
+
+        ```
         """
+
         try:
             try:
                 return self.__dict__[name]
@@ -186,6 +211,8 @@ class OrderedDict(OrderedDict_):
             name (str): Key name.
             value (Any): Value to set.
 
+        Example:
+        ```python
         >>> d = OrderedDict()
         >>> d.set('d', 1013)
         >>> d.get('d')
@@ -196,7 +223,10 @@ class OrderedDict(OrderedDict_):
         >>> d.d = 'chang'
         >>> d.d
         'chang'
+
+        ```
         """
+
         if isinstance(value, str):
             try:
                 value = literal_eval(value)
@@ -216,11 +246,16 @@ class OrderedDict(OrderedDict_):
             name (str): Key name.
             value (Any): Value to set.
 
+        Example:
+        ```python
         >>> d = OrderedDict()
         >>> d.setattr('attr', 'value')
         >>> d.getattr('attr')
         'value'
+
+        ```
         """
+
         self.__dict__[name] = value
 
     def delete(self, name: str) -> None:
@@ -232,6 +267,8 @@ class OrderedDict(OrderedDict_):
             name (str): Key name.
             value (Any): Value to set.
 
+        Example:
+        ```python
         >>> d = OrderedDict(d=1016, n='chang')
         >>> d.d
         1016
@@ -248,7 +285,10 @@ class OrderedDict(OrderedDict_):
         >>> del d.f
         Traceback (most recent call last):
         KeyError: 'f'
+
+        ```
         """
+
         super().__delitem__(name)
 
     __delitem__ = delete
@@ -263,6 +303,8 @@ class OrderedDict(OrderedDict_):
         Args:
             name (str): Key name.
 
+        Example:
+        ```python
         >>> d = OrderedDict()
         >>> d.setattr('name', 'chang')
         >>> d.getattr('name')
@@ -271,7 +313,10 @@ class OrderedDict(OrderedDict_):
         >>> d.getattr('name')
         Traceback (most recent call last):
         AttributeError: OrderedDict has no attribute name
+
+        ```
         """
+
         del self.__dict__[name]
 
     def __missing__(self, name: str, default: Optional[Any] = None) -> Any:
@@ -282,6 +327,8 @@ class OrderedDict(OrderedDict_):
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
+        Example:
+        ```python
         >>> d = OrderedDict(default_factory=list)
         >>> d.n
         []
@@ -289,7 +336,10 @@ class OrderedDict(OrderedDict_):
         1031
         >>> d.__missing__('d', 1031)
         1031
+
+        ```
         """
+
         if default is None:
             default_factory = self.getattr("default_factory")
             if default_factory is None:
@@ -303,14 +353,20 @@ class OrderedDict(OrderedDict_):
     def convert(self, cls: Callable = dict) -> Mapping:
         r"""
         Convert OrderedDict to other Mapping.
+        to and dict are alias of this method.
 
         Args:
-            cls (Callable): Target class to be convereted to.
+            cls (Callable): Target class to be converted to.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.convert(dict)
         {'a': 1, 'b': 2, 'c': 3}
+
+        ```
         """
+
         return cls(**self)
 
     to = convert
@@ -323,14 +379,19 @@ class OrderedDict(OrderedDict_):
         Args:
             other (Mapping | Iterable | PathStr): Other values to update.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.update(n).dict()
+        >>> d.update(n).convert()
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.update(l).dict()
+        >>> d.update(l).convert()
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+
+        ```
         """
+
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
@@ -359,17 +420,22 @@ class OrderedDict(OrderedDict_):
         Args:
             other (Mapping | Iterable | PathStr): Other values to compare.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.difference(n).dict()
+        >>> d.difference(n).convert()
         {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.difference(l).dict()
+        >>> d.difference(l).convert()
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
         TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+
+        ```
         """
+
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
@@ -395,17 +461,22 @@ class OrderedDict(OrderedDict_):
         Args:
             other (Mapping | Iterable | PathStr): Other values to join.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.intersection(n).dict()
+        >>> d.intersection(n).convert()
         {}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.intersection(l).dict()
+        >>> d.intersection(l).convert()
         {'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
         TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+
+        ```
         """
+
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
@@ -422,34 +493,44 @@ class OrderedDict(OrderedDict_):
         r"""
         Create a shallow copy of OrderedDict.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.copy()
-        >>> c.dict()
+        >>> c.convert()
         {'a': []}
         >>> d.a.append(1)
-        >>> c.dict()
+        >>> c.convert()
         {'a': [1]}
         >>> c.getattr("name")
         'Chang'
+
+        ```
         """
+
         return copy(self)
 
     def deepcopy(self, memo: Optional[Mapping] = None, *args, **kwargs) -> OrderedDict:
         r"""
         Create a deep copy of OrderedDict.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.deepcopy()
-        >>> c.dict()
+        >>> c.convert()
         {'a': []}
         >>> d.a.append(1)
-        >>> c.dict()
+        >>> c.convert()
         {'a': []}
         >>> c.getattr("name")
         'Chang'
+
+        ```
         """
+
         if memo is not None and id(self) in memo:
             return memo[id(self)]
         ret = self.empty_like()
@@ -471,11 +552,16 @@ class OrderedDict(OrderedDict_):
         This method is helpful when you inheriting the OrderedDict with default values.
         Use type(self)() in this case would copy the redundant default values.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=[])
         >>> c = d.empty()
-        >>> c.dict()
+        >>> c.convert()
         {}
+
+        ```
         """
+
         empty = cls()
         empty.clear()
         empty.init(*args, **kwargs)
@@ -486,26 +572,52 @@ class OrderedDict(OrderedDict_):
         Initialise an empty copy of OrderedDict.
         This method will preserve everything in __dict__.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.empty_like()
-        >>> c.dict()
+        >>> c.convert()
         {}
         >>> c.getattr("name")
         'Chang'
+
+        ```
         """
+
         empty = self.empty(*args, **kwargs)
         empty.__dict__.update(self.__dict__)
         return empty
 
     def json(self, file: File, *args, **kwargs) -> None:
+        r"""
+        Dump OrderedDict to json file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d.json("example.json")
+
+        ```
+        """
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
         with self.open(file, mode="w") as fp:
-            json_dump(self.to(dict), fp, *args, **kwargs)
+            json_dump(self.convert(dict), fp, *args, **kwargs)
 
     @classmethod
     def from_json(cls, file: File, **kwargs) -> OrderedDict:
+        r"""
+        Construct OrderedDict from json file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict.from_json('example.json')
+        >>> d.convert()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
         with cls.open(file) as fp:
             return cls(**json_load(fp, **kwargs))
 
@@ -513,58 +625,100 @@ class OrderedDict(OrderedDict_):
         r"""
         Dump OrderedDict to json string.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.jsons()
         '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
+
+        ```
         """
+
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return json_dumps(self.to(dict), *args, **kwargs)
+        return json_dumps(self.convert(dict), *args, **kwargs)
 
     @classmethod
     def from_jsons(cls, string: str, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from json string.
 
+        Example:
+        ```python
         >>> d = OrderedDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
-        >>> d.dict()
+        >>> d.convert()
         {'a': 1, 'b': 2, 'c': 3}
+
+        ```
         """
+
         return cls(**json_loads(string, **kwargs))
 
     def yaml(self, file: File, *args, **kwargs) -> None:
+        r"""
+        Dump OrderedDict to yaml file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d.yaml("example.yaml")
+
+        ```
+        """
         with self.open(file, mode="w") as fp:
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, string: str, **kwargs) -> OrderedDict:
-        if "Loader" not in kwargs:
-            kwargs["Loader"] = SafeLoader
-        return cls(**yaml_load(string, **kwargs))
+    def from_yaml(cls, file: File, **kwargs) -> OrderedDict:
+        r"""
+        Construct OrderedDict from yaml file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict.from_yaml('example.yaml')
+        >>> d.convert()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+        with cls.open(file) as fp:
+            if "Loader" not in kwargs:
+                kwargs["Loader"] = SafeLoader
+            return cls(**yaml_load(fp.read(), **kwargs))
 
     def yamls(self, *args, **kwargs) -> str:
         r"""
         Dump OrderedDict to yaml string.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> d.yamls()
         'a: 1\nb: 2\nc: 3\n'
+
+        ```
         """
+
         if "Dumper" not in kwargs:
             kwargs["Dumper"] = Dumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return yaml_dump(self.to(dict), *args, **kwargs)
+        return yaml_dump(self.convert(dict), *args, **kwargs)
 
     @classmethod
     def from_yamls(cls, string: str, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from yaml string.
 
+        Example:
+        ```python
         >>> d = OrderedDict.from_yamls('a: 1\nb: 2\nc: 3\n')
-        >>> d.dict()
+        >>> d.convert()
         {'a': 1, 'b': 2, 'c': 3}
+
+        ```
         """
+
         if "Loader" not in kwargs:
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
@@ -615,10 +769,15 @@ class OrderedDict(OrderedDict_):
         r"""
         Representation of OrderedDict.
 
+        Example:
+        ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> repr(d)
         'OrderedDict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
+
+        ```
         """
+
         extra_lines = []
         extra_repr = self.extra_repr()
         # empty string will be split into list ['']
@@ -688,6 +847,8 @@ class NestedDict(OrderedDict):
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
+        Example:
+        ```python
         >>> d = NestedDict()
         >>> d['i.d'] = 1013
         >>> d.get('i.d')
@@ -701,6 +862,8 @@ class NestedDict(OrderedDict):
         >>> d.get('c')
         Traceback (most recent call last):
         KeyError: 'NestedDict does not contain c'
+
+        ```
         """
 
         @wraps(self.get)
@@ -735,6 +898,8 @@ class NestedDict(OrderedDict):
             name (str): Key name.
             value (Any): Value to set.
 
+        Example:
+        ```python
         >>> d = NestedDict()
         >>> d.set('i.d', 1031)
         >>> d.i.d
@@ -742,7 +907,10 @@ class NestedDict(OrderedDict):
         >>> d['b.c'] = 'chang'
         >>> d.b.c
         'chang'
+
+        ```
         """
+
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
         if self.getattr("delimiter") in name:
@@ -767,13 +935,47 @@ class NestedDict(OrderedDict):
     __setitem__ = set
     __setattr__ = set
 
+    def pop(self, name: str, default: Optional[Any] = None) -> Any:
+        r"""
+        Pop value from NestedDict.
+
+        Args:
+            name (str): Key name.
+            default (Optional[Any]): Default value if name does not present.
+
+        Example:
+        ```python
+        >>> d = NestedDict()
+        >>> d['i.d'] = 1013
+        >>> d.pop('i.d')
+        1013
+        >>> d.pop('i.d', True)
+        True
+        >>> d.pop('i.d')
+        Traceback (most recent call last):
+        KeyError: 'd'
+
+        ```
+        """
+
+        if self.getattr("delimiter") in name:
+            name, rest = name.split(self.getattr("delimiter"), 1)
+            if name not in self:
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+            return self[name].pop(rest, default)
+        return super().pop(name, default) if default is not None else super().pop(name)
+
     def all_keys(self):
         r"""
         Get all keys of NestedDict.
 
+        Example:
+        ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_keys())
         ['a', 'b.c', 'b.d']
+
+        ```
         """
 
         @wraps(self.all_keys)
@@ -792,10 +994,15 @@ class NestedDict(OrderedDict):
         r"""
         Get all values of NestedDict.
 
+        Example:
+        ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_values())
         [1, 2, 3]
+
+        ```
         """
+
         for value in self.values():
             if isinstance(value, NestedDict):
                 yield from value.all_values()
@@ -806,9 +1013,13 @@ class NestedDict(OrderedDict):
         r"""
         Get all items of NestedDict.
 
+        Example:
+        ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_items())
         [('a', 1), ('b.c', 2), ('b.d', 3)]
+
+        ```
         """
 
         @wraps(self.all_items)
@@ -830,6 +1041,34 @@ class NestedDict(OrderedDict):
         func(self)
         return self
 
+    def convert(self, cls: Callable = dict) -> Mapping:
+        r"""
+        Convert NestedDict to other Mapping.
+        to and dict are alias of this method.
+
+        Args:
+            cls (Callable): Target class to be converted to.
+
+        Example:
+        ```python
+        >>> d = NestedDict(a=1, b=2, c=3)
+        >>> d['i.d'] = 1013
+        >>> d.convert(dict)
+        {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
+
+        ```
+        """
+
+        ret = cls()
+        for k, v in self.items():
+            if isinstance(v, OrderedDict):
+                v = v.convert(cls)
+            ret[k] = v
+        return ret
+
+    to = convert
+    dict = convert
+
 
 def frozen_check(func: Callable):
     @wraps(func)
@@ -838,7 +1077,7 @@ def frozen_check(func: Callable):
             raise ValueError(
                 "Attempting to alter a frozen config. Run config.defrost() to defrost first"
             )
-        func(self, *args, **kwargs)
+        return func(self, *args, **kwargs)
 
     return decorator
 
@@ -860,7 +1099,7 @@ class Config(NestedDict):
         self.setattr("frozen", False)
         self.setattr("convert_mapping", True)
         self.setattr("parser", ConfigParser())
-        self.setattr("default_factory", NestedDict)
+        self.setattr("default_factory", Config)
 
     @frozen_check
     def set(
@@ -869,6 +1108,34 @@ class Config(NestedDict):
         value: Any,
         convert_mapping: Optional[bool] = None,
     ) -> None:
+        r"""
+        Set value of Config.
+        __setitem__ and __setattr__ are alias of this method.
+
+        Args:
+            name (str): Key name.
+            value (Any): Value to set.
+
+        Example:
+        ```python
+        >>> c = Config()
+        >>> c['i.d'] = 1013
+        >>> c.i.d
+        1013
+        >>> c.freeze().convert()
+        {'i': {'d': 1013}}
+        >>> c['i.d'] = 1031
+        Traceback (most recent call last):
+        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
+        >>> c.defrost().convert()
+        {'i': {'d': 1013}}
+        >>> c['i.d'] = 1031
+        >>> c.i.d
+        1031
+
+        ```
+        """
+
         return super().set(name, value, convert_mapping)
 
     __setitem__ = set
@@ -883,9 +1150,57 @@ class Config(NestedDict):
 
     @frozen_check
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
-        super().pop(name, default)
+        r"""
+        Pop value from Config.
+
+        Args:
+            name (str): Key name.
+            default (Optional[Any]): Default value if name does not present.
+
+        Example:
+        ```python
+        >>> c = Config()
+        >>> c['i.d'] = 1013
+        >>> c.pop('i.d')
+        1013
+        >>> c.pop('i.d', True)
+        True
+        >>> c.freeze().convert()
+        {'i': {}}
+        >>> c['i.d'] = 1031
+        Traceback (most recent call last):
+        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
+        >>> c.defrost().convert()
+        {'i': {}}
+        >>> c['i.d'] = 1031
+        >>> c.pop('i.d')
+        1031
+
+        ```
+        """
+
+        return super().pop(name, default)
 
     def freeze(self, recursive: Optional[bool] = True) -> Config:
+        r"""
+        Freeze the config.
+
+        Args:
+            recursive (Optional[bool]): freeze all sub-configs recursively. Defaults to True.
+
+        Example:
+        ```python
+        >>> c = Config()
+        >>> c.getattr('frozen')
+        False
+        >>> c.freeze().convert()
+        {}
+        >>> c.getattr('frozen')
+        True
+
+        ```
+        """
+
         @wraps(self.freeze)
         def freeze(config: Config) -> None:
             config.setattr("frozen", True)
@@ -896,7 +1211,30 @@ class Config(NestedDict):
             freeze(self)
         return self
 
-    def defrost(self, recursive: Optional[bool] = True) -> None:
+    def defrost(self, recursive: Optional[bool] = True) -> Config:
+        r"""
+        Defrost the config.
+
+        Args:
+            recursive (Optional[bool]): defrost all sub-configs recursively. Defaults to True.
+
+        Example:
+        ```python
+        >>> c = Config()
+        >>> c.getattr('frozen')
+        False
+        >>> c.freeze().convert()
+        {}
+        >>> c.getattr('frozen')
+        True
+        >>> c.defrost().convert()
+        {}
+        >>> c.getattr('frozen')
+        False
+
+        ```
+        """
+
         @wraps(self.defrost)
         def defrost(config: Config) -> None:
             config.setattr("frozen", False)
@@ -905,17 +1243,46 @@ class Config(NestedDict):
             self.apply(defrost)
         else:
             defrost(self)
+        return self
 
     def parse(
         self,
         args: Optional[Iterable[str]] = None,
         default_config: Optional[str] = None,
     ) -> Config:
-        return self.getattr("parser").parse_config(args, self, default_config)
+        r"""
+        Parse the arguments for config.
+        There are three levels of config:
+        1. The base config parsed into the function,
+        2. The config file located at the path of default_config (if specified),
+        3. The config specified in arguments.
+        Higher levels override lower levels (i.e. 3 > 2 > 1).
+
+        Args:
+            args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
+            config (Optional[Config]): The base config. Defaults to an empty Config.
+            default_config (Optional[str]): The path to a config file.
+
+        Example:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.convert()
+        {'a': 0}
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).convert()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        return self.getattr("parser").parse(args, self, default_config)
 
     parse_config = parse
 
     def add_argument(self, *args, **kwargs) -> None:
+        r"""
+        Add an argument to the parser.
+        """
+
         self.getattr("parser").add_argument(*args, **kwargs)
 
 
