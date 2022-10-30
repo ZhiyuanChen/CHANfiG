@@ -1,5 +1,8 @@
 # CHANfiG
 
+Read this in other language: [English](README.md)
+在其他语言中阅读本文：[简体中文](README.cn.md)
+
 ## 介绍
 
 CHANfiG希望能让你的配置更加简单。

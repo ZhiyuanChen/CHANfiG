@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "chanfig"
+version = "0.0.1"
+description = "Easier Configuration"
+maintainers = [
+    "Zhiyuan Chen <this@zyc.ai>"
+]
+authors = [
+    "Zhiyuan Chen <this@zyc.ai>",
+    "Evian C. Liu <evian.liu@outlook.com>"
+]
+readme = "README.md"
+homepage = "https://chanfig.danling.org"
+repository = "https://github.com/ZhiyuanChen/CHANfiG"
+documentation = "https://chanfig.danling.org"
+keywords = ["Machine Learning", "Config", "Dict"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[tool.poetry.dependencies]
+python = "^3"
+
+[tool.poetry-dynamic-versioning]
+style = "pep440"
+enable = true
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["chanfig/__init__.py"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"

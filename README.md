@@ -1,5 +1,8 @@
 # CHANfiG
 
+Read this in other language: [English](README.md)
+在其他语言中阅读本文：[简体中文](README.cn.md)
+
 ## Introduction
 
 CHANfiG aims to make your configuration easier.
@@ -120,7 +123,7 @@ model:
 
 Define the default arguments in function, put alteration in CLI, and leave the rest to CHANfiG.
 
-## Install
+## Installation
 
 Install most recent stable version on pypi:
 
