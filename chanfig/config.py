@@ -100,16 +100,18 @@ class OrderedDict(OrderedDict_):
     Default OrderedDict with attributes
     """
 
-    default_factory: Optional[Callable] = None
+    default_factory: Optional[Callable]
     indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         super().__init__()
-        if default_factory is not None and not callable(default_factory):
-            raise TypeError(
-                f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
-            )
-        self.setattr("default_factory", default_factory)
+        if default_factory is not None:
+            if callable(default_factory):
+                self.setattr("default_factory", default_factory)
+            else:
+                raise TypeError(
+                    f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
+                )
         self.setattr("indent", 2)
         self.init(*args, **kwargs)
 
@@ -152,9 +154,9 @@ class OrderedDict(OrderedDict_):
         1013
         >>> d.get('f', 2)
         2
-        >>> d.get('e')
+        >>> d.get('f')
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain e'
+        KeyError: 'OrderedDict does not contain f'
 
         ```
         """
@@ -167,6 +169,7 @@ class OrderedDict(OrderedDict_):
     def getattr(self, name: str, default: Optional[Any] = None):
         r"""
         Get attribute of OrderedDict.
+
         Note that if won't return value in the OrderedDict, nor will it create new one if default_factory is specified.
 
         Args:
@@ -337,13 +340,13 @@ class OrderedDict(OrderedDict_):
         """
 
         if default is None:
-            default_factory = self.getattr("default_factory")
-            if default_factory is None:
+            if "default_factory" not in self.__dict__:
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+            default_factory = self.getattr("default_factory")
             default = default_factory()
             if isinstance(default, OrderedDict):
                 default.__dict__.update(self.__dict__)
-        self.set(name, default)
+            self.set(name, default)
         return default
 
     def convert(self, cls: Callable = dict) -> Mapping:
@@ -820,7 +823,7 @@ class NestedDict(OrderedDict):
     """
 
     convert_mapping: bool = False
-    default_factory: Optional[Callable] = None
+    default_factory: Optional[Callable]
     delimiter: str = "."
     indent: int = 2
 
@@ -841,13 +844,15 @@ class NestedDict(OrderedDict):
 
         `__getitem__` and `__getattr__` are alias of this method.
 
+        Note that default here will override the default_factory if specified.
+
         Args:
             name (str): Key name.
             default (Optional[Any]): Default value if name does not present.
 
         Example:
         ```python
-        >>> d = NestedDict()
+        >>> d = NestedDict(default_factory=NestedDict)
         >>> d['i.d'] = 1013
         >>> d.get('i.d')
         1013
@@ -858,26 +863,20 @@ class NestedDict(OrderedDict):
         >>> d.get('c', 2)
         2
         >>> d.get('c')
+        NestedDict()
+        >>> d = NestedDict()
+        >>> d.get('c')
         Traceback (most recent call last):
         KeyError: 'NestedDict does not contain c'
 
         ```
         """
 
-        @wraps(self.get)
-        def get(self, name):
-            if self.getattr("delimiter") in name:
-                name, rest = name.split(self.getattr("delimiter"), 1)
-                return getattr(self[name], rest)
-            else:
-                return super().get(name)
-
-        if default is not None:
-            try:
-                return get(self, name)
-            except KeyError:
-                return default
-        return get(self, name)
+        while self.getattr("delimiter") in name:
+            name, rest = name.split(self.getattr("delimiter"), 1)
+            self, name = self[name], rest
+        else:
+            return super().get(name, default)
 
     __getitem__ = get
     __getattr__ = get
@@ -899,33 +898,33 @@ class NestedDict(OrderedDict):
 
         Example:
         ```python
-        >>> d = NestedDict()
+        >>> d = NestedDict(default_factory=NestedDict)
         >>> d.set('i.d', 1031)
         >>> d.i.d
         1031
-        >>> d['b.c'] = 'chang'
-        >>> d.b.c
+        >>> d['n.l'] = 'chang'
+        >>> d.n.l
         'chang'
+        >>> d.n.f = 'liu'
+        >>> d.n.f
+        'liu'
+        >>> d.d.i = 1031
+        >>> d.d.i
+        1031
 
         ```
         """
 
-        if convert_mapping is None:
-            convert_mapping = self.convert_mapping
-        if self.getattr("delimiter") in name:
+        while self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
             if name not in self:
-                super().set(name, self.empty_like())
-            self[name][rest] = value
-        elif convert_mapping and not isinstance(value, NestedDict) and isinstance(value, Mapping):
-            self[name] = self.empty_like(**value)
-        else:
-            if isinstance(value, str):
-                try:
-                    value = literal_eval(value)
-                except (ValueError, SyntaxError):
-                    pass
-            super().__setitem__(name, value)
+                self.__missing__(name)
+            self, name = self[name], rest
+        if convert_mapping is None:
+            convert_mapping = self.convert_mapping
+        elif convert_mapping and isinstance(value, Mapping):
+            value = self.getattr("default_factory", self.empty_like)(**value)
+        super().__setitem__(name, value)
 
     __setitem__ = set
     __setattr__ = set
@@ -940,7 +939,7 @@ class NestedDict(OrderedDict):
 
         Example:
         ```python
-        >>> d = NestedDict()
+        >>> d = NestedDict(default_factory=NestedDict)
         >>> d['i.d'] = 1013
         >>> d.pop('i.d')
         1013
@@ -1047,7 +1046,7 @@ class NestedDict(OrderedDict):
 
         Example:
         ```python
-        >>> d = NestedDict(a=1, b=2, c=3)
+        >>> d = NestedDict(default_factory=NestedDict, a=1, b=2, c=3)
         >>> d['i.d'] = 1013
         >>> d.convert(dict)
         {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
@@ -1076,6 +1075,17 @@ def frozen_check(func: Callable):
     return decorator
 
 
+class DefaultDict(NestedDict):
+    """
+    NestedDict with default_factory set to NestedDict by default.
+    """
+
+    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
+        if default_factory is None:
+            default_factory = NestedDict
+        super().__init__(*args, default_factory=default_factory, **kwargs)
+
+
 class Config(NestedDict):
     """
     Basic Config
@@ -1083,7 +1093,7 @@ class Config(NestedDict):
 
     frozen: bool = False
     convert_mapping: bool = False
-    default_factory: Optional[Callable] = NestedDict
+    default_factory: Optional[Callable]
     delimiter: str = "."
     indent: int = 2
     parser: ConfigParser
