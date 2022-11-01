@@ -825,12 +825,14 @@ class NestedDict(OrderedDict):
 
     convert_mapping: bool = False
     default_factory: Optional[Callable]
+    default_mapping: Optional[Callable]
     delimiter: str = "."
     indent: int = 2
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         self.setattr("delimiter", ".")
         self.setattr("convert_mapping", False)
+        self.setattr("default_mapping", NestedDict)
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
     def init(self, *args, **kwargs) -> None:
@@ -922,18 +924,19 @@ class NestedDict(OrderedDict):
         ```
         """
 
+        default_mapping = self.getattr("default_mapping")
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
         while self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
             if name not in self:
                 if convert_mapping:
-                    super().__setitem__(name, self.empty_like())
+                    super().__setitem__(name, default_mapping())
                 else:
                     self.__missing__(name)
             self, name = self[name], rest
         if convert_mapping and isinstance(value, Mapping):
-            value = self.getattr("default_factory", self.empty_like)(**value)
+            value = default_mapping(**value)
         super().__setitem__(name, value)
 
     __setitem__ = set
