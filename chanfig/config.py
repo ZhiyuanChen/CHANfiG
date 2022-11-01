@@ -1143,11 +1143,10 @@ class Config(NestedDict):
     parser: ConfigParser
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.setattr("frozen", False)
-        self.setattr("convert_mapping", True)
         self.setattr("parser", ConfigParser())
-        self.setattr("default_factory", Config)
+        super().__init__(*args, default_factory=Config, **kwargs)
+        self.setattr("convert_mapping", True)
 
     @frozen_check
     def set(
