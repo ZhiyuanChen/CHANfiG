@@ -8,9 +8,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from functools import wraps
-from json import dump as json_dump
 from json import dumps as json_dumps
-from json import load as json_load
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
@@ -379,6 +377,8 @@ class OrderedDict(OrderedDict_):
         r"""
         Update OrderedDict values w.r.t. other.
 
+        `merge`, `merge_from_file`, and `union` are alias of this method.
+
         Args:
             other (Mapping | Iterable | PathStr): Other values to update.
 
@@ -415,6 +415,8 @@ class OrderedDict(OrderedDict_):
     def difference(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
         r"""
         Difference between OrderedDict values and other.
+
+        `diff` is an alias of this method.
 
         Args:
             other (Mapping | Iterable | PathStr): Other values to compare.
@@ -504,6 +506,8 @@ class OrderedDict(OrderedDict_):
         r"""
         Create a deep copy of OrderedDict.
 
+        `clone` and `__deepcopy__` are alias of this method.
+
         Example:
         ```python
         >>> d = OrderedDict(a=[])
@@ -582,6 +586,9 @@ class OrderedDict(OrderedDict_):
         r"""
         Dump OrderedDict to json file.
 
+        This function calls `self.jsons()` to generate json string.
+        You may overwrite `jsons` in case something is not json serializable.
+
         Example:
         ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
@@ -589,15 +596,16 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
-        if "indent" not in kwargs:
-            kwargs["indent"] = self.getattr("indent")
         with self.open(file, mode="w") as fp:
-            json_dump(self.convert(dict), fp, *args, **kwargs)
+            fp.write(self.jsons(*args, **kwargs))
 
     @classmethod
-    def from_json(cls, file: File, **kwargs) -> OrderedDict:
+    def from_json(cls, file: File, *args, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from json file.
+
+        This function calls `self.from_jsons()` to constract object from json string.
+        You may overwrite `from_jsons` in case something is not json serializable.
 
         Example:
         ```python
@@ -608,7 +616,7 @@ class OrderedDict(OrderedDict_):
         ```
         """
         with cls.open(file) as fp:
-            return cls(**json_load(fp, **kwargs))
+            return cls.from_jsons(fp.read(), *args, **kwargs)
 
     def jsons(self, *args, **kwargs) -> str:
         r"""
@@ -628,7 +636,7 @@ class OrderedDict(OrderedDict_):
         return json_dumps(self.convert(dict), *args, **kwargs)
 
     @classmethod
-    def from_jsons(cls, string: str, **kwargs) -> OrderedDict:
+    def from_jsons(cls, string: str, *args, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from json string.
 
@@ -641,11 +649,14 @@ class OrderedDict(OrderedDict_):
         ```
         """
 
-        return cls(**json_loads(string, **kwargs))
+        return cls(**json_loads(string, *args, **kwargs))
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
         Dump OrderedDict to yaml file.
+
+        This function calls `self.yamls()` to generate yaml string.
+        You may overwrite `yamls` in case something is not yaml serializable.
 
         Example:
         ```python
@@ -658,11 +669,13 @@ class OrderedDict(OrderedDict_):
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, file: File, **kwargs) -> OrderedDict:
+    def from_yaml(cls, file: File, *args, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from yaml file.
 
-        Example:
+        This function calls `self.from_yamls()` to constract object from yaml string.
+        You may overwrite `from_yamls` in case something is not yaml serializable.
+
         ```python
         >>> d = OrderedDict.from_yaml('example.yaml')
         >>> d.convert()
@@ -671,9 +684,7 @@ class OrderedDict(OrderedDict_):
         ```
         """
         with cls.open(file) as fp:
-            if "Loader" not in kwargs:
-                kwargs["Loader"] = SafeLoader
-            return cls(**yaml_load(fp.read(), **kwargs))
+            return cls.from_yamls(fp.read(), *args, **kwargs)
 
     def yamls(self, *args, **kwargs) -> str:
         r"""
@@ -695,7 +706,7 @@ class OrderedDict(OrderedDict_):
         return yaml_dump(self.convert(dict), *args, **kwargs)  # type: ignore
 
     @classmethod
-    def from_yamls(cls, string: str, **kwargs) -> OrderedDict:
+    def from_yamls(cls, string: str, *args, **kwargs) -> OrderedDict:
         r"""
         Construct OrderedDict from yaml string.
 
@@ -710,7 +721,7 @@ class OrderedDict(OrderedDict_):
 
         if "Loader" not in kwargs:
             kwargs["Loader"] = SafeLoader
-        return cls(**yaml_load(string, **kwargs))
+        return cls(**yaml_load(string, *args, **kwargs))
 
     def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""
@@ -1044,6 +1055,24 @@ class NestedDict(OrderedDict):
         return all_items(self)
 
     def apply(self, func: Callable) -> NestedDict:
+        r"""
+        Recursively apply a function to the object and its childrens.
+
+        Args:
+            runc (Callable): Function to be applied to.
+
+        Example:
+        ```python
+        >>> d = NestedDict()
+        >>> d.a = NestedDict()
+        >>> def func(d):
+        ...     d.t = 1
+        >>> d.apply(func).convert()
+        {'a': {'t': 1}, 't': 1}
+
+        ```
+        """
+
         for value in self.values():
             if isinstance(value, NestedDict):
                 value.apply(func)
