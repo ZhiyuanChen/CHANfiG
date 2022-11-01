@@ -217,10 +217,10 @@ class OrderedDict(OrderedDict_):
         >>> d.get('d')
         1013
         >>> d['d'] = 1031
-        >>> d['d']
+        >>> d.d
         1031
         >>> d.d = 'chang'
-        >>> d.d
+        >>> d['d']
         'chang'
 
         ```
@@ -340,13 +340,14 @@ class OrderedDict(OrderedDict_):
         """
 
         if default is None:
+            # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
             if "default_factory" not in self.__dict__:
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}")
             default_factory = self.getattr("default_factory")
             default = default_factory()
             if isinstance(default, OrderedDict):
                 default.__dict__.update(self.__dict__)
-            self.set(name, default)
+            super().__setitem__(name, default)
         return default
 
     def convert(self, cls: Callable = dict) -> Mapping:
@@ -875,8 +876,7 @@ class NestedDict(OrderedDict):
         while self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
             self, name = self[name], rest
-        else:
-            return super().get(name, default)
+        return super().get(name, default)
 
     __getitem__ = get
     __getattr__ = get
@@ -899,30 +899,40 @@ class NestedDict(OrderedDict):
         Example:
         ```python
         >>> d = NestedDict(default_factory=NestedDict)
-        >>> d.set('i.d', 1031)
+        >>> d.set('i.d', 1013)
         >>> d.i.d
+        1013
+        >>> d.d.i = 1031
+        >>> d['d.i']
         1031
         >>> d['n.l'] = 'chang'
         >>> d.n.l
         'chang'
-        >>> d.n.f = 'liu'
-        >>> d.n.f
+        >>> d.f.n = 'liu'
+        >>> d['f.n']
         'liu'
-        >>> d.d.i = 1031
-        >>> d.d.i
-        1031
+        >>> d.setattr('convert_mapping', True)
+        >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
+        >>> d.a.b.c.d
+        1
+        >>> d.a.b.e.f
+        2
+
 
         ```
         """
 
+        if convert_mapping is None:
+            convert_mapping = self.convert_mapping
         while self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
             if name not in self:
-                self.__missing__(name)
+                if convert_mapping:
+                    super().__setitem__(name, self.empty_like())
+                else:
+                    self.__missing__(name)
             self, name = self[name], rest
-        if convert_mapping is None:
-            convert_mapping = self.convert_mapping
-        elif convert_mapping and isinstance(value, Mapping):
+        if convert_mapping and isinstance(value, Mapping):
             value = self.getattr("default_factory", self.empty_like)(**value)
         super().__setitem__(name, value)
 
