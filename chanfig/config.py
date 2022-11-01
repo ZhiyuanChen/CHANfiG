@@ -75,8 +75,10 @@ class ConfigParser(ArgumentParser):
         if args is None:
             args = sys.argv[1:]
         for arg in args:
-            if arg.startswith("--") and args != "--" and arg not in self._option_string_actions:
-                self.add_argument(arg)
+            if arg.startswith("--") and args != "--":
+                arg = arg.split("=")[0]
+                if arg not in self._option_string_actions:
+                    self.add_argument(arg)
         if config is None:
             config = Config()
         path = getattr(config, default_config, None) if default_config is not None else None
@@ -710,7 +712,7 @@ class OrderedDict(OrderedDict_):
             kwargs["Loader"] = SafeLoader
         return cls(**yaml_load(string, **kwargs))
 
-    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:
+    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""
         Dump OrderedDict to file.
 
