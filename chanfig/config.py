@@ -12,7 +12,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Optional, Sequence, Union
+from typing import IO, Any, Callable, Iterable, List, Optional, Sequence, Union
 from warnings import warn
 
 from typing_extensions import LiteralString  # type: ignore
@@ -28,16 +28,16 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
-class Dumper(SafeDumper):
+class Dumper(SafeDumper):  # pylint: disable=C0115
     def increase_indent(self, flow: Optional[bool] = False, indentless: Optional[bool] = False):
         return super().increase_indent(flow, indentless)
 
 
-class FileError(ValueError):
+class FileError(ValueError):  # pylint: disable=C0115
     pass
 
 
-class ConfigParser(ArgumentParser):
+class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     def parse(
         self,
         args: Optional[Sequence[str]] = None,
@@ -62,9 +62,9 @@ class ConfigParser(ArgumentParser):
         Example:
         ```python
         >>> c = Config(a=0)
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).convert()
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -92,7 +92,195 @@ class ConfigParser(ArgumentParser):
 
     @staticmethod
     def identity(string):
+        """
+        https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity
+        """
         return string
+
+
+class Variable:
+    r"""
+    Mutable wrapper for immutable objects.
+    """
+
+    storage: List[Any]
+
+    def __init__(self, value):
+        self.storage = [value]
+
+    def __getattr__(self, attr):
+        return getattr(self.value, attr)
+
+    def __lt__(self, other) -> bool:
+        return self.value < self._get(other)
+
+    def __le__(self, other) -> bool:
+        return self.value <= self._get(other)
+
+    def __eq__(self, other) -> bool:
+        return self.value == self._get(other)
+
+    def __ne__(self, other) -> bool:
+        return self.value != self._get(other)
+
+    def __ge__(self, other) -> bool:
+        return self.value >= self._get(other)
+
+    def __gt__(self, other) -> bool:
+        return self.value > self._get(other)
+
+    def __index__(self) -> int:
+        return int(self.value)
+
+    def __invert__(self):
+        return ~self.value
+
+    def __abs__(self):
+        return abs(self.value)
+
+    def __add__(self, other):
+        return Variable(self.value + self._get(other))
+
+    def __radd__(self, other):
+        return Variable(self._get(other) + self.value)
+
+    def __and__(self, other):
+        return Variable(self.value & self._get(other))
+
+    def __rand__(self, other):
+        return Variable(self._get(other) & self.value)
+
+    def __floordiv__(self, other):
+        return Variable(self.value // self._get(other))
+
+    def __rfloordiv__(self, other):
+        return Variable(self._get(other) // self.value)
+
+    def __mod__(self, other):
+        return Variable(self.value % self._get(other))
+
+    def __rmod__(self, other):
+        return Variable(self._get(other) % self.value)
+
+    def __mul__(self, other):
+        return Variable(self.value * self._get(other))
+
+    def __rmul__(self, other):
+        return Variable(self._get(other) * self.value)
+
+    def __matmul__(self, other):
+        return Variable(self.value @ self._get(other))
+
+    def __rmatmul__(self, other):
+        return Variable(self._get(other) @ self.value)
+
+    def __pow__(self, other):
+        return Variable(self.value ** self._get(other))
+
+    def __rpow__(self, other):
+        return Variable(self._get(other) ** self.value)
+
+    def __truediv__(self, other):
+        return Variable(self.value / self._get(other))
+
+    def __rtruediv__(self, other):
+        return Variable(self._get(other) / self.value)
+
+    def __sub__(self, other):
+        return Variable(self.value - self._get(other))
+
+    def __rsub__(self, other):
+        return Variable(self._get(other) - self.value)
+
+    def __copy__(self):
+        return Variable(self.value)
+
+    def __deepcopy__(self, memo: Optional[Mapping] = None):
+        return Variable(copy(self.value))
+
+    def __repr__(self):
+        return repr(self.value)
+
+    def to(self, cls: Callable):  # pylint: disable=C0103
+        r"""
+        Convert the value to a different type.
+
+        `convert` is an alias of this method.
+
+        Args:
+            cls (Callable): The type to convert to.
+
+        Example:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.to(float)
+        1013.0
+        >>> id.to(str)
+        '1013.0'
+
+        ```
+        """
+
+        self.storage[0] = cls(self.storage[0])
+        return self
+
+    def int(self) -> int:
+        r"""
+        Convert the value to a python default int.
+
+        Example:
+        ```python
+        >>> id = Variable(1013.0)
+        >>> id.int()
+        1013
+
+        ```
+        """
+
+        return self.to(int)
+
+    def float(self) -> float:
+        r"""
+        Convert the value to a python default float.
+
+        Example:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.float()
+        1013.0
+
+        ```
+        """
+
+        return self.to(float)
+
+    def str(self) -> str:
+        r"""
+        Convert the value to a python default float.
+
+        Example:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.str()
+        '1013'
+
+        ```
+        """
+
+        return self.to(str)
+
+    @property
+    def value(self):
+        """
+        actual object stored in the Variable
+        """
+        return self.storage[0]
+
+    @staticmethod
+    def _get(obj):
+        if isinstance(obj, Variable):
+            return obj.value
+        return obj
 
 
 class OrderedDict(OrderedDict_):
@@ -350,7 +538,7 @@ class OrderedDict(OrderedDict_):
             super().__setitem__(name, default)
         return default
 
-    def convert(self, cls: Callable = dict) -> Mapping:
+    def to(self, cls: Callable = dict) -> Mapping:  # pylint: disable=C0103
         r"""
         Convert OrderedDict to other Mapping.
 
@@ -362,7 +550,7 @@ class OrderedDict(OrderedDict_):
         Example:
         ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
-        >>> d.convert(dict)
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -370,8 +558,8 @@ class OrderedDict(OrderedDict_):
 
         return cls(**self)
 
-    to = convert
-    dict = convert
+    convert = to
+    dict = to
 
     def update(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:  # type: ignore
         r"""
@@ -386,10 +574,10 @@ class OrderedDict(OrderedDict_):
         ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.update(n).convert()
+        >>> d.update(n).to(dict)
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.update(l).convert()
+        >>> d.update(l).to(dict)
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
 
         ```
@@ -425,10 +613,10 @@ class OrderedDict(OrderedDict_):
         ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.difference(n).convert()
+        >>> d.difference(n).to(dict)
         {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.difference(l).convert()
+        >>> d.difference(l).to(dict)
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
@@ -460,10 +648,10 @@ class OrderedDict(OrderedDict_):
         ```python
         >>> d = OrderedDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.intersection(n).convert()
+        >>> d.intersection(n).to(dict)
         {}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.intersection(l).convert()
+        >>> d.intersection(l).to(dict)
         {'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
@@ -489,10 +677,10 @@ class OrderedDict(OrderedDict_):
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.copy()
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': []}
         >>> d.a.append(1)
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': [1]}
         >>> c.getattr("name")
         'Chang'
@@ -513,10 +701,10 @@ class OrderedDict(OrderedDict_):
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.deepcopy()
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': []}
         >>> d.a.append(1)
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': []}
         >>> c.getattr("name")
         'Chang'
@@ -549,7 +737,7 @@ class OrderedDict(OrderedDict_):
         ```python
         >>> d = OrderedDict(a=[])
         >>> c = d.empty()
-        >>> c.convert()
+        >>> c.to(dict)
         {}
 
         ```
@@ -570,7 +758,7 @@ class OrderedDict(OrderedDict_):
         >>> d = OrderedDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.empty_like()
-        >>> c.convert()
+        >>> c.to(dict)
         {}
         >>> c.getattr("name")
         'Chang'
@@ -610,7 +798,7 @@ class OrderedDict(OrderedDict_):
         Example:
         ```python
         >>> d = OrderedDict.from_json('example.json')
-        >>> d.convert()
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -633,7 +821,7 @@ class OrderedDict(OrderedDict_):
 
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return json_dumps(self.convert(dict), *args, **kwargs)
+        return json_dumps(self.to(dict), *args, **kwargs)
 
     @classmethod
     def from_jsons(cls, string: str, *args, **kwargs) -> OrderedDict:
@@ -643,7 +831,7 @@ class OrderedDict(OrderedDict_):
         Example:
         ```python
         >>> d = OrderedDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
-        >>> d.convert()
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -678,7 +866,7 @@ class OrderedDict(OrderedDict_):
 
         ```python
         >>> d = OrderedDict.from_yaml('example.yaml')
-        >>> d.convert()
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -703,7 +891,7 @@ class OrderedDict(OrderedDict_):
             kwargs["Dumper"] = Dumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return yaml_dump(self.convert(dict), *args, **kwargs)  # type: ignore
+        return yaml_dump(self.to(dict), *args, **kwargs)  # type: ignore
 
     @classmethod
     def from_yamls(cls, string: str, *args, **kwargs) -> OrderedDict:
@@ -713,7 +901,7 @@ class OrderedDict(OrderedDict_):
         Example:
         ```python
         >>> d = OrderedDict.from_yamls('a: 1\nb: 2\nc: 3\n')
-        >>> d.convert()
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -738,31 +926,45 @@ class OrderedDict(OrderedDict_):
             if isinstance(file, IO):
                 raise ValueError("method must be specified when dumping to file-like object")
             method = splitext(file)[-1][1:]  # type: ignore
-        method = method.lower()  # type: ignore
-        if method in YAML:
-            self.yaml(file=file, *args, **kwargs)  # type: ignore
-        elif method in JSON:
-            self.json(file=file, *args, **kwargs)  # type: ignore
-        else:
-            raise FileError(f"method {method} should be in {JSON} or {YAML}")
+        extension = method.lower()  # type: ignore
+        if extension in YAML:
+            return self.yaml(file=file, *args, **kwargs)  # type: ignore
+        if extension in JSON:
+            return self.json(file=file, *args, **kwargs)  # type: ignore
+        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")
 
     @classmethod
-    def load(cls, path: PathStr, **kwargs) -> OrderedDict:
-        extension = splitext(path)[-1][1:].lower()  # type: ignore
-        with cls.open(path) as fp:
-            if extension in JSON:
-                config = cls.from_json(fp.read(), **kwargs)
-            elif extension in YAML:
-                config = cls.from_yaml(fp.read(), **kwargs)
-            else:
-                raise FileError(
-                    f"file {path} should have extensions {JSON} or {YAML}, but got {extension}"  # type: ignore
-                )
-        return config
+    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> OrderedDict:  # pylint: disable=W1113
+        """
+        Load OrderedDict from file.
+
+        Example:
+        ```python
+        >>> d = OrderedDict.load("example.yaml")
+        >>> d.to(dict)
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        if method is None:
+            if isinstance(file, IO):
+                raise ValueError("method must be specified when loading from file-like object")
+            method = splitext(file)[-1][1:]  # type: ignore
+        extension = method.lower()  # type: ignore
+        if extension in JSON:
+            return cls.from_json(file, *args, **kwargs)
+        if extension in YAML:
+            return cls.from_yaml(file, *args, **kwargs)
+        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}")
 
     @staticmethod
     @contextmanager
     def open(file: File, *args, **kwargs):
+        """
+        open file IO from file path or file-like object.
+        """
+
         if isinstance(file, (PathLike, str)):
             file = open(file, *args, **kwargs)
             try:
@@ -776,7 +978,8 @@ class OrderedDict(OrderedDict_):
                 f"file={file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"  # type: ignore
             )
 
-    def extra_repr(self) -> str:
+    @staticmethod
+    def extra_repr() -> str:  # pylint: disable=C0116
         return ""
 
     def __repr__(self):
@@ -890,13 +1093,13 @@ class NestedDict(OrderedDict):
 
         while self.getattr("delimiter") in name:
             name, rest = name.split(self.getattr("delimiter"), 1)
-            self, name = self[name], rest
+            self, name = self[name], rest  # pylint: disable=W0642
         return super().get(name, default)
 
     __getitem__ = get
     __getattr__ = get
 
-    def set(
+    def set(  # pylint: disable=W0221
         self,
         name: str,
         value: Any,
@@ -947,7 +1150,7 @@ class NestedDict(OrderedDict):
                     super().__setitem__(name, default_mapping())
                 else:
                     self.__missing__(name)
-            self, name = self[name], rest
+            self, name = self[name], rest  # pylint: disable=W0642
         if convert_mapping and isinstance(value, Mapping):
             value = default_mapping(**value)
         super().__setitem__(name, value)
@@ -1067,7 +1270,7 @@ class NestedDict(OrderedDict):
         >>> d.a = NestedDict()
         >>> def func(d):
         ...     d.t = 1
-        >>> d.apply(func).convert()
+        >>> d.apply(func).to(dict)
         {'a': {'t': 1}, 't': 1}
 
         ```
@@ -1079,7 +1282,7 @@ class NestedDict(OrderedDict):
         func(self)
         return self
 
-    def convert(self, cls: Callable = dict) -> Mapping:
+    def to(self, cls: Callable = dict) -> Mapping:  # pylint: disable=C0103
         r"""
         Convert NestedDict to other Mapping.
 
@@ -1092,7 +1295,7 @@ class NestedDict(OrderedDict):
         ```python
         >>> d = NestedDict(default_factory=NestedDict, a=1, b=2, c=3)
         >>> d['i.d'] = 1013
-        >>> d.convert(dict)
+        >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
 
         ```
@@ -1105,18 +1308,8 @@ class NestedDict(OrderedDict):
             ret[k] = v
         return ret
 
-    to = convert
-    dict = convert
-
-
-def frozen_check(func: Callable):
-    @wraps(func)
-    def decorator(self, *args, **kwargs):
-        if self.getattr("frozen"):
-            raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
-        return func(self, *args, **kwargs)
-
-    return decorator
+    convert = to
+    dict = to
 
 
 class DefaultDict(NestedDict):
@@ -1128,6 +1321,21 @@ class DefaultDict(NestedDict):
         if default_factory is None:
             default_factory = NestedDict
         super().__init__(*args, default_factory=default_factory, **kwargs)
+
+
+def frozen_check(func: Callable):
+    """
+    Decorator check if the object is frozen.
+
+    """
+
+    @wraps(func)
+    def decorator(self, *args, **kwargs):
+        if self.getattr("frozen"):
+            raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
+        return func(self, *args, **kwargs)
+
+    return decorator
 
 
 class Config(NestedDict):
@@ -1170,12 +1378,12 @@ class Config(NestedDict):
         >>> c['i.d'] = 1013
         >>> c.i.d
         1013
-        >>> c.freeze().convert()
+        >>> c.freeze().to(dict)
         {'i': {'d': 1013}}
         >>> c['i.d'] = 1031
         Traceback (most recent call last):
         ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
-        >>> c.defrost().convert()
+        >>> c.defrost().to(dict)
         {'i': {'d': 1013}}
         >>> c['i.d'] = 1031
         >>> c.i.d
@@ -1190,11 +1398,41 @@ class Config(NestedDict):
     __setattr__ = set
 
     @frozen_check
-    def remove(self, name: str) -> None:
+    def delete(self, name: str) -> None:
+        r"""
+        Remove value from Config.
+
+        `__delitem__`, `__delattr__` and `remove` are alias of this method.
+
+        Args:
+            name (str): Key name.
+
+        Example:
+        ```python
+        >>> d = OrderedDict(d=1016, n='chang')
+        >>> d.d
+        1016
+        >>> d.n
+        'chang'
+        >>> d.delete('d')
+        >>> d.d
+        Traceback (most recent call last):
+        KeyError: 'OrderedDict does not contain d'
+        >>> del d.n
+        >>> d.n
+        Traceback (most recent call last):
+        KeyError: 'OrderedDict does not contain n'
+        >>> del d.f
+        Traceback (most recent call last):
+        KeyError: 'f'
+
+        ```
+        """
         super().remove(name)
 
-    __delitem__ = remove
-    __delattr__ = remove
+    __delitem__ = delete
+    __delattr__ = delete
+    remove = delete
 
     @frozen_check
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
@@ -1213,12 +1451,12 @@ class Config(NestedDict):
         1013
         >>> c.pop('i.d', True)
         True
-        >>> c.freeze().convert()
+        >>> c.freeze().to(dict)
         {'i': {}}
         >>> c['i.d'] = 1031
         Traceback (most recent call last):
         ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
-        >>> c.defrost().convert()
+        >>> c.defrost().to(dict)
         {'i': {}}
         >>> c['i.d'] = 1031
         >>> c.pop('i.d')
@@ -1241,7 +1479,7 @@ class Config(NestedDict):
         >>> c = Config()
         >>> c.getattr('frozen')
         False
-        >>> c.freeze().convert()
+        >>> c.freeze().to(dict)
         {}
         >>> c.getattr('frozen')
         True
@@ -1271,11 +1509,11 @@ class Config(NestedDict):
         >>> c = Config()
         >>> c.getattr('frozen')
         False
-        >>> c.freeze().convert()
+        >>> c.freeze().to(dict)
         {}
         >>> c.getattr('frozen')
         True
-        >>> c.defrost().convert()
+        >>> c.defrost().to(dict)
         {}
         >>> c.getattr('frozen')
         False
@@ -1315,9 +1553,9 @@ class Config(NestedDict):
         Example:
         ```python
         >>> c = Config(a=0)
-        >>> c.convert()
+        >>> c.to(dict)
         {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).convert()
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
