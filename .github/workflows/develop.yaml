@@ -19,9 +19,7 @@ jobs:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
       - name: build package
-        run: |
-          poetry version 0.0.1+g$(git rev-parse --short HEAD)
-          poetry build
+        run: poetry build
       - name: create release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
