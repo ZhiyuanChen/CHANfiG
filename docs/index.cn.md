@@ -1,10 +1,6 @@
 ---
 title: CHANfiG
-<<<<<<< HEAD
 summary: Easier Configuration
-=======
-summary: Easier configuration.
->>>>>>> 1b84786 (add documents site)
 authors:
     - Zhiyuan Chen
 date: 2022-05-04
