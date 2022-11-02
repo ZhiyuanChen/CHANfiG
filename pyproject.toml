@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chanfig"
-version = "0.0.1"
+version = "0.0.0"
 description = "Easier Configuration"
 maintainers = [
     "Zhiyuan Chen <this@zyc.ai>"
@@ -27,12 +27,14 @@ classifiers = [
 python = "^3"
 
 [tool.poetry-dynamic-versioning]
-style = "pep440"
 enable = true
+style = "pep440"
 
 [tool.poetry-dynamic-versioning.substitution]
-files = ["chanfig/__init__.py"]
+folders = [
+  { path = "chanfig" }
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["poetry-core>=1.2.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
