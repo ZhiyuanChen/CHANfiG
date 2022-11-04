@@ -130,6 +130,10 @@ class Variable:
         self.storage = [value]
 
     @property
+    def __class__(self):
+        return self.value.__class__
+
+    @property
     def value(self):
         """
         actual object stored in the Variable
