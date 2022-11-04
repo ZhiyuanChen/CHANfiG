@@ -1582,6 +1582,8 @@ class Config(NestedDict):
         r"""
         Freeze the config.
 
+        `lock` is an alias of this method.
+
         Args:
             recursive (Optional[bool]): freeze all sub-configs recursively. Defaults to True.
 
@@ -1608,9 +1610,13 @@ class Config(NestedDict):
             freeze(self)
         return self
 
+    lock = freeze
+
     def defrost(self, recursive: Optional[bool] = True) -> Config:
         r"""
         Defrost the config.
+
+        `unlock` is an alias of this method.
 
         Args:
             recursive (Optional[bool]): defrost all sub-configs recursively. Defaults to True.
@@ -1641,6 +1647,33 @@ class Config(NestedDict):
         else:
             defrost(self)
         return self
+
+    unlock = defrost
+
+    @contextmanager
+    def unlocked(self):
+        """
+        Context manager which temporarily unlocks the config.
+
+        Example:
+        ```python
+        >>> c = Config()
+        >>> c.freeze().to(dict)
+        {}
+        >>> with c.unlocked():
+        ...     c['i.d'] = 1013
+        >>> c.to(dict)
+        {'i': {'d': 1013}}
+
+        ```
+        """
+        was_frozen = self.getattr("frozen")
+        try:
+            self.defrost()
+            yield self
+        finally:
+            if was_frozen:
+                self.freeze()
 
     def parse(
         self,
