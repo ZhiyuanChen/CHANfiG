@@ -141,7 +141,13 @@ class Variable:
         """
         assign value to object stored in the Variable
         """
-        self.storage[0] = value
+        self.storage[0] = self._get_value(value)
+
+    def get(self):
+        """
+        alias of value
+        """
+        return self.value
 
     def set(self, value):
         """
@@ -355,7 +361,35 @@ class Variable:
 
 class OrderedDict(OrderedDict_):
     """
-    Default OrderedDict with attributes
+    Default OrderedDict with attribute-style access.
+
+    Works best with `Variable` objects.
+
+    Example:
+    ```python
+    >>> d = OrderedDict()
+    >>> d.d = 1013
+    >>> d['d']
+    1013
+    >>> d['i'] = 1031
+    >>> d.i
+    1031
+    >>> d.a = Variable(1)
+    >>> d.b = d.a
+    >>> d.a, d.b
+    (1, 1)
+    >>> d.a += 1
+    >>> d.a, d.b
+    (2, 2)
+    >>> d.a = 3
+    >>> d.a, d.b
+    (3, 3)
+    >>> d.a = Variable('hello')
+    >>> d.a = d.a + ', world'
+    >>> d.b
+    'hello, world'
+
+    ```
     """
 
     default_factory: Optional[Callable]
@@ -487,9 +521,12 @@ class OrderedDict(OrderedDict_):
         if isinstance(value, str):
             try:
                 value = literal_eval(value)
-            except (ValueError, SyntaxError):
+            except (TypeError, ValueError, SyntaxError):
                 pass
-        super().__setitem__(name, value)
+        if name in self and isinstance(self[name], Variable):
+            self[name].set(value)
+        else:
+            super().__setitem__(name, value)
 
     __setitem__ = set
     __setattr__ = set
