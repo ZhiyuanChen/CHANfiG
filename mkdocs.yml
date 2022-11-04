@@ -9,6 +9,7 @@ repo_url: https://github.com/ZhiyuanChen/CHANfiG
 
 nav:
   - CHANfiG: index.md
+  - Variable: variable.md
   - Config: config.md
   - NestedDict: nested_dict.md
   - OrderedDict: ordered_dict.md

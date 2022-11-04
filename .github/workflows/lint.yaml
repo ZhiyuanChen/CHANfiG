@@ -19,4 +19,4 @@ jobs:
           extra-flake8-options: "--max-line-length 120"
           extra-black-options: "--line-length 120"
           extra-mypy-options: ""
-          extra-isort-options: ""
+          extra-isort-options: "--line-length 120"
