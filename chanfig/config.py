@@ -314,7 +314,7 @@ class Variable:
         ```
         """
 
-        self.storage[0] = cls(self.storage[0])
+        self.value = cls(self.value)
         return self
 
     def int(self) -> int:
@@ -667,7 +667,7 @@ class OrderedDict(OrderedDict_):
         ```
         """
 
-        return cls(**self)
+        return cls(**{k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
 
     convert = to
     dict = to
