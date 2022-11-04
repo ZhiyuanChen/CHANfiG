@@ -136,6 +136,16 @@ class Variable:
         """
         return self.storage[0]
 
+    def get(self):
+        """
+        alias of value
+
+        used to implement descriptor protocol
+        """
+        return self.value
+
+    __get__ = get
+
     @value.setter
     def value(self, value):
         """
@@ -146,8 +156,12 @@ class Variable:
     def set(self, value):
         """
         alias of value.setter
+
+        used to implement descriptor protocol
         """
-        self.value = value
+        self.value = self._get_value(value)
+
+    __set__ = set
 
     @staticmethod
     def _get_value(obj):
@@ -355,7 +369,35 @@ class Variable:
 
 class OrderedDict(OrderedDict_):
     """
-    Default OrderedDict with attributes
+    Default OrderedDict with attribute-style access.
+
+    Works best with `Variable` objects.
+
+    Example:
+    ```python
+    >>> d = OrderedDict()
+    >>> d.d = 1013
+    >>> d['d']
+    1013
+    >>> d['i'] = 1031
+    >>> d.i
+    1031
+    >>> d.a = Variable(1)
+    >>> d.b = d.a
+    >>> d.a, d.b
+    (1, 1)
+    >>> d.a += 1
+    >>> d.a, d.b
+    (2, 2)
+    >>> d.a = 3
+    >>> d.a, d.b
+    (3, 3)
+    >>> d.a = 'hello'
+    >>> d.a += ', world'
+    >>> d.b
+    'hello, world'
+
+    ```
     """
 
     default_factory: Optional[Callable]
@@ -489,7 +531,10 @@ class OrderedDict(OrderedDict_):
                 value = literal_eval(value)
             except (ValueError, SyntaxError):
                 pass
-        super().__setitem__(name, value)
+        if name in self and isinstance(self[name], Variable):
+            self[name].set(value)
+        else:
+            super().__setitem__(name, value)
 
     __setitem__ = set
     __setattr__ = set
