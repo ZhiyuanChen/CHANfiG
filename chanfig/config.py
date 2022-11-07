@@ -409,13 +409,12 @@ class OrderedDict(OrderedDict_):
                     f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
                 )
         self.setattr("indent", 2)
-        self.init(*args, **kwargs)
+        self._init(*args, **kwargs)
 
-    def init(self, *args, **kwargs) -> None:
+    def _init(self, *args, **kwargs) -> None:
         r"""
-        Initialise values for OrderedDict.
+        Initialise values from arguments for OrderedDict.
         This method is called in `__init__`.
-        You can overwrite this method to avoid call `super().__init__()` in `__init__`.
 
         Args:
             *args: [(key1, value1), (key2, value2)].
@@ -856,7 +855,7 @@ class OrderedDict(OrderedDict_):
 
         empty = cls()
         empty.clear()
-        empty.init(*args, **kwargs)
+        empty._init(*args, **kwargs)
         return empty
 
     def empty_like(self, *args, **kwargs):
@@ -1162,7 +1161,7 @@ class NestedDict(OrderedDict):
         self.setattr("default_mapping", NestedDict)
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
-    def init(self, *args, **kwargs) -> None:
+    def _init(self, *args, **kwargs) -> None:
         for key, value in args:
             self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
