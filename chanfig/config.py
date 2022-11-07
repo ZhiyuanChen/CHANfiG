@@ -133,6 +133,10 @@ class Variable:
     def __class__(self):
         return self.value.__class__
 
+    @__class__.setter
+    def __class__(self, value):
+        self.value.__class__ = value
+
     @property
     def value(self):
         """
