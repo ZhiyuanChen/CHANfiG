@@ -414,7 +414,6 @@ class OrderedDict(OrderedDict_):
                 )
         self.setattr("indent", 2)
         self._init(*args, **kwargs)
-        self.init()
 
     def _init(self, *args, **kwargs) -> None:
         r"""
@@ -430,18 +429,6 @@ class OrderedDict(OrderedDict_):
             self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
-
-    def init(self) -> None:
-        r"""
-        Setting values for OrderedDict.
-        This method is called in `__init__`.
-        You can overwrite this method instead of `__init__` as constructor to avoid call of `super().__init__()`
-
-        Args:
-            *args: [(key1, value1), (key2, value2)].
-            **kwargs: {key1: value1, key2: value2}.
-
-        """
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
