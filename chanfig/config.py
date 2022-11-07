@@ -29,7 +29,7 @@ PYTHON = ("py",)
 
 
 class Dumper(SafeDumper):  # pylint: disable=C0115
-    def increase_indent(self, flow: Optional[bool] = False, indentless: Optional[bool] = False):
+    def increase_indent(self, flow: bool = False, indentless: bool = False):  # pylint: disable=W0235
         return super().increase_indent(flow, indentless)
 
 
@@ -129,7 +129,7 @@ class Variable:
     def __init__(self, value):
         self.storage = [value]
 
-    @property
+    @property  # type: ignore
     def __class__(self):
         return self.value.__class__
 
@@ -741,15 +741,18 @@ class OrderedDict(OrderedDict_):
             other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
-        return self.empty(
+
+        return self.empty_like(
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
     diff = difference
 
-    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> Mapping:
+    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
         r"""
         Intersection between OrderedDict values and other.
+
+        `inter` is an alias of this method.
 
         Args:
             other (Mapping | Iterable | PathStr): Other values to join.
@@ -776,7 +779,11 @@ class OrderedDict(OrderedDict_):
             other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
-        return self.empty(**{key: value for key, value in other if key in self and self[key] == value})  # type: ignore
+        return self.empty_like(
+            **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
+        )
+
+    inter = intersection
 
     def copy(self) -> OrderedDict:
         r"""
@@ -1421,6 +1428,111 @@ class NestedDict(OrderedDict):
     convert = to
     dict = to
 
+    def difference(  # pylint: disable=W0221
+        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
+    ) -> NestedDict:
+        r"""
+        Difference between NestedDict values and other.
+
+        `diff` is an alias of this method.
+
+        Args:
+            other (Mapping | Iterable | PathStr): Other values to compare.
+            recursive (bool): Whether to compare recursively. Defaults to True.
+
+        Example:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
+        >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+        >>> d.difference(n).to(dict)
+        {'b': {'c': 3}, 'e': 4}
+        >>> d.difference(n, recursive=False).to(dict)
+        {'b': {'c': 3, 'd': 3}, 'e': 4}
+        >>> l = [('a', 1), ('d', 4)]
+        >>> d.difference(l).to(dict)
+        {'d': 4}
+        >>> d.difference(1)
+        Traceback (most recent call last):
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+
+        ```
+        """
+
+        if isinstance(other, (PathLike, str, bytes)):
+            other = self.load(other)
+        if isinstance(other, (Mapping,)):
+            other = self.empty_like(**other).items()
+        if not isinstance(other, Iterable):
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+
+        @wraps(self.difference)
+        def difference(this: NestedDict, that: Iterable) -> Mapping:
+            ret = {}
+            for key, value in that:
+                if key not in this:
+                    ret[key] = value
+                elif isinstance(this[key], NestedDict) and recursive:
+                    ret[key] = this[key].difference(value)
+                elif this[key] != value:
+                    ret[key] = value
+            return ret
+
+        return self.empty_like(**difference(self, other))  # type: ignore
+
+    diff = difference
+
+    def intersection(  # pylint: disable=W0221
+        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
+    ) -> NestedDict:
+        r"""
+        Intersection between NestedDict values and other.
+
+        `inter` is an alias of this method.
+
+        Args:
+            other (Mapping | Iterable | PathStr): Other values to join.
+            recursive (bool): Whether to compare recursively. Defaults to True.
+
+        Example:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
+        >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+        >>> d.intersection(n).to(dict)
+        {'a': 1, 'b': {'d': 3}}
+        >>> d.intersection(n, recursive=False).to(dict)
+        {'a': 1}
+        >>> l = [('a', 1), ('d', 4)]
+        >>> d.intersection(l).to(dict)
+        {'a': 1}
+        >>> d.intersection(1)
+        Traceback (most recent call last):
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+
+        ```
+        """
+
+        if isinstance(other, (PathLike, str, bytes)):
+            other = self.load(other)
+        if isinstance(other, (Mapping,)):
+            other = self.empty_like(**other).items()
+        if not isinstance(other, Iterable):
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+
+        @wraps(self.intersection)
+        def intersection(this: NestedDict, that: Iterable) -> Mapping:
+            ret = {}
+            for key, value in that:
+                if key in this:
+                    if isinstance(this[key], NestedDict) and recursive:
+                        ret[key] = this[key].intersection(value)
+                    elif this[key] == value:
+                        ret[key] = value
+            return ret
+
+        return self.empty_like(**intersection(self, other))  # type: ignore
+
+    inter = intersection
+
 
 class DefaultDict(NestedDict):
     """
@@ -1577,14 +1689,14 @@ class Config(NestedDict):
 
         return super().pop(name, default)
 
-    def freeze(self, recursive: Optional[bool] = True) -> Config:
+    def freeze(self, recursive: bool = True) -> Config:
         r"""
         Freeze the config.
 
         `lock` is an alias of this method.
 
         Args:
-            recursive (Optional[bool]): freeze all sub-configs recursively. Defaults to True.
+            recursive (bool): freeze all sub-configs recursively. Defaults to True.
 
         Example:
         ```python
@@ -1611,14 +1723,14 @@ class Config(NestedDict):
 
     lock = freeze
 
-    def defrost(self, recursive: Optional[bool] = True) -> Config:
+    def defrost(self, recursive: bool = True) -> Config:
         r"""
         Defrost the config.
 
         `unlock` is an alias of this method.
 
         Args:
-            recursive (Optional[bool]): defrost all sub-configs recursively. Defaults to True.
+            recursive (bool): defrost all sub-configs recursively. Defaults to True.
 
         Example:
         ```python
