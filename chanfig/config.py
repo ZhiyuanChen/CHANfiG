@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from functools import wraps
+from json import JSONEncoder
 from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
@@ -28,7 +29,26 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
-class Dumper(SafeDumper):  # pylint: disable=C0115
+class JsonEncoder(JSONEncoder):
+    """
+    JSON encoder for Config.
+
+    """
+
+    def default(self, o: Any) -> Any:
+        if isinstance(o, Variable):
+            return o.value
+        if hasattr(o, "__json__"):
+            return o.__json__()
+        return super().default(o)
+
+
+class YamlDumper(SafeDumper):
+    """
+    YAML Dumper for Config.
+
+    """
+
     def increase_indent(self, flow: bool = False, indentless: bool = False):  # pylint: disable=W0235
         return super().increase_indent(flow, indentless)
 
@@ -132,6 +152,7 @@ class Variable:
     ```
     """
 
+    wrap_type: bool = True
     storage: List[Any]
 
     def __init__(self, value):
@@ -139,13 +160,14 @@ class Variable:
 
     @property  # type: ignore
     def __class__(self):
-        return self.value.__class__
+        return self.value.__class__ if self.wrap_type else type(self)
 
     @property
     def value(self):
         """
         actual object stored in the Variable
         """
+
         return self.storage[0]
 
     @value.setter
@@ -153,18 +175,29 @@ class Variable:
         """
         assign value to object stored in the Variable
         """
+
         self.storage[0] = self._get_value(value)
+
+    @property
+    def dtype(self):
+        """
+        data type of Variable
+        """
+
+        return self.value.__class__
 
     def get(self):
         """
         alias of value
         """
+
         return self.value
 
     def set(self, value):
         """
         alias of value.setter
         """
+
         self.value = value
 
     @staticmethod
@@ -372,6 +405,30 @@ class Variable:
         """
 
         return self.to(str)
+
+    @contextmanager
+    def unwraped(self):
+        """
+        Context manager which temporarily unwrap the Variable.
+
+        Example:
+        ```python
+        >>> v = Variable(1)
+        >>> isinstance(v, int)
+        True
+        >>> with v.unwraped():
+        ...    isinstance(v, int)
+        False
+
+        ```
+        """
+
+        wrap_type = self.wrap_type
+        self.wrap_type = False
+        try:
+            yield self
+        finally:
+            self.wrap_type = wrap_type
 
 
 class OrderedDict(OrderedDict_):
@@ -949,6 +1006,8 @@ class OrderedDict(OrderedDict_):
         ```
         """
 
+        if "cls" not in kwargs:
+            kwargs["cls"] = JsonEncoder
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
         return json_dumps(self.to(dict), *args, **kwargs)
@@ -1018,7 +1077,7 @@ class OrderedDict(OrderedDict_):
         """
 
         if "Dumper" not in kwargs:
-            kwargs["Dumper"] = Dumper
+            kwargs["Dumper"] = YamlDumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
         return yaml_dump(self.to(dict), *args, **kwargs)  # type: ignore
@@ -1433,8 +1492,10 @@ class NestedDict(OrderedDict):
 
         ret = cls()
         for k, v in self.items():
+            if isinstance(v, Variable):
+                v = v.value
             if isinstance(v, OrderedDict):
-                v = v.convert(cls)
+                v = v.to(cls)
             ret[k] = v
         return ret
 
@@ -1791,6 +1852,7 @@ class Config(NestedDict):
 
         ```
         """
+
         was_frozen = self.getattr("frozen")
         try:
             self.defrost()
