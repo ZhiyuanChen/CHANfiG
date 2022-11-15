@@ -120,6 +120,14 @@ class Variable:
     >>> v = 5
     >>> v, n
     (5, 4)
+    >>> f'4 < {v}'
+    '4 < 5'
+    >>> v = Variable('hello')
+    >>> f'{v}, world!'
+    'hello, world!'
+    >>> v += ', world!'
+    >>> v
+    'hello, world!'
 
     ```
     """
@@ -291,6 +299,9 @@ class Variable:
     def __deepcopy__(self, memo: Optional[Mapping] = None):
         return Variable(copy(self.value))
 
+    def __format__(self, format_spec):
+        return self.value if isinstance(self, str) else format(self.value, format_spec)
+
     def __repr__(self):
         return repr(self.value)
 
@@ -389,9 +400,11 @@ class OrderedDict(OrderedDict_):
     >>> d.a, d.b
     (3, 3)
     >>> d.a = Variable('hello')
-    >>> d.a = d.a + ', world'
+    >>> f"{d.a}, world!"
+    'hello, world!'
+    >>> d.a = d.a + ', world!'
     >>> d.b
-    'hello, world'
+    'hello, world!'
 
     ```
     """
