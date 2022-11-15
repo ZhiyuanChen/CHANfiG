@@ -1347,6 +1347,33 @@ class NestedDict(OrderedDict):
     __setitem__ = set
     __setattr__ = set
 
+    def __contains__(self, name: str) -> bool:  # type: ignore
+        r"""
+        Determine if NestedDict contains name.
+
+        Args:
+            name (str): Key name.
+
+        Example:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b.c': 2})
+        >>> 'a' in d
+        True
+        >>> 'b.c' in d
+        True
+        >>> 'b' in d
+        True
+        >>> 'd' in d
+        False
+
+        ```
+        """
+
+        while self.getattr("delimiter") in name:
+            name, rest = name.split(self.getattr("delimiter"), 1)
+            self, name = self[name], rest  # pylint: disable=W0642
+        return super().__contains__(name)
+
     def pop(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
         Pop value from NestedDict.
