@@ -26,13 +26,21 @@ CHANfiG的范式是：
 
 `代码 + 命令行参数 (+ 可选的CHANfiG配置文件 + 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E (+ 可选的CHANfiG配置文件)`
 
+## 特性
+
+CHANfiG包括一个功能完全的`OrderedDict`和`NestedDict`，具有完善的IO操作（`load`、`dump`、`jsons`、`yamls`等），协作能力（`difference`、`intersection`、`update`）和简单易用的APIs（`all_items`、`all_keys`、`all_values`）。
+
+与`ConfigParser`相配合，你可以简单的从命令行参数创建`Config`对象。
+
+有一个值在多个地方以多个名字出现？我们给你提供掩护。
+
+只要将值以`Variable`包装，然后每处更改都会在处处体现。
+
 ## 使用
 
 CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于yaml和json的配置文件。
 
 如果你此前使用yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有CHANfiG所提供的便利。
-
-现有代码：
 
 ```python
 from chanfig import Config
@@ -55,22 +63,26 @@ def main(config):
 class TestConfig(Config):
     def __init__(self):
         super().__init__()
+        dropout = Variable(0.1)
         self.data.batch_size = 64
         self.model.encoder.num_layers = 6
         self.model.decoder.num_layers = 6
+        self.model.dropout = dropout
+        self.model.encoder.dropout = dropout
+        self.model.decoder.dropout = dropout
         self.activation = "GELU"
         self.optim.lr = 1e-3
 
 
 if __name__ == '__main__':
-    # config = Config.read('config.yaml')  # 如果你想读取一个 yaml
-    # config = Config.read('config.json')  # 如果你想读取一个 json
+    # config = Config.load('config.yaml')  # 如果你想读取一个 yaml
+    # config = Config.load('config.json')  # 如果你想读取一个 json
     # existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
     # config = Config(**existing_configs)  # 如果你有些config需要读取
     config = TestConfig()
     config = config.parse()
-    # config.merge('dataset.yaml')  # 如果你想合并一个 yaml
-    # config.merge('dataset.json')  # 如果你想合并一个 json
+    # config.update('dataset.yaml')  # 如果你想合并一个 yaml
+    # config.update('dataset.json')  # 如果你想合并一个 json
     # 注意被合并的值具有更高的优先级
     config.model.decoder.num_layers = 8
     config.freeze()
@@ -83,13 +95,15 @@ if __name__ == '__main__':
 所有你需要做的仅仅是运行一行：
 
 ```shell
-python main.py --model.encoder.num_layers 8
+python main.py --model.encoder.num_layers 8 --model.dropout=0.2
 ```
 
 当然，你也可以读取一个默认配置文件然后在他基础上修改：
 
+注意，你必须指定`config.parse(default_config='config')`来正确读取默认配置文件。
+
 ```shell
-python main.py --config meow.yaml --model.encoder.num_layers 8
+python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0.2
 ```
 
 如果你保存了配置文件，那他应该看起来像这样：
@@ -100,8 +114,11 @@ data:
 model:
   encoder:
     num_layers: 8
+    dropout: 0.2
   decoder:
     num_layers: 8
+    dropout: 0.2
+  dropout: 0.2
   activation: GELU
 ```
 
@@ -112,13 +129,16 @@ model:
   },
   "model": {
     "encoder": {
-      "num_layers": 8
+      "num_layers": 8,
+      "dropout": 0.2
     },
     "decoder": {
-      "num_layers": 8
+      "num_layers": 8,
+      "dropout": 0.2
     },
-  "activation": "GELU"
-  }
+  "dropout": 0.2,
+  "activation": "GELU",
+  },
 }
 ```
 
@@ -135,9 +155,7 @@ pip install chanfig
 从源码安装最新的版本：
 
 ```shell
-pip install git+https://github.com/ZhiyuanChen/chanfig
+pip install git+https://github.com/ZhiyuanChen/CHANfiG
 ```
-
-
 
 他本该如此工作。
