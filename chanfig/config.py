@@ -99,13 +99,20 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                     self.add_argument(arg)
         if config is None:
             config = Config()
-        path = getattr(config, default_config, None) if default_config is not None else None
-        if path is not None:
-            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
-        parsed, _ = self.parse_known_args(args)
-        if path is not None:
-            config = config.update(path)  # type: ignore
-        config = config.update(vars(parsed))  # type: ignore
+        parsed = vars(self.parse_args(args))
+
+        # parse the config file
+        if default_config is not None:
+            if default_config in parsed:
+                path = parsed[default_config]
+                warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
+                # create a temp config to avoid issues when users inherit from Config
+                config = config.update(Config.load(path))  # type: ignore
+            else:
+                raise ValueError(f"default_config is set to {default_config}, but not found in args")
+
+        # parse the command line arguments
+        config = config.update(parsed)  # type: ignore
         return config  # type: ignore
 
     parse_config = parse
@@ -1120,7 +1127,7 @@ class OrderedDict(OrderedDict_):
             return self.yaml(file=file, *args, **kwargs)  # type: ignore
         if extension in JSON:
             return self.json(file=file, *args, **kwargs)  # type: ignore
-        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")
+        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")  # type: ignore
 
     @classmethod
     def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> OrderedDict:  # pylint: disable=W1113
@@ -1159,7 +1166,7 @@ class OrderedDict(OrderedDict_):
             try:
                 yield file
             finally:
-                file.close()
+                file.close()  # type: ignore
         elif isinstance(file, (IO,)):
             yield file
         else:
