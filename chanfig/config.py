@@ -978,6 +978,7 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
+
         with self.open(file, mode="w") as fp:
             fp.write(self.jsons(*args, **kwargs))
 
@@ -986,7 +987,7 @@ class OrderedDict(OrderedDict_):
         r"""
         Construct OrderedDict from json file.
 
-        This function calls `self.from_jsons()` to constract object from json string.
+        This function calls `self.from_jsons()` to construct object from json string.
         You may overwrite `from_jsons` in case something is not json serializable.
 
         Example:
@@ -997,6 +998,7 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
+
         with cls.open(file) as fp:
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
@@ -1057,7 +1059,7 @@ class OrderedDict(OrderedDict_):
         r"""
         Construct OrderedDict from yaml file.
 
-        This function calls `self.from_yamls()` to constract object from yaml string.
+        This function calls `self.from_yamls()` to construct object from yaml string.
         You may overwrite `from_yamls` in case something is not yaml serializable.
 
         ```python
