@@ -563,11 +563,12 @@ class OrderedDict(OrderedDict_):
         """
 
         try:
-            try:
+            if name in self.__dict__:
                 return self.__dict__[name]
-            except KeyError:
+            if name in self.__class__.__dict__:
                 return self.__class__.__dict__[name]
-        except KeyError:
+            return super().getattr(name, default)  # type: ignore
+        except AttributeError:
             if default is not None:
                 return default
             raise AttributeError(f"{self.__class__.__name__} has no attribute {name}") from None
@@ -1311,6 +1312,7 @@ class NestedDict(OrderedDict):
         Args:
             name (str): Key name.
             value (Any): Value to set.
+            convert_mapping (Optional[bool]): Whether convert mapping to NestedDict. Defaults to self.convert_mapping.
 
         Example:
         ```python
@@ -1676,7 +1678,7 @@ class Config(NestedDict):
     """
 
     frozen: bool = False
-    convert_mapping: bool = False
+    convert_mapping: bool = True
     default_factory: Optional[Callable]
     delimiter: str = "."
     indent: int = 2
