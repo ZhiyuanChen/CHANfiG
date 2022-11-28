@@ -563,11 +563,12 @@ class OrderedDict(OrderedDict_):
         """
 
         try:
-            try:
+            if name in self.__dict__:
                 return self.__dict__[name]
-            except KeyError:
+            if name in self.__class__.__dict__:
                 return self.__class__.__dict__[name]
-        except KeyError:
+            return super().getattr(name, default)  # type: ignore
+        except AttributeError:
             if default is not None:
                 return default
             raise AttributeError(f"{self.__class__.__name__} has no attribute {name}") from None
