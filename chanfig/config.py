@@ -16,12 +16,11 @@ from os.path import splitext
 from typing import IO, Any, Callable, Iterable, List, Optional, Sequence, Union
 from warnings import warn
 
-from typing_extensions import LiteralString  # type: ignore
 from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-PathStr = Union[PathLike, str, bytes, LiteralString]
+PathStr = Union[PathLike, str, bytes]
 File = Union[PathStr, IO]
 
 YAML = ("yml", "yaml")
@@ -32,7 +31,6 @@ PYTHON = ("py",)
 class JsonEncoder(JSONEncoder):
     """
     JSON encoder for Config.
-
     """
 
     def default(self, o: Any) -> Any:
@@ -46,7 +44,6 @@ class JsonEncoder(JSONEncoder):
 class YamlDumper(SafeDumper):
     """
     YAML Dumper for Config.
-
     """
 
     def increase_indent(self, flow: bool = False, indentless: bool = False):  # pylint: disable=W0235
@@ -66,6 +63,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     ) -> Config:
         r"""
         Parse the arguments for config.
+
         There are three levels of config:
 
         1. The base config parsed into the function,
@@ -119,9 +117,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
     @staticmethod
     def identity(string):
-        """
+        r"""
         https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity
         """
+
         return string
 
 
@@ -171,38 +170,38 @@ class Variable:
 
     @property
     def value(self):
-        """
-        actual object stored in the Variable
+        r"""
+        Actual object stored in the Variable.
         """
 
         return self.storage[0]
 
     @value.setter
     def value(self, value):
-        """
-        assign value to object stored in the Variable
+        r"""
+        Assign value to object stored in the Variable.
         """
 
         self.storage[0] = self._get_value(value)
 
     @property
     def dtype(self):
-        """
-        data type of Variable
+        r"""
+        Data type of Variable.
         """
 
         return self.value.__class__
 
     def get(self):
-        """
-        alias of value
+        r"""
+        alias of value.
         """
 
         return self.value
 
     def set(self, value):
-        """
-        alias of value.setter
+        r"""
+        alias of value.setter.
         """
 
         self.value = value
@@ -439,10 +438,12 @@ class Variable:
 
 
 class OrderedDict(OrderedDict_):
-    """
-    Default OrderedDict with attribute-style access.
+    r"""
+    OrderedDict with attribute-style access.
 
-    Works best with `Variable` objects.
+    OrderedDict inherits from built-in OrderedDict of collections.
+    It also comes with many easy to use helper function, such as `difference`, `intersection` and full IO supports.
+    OrderedDict works best with `Variable` objects.
 
     Example:
     ```python
@@ -491,13 +492,14 @@ class OrderedDict(OrderedDict_):
     def _init(self, *args, **kwargs) -> None:
         r"""
         Initialise values from arguments for OrderedDict.
+
         This method is called in `__init__`.
 
         Args:
             *args: [(key1, value1), (key2, value2)].
             **kwargs: {key1: value1, key2: value2}.
-
         """
+
         for key, value in args:
             self.set(key, value)
         for key, value in kwargs.items():
@@ -615,6 +617,7 @@ class OrderedDict(OrderedDict_):
     def setattr(self, name: str, value: Any):
         r"""
         Set attribute of OrderedDict.
+
         Note that it won't alter values in the OrderedDict.
 
         Args:
@@ -673,6 +676,7 @@ class OrderedDict(OrderedDict_):
     def delattr(self, name: str) -> None:
         r"""
         Remove attribute of OrderedDict.
+
         Note that it won't remove values in the OrderedDict.
 
         Args:
@@ -925,8 +929,9 @@ class OrderedDict(OrderedDict_):
     def empty(cls, *args, **kwargs):
         r"""
         Initialise an empty OrderedDict.
-        This method is helpful when you inheriting the OrderedDict with default values.
-        Use type(self)() in this case would copy the redundant default values.
+
+        This method is helpful when you inheriting the OrderedDict with default values defined in `__init__()`.
+        As use type(self)() in this case would copy all the default values, which might now be desired.
 
         Example:
         ```python
@@ -946,7 +951,8 @@ class OrderedDict(OrderedDict_):
     def empty_like(self, *args, **kwargs):
         r"""
         Initialise an empty copy of OrderedDict.
-        This method will preserve everything in __dict__.
+
+        This method will preserve everything in `__dict__`.
 
         Example:
         ```python
@@ -1052,6 +1058,7 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
+
         with self.open(file, mode="w") as fp:
             self.yamls(fp, *args, **kwargs)
 
@@ -1070,6 +1077,7 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
+
         with cls.open(file) as fp:
             return cls.from_yamls(fp.read(), *args, **kwargs)
 
@@ -1121,6 +1129,7 @@ class OrderedDict(OrderedDict_):
 
         ```
         """
+
         if method is None:
             if isinstance(file, IO):
                 raise ValueError("method must be specified when dumping to file-like object")
@@ -1161,7 +1170,7 @@ class OrderedDict(OrderedDict_):
     @contextmanager
     def open(file: File, *args, **kwargs):
         """
-        open file IO from file path or file-like object.
+        Open file IO from file path or file-like object.
         """
 
         if isinstance(file, (PathLike, str)):
@@ -1235,7 +1244,10 @@ class OrderedDict(OrderedDict_):
 
 class NestedDict(OrderedDict):
     """
-    Nested Dict
+    NestedDict is basically an OrderedDict object that create a nested structure with delimiter.
+
+    It also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
+    respectively in the nested structure.
     """
 
     convert_mapping: bool = False
@@ -1335,7 +1347,6 @@ class NestedDict(OrderedDict):
         1
         >>> d.a.b.e.f
         2
-
 
         ```
         """
@@ -1486,10 +1497,10 @@ class NestedDict(OrderedDict):
 
     def apply(self, func: Callable) -> NestedDict:
         r"""
-        Recursively apply a function to the object and its childrens.
+        Recursively apply a function to the object and its children.
 
         Args:
-            runc (Callable): Function to be applied to.
+            func (Callable): Function to be applied to.
 
         Example:
         ```python
@@ -1660,7 +1671,6 @@ class DefaultDict(NestedDict):
 def frozen_check(func: Callable):
     """
     Decorator check if the object is frozen.
-
     """
 
     @wraps(func)
@@ -1674,7 +1684,7 @@ def frozen_check(func: Callable):
 
 class Config(NestedDict):
     """
-    Basic Config
+    Config is basically a NestedDict object with support of freeze/defrost and has ConfigParser built-in.
     """
 
     frozen: bool = False
@@ -1762,6 +1772,7 @@ class Config(NestedDict):
 
         ```
         """
+
         super().remove(name)
 
     __delitem__ = delete
