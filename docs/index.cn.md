@@ -45,7 +45,7 @@ CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于yam
 现有代码：
 
 ```python
-from chanfig import Config
+from chanfig import Config, Variable
 
 
 class Model:

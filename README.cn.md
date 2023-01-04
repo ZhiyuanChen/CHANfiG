@@ -43,7 +43,7 @@ CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于yam
 如果你此前使用yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有CHANfiG所提供的便利。
 
 ```python
-from chanfig import Config
+from chanfig import Config, Variable
 
 
 class Model:

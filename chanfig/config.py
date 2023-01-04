@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from argparse import ArgumentParser
 from ast import literal_eval
 from collections import OrderedDict as OrderedDict_
@@ -13,6 +12,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
+from sys import argv
 from typing import IO, Any, Callable, Iterable, List, Optional, Sequence, Union
 from warnings import warn
 
@@ -89,7 +89,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         """
 
         if args is None:
-            args = sys.argv[1:]
+            args = argv[1:]
         for arg in args:
             if arg.startswith("--") and args != "--":
                 arg = arg.split("=")[0]
