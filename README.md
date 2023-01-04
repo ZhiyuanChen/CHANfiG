@@ -47,7 +47,7 @@ No matter your old config is json or yaml, you could directly read from them.
 And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
 ```python
-from chanfig import Config
+from chanfig import Config, Variable
 
 
 class Model:
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     config = config.parse()
     # config.update('dataset.yaml')  # in case you want to merge a yaml
     # config.update('dataset.json')  # in case you want to merge a json
-    # note that the value of merge will surpass current values
+    # note that the value of merge will override current values
     config.model.decoder.num_layers = 8
     config.freeze()
     print(config)
