@@ -214,9 +214,9 @@ class Config(NestedDict):
     @frozen_check
     def delete(self, name: str) -> None:
         r"""
-        Remove value from Config.
+        Delete value from Config.
 
-        `__delitem__`, `__delattr__` and `remove` are alias of this method.
+        `__delitem__` and `__delattr__` and are alias of this method.
 
         Args:
             name (str): Key name.
@@ -245,11 +245,10 @@ class Config(NestedDict):
         ```
         """
 
-        super().remove(name)
+        super().delete(name)
 
     __delitem__ = delete
     __delattr__ = delete
-    remove = delete
 
     @frozen_check
     def pop(self, name: str, default: Optional[Any] = None) -> Any:

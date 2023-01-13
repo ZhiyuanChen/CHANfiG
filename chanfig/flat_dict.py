@@ -229,9 +229,9 @@ class FlatDict(OrderedDict):
 
     def delete(self, name: str) -> None:
         r"""
-        Remove value from FlatDict.
+        Delete value from FlatDict.
 
-        `__delitem__`, `__delattr__` and `remove` are alias of this method.
+        `__delitem__` and `__delattr__` are alias of this method.
 
         Args:
             name (str): Key name.
@@ -262,13 +262,12 @@ class FlatDict(OrderedDict):
 
     __delitem__ = delete
     __delattr__ = delete
-    remove = delete
 
     def delattr(self, name: str) -> None:
         r"""
-        Remove attribute of FlatDict.
+        Delete attribute of FlatDict.
 
-        Note that it won't remove values in the FlatDict.
+        Note that it won't delete values in the FlatDict.
 
         Args:
             name (str): Key name.
