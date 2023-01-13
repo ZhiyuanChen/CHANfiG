@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 from ast import literal_eval
-from collections import OrderedDict as OrderedDict_
+from collections import OrderedDict
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
@@ -344,7 +344,7 @@ class Variable:
     def __repr__(self):
         return repr(self.value)
 
-    def to(self, cls: Callable):  # pylint: disable=C0103
+    def to(self, cls: Callable) -> Any:  # pylint: disable=C0103
         r"""
         Convert the value to a different type.
 
@@ -437,17 +437,20 @@ class Variable:
             self.wrap_type = wrap_type
 
 
-class OrderedDict(OrderedDict_):
-    r"""
-    OrderedDict with attribute-style access.
+class FlatDict(OrderedDict):
 
-    OrderedDict inherits from built-in OrderedDict of collections.
+    # pylint: disable=R0904
+
+    r"""
+    FlatDict with attribute-style access.
+
+    FlatDict inherits from built-in FlatDict of collections.
     It also comes with many easy to use helper function, such as `difference`, `intersection` and full IO supports.
-    OrderedDict works best with `Variable` objects.
+    FlatDict works best with `Variable` objects.
 
     Example:
     ```python
-    >>> d = OrderedDict()
+    >>> d = FlatDict()
     >>> d.d = 1013
     >>> d['d']
     1013
@@ -491,7 +494,7 @@ class OrderedDict(OrderedDict_):
 
     def _init(self, *args, **kwargs) -> None:
         r"""
-        Initialise values from arguments for OrderedDict.
+        Initialise values from arguments for FlatDict.
 
         This method is called in `__init__`.
 
@@ -507,7 +510,7 @@ class OrderedDict(OrderedDict_):
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
-        Get value from OrderedDict.
+        Get value from FlatDict.
 
         `__getitem__` and `__getattr__` are alias of this method.
 
@@ -519,7 +522,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(d=1013)
+        >>> d = FlatDict(d=1013)
         >>> d.get('d')
         1013
         >>> d['d']
@@ -530,7 +533,7 @@ class OrderedDict(OrderedDict_):
         2
         >>> d.get('f')
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain f'
+        KeyError: 'FlatDict does not contain f'
 
         ```
         """
@@ -542,9 +545,9 @@ class OrderedDict(OrderedDict_):
 
     def getattr(self, name: str, default: Optional[Any] = None):
         r"""
-        Get attribute of OrderedDict.
+        Get attribute of FlatDict.
 
-        Note that if won't return value in the OrderedDict, nor will it create new one if default_factory is specified.
+        Note that if won't return value in the FlatDict, nor will it create new one if default_factory is specified.
 
         Args:
             name (str): Key name.
@@ -552,14 +555,14 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, default_factory=list)
+        >>> d = FlatDict(a=1, default_factory=list)
         >>> d.getattr('default_factory')
         <class 'list'>
         >>> d.getattr('b', 2)
         2
         >>> d.getattr('a')
         Traceback (most recent call last):
-        AttributeError: OrderedDict has no attribute a
+        AttributeError: FlatDict has no attribute a
 
         ```
         """
@@ -577,7 +580,7 @@ class OrderedDict(OrderedDict_):
 
     def set(self, name: str, value: Any) -> None:
         r"""
-        Set value of OrderedDict.
+        Set value of FlatDict.
 
         `__setitem__` and `__setattr__` are alias of this method.
 
@@ -587,7 +590,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict()
+        >>> d = FlatDict()
         >>> d.set('d', 1013)
         >>> d.get('d')
         1013
@@ -616,9 +619,9 @@ class OrderedDict(OrderedDict_):
 
     def setattr(self, name: str, value: Any):
         r"""
-        Set attribute of OrderedDict.
+        Set attribute of FlatDict.
 
-        Note that it won't alter values in the OrderedDict.
+        Note that it won't alter values in the FlatDict.
 
         Args:
             name (str): Key name.
@@ -626,7 +629,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict()
+        >>> d = FlatDict()
         >>> d.setattr('attr', 'value')
         >>> d.getattr('attr')
         'value'
@@ -638,7 +641,7 @@ class OrderedDict(OrderedDict_):
 
     def delete(self, name: str) -> None:
         r"""
-        Remove value from OrderedDict.
+        Remove value from FlatDict.
 
         `__delitem__`, `__delattr__` and `remove` are alias of this method.
 
@@ -647,7 +650,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(d=1016, n='chang')
+        >>> d = FlatDict(d=1016, n='chang')
         >>> d.d
         1016
         >>> d.n
@@ -655,11 +658,11 @@ class OrderedDict(OrderedDict_):
         >>> d.delete('d')
         >>> d.d
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain d'
+        KeyError: 'FlatDict does not contain d'
         >>> del d.n
         >>> d.n
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain n'
+        KeyError: 'FlatDict does not contain n'
         >>> del d.f
         Traceback (most recent call last):
         KeyError: 'f'
@@ -675,23 +678,23 @@ class OrderedDict(OrderedDict_):
 
     def delattr(self, name: str) -> None:
         r"""
-        Remove attribute of OrderedDict.
+        Remove attribute of FlatDict.
 
-        Note that it won't remove values in the OrderedDict.
+        Note that it won't remove values in the FlatDict.
 
         Args:
             name (str): Key name.
 
         Example:
         ```python
-        >>> d = OrderedDict()
+        >>> d = FlatDict()
         >>> d.setattr('name', 'chang')
         >>> d.getattr('name')
         'chang'
         >>> d.delattr('name')
         >>> d.getattr('name')
         Traceback (most recent call last):
-        AttributeError: OrderedDict has no attribute name
+        AttributeError: FlatDict has no attribute name
 
         ```
         """
@@ -708,7 +711,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(default_factory=list)
+        >>> d = FlatDict(default_factory=list)
         >>> d.n
         []
         >>> d.get('d', 1031)
@@ -725,14 +728,14 @@ class OrderedDict(OrderedDict_):
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}")
             default_factory = self.getattr("default_factory")
             default = default_factory()
-            if isinstance(default, OrderedDict):
+            if isinstance(default, FlatDict):
                 default.__dict__.update(self.__dict__)
             super().__setitem__(name, default)
         return default
 
-    def to(self, cls: Callable = dict) -> Mapping:  # pylint: disable=C0103
+    def to(self, cls: Callable = dict) -> Mapping:
         r"""
-        Convert OrderedDict to other Mapping.
+        Convert FlatDict to other Mapping.
 
         `to` and `dict` are alias of this method.
 
@@ -741,21 +744,23 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
         """
 
+        # pylint: disable=C0103
+
         return cls(**{k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
 
     convert = to
     dict = to
 
-    def update(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:  # type: ignore
+    def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
         r"""
-        Update OrderedDict values w.r.t. other.
+        Update FlatDict values w.r.t. other.
 
         `merge`, `merge_from_file`, and `union` are alias of this method.
 
@@ -764,7 +769,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.update(n).to(dict)
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
@@ -792,9 +797,9 @@ class OrderedDict(OrderedDict_):
     merge_from_file = update
     union = update
 
-    def difference(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
+    def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Difference between OrderedDict values and other.
+        Difference between FlatDict values and other.
 
         `diff` is an alias of this method.
 
@@ -803,7 +808,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.difference(n).to(dict)
         {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -830,9 +835,9 @@ class OrderedDict(OrderedDict_):
 
     diff = difference
 
-    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> OrderedDict:
+    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Intersection between OrderedDict values and other.
+        Intersection between FlatDict values and other.
 
         `inter` is an alias of this method.
 
@@ -841,7 +846,7 @@ class OrderedDict(OrderedDict_):
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> d.intersection(n).to(dict)
         {}
@@ -867,13 +872,13 @@ class OrderedDict(OrderedDict_):
 
     inter = intersection
 
-    def copy(self) -> OrderedDict:
+    def copy(self) -> FlatDict:
         r"""
-        Create a shallow copy of OrderedDict.
+        Create a shallow copy of FlatDict.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=[])
+        >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.copy()
         >>> c.to(dict)
@@ -889,15 +894,15 @@ class OrderedDict(OrderedDict_):
 
         return copy(self)
 
-    def deepcopy(self, memo: Optional[Mapping] = None) -> OrderedDict:
+    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:
         r"""
-        Create a deep copy of OrderedDict.
+        Create a deep copy of FlatDict.
 
         `clone` and `__deepcopy__` are alias of this method.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=[])
+        >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.deepcopy()
         >>> c.to(dict)
@@ -911,11 +916,13 @@ class OrderedDict(OrderedDict_):
         ```
         """
 
+        # pylint: disable=C0103
+
         if memo is not None and id(self) in memo:
             return memo[id(self)]
         ret = self.empty_like()
         for k, v in self.items():
-            if isinstance(v, OrderedDict):
+            if isinstance(v, FlatDict):
                 ret[k] = v.deepcopy(memo=memo)
             else:
                 ret[k] = deepcopy(v)
@@ -928,14 +935,14 @@ class OrderedDict(OrderedDict_):
     @classmethod
     def empty(cls, *args, **kwargs):
         r"""
-        Initialise an empty OrderedDict.
+        Initialise an empty FlatDict.
 
-        This method is helpful when you inheriting the OrderedDict with default values defined in `__init__()`.
+        This method is helpful when you inheriting the FlatDict with default values defined in `__init__()`.
         As use type(self)() in this case would copy all the default values, which might now be desired.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=[])
+        >>> d = FlatDict(a=[])
         >>> c = d.empty()
         >>> c.to(dict)
         {}
@@ -950,13 +957,13 @@ class OrderedDict(OrderedDict_):
 
     def empty_like(self, *args, **kwargs):
         r"""
-        Initialise an empty copy of OrderedDict.
+        Initialise an empty copy of FlatDict.
 
         This method will preserve everything in `__dict__`.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=[])
+        >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.empty_like()
         >>> c.to(dict)
@@ -973,49 +980,49 @@ class OrderedDict(OrderedDict_):
 
     def json(self, file: File, *args, **kwargs) -> None:
         r"""
-        Dump OrderedDict to json file.
+        Dump FlatDict to json file.
 
         This function calls `self.jsons()` to generate json string.
         You may overwrite `jsons` in case something is not json serializable.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.json("example.json")
 
         ```
         """
 
-        with self.open(file, mode="w") as fp:
+        with self.open(file, mode="w") as fp:  # pylint: disable=C0103
             fp.write(self.jsons(*args, **kwargs))
 
     @classmethod
-    def from_json(cls, file: File, *args, **kwargs) -> OrderedDict:
+    def from_json(cls, file: File, *args, **kwargs) -> FlatDict:
         r"""
-        Construct OrderedDict from json file.
+        Construct FlatDict from json file.
 
         This function calls `self.from_jsons()` to construct object from json string.
         You may overwrite `from_jsons` in case something is not json serializable.
 
         Example:
         ```python
-        >>> d = OrderedDict.from_json('example.json')
+        >>> d = FlatDict.from_json('example.json')
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
         """
 
-        with cls.open(file) as fp:
+        with cls.open(file) as fp:  # pylint: disable=C0103
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
     def jsons(self, *args, **kwargs) -> str:
         r"""
-        Dump OrderedDict to json string.
+        Dump FlatDict to json string.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.jsons()
         '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
 
@@ -1029,13 +1036,13 @@ class OrderedDict(OrderedDict_):
         return json_dumps(self.to(dict), *args, **kwargs)
 
     @classmethod
-    def from_jsons(cls, string: str, *args, **kwargs) -> OrderedDict:
+    def from_jsons(cls, string: str, *args, **kwargs) -> FlatDict:
         r"""
-        Construct OrderedDict from json string.
+        Construct FlatDict from json string.
 
         Example:
         ```python
-        >>> d = OrderedDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
+        >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
@@ -1046,48 +1053,48 @@ class OrderedDict(OrderedDict_):
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
-        Dump OrderedDict to yaml file.
+        Dump FlatDict to yaml file.
 
         This function calls `self.yamls()` to generate yaml string.
         You may overwrite `yamls` in case something is not yaml serializable.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.yaml("example.yaml")
 
         ```
         """
 
-        with self.open(file, mode="w") as fp:
+        with self.open(file, mode="w") as fp:  # pylint: disable=C0103
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, file: File, *args, **kwargs) -> OrderedDict:
+    def from_yaml(cls, file: File, *args, **kwargs) -> FlatDict:
         r"""
-        Construct OrderedDict from yaml file.
+        Construct FlatDict from yaml file.
 
         This function calls `self.from_yamls()` to construct object from yaml string.
         You may overwrite `from_yamls` in case something is not yaml serializable.
 
         ```python
-        >>> d = OrderedDict.from_yaml('example.yaml')
+        >>> d = FlatDict.from_yaml('example.yaml')
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
         """
 
-        with cls.open(file) as fp:
+        with cls.open(file) as fp:  # pylint: disable=C0103
             return cls.from_yamls(fp.read(), *args, **kwargs)
 
     def yamls(self, *args, **kwargs) -> str:
         r"""
-        Dump OrderedDict to yaml string.
+        Dump FlatDict to yaml string.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.yamls()
         'a: 1\nb: 2\nc: 3\n'
 
@@ -1101,13 +1108,13 @@ class OrderedDict(OrderedDict_):
         return yaml_dump(self.to(dict), *args, **kwargs)  # type: ignore
 
     @classmethod
-    def from_yamls(cls, string: str, *args, **kwargs) -> OrderedDict:
+    def from_yamls(cls, string: str, *args, **kwargs) -> FlatDict:
         r"""
-        Construct OrderedDict from yaml string.
+        Construct FlatDict from yaml string.
 
         Example:
         ```python
-        >>> d = OrderedDict.from_yamls('a: 1\nb: 2\nc: 3\n')
+        >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
@@ -1120,11 +1127,11 @@ class OrderedDict(OrderedDict_):
 
     def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""
-        Dump OrderedDict to file.
+        Dump FlatDict to file.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.dump("example.yaml")
 
         ```
@@ -1142,13 +1149,13 @@ class OrderedDict(OrderedDict_):
         raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")  # type: ignore
 
     @classmethod
-    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> OrderedDict:  # pylint: disable=W1113
+    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
         """
-        Load OrderedDict from file.
+        Load FlatDict from file.
 
         Example:
         ```python
-        >>> d = OrderedDict.load("example.yaml")
+        >>> d = FlatDict.load("example.yaml")
         >>> d.to(dict)
         {'a': 1, 'b': 2, 'c': 3}
 
@@ -1174,7 +1181,7 @@ class OrderedDict(OrderedDict_):
         """
 
         if isinstance(file, (PathLike, str)):
-            file = open(file, *args, **kwargs)
+            file = open(file, *args, **kwargs)  # pylint: disable=W1514
             try:
                 yield file
             finally:
@@ -1192,13 +1199,13 @@ class OrderedDict(OrderedDict_):
 
     def __repr__(self):
         r"""
-        Representation of OrderedDict.
+        Representation of FlatDict.
 
         Example:
         ```python
-        >>> d = OrderedDict(a=1, b=2, c=3)
+        >>> d = FlatDict(a=1, b=2, c=3)
         >>> repr(d)
-        'OrderedDict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
+        'FlatDict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
 
         ```
         """
@@ -1226,25 +1233,25 @@ class OrderedDict(OrderedDict_):
         main_str += ")"
         return main_str
 
-    def _add_indent(self, s):
-        st = s.split("\n")
+    def _add_indent(self, text):
+        lines = text.split("\n")
         # don't do anything for single-line stuff
-        if len(st) == 1:
-            return s
-        first = st.pop(0)
-        st = [(self.getattr("indent") * " ") + line for line in st]
-        st = "\n".join(st)
-        st = first + "\n" + st
-        return st
+        if len(lines) == 1:
+            return text
+        first = lines.pop(0)
+        lines = [(self.getattr("indent") * " ") + line for line in lines]
+        lines = "\n".join(lines)
+        lines = first + "\n" + lines
+        return lines
 
     def __setstate__(self, states, *args, **kwargs):
         for name, value in states.items():
             self.setattr(name, value)
 
 
-class NestedDict(OrderedDict):
+class NestedDict(FlatDict):
     """
-    NestedDict is basically an OrderedDict object that create a nested structure with delimiter.
+    NestedDict is basically an FlatDict object that create a nested structure with delimiter.
 
     It also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
@@ -1520,7 +1527,7 @@ class NestedDict(OrderedDict):
         func(self)
         return self
 
-    def to(self, cls: Callable = dict) -> Mapping:  # pylint: disable=C0103
+    def to(self, cls: Callable = dict) -> Mapping:
         r"""
         Convert NestedDict to other Mapping.
 
@@ -1539,11 +1546,13 @@ class NestedDict(OrderedDict):
         ```
         """
 
+        # pylint: disable=C0103
+
         ret = cls()
         for k, v in self.items():
             if isinstance(v, Variable):
                 v = v.value
-            if isinstance(v, OrderedDict):
+            if isinstance(v, FlatDict):
                 v = v.to(cls)
             ret[k] = v
         return ret
@@ -1753,7 +1762,7 @@ class Config(NestedDict):
 
         Example:
         ```python
-        >>> d = OrderedDict(d=1016, n='chang')
+        >>> d = FlatDict(d=1016, n='chang')
         >>> d.d
         1016
         >>> d.n
@@ -1761,11 +1770,11 @@ class Config(NestedDict):
         >>> d.delete('d')
         >>> d.d
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain d'
+        KeyError: 'FlatDict does not contain d'
         >>> del d.n
         >>> d.n
         Traceback (most recent call last):
-        KeyError: 'OrderedDict does not contain n'
+        KeyError: 'FlatDict does not contain n'
         >>> del d.f
         Traceback (most recent call last):
         KeyError: 'f'
