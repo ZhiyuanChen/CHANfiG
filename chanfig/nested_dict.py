@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from functools import wraps
 from os import PathLike
-from typing import Any, Callable, Iterable, Optional, Union, TypeVar
+from typing import Any, Callable, Iterable, Optional, TypeVar, Union
 
 from .flat_dict import FlatDict, PathStr
 from .variable import Variable
