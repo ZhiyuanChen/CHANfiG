@@ -9,13 +9,12 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Optional, Union
+from typing import IO, Any, Callable, Iterable, Optional, Union, TypeVar
 
-from yaml import SafeLoader
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import FileError, JsonEncoder, YamlDumper
+from .utils import FileError, JsonEncoder, YamlDumper, YamlLoader
 from .variable import Variable
 
 PathStr = Union[PathLike, str, bytes]
@@ -25,8 +24,11 @@ YAML = ("yml", "yaml")
 JSON = ("json",)
 PYTHON = ("py",)
 
+K = TypeVar("K")
+V = TypeVar("V")
 
-class FlatDict(OrderedDict):
+
+class FlatDict(OrderedDict[K, V]):
 
     # pylint: disable=R0904
 
@@ -711,7 +713,7 @@ class FlatDict(OrderedDict):
         """
 
         if "Loader" not in kwargs:
-            kwargs["Loader"] = SafeLoader
+            kwargs["Loader"] = YamlLoader
         return cls(**yaml_load(string, *args, **kwargs))
 
     def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113

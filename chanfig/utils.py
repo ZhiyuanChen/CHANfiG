@@ -1,7 +1,7 @@
 from json import JSONEncoder
 from typing import Any
 
-from yaml import SafeDumper
+from yaml import SafeDumper, SafeLoader
 
 from .variable import Variable
 
@@ -28,5 +28,13 @@ class YamlDumper(SafeDumper):
         return super().increase_indent(flow, indentless)
 
 
-class FileError(ValueError):  # pylint: disable=C0115
-    pass
+class YamlLoader(SafeLoader):  # pylint: disable=R0901
+    """
+    YAML Loader for Config.
+    """
+
+
+class FileError(ValueError):
+    """
+    Error for file operations.
+    """
