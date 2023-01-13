@@ -5,4 +5,4 @@ authors:
 date: 2022-05-04
 ---
 
-::: chanfig.config.Variable
+::: chanfig.variable

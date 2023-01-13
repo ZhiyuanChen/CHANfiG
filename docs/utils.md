@@ -1,8 +1,8 @@
 ---
-title: NestedDict
+title: Utilities
 authors:
     - Zhiyuan Chen
 date: 2022-05-04
 ---
 
-::: chanfig.nested_dict
+::: chanfig.utils
