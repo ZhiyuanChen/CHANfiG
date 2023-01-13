@@ -12,8 +12,9 @@ nav:
   - Variable: variable.md
   - Config: config.md
   - NestedDict: nested_dict.md
-  - OrderedDict: ordered_dict.md
+  - FlatDict: flat_dict.md
   - ConfigParser: parser.md
+  - Utilities: utils.md
   - package: package.md
   # - Blog: blog/index.md
 
