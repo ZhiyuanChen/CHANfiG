@@ -9,7 +9,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Optional, Union, TypeVar
+from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
@@ -328,7 +328,7 @@ class FlatDict(OrderedDict[K, V]):
         r"""
         Convert FlatDict to other Mapping.
 
-        `to` and `dict` are alias of this method.
+        `convert` is an alias of this method.
 
         Args:
             cls (Callable): Target class to be converted to. Defaults to dict.
@@ -347,7 +347,21 @@ class FlatDict(OrderedDict[K, V]):
         return cls(**{k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
 
     convert = to
-    dict = to
+
+    def dict(self) -> Dict[str, Any]:
+        r"""
+        Convert FlatDict to dict.
+
+        Example:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        return self.to(dict)
 
     def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
         r"""
