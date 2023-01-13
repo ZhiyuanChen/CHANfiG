@@ -9,7 +9,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+from typing import IO, Any, Callable, Iterable, Optional, Union
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
@@ -24,11 +24,8 @@ YAML = ("yml", "yaml")
 JSON = ("json",)
 PYTHON = ("py",)
 
-K = TypeVar("K")
-V = TypeVar("V")
 
-
-class FlatDict(OrderedDict[K, V]):
+class FlatDict(OrderedDict):
 
     # pylint: disable=R0904
 
@@ -348,7 +345,7 @@ class FlatDict(OrderedDict[K, V]):
 
     convert = to
 
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> Mapping[Any, Any]:
         r"""
         Convert FlatDict to dict.
 
