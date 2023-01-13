@@ -1,0 +1,7 @@
+- name: merge
+  patterns:
+    - chanfig/**
+  approved_by:
+    - ZhiyuanChen
+  mandatory_checks_name:
+    - push

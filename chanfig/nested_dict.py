@@ -3,16 +3,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from functools import wraps
 from os import PathLike
-from typing import Any, Callable, Iterable, Optional, TypeVar, Union
+from typing import Any, Callable, Iterable, Optional, Union
 
 from .flat_dict import FlatDict, PathStr
 from .variable import Variable
 
-K = TypeVar("K")
-V = TypeVar("V")
 
-
-class NestedDict(FlatDict[K, V]):
+class NestedDict(FlatDict):
     r"""
     NestedDict is basically an FlatDict object that create a nested structure with delimiter.
 
