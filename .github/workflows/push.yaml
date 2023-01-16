@@ -28,14 +28,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry/virtualenvs
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt && pip install -e .
       - name: Install dependencies for testing
-        run: pip install torch
-      - name: Install pytest
-        run: pip install pytest
+        run: pip install pytest torch
       - name: doctest
         run: pytest --doctest-modules chanfig
+      - name: unittest
+        run: pytest tests/
   release:
     if: startsWith(github.event.ref, 'refs/tags/v')
     needs: [lint, test]
@@ -46,6 +50,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
+          cache: "pip"
       - uses: Gr1N/setup-poetry@v7
       - name: install building dependencies
         run: poetry self add "poetry-dynamic-versioning[plugin]"
@@ -79,6 +84,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
+          cache: "pip"
       - uses: Gr1N/setup-poetry@v7
       - name: install building dependencies
         run: poetry self add "poetry-dynamic-versioning[plugin]"

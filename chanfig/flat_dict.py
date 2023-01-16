@@ -80,8 +80,8 @@ class FlatDict(OrderedDict):
 
     # pylint: disable=R0904
 
-    default_factory: Optional[Callable]
     indent: int = 2
+    default_factory: Optional[Callable]
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         super().__init__()
@@ -92,7 +92,6 @@ class FlatDict(OrderedDict):
                 raise TypeError(
                     f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
                 )
-        self.setattr("indent", 2)
         self._init(*args, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
@@ -106,6 +105,7 @@ class FlatDict(OrderedDict):
             **kwargs: {key1: value1, key2: value2}.
         """
 
+        self.setattr("indent", 2)
         for key, value in args:
             self.set(key, value)
         for key, value in kwargs.items():
@@ -716,7 +716,7 @@ class FlatDict(OrderedDict):
         if "cls" not in kwargs:
             kwargs["cls"] = JsonEncoder
         if "indent" not in kwargs:
-            kwargs["indent"] = self.getattr("indent")
+            kwargs["indent"] = self.getattr("indent", 2)
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
@@ -788,7 +788,7 @@ class FlatDict(OrderedDict):
         if "Dumper" not in kwargs:
             kwargs["Dumper"] = YamlDumper
         if "indent" not in kwargs:
-            kwargs["indent"] = self.getattr("indent")
+            kwargs["indent"] = self.getattr("indent", 2)
         return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
 
     @classmethod
@@ -923,7 +923,7 @@ class FlatDict(OrderedDict):
         if len(lines) == 1:
             return text
         first = lines.pop(0)
-        lines = [(self.getattr("indent") * " ") + line for line in lines]
+        lines = [(self.getattr("indent", 2) * " ") + line for line in lines]
         lines = "\n".join(lines)
         lines = first + "\n" + lines
         return lines

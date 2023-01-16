@@ -87,7 +87,7 @@ def frozen_check(func: Callable):
 
     @wraps(func)
     def decorator(self, *args, **kwargs):
-        if self.getattr("frozen"):
+        if self.getattr("frozen", False):
             raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
         return func(self, *args, **kwargs)
 
@@ -110,18 +110,16 @@ class Config(NestedDict):
     It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
     """
 
-    default_factory: Optional[Callable]
+    parser: ConfigParser
     frozen: bool = False
     convert_mapping: bool = True
     delimiter: str = "."
     indent: int = 2
-    parser: ConfigParser
+    default_factory: Optional[Callable]
 
     def __init__(self, *args, **kwargs):
-        self.setattr("frozen", False)
         self.setattr("parser", ConfigParser())
         super().__init__(*args, default_factory=Config, **kwargs)
-        self.setattr("convert_mapping", True)
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
@@ -163,7 +161,9 @@ class Config(NestedDict):
         ```
         """
 
-        if name in self or not self.getattr("frozen"):
+        if "default_factory" not in self:  # did not call super().__init__() in sub-class
+            self.setattr("default_factory", Config)
+        if name in self or not self.getattr("frozen", False):
             return super().get(name, default)
         raise KeyError(f"{self.__class__.__name__} does not contain {name}")
 
@@ -373,7 +373,7 @@ class Config(NestedDict):
         ```
         """
 
-        was_frozen = self.getattr("frozen")
+        was_frozen = self.getattr("frozen", False)
         try:
             self.defrost()
             yield self
@@ -411,7 +411,7 @@ class Config(NestedDict):
         ```
         """
 
-        return self.getattr("parser").parse(args, self, default_config)
+        return self.getattr("parser", ConfigParser()).parse(args, self, default_config)
 
     parse_config = parse
 
@@ -429,4 +429,4 @@ class Config(NestedDict):
         ```
         """
 
-        self.getattr("parser").add_argument(*args, **kwargs)
+        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
