@@ -37,15 +37,13 @@ class NestedDict(FlatDict):
     ```
     """
 
+    default_mapping: Callable
     convert_mapping: bool = False
-    default_factory: Optional[Callable]
-    default_mapping: Optional[Callable]
     delimiter: str = "."
     indent: int = 2
+    default_factory: Optional[Callable]
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        self.setattr("delimiter", ".")
-        self.setattr("convert_mapping", False)
         self.setattr("default_mapping", NestedDict)
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
@@ -89,8 +87,9 @@ class NestedDict(FlatDict):
         ```
         """
 
-        while self.getattr("delimiter") in name:
-            name, rest = name.split(self.getattr("delimiter"), 1)
+        delimiter = self.getattr("delimiter", ".")
+        while delimiter in name:
+            name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
         return super().get(name, default)
 
@@ -138,11 +137,12 @@ class NestedDict(FlatDict):
         ```
         """
 
-        default_mapping = self.getattr("default_mapping")
+        delimiter = self.getattr("delimiter", ".")
+        default_mapping = self.getattr("default_mapping", NestedDict)
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
-        while self.getattr("delimiter") in name:
-            name, rest = name.split(self.getattr("delimiter"), 1)
+        while delimiter in name:
+            name, rest = name.split(delimiter, 1)
             if name not in self:
                 if convert_mapping:
                     super().__setitem__(name, default_mapping())
@@ -178,8 +178,9 @@ class NestedDict(FlatDict):
         ```
         """
 
-        while self.getattr("delimiter") in name:
-            name, rest = name.split(self.getattr("delimiter"), 1)
+        delimiter = self.getattr("delimiter", ".")
+        while delimiter in name:
+            name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
         return super().__contains__(name)
 
@@ -206,8 +207,9 @@ class NestedDict(FlatDict):
         ```
         """
 
-        if self.getattr("delimiter") in name:
-            name, rest = name.split(self.getattr("delimiter"), 1)
+        delimiter = self.getattr("delimiter", ".")
+        if delimiter in name:
+            name, rest = name.split(delimiter, 1)
             if name not in self:
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}")
             return self[name].pop(rest, default)
@@ -226,11 +228,13 @@ class NestedDict(FlatDict):
         ```
         """
 
+        delimiter = self.getattr("delimiter", ".")
+
         @wraps(self.all_keys)
         def all_keys(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self.getattr("delimiter") + key
+                    key = prefix + delimiter + key
                 if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
                 else:
@@ -270,11 +274,13 @@ class NestedDict(FlatDict):
         ```
         """
 
+        delimiter = self.getattr("delimiter", ".")
+
         @wraps(self.all_items)
         def all_items(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + self.getattr("delimiter") + key
+                    key = prefix + delimiter + key
                 if isinstance(value, NestedDict):
                     yield from all_items(value, key)
                 else:
