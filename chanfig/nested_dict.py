@@ -5,16 +5,36 @@ from functools import wraps
 from os import PathLike
 from typing import Any, Callable, Iterable, Optional, Union
 
-from .flat_dict import FlatDict, PathStr
+from .flat_dict import FlatDict, PathStr, TorchDevice, TorchDtype
 from .variable import Variable
 
 
 class NestedDict(FlatDict):
     r"""
-    NestedDict is basically an FlatDict object that create a nested structure with delimiter.
+    `NestedDict` further extends `FlatDict` object by introducing a nested structure with delimiter.
 
-    It also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
+    `d = NestedDict(**{"a.b.c": 1})` is equivalent to `d = NestedDict(**{"a": {"b": {"c": 1}}})`,
+    and you can access the value by `d["a.b.c"]` or more simply `d.a.b.c`.
+
+    With `default_factory`, you can create nested `NestedDict` objects automatically.
+
+    This behavior allows you to pass keyword arguments to other function like `func1(**d.func1)`.
+
+    `NestedDict` also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
+
+    Example:
+    ```python
+    >>> d = NestedDict(default_factory=NestedDict)
+    >>> d.i.d = 1013
+    >>> d['i.d']
+    1013
+    >>> d.i.d
+    1013
+    >>> d.dict()
+    {'i': {'d': 1013}}
+
+    ```
     """
 
     convert_mapping: bool = False
@@ -99,9 +119,9 @@ class NestedDict(FlatDict):
         >>> d.set('i.d', 1013)
         >>> d.i.d
         1013
-        >>> d.d.i = 1031
+        >>> d.d.i = 1013
         >>> d['d.i']
-        1031
+        1013
         >>> d['n.l'] = 'chang'
         >>> d.n.l
         'chang'
@@ -275,7 +295,7 @@ class NestedDict(FlatDict):
         >>> d.a = NestedDict()
         >>> def func(d):
         ...     d.t = 1
-        >>> d.apply(func).to(dict)
+        >>> d.apply(func).dict()
         {'a': {'t': 1}, 't': 1}
 
         ```
@@ -286,39 +306,6 @@ class NestedDict(FlatDict):
                 value.apply(func)
         func(self)
         return self
-
-    def to(self, cls: Callable = dict) -> Mapping:
-        r"""
-        Convert NestedDict to other Mapping.
-
-        `to` and `dict` are alias of this method.
-
-        Args:
-            cls (Callable): Target class to be converted to.
-
-        Example:
-        ```python
-        >>> d = NestedDict(default_factory=NestedDict, a=1, b=2, c=3)
-        >>> d['i.d'] = 1013
-        >>> d.to(dict)
-        {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
-
-        ```
-        """
-
-        # pylint: disable=C0103
-
-        ret = cls()
-        for k, v in self.items():
-            if isinstance(v, Variable):
-                v = v.value
-            if isinstance(v, FlatDict):
-                v = v.to(cls)
-            ret[k] = v
-        return ret
-
-    convert = to
-    dict = to
 
     def difference(  # pylint: disable=W0221
         self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
@@ -336,12 +323,12 @@ class NestedDict(FlatDict):
         ```python
         >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
-        >>> d.difference(n).to(dict)
+        >>> d.difference(n).dict()
         {'b': {'c': 3}, 'e': 4}
-        >>> d.difference(n, recursive=False).to(dict)
+        >>> d.difference(n, recursive=False).dict()
         {'b': {'c': 3, 'd': 3}, 'e': 4}
         >>> l = [('a', 1), ('d', 4)]
-        >>> d.difference(l).to(dict)
+        >>> d.difference(l).dict()
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
@@ -391,12 +378,12 @@ class NestedDict(FlatDict):
         ```python
         >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
-        >>> d.intersection(n).to(dict)
+        >>> d.intersection(n).dict()
         {'a': 1, 'b': {'d': 3}}
-        >>> d.intersection(n, recursive=False).to(dict)
+        >>> d.intersection(n, recursive=False).dict()
         {'a': 1}
         >>> l = [('a', 1), ('d', 4)]
-        >>> d.intersection(l).to(dict)
+        >>> d.intersection(l).dict()
         {'a': 1}
         >>> d.intersection(1)
         Traceback (most recent call last):
@@ -426,6 +413,53 @@ class NestedDict(FlatDict):
         return self.empty_like(**intersection(self, other))  # type: ignore
 
     inter = intersection
+
+    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> Any:
+        r"""
+        Move values of FlatDict to target class.
+
+        Args:
+            cls (Union[str, TorchDevice, TorchDtype]): Target class.
+
+        Example:
+        ```python
+        >>> import torch
+        >>> d = NestedDict(**{'i.d': torch.tensor(1013)})
+        >>> d.cpu().dict()
+        {'i': {'d': tensor(1013)}}
+
+        ```
+        """
+
+        return self.apply(lambda d: super().to(cls))
+
+    def dict(self, cls: Callable = dict) -> Mapping:
+        r"""
+        Convert NestedDict to other Mapping.
+
+        Args:
+            cls (Callable): Target class to be converted to.
+
+        Example:
+        ```python
+        >>> d = NestedDict(default_factory=NestedDict, a=1, b=2, c=3)
+        >>> d['i.d'] = 1013
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
+
+        ```
+        """
+
+        # pylint: disable=C0103
+
+        ret = cls()
+        for k, v in self.items():
+            if isinstance(v, Variable):
+                v = v.value
+            if isinstance(v, FlatDict):
+                v = v.dict(cls)
+            ret[k] = v
+        return ret
 
 
 class DefaultDict(NestedDict):

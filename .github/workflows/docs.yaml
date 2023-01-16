@@ -1,12 +1,12 @@
 name: docs
 on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
+  workflow_run:
+    workflows: ["push"]
+    types:
+      - completed
 jobs:
   pages:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: mkdocs
     runs-on: ubuntu-latest
     permissions:

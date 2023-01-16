@@ -17,6 +17,15 @@ from yaml import load as yaml_load
 from .utils import FileError, JsonEncoder, YamlDumper, YamlLoader
 from .variable import Variable
 
+try:
+    from torch import Tensor as TorchTensor
+    from torch import device as TorchDevice
+    from torch import dtype as TorchDtype
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+
 PathStr = Union[PathLike, str, bytes]
 File = Union[PathStr, IO]
 
@@ -26,15 +35,19 @@ PYTHON = ("py",)
 
 
 class FlatDict(OrderedDict):
-
-    # pylint: disable=R0904
-
     r"""
-    FlatDict with attribute-style access.
+    `FlatDict` with attribute-style access.
 
-    FlatDict inherits from built-in FlatDict of collections.
-    It also comes with many easy to use helper function, such as `difference`, `intersection` and full IO supports.
-    FlatDict works best with `Variable` objects.
+    `FlatDict` inherits from built-in `collections.OrderedDict`.
+
+    It comes with many easy to use helper function, such as `difference`, `intersection`.
+
+    It also has full support for  IO operations, such as `json` and `yaml`.
+
+    Even better, `FlatDict` has pytorch support built-in.
+    You can directly call `FlatDict.cpu()` or `FlatDict.to("cpu")` to move all `torch.Tensor` objects across devices.
+
+    `FlatDict` works best with `Variable` objects.
 
     Example:
     ```python
@@ -42,9 +55,9 @@ class FlatDict(OrderedDict):
     >>> d.d = 1013
     >>> d['d']
     1013
-    >>> d['i'] = 1031
+    >>> d['i'] = 1013
     >>> d.i
-    1031
+    1013
     >>> d.a = Variable(1)
     >>> d.b = d.a
     >>> d.a, d.b
@@ -64,6 +77,8 @@ class FlatDict(OrderedDict):
 
     ```
     """
+
+    # pylint: disable=R0904
 
     default_factory: Optional[Callable]
     indent: int = 2
@@ -182,9 +197,9 @@ class FlatDict(OrderedDict):
         >>> d.set('d', 1013)
         >>> d.get('d')
         1013
-        >>> d['d'] = 1031
+        >>> d['d'] = 1013
         >>> d.d
-        1031
+        1013
         >>> d.d = 'chang'
         >>> d['d']
         'chang'
@@ -301,10 +316,10 @@ class FlatDict(OrderedDict):
         >>> d = FlatDict(default_factory=list)
         >>> d.n
         []
-        >>> d.get('d', 1031)
-        1031
-        >>> d.__missing__('d', 1031)
-        1031
+        >>> d.get('d', 1013)
+        1013
+        >>> d.__missing__('d', 1013)
+        1013
 
         ```
         """
@@ -320,45 +335,6 @@ class FlatDict(OrderedDict):
             super().__setitem__(name, default)
         return default
 
-    def to(self, cls: Callable = dict) -> Mapping:
-        r"""
-        Convert FlatDict to other Mapping.
-
-        `convert` is an alias of this method.
-
-        Args:
-            cls (Callable): Target class to be converted to. Defaults to dict.
-
-        Example:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.to(dict)
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        # pylint: disable=C0103
-
-        return cls(**{k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
-
-    convert = to
-
-    def dict(self) -> Mapping[Any, Any]:
-        r"""
-        Convert FlatDict to dict.
-
-        Example:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        return self.to(dict)
-
     def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
         r"""
         Update FlatDict values w.r.t. other.
@@ -372,10 +348,10 @@ class FlatDict(OrderedDict):
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.update(n).to(dict)
+        >>> d.update(n).dict()
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.update(l).to(dict)
+        >>> d.update(l).dict()
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
 
         ```
@@ -411,10 +387,10 @@ class FlatDict(OrderedDict):
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.difference(n).to(dict)
+        >>> d.difference(n).dict()
         {'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.difference(l).to(dict)
+        >>> d.difference(l).dict()
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
@@ -449,10 +425,10 @@ class FlatDict(OrderedDict):
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.intersection(n).to(dict)
+        >>> d.intersection(n).dict()
         {}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.intersection(l).to(dict)
+        >>> d.intersection(l).dict()
         {'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
@@ -482,10 +458,10 @@ class FlatDict(OrderedDict):
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.copy()
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': []}
         >>> d.a.append(1)
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': [1]}
         >>> c.getattr("name")
         'Chang'
@@ -506,10 +482,10 @@ class FlatDict(OrderedDict):
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.deepcopy()
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': []}
         >>> d.a.append(1)
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': []}
         >>> c.getattr("name")
         'Chang'
@@ -545,7 +521,7 @@ class FlatDict(OrderedDict):
         ```python
         >>> d = FlatDict(a=[])
         >>> c = d.empty()
-        >>> c.to(dict)
+        >>> c.dict()
         {}
 
         ```
@@ -567,7 +543,7 @@ class FlatDict(OrderedDict):
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
         >>> c = d.empty_like()
-        >>> c.to(dict)
+        >>> c.dict()
         {}
         >>> c.getattr("name")
         'Chang'
@@ -578,6 +554,113 @@ class FlatDict(OrderedDict):
         empty = self.empty(*args, **kwargs)
         empty.__dict__.update(self.__dict__)
         return empty
+
+    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> Any:
+        r"""
+        Move values of FlatDict to target class.
+
+        Args:
+            cls (Union[str, TorchDevice, TorchDtype]): Target class.
+
+        Example:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        # pylint: disable=C0103
+
+        if isinstance(cls, str):
+            if cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
+                return getattr(self, cls)()
+        if TORCH_AVAILABLE and isinstance(cls, (TorchDevice, TorchDtype)):
+            for k, v in self.items():
+                if isinstance(v, TorchTensor):
+                    self[k] = v.to(cls)
+            return self
+
+        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}")
+
+    def cpu(self) -> FlatDict:
+        r"""
+        Move all tensors to cpu.
+
+        Example:
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.cpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='cpu')}
+
+        ```
+        """
+
+        # pylint: disable=C0103
+
+        return self.to(TorchDevice("cpu"))
+
+    def gpu(self) -> FlatDict:
+        r"""
+        Move all tensors to gpu.
+
+        `cuda` is an alias of this method.
+
+        Example:
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.gpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='cuda:0')}
+
+        ```
+        """
+
+        # pylint: disable=C0103
+
+        return self.to(TorchDevice("cuda"))
+
+    cuda = gpu
+
+    def tpu(self) -> FlatDict:
+        r"""
+        Move all tensors to tpu.
+
+        `xla` is an alias of this method.
+
+        Example:
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.tpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='xla:0')}
+
+        ```
+        """
+
+        return self.to(TorchDevice("xla"))
+
+    xla = tpu
+
+    def dict(self, cls: Callable = dict) -> Mapping[Any, Any]:
+        r"""
+        Convert FlatDict to other Mapping.
+
+        Args:
+            cls (Callable): Target class to be converted to.
+
+        Example:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
 
     def json(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -608,7 +691,7 @@ class FlatDict(OrderedDict):
         Example:
         ```python
         >>> d = FlatDict.from_json('example.json')
-        >>> d.to(dict)
+        >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -634,7 +717,7 @@ class FlatDict(OrderedDict):
             kwargs["cls"] = JsonEncoder
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return json_dumps(self.to(dict), *args, **kwargs)
+        return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
     def from_jsons(cls, string: str, *args, **kwargs) -> FlatDict:
@@ -644,7 +727,7 @@ class FlatDict(OrderedDict):
         Example:
         ```python
         >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
-        >>> d.to(dict)
+        >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -680,7 +763,7 @@ class FlatDict(OrderedDict):
 
         ```python
         >>> d = FlatDict.from_yaml('example.yaml')
-        >>> d.to(dict)
+        >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -706,7 +789,7 @@ class FlatDict(OrderedDict):
             kwargs["Dumper"] = YamlDumper
         if "indent" not in kwargs:
             kwargs["indent"] = self.getattr("indent")
-        return yaml_dump(self.to(dict), *args, **kwargs)  # type: ignore
+        return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
 
     @classmethod
     def from_yamls(cls, string: str, *args, **kwargs) -> FlatDict:
@@ -716,7 +799,7 @@ class FlatDict(OrderedDict):
         Example:
         ```python
         >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
-        >>> d.to(dict)
+        >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -757,7 +840,7 @@ class FlatDict(OrderedDict):
         Example:
         ```python
         >>> d = FlatDict.load("example.yaml")
-        >>> d.to(dict)
+        >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
