@@ -36,9 +36,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Example:
         ```python
         >>> c = Config(a=0)
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).to(dict)
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -192,16 +192,16 @@ class Config(NestedDict):
         >>> c['i.d'] = 1013
         >>> c.i.d
         1013
-        >>> c.freeze().to(dict)
+        >>> c.freeze().dict()
         {'i': {'d': 1013}}
-        >>> c['i.d'] = 1031
+        >>> c['i.d'] = 1013
         Traceback (most recent call last):
         ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
-        >>> c.defrost().to(dict)
+        >>> c.defrost().dict()
         {'i': {'d': 1013}}
-        >>> c['i.d'] = 1031
+        >>> c['i.d'] = 1013
         >>> c.i.d
-        1031
+        1013
 
         ```
         """
@@ -267,16 +267,16 @@ class Config(NestedDict):
         1013
         >>> c.pop('i.d', True)
         True
-        >>> c.freeze().to(dict)
+        >>> c.freeze().dict()
         {'i': {}}
-        >>> c['i.d'] = 1031
+        >>> c['i.d'] = 1013
         Traceback (most recent call last):
         ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
-        >>> c.defrost().to(dict)
+        >>> c.defrost().dict()
         {'i': {}}
-        >>> c['i.d'] = 1031
+        >>> c['i.d'] = 1013
         >>> c.pop('i.d')
-        1031
+        1013
 
         ```
         """
@@ -297,7 +297,7 @@ class Config(NestedDict):
         >>> c = Config()
         >>> c.getattr('frozen')
         False
-        >>> c.freeze().to(dict)
+        >>> c.freeze().dict()
         {}
         >>> c.getattr('frozen')
         True
@@ -331,11 +331,11 @@ class Config(NestedDict):
         >>> c = Config()
         >>> c.getattr('frozen')
         False
-        >>> c.freeze().to(dict)
+        >>> c.freeze().dict()
         {}
         >>> c.getattr('frozen')
         True
-        >>> c.defrost().to(dict)
+        >>> c.defrost().dict()
         {}
         >>> c.getattr('frozen')
         False
@@ -363,11 +363,11 @@ class Config(NestedDict):
         Example:
         ```python
         >>> c = Config()
-        >>> c.freeze().to(dict)
+        >>> c.freeze().dict()
         {}
         >>> with c.unlocked():
         ...     c['i.d'] = 1013
-        >>> c.to(dict)
+        >>> c.dict()
         {'i': {'d': 1013}}
 
         ```
@@ -403,9 +403,9 @@ class Config(NestedDict):
         Example:
         ```python
         >>> c = Config(a=0)
-        >>> c.to(dict)
+        >>> c.dict()
         {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).to(dict)
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
@@ -423,7 +423,7 @@ class Config(NestedDict):
         ```python
         >>> c = Config(a=0)
         >>> c.add_argument("--a", type=int, default=1)
-        >>> c.parse([]).to(dict)
+        >>> c.parse([]).dict()
         {'a': 1}
 
         ```

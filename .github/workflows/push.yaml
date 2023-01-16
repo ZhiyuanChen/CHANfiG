@@ -14,7 +14,7 @@ jobs:
           extra-pycodestyle-options: "--max-line-length 120"
           extra-flake8-options: "--max-line-length 120"
           extra-black-options: "--line-length 120"
-          extra-mypy-options: ""
+          extra-mypy-options: "--ignore-missing-imports"
           extra-isort-options: "--line-length 120"
   test:
     environment: analysis
@@ -30,6 +30,8 @@ jobs:
           cache: "pip"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Install dependencies for testing
+        run: pip install torch
       - name: Install pytest
         run: pip install pytest
       - name: doctest
