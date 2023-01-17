@@ -23,16 +23,17 @@ class NestedDict(FlatDict):
     `NestedDict` also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
 
-    Example:
+    Examples
+    --------
     ```python
-    >>> d = NestedDict(default_factory=NestedDict)
+    >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
     >>> d.i.d = 1013
     >>> d['i.d']
     1013
     >>> d.i.d
     1013
     >>> d.dict()
-    {'i': {'d': 1013}}
+    {'f': {'n': 'chang'}, 'i': {'d': 1013}}
 
     ```
     """
@@ -40,11 +41,10 @@ class NestedDict(FlatDict):
     default_mapping: Callable
     convert_mapping: bool = False
     delimiter: str = "."
-    indent: int = 2
-    default_factory: Optional[Callable]
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        self.setattr("default_mapping", NestedDict)
+        if not self.hasattr("default_mapping"):
+            self.setattr("default_mapping", NestedDict)
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
@@ -57,32 +57,48 @@ class NestedDict(FlatDict):
         r"""
         Get value from NestedDict.
 
-        `__getitem__` and `__getattr__` are alias of this method.
+        Note that `default` will override the `default_factory` if specified.
 
-        Note that default here will override the default_factory if specified.
+        Parameters
+        ----------
+        name: str
+        default: Optional[Any] = None
 
-        Args:
-            name (str): Key name.
-            default (Optional[Any]): Default value if name does not present.
+        Returns
+        -------
+        value: Any
+            If name does not exist, return `default`.
+            If `default` is not specified, return `default_factory()`.
 
-        Example:
+        Raises
+        ------
+        KeyError
+            If name does not exist and `default`/`default_factory` is not specified.
+
+        **Alias**:
+
+        + `__getitem__`
+        + `__getattr__`
+
+        Examples
+        --------
         ```python
-        >>> d = NestedDict(default_factory=NestedDict)
-        >>> d['i.d'] = 1013
+        >>> d = NestedDict(**{"i.d": 1013}, default_factory=NestedDict)
         >>> d.get('i.d')
         1013
         >>> d['i.d']
         1013
         >>> d.i.d
         1013
-        >>> d.get('c', 2)
+        >>> d.get('f', 2)
         2
-        >>> d.get('c')
+        >>> d.f
         NestedDict()
+        >>> del d.f
         >>> d = NestedDict()
-        >>> d.get('c')
+        >>> d.f
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain c'
+        KeyError: 'NestedDict does not contain f'
 
         ```
         """
@@ -105,22 +121,31 @@ class NestedDict(FlatDict):
         r"""
         Set value of NestedDict.
 
-        `__setitem__` and `__setattr__` are alias of this method.
+        Parameters
+        ----------
+        name: str
+        value: Any
+        convert_mapping: Optional[bool] = self.convert_mapping
+            Whether convert mapping to NestedDict.
 
-        Args:
-            name (str): Key name.
-            value (Any): Value to set.
-            convert_mapping (Optional[bool]): Whether convert mapping to NestedDict. Defaults to self.convert_mapping.
+        **Alias**:
 
-        Example:
+        + `__setitem__`
+        + `__setattr__`
+
+        Examples
+        --------
         ```python
         >>> d = NestedDict(default_factory=NestedDict)
         >>> d.set('i.d', 1013)
-        >>> d.i.d
+        >>> d.get('i.d')
         1013
-        >>> d.d.i = 1013
-        >>> d['d.i']
-        1013
+        >>> d
+        NestedDict(
+          (i): NestedDict(
+            (d): 1013
+          )
+        )
         >>> d['n.l'] = 'chang'
         >>> d.n.l
         'chang'
@@ -156,21 +181,70 @@ class NestedDict(FlatDict):
     __setitem__ = set
     __setattr__ = set
 
+    def delete(self, name: str) -> None:
+        r"""
+        Delete value from NestedDict.
+
+        Parameters
+        ----------
+        name: str
+
+        **Alias**:
+
+        + `__delitem__`
+        + `__delattr__`
+
+        Examples
+        --------
+        ```python
+        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+        >>> d.i.d
+        1013
+        >>> d.f.n
+        'chang'
+        >>> d.delete('i.d')
+        >>> "i.d" in d
+        False
+        >>> d.i.d
+        Traceback (most recent call last):
+        KeyError: 'NestedDict does not contain d'
+        >>> del d.f.n
+        >>> d.f.n
+        Traceback (most recent call last):
+        KeyError: 'NestedDict does not contain n'
+        >>> del d.c
+        Traceback (most recent call last):
+        KeyError: 'c'
+
+        ```
+        """
+
+        delimiter = self.getattr("delimiter", ".")
+        while delimiter in name:
+            name, rest = name.split(delimiter, 1)
+            self, name = self[name], rest  # pylint: disable=W0642
+        super().__delitem__(name)
+
+    __delitem__ = delete
+    __delattr__ = delete
+
     def __contains__(self, name: str) -> bool:  # type: ignore
         r"""
         Determine if NestedDict contains name.
 
-        Args:
-            name (str): Key name.
+        Parameters
+        ----------
+        name: str
 
-        Example:
+        Examples
+        --------
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b.c': 2})
-        >>> 'a' in d
+        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+        >>> 'i.d' in d
         True
-        >>> 'b.c' in d
+        >>> 'f.n' in d
         True
-        >>> 'b' in d
+        >>> 'i' in d
         True
         >>> 'd' in d
         False
@@ -188,14 +262,15 @@ class NestedDict(FlatDict):
         r"""
         Pop value from NestedDict.
 
-        Args:
-            name (str): Key name.
-            default (Optional[Any]): Default value if name does not present.
+        Parameters
+        ----------
+        name: str
+        default: Optional[Any] = None
 
-        Example:
+        Examples
+        --------
         ```python
-        >>> d = NestedDict(default_factory=NestedDict)
-        >>> d['i.d'] = 1013
+        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
         >>> d.pop('i.d')
         1013
         >>> d.pop('i.d', True)
@@ -219,7 +294,8 @@ class NestedDict(FlatDict):
         r"""
         Get all keys of NestedDict.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_keys())
@@ -246,7 +322,8 @@ class NestedDict(FlatDict):
         r"""
         Get all values of NestedDict.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_values())
@@ -265,7 +342,8 @@ class NestedDict(FlatDict):
         r"""
         Get all items of NestedDict.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_items())
@@ -292,10 +370,12 @@ class NestedDict(FlatDict):
         r"""
         Recursively apply a function to the object and its children.
 
-        Args:
-            func (Callable): Function to be applied to.
+        Parameters
+        ----------
+        func: Callable
 
-        Example:
+        Examples
+        --------
         ```python
         >>> d = NestedDict()
         >>> d.a = NestedDict()
@@ -319,13 +399,17 @@ class NestedDict(FlatDict):
         r"""
         Difference between NestedDict values and other.
 
-        `diff` is an alias of this method.
+        Parameters
+        ----------
+        other: Mapping | Iterable | PathStr
+        recursive: bool = True
 
-        Args:
-            other (Mapping | Iterable | PathStr): Other values to compare.
-            recursive (bool): Whether to compare recursively. Defaults to True.
+        **Alias**:
 
-        Example:
+        + `diff`
+
+        Examples
+        --------
         ```python
         >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
@@ -374,13 +458,17 @@ class NestedDict(FlatDict):
         r"""
         Intersection between NestedDict values and other.
 
-        `inter` is an alias of this method.
+        Parameters
+        ----------
+        other: Mapping | Iterable | PathStr
+        recursive: bool = True
 
-        Args:
-            other (Mapping | Iterable | PathStr): Other values to join.
-            recursive (bool): Whether to compare recursively. Defaults to True.
+        **Alias**:
 
-        Example:
+        + `inter`
+
+        Examples
+        --------
         ```python
         >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
@@ -422,12 +510,14 @@ class NestedDict(FlatDict):
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> Any:
         r"""
-        Move values of FlatDict to target class.
+        Convert values of `NestedDict` to target class.
 
-        Args:
-            cls (Union[str, TorchDevice, TorchDtype]): Target class.
+        Parameters
+        ----------
+        cls: str | torch.device | torch.dtype
 
-        Example:
+        Examples
+        --------
         ```python
         >>> import torch
         >>> d = NestedDict(**{'i.d': torch.tensor(1013)})
@@ -441,17 +531,20 @@ class NestedDict(FlatDict):
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""
-        Convert NestedDict to other Mapping.
+        Convert `NestedDict` to other `Mapping`.
 
-        Args:
-            cls (Callable): Target class to be converted to.
+        Parameters
+        ----------
+        cls: Callable = dict
+            Target class to be converted to.
 
-        Example:
+        Examples
+        --------
         ```python
-        >>> d = NestedDict(default_factory=NestedDict, a=1, b=2, c=3)
+        >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
         >>> d['i.d'] = 1013
         >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3, 'i': {'d': 1013}}
+        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
 
         ```
         """
@@ -470,11 +563,11 @@ class NestedDict(FlatDict):
 
 class DefaultDict(NestedDict):
     r"""
-    NestedDict with default_factory set to NestedDict by default.
+    `NestedDict` with `default_factory` set to `NestedDict` by default.
 
-    Note that just like `collections.defaultdict`, the default_factory is called without any arguments.
+    Note that just like `collections.defaultdict`, the `default_factory()` is called without any arguments.
 
-    In addition, if you access a key that does not exist, the value will be set to default_factory().
+    In addition, if you access a key that does not exist, the value will be set to `default_factory()`.
     """
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
