@@ -28,12 +28,27 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
-        Args:
-            args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
-            config (Optional[Config]): The base config. Defaults to an empty Config.
-            default_config (Optional[str]): The path to a config file.
+        Parameters
+        ----------
+        args: Optional[Sequence[str]] = sys.argv[1:]
+            The arguments to parse.
+        config: Optional[Config] = Config()
+            The base config.
+        default_config: Optional[str] = None
+            The path to a config file.
 
-        Example:
+        Returns
+        -------
+        config: Config
+            The parsed config.
+
+        Raises
+        ------
+        ValueError
+            If default_config is specified but not found in args.
+
+        Examples
+        --------
         ```python
         >>> c = Config(a=0)
         >>> c.dict()
@@ -112,51 +127,64 @@ class Config(NestedDict):
 
     parser: ConfigParser
     frozen: bool = False
-    convert_mapping: bool = True
-    delimiter: str = "."
-    indent: int = 2
-    default_factory: Optional[Callable]
 
     def __init__(self, *args, **kwargs):
-        self.setattr("parser", ConfigParser())
+        if not self.hasattr("default_mapping"):
+            self.setattr("default_mapping", Config)
         super().__init__(*args, default_factory=Config, **kwargs)
+        self.setattr("parser", ConfigParser())
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
         Get value from Config.
 
-        `__getitem__` and `__getattr__` are alias of this method.
+        Note that `default` will override the `default_factory` if specified.
 
-        Note that default here will override the default_factory if specified.
+        Parameters
+        ----------
+        name: str
+        default: Optional[Any] = None
 
-        Args:
-            name (str): Key name.
-            default (Optional[Any]): Default value if name does not present.
+        Returns
+        -------
+        value: Any
+            If name does not exist, return `default`.
+            If `default` is not specified, return `default_factory()`.
 
-        Example:
+        Raises
+        ------
+        KeyError
+            If name does not exist and `default`/`default_factory` is not specified.
+
+        **Alias**:
+
+        + `__getitem__`
+        + `__getattr__`
+
+        Examples
+        --------
         ```python
-        >>> d = Config()
-        >>> d['i.d'] = 1013
+        >>> d = Config(**{"i.d": 1013})
         >>> d.get('i.d')
         1013
         >>> d['i.d']
         1013
         >>> d.i.d
         1013
-        >>> d.get('c', 2)
+        >>> d.get('f', 2)
         2
-        >>> d.c
+        >>> d.f
         Config()
-        >>> del d.c
+        >>> del d.f
         >>> d.freeze()
         Config(
-          (i): NestedDict(
+          (i): Config(
             (d): 1013
           )
         )
-        >>> d.c
+        >>> d.f
         Traceback (most recent call last):
-        KeyError: 'Config does not contain c'
+        KeyError: 'Config does not contain f'
 
         ```
         """
@@ -180,13 +208,23 @@ class Config(NestedDict):
         r"""
         Set value of Config.
 
-        `__setitem__` and `__setattr__` are alias of this method.
+        Parameters
+        ----------
+        name: str
+        value: Any
 
-        Args:
-            name (str): Key name.
-            value (Any): Value to set.
+        Raises
+        ------
+        ValueError
+            If Config is frozen.
 
-        Example:
+        **Alias**:
+
+        + `__setitem__`
+        + `__setattr__`
+
+        Examples
+        --------
         ```python
         >>> c = Config()
         >>> c['i.d'] = 1013
@@ -216,31 +254,36 @@ class Config(NestedDict):
         r"""
         Delete value from Config.
 
-        `__delitem__` and `__delattr__` and are alias of this method.
+        Parameters
+        ----------
+        name: str
 
-        Args:
-            name (str): Key name.
+        **Alias**:
 
-        Example:
+        + `__delitem__`
+        + `__delattr__`
+
+        Examples
+        --------
         ```python
-        >>> d = Config(d=1016, n='chang')
-        >>> d.d
-        1016
-        >>> d.n
+        >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
+        >>> d.i.d
+        1013
+        >>> d.f.n
         'chang'
-        >>> d.delete('d')
-        >>> "d" in d
+        >>> d.delete('i.d')
+        >>> "i.d" in d
         False
-        >>> d.d
+        >>> d.i.d
         Config()
-        >>> "d" in d
+        >>> "i.d" in d
         True
-        >>> del d.n
-        >>> d.n
+        >>> del d.f.n
+        >>> d.f.n
         Config()
-        >>> del d.f
+        >>> del d.c
         Traceback (most recent call last):
-        KeyError: 'f'
+        KeyError: 'c'
 
         ```
         """
@@ -255,11 +298,13 @@ class Config(NestedDict):
         r"""
         Pop value from Config.
 
-        Args:
-            name (str): Key name.
-            default (Optional[Any]): Default value if name does not present.
+        Parameters
+        ----------
+        name: str
+        default: Optional[Any] = None
 
-        Example:
+        Examples
+        --------
         ```python
         >>> c = Config()
         >>> c['i.d'] = 1013
@@ -287,12 +332,16 @@ class Config(NestedDict):
         r"""
         Freeze the config.
 
-        `lock` is an alias of this method.
+        Parameters
+        ----------
+        recursive: bool = True
 
-        Args:
-            recursive (bool): freeze all sub-configs recursively. Defaults to True.
+        **Alias**:
 
-        Example:
+        + `lock`
+
+        Examples
+        --------
         ```python
         >>> c = Config()
         >>> c.getattr('frozen')
@@ -321,12 +370,16 @@ class Config(NestedDict):
         r"""
         Defrost the config.
 
-        `unlock` is an alias of this method.
+        Parameters
+        ----------
+        recursive: bool = True
 
-        Args:
-            recursive (bool): defrost all sub-configs recursively. Defaults to True.
+        **Alias**:
 
-        Example:
+        + `unlock`
+
+        Examples
+        --------
         ```python
         >>> c = Config()
         >>> c.getattr('frozen')
@@ -360,7 +413,8 @@ class Config(NestedDict):
         """
         Context manager which temporarily unlocks the config.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> c = Config()
         >>> c.freeze().dict()
@@ -396,11 +450,13 @@ class Config(NestedDict):
 
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
-        Args:
+        Parameters
+        ----------
             args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
             default_config (Optional[str]): The path to a config file.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> c = Config(a=0)
         >>> c.dict()
@@ -419,7 +475,8 @@ class Config(NestedDict):
         r"""
         Add an argument to the parser.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> c = Config(a=0)
         >>> c.add_argument("--a", type=int, default=1)

@@ -8,7 +8,8 @@ class Variable:
     r"""
     Mutable wrapper for immutable objects.
 
-    Example:
+    Examples
+    --------
     ```python
     >>> v = Variable(1)
     >>> n = v
@@ -228,12 +229,12 @@ class Variable:
         r"""
         Convert the value to a different type.
 
-        `convert` is an alias of this method.
-
-        Args:
+        Parameters
+        ----------
             cls (Callable): The type to convert to.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> id = Variable(1013)
         >>> id.to(float)
@@ -251,7 +252,8 @@ class Variable:
         r"""
         Convert the value to a python default int.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> id = Variable(1013.0)
         >>> id.int()
@@ -266,7 +268,8 @@ class Variable:
         r"""
         Convert the value to a python default float.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> id = Variable(1013)
         >>> id.float()
@@ -281,7 +284,8 @@ class Variable:
         r"""
         Convert the value to a python default float.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> id = Variable(1013)
         >>> id.str()
@@ -297,7 +301,8 @@ class Variable:
         """
         Context manager which temporarily unwrap the Variable.
 
-        Example:
+        Examples
+        --------
         ```python
         >>> v = Variable(1)
         >>> isinstance(v, int)

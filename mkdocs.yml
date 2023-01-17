@@ -156,7 +156,14 @@ plugins:
   #     post_date_format: full
   #     post_url_format: "{slug}"
   - git-committers
-  - mkdocstrings
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          selection:
+            docstring_style: numpy
+      watch:
+        - chanfig/
   - i18n:
       default_language: en
       languages:

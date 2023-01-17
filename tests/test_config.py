@@ -3,6 +3,7 @@ from chanfig import Config, Variable
 
 class TestConfig(Config):
     __test__ = False
+
     def __init__(self, *args, **kwargs):
         num_classes = Variable(10)
         self.name = "CHANfiG"
