@@ -23,6 +23,18 @@ class NestedDict(FlatDict):
     `NestedDict` also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
 
+    When `convert_mapping` specified, all new values with a type of `Mapping` will be converted to `default_mapping`.
+    Note that `convert_mapping` is automatically applied to arguments at initialisation.
+
+    Attributes
+    ----------
+    default_mapping: Callable = NestedDict
+        Default mapping when performing `convert_mapping`.
+    convert_mapping: bool = False
+        If `True`, all new values with a type of `Mapping` will be converted to `default_mapping`.
+    delimiter: str = "."
+        Delimiter for nested structure.
+
     Examples
     --------
     ```python
@@ -98,7 +110,7 @@ class NestedDict(FlatDict):
         >>> d = NestedDict()
         >>> d.f
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain f'
+        KeyError: 'NestedDict does not contain f.'
 
         ```
         """
@@ -207,11 +219,11 @@ class NestedDict(FlatDict):
         False
         >>> d.i.d
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain d'
+        KeyError: 'NestedDict does not contain d.'
         >>> del d.f.n
         >>> d.f.n
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain n'
+        KeyError: 'NestedDict does not contain n.'
         >>> del d.c
         Traceback (most recent call last):
         KeyError: 'c'
@@ -422,7 +434,7 @@ class NestedDict(FlatDict):
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -434,7 +446,7 @@ class NestedDict(FlatDict):
         if isinstance(other, (Mapping,)):
             other = self.empty_like(**other).items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         @wraps(self.difference)
         def difference(this: NestedDict, that: Iterable) -> Mapping:
@@ -481,7 +493,7 @@ class NestedDict(FlatDict):
         {'a': 1}
         >>> d.intersection(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -491,7 +503,7 @@ class NestedDict(FlatDict):
         if isinstance(other, (Mapping,)):
             other = self.empty_like(**other).items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         @wraps(self.intersection)
         def intersection(this: NestedDict, that: Iterable) -> Mapping:
@@ -570,7 +582,7 @@ class DefaultDict(NestedDict):
     In addition, if you access a key that does not exist, the value will be set to `default_factory()`.
     """
 
-    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        if default_factory is None:
-            default_factory = NestedDict
-        super().__init__(*args, default_factory=default_factory, **kwargs)
+    def __init__(self, *args, **kwargs):
+        if "default_factory" not in kwargs:
+            kwargs["default_factory"] = NestedDict
+        super().__init__(*args, **kwargs)

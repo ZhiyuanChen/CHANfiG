@@ -103,7 +103,7 @@ def frozen_check(func: Callable):
     @wraps(func)
     def decorator(self, *args, **kwargs):
         if self.getattr("frozen", False):
-            raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first")
+            raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first.")
         return func(self, *args, **kwargs)
 
     return decorator
@@ -123,6 +123,46 @@ class Config(NestedDict):
     accessing anything that does not exist will create a new empty Config sub-attribute.
 
     It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
+
+    Attributes
+    ----------
+    parser: ConfigParser = ConfigParser()
+        Parser for command line arguments.
+    frozen: bool = False
+        If `True`, the config is frozen and cannot be altered.
+
+    Examples
+    --------
+    ```python
+    >>> c = Config(**{"f.n": "chang"})
+    >>> c.i.d = 1013
+    >>> c.i.d
+    1013
+    >>> c.d.i
+    Config()
+    >>> c.freeze()
+    Config(
+      (f): Config(
+        (n): 'chang'
+      )
+      (i): Config(
+        (d): 1013
+      )
+      (d): Config(
+        (i): Config()
+      )
+    )
+    >>> c.d.i = 1013
+    Traceback (most recent call last):
+    ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
+    >>> c.d.e
+    Traceback (most recent call last):
+    KeyError: 'Config does not contain e'
+    >>> with c.unlocked():
+    ...     del c.d
+    >>> c.dict()
+    {'f': {'n': 'chang'}, 'i': {'d': 1013}}
+
     """
 
     parser: ConfigParser
@@ -131,7 +171,9 @@ class Config(NestedDict):
     def __init__(self, *args, **kwargs):
         if not self.hasattr("default_mapping"):
             self.setattr("default_mapping", Config)
-        super().__init__(*args, default_factory=Config, **kwargs)
+        if "default_factory" not in kwargs:
+            kwargs["default_factory"] = Config
+        super().__init__(*args, **kwargs)
         self.setattr("parser", ConfigParser())
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
@@ -234,7 +276,7 @@ class Config(NestedDict):
         {'i': {'d': 1013}}
         >>> c['i.d'] = 1013
         Traceback (most recent call last):
-        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
+        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
         >>> c.defrost().dict()
         {'i': {'d': 1013}}
         >>> c['i.d'] = 1013
@@ -316,7 +358,7 @@ class Config(NestedDict):
         {'i': {}}
         >>> c['i.d'] = 1013
         Traceback (most recent call last):
-        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first
+        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
         >>> c.defrost().dict()
         {'i': {}}
         >>> c['i.d'] = 1013
