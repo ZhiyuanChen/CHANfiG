@@ -1,10 +1,11 @@
 ---
-title: CHANfiG
 summary: Easier Configuration
 authors:
     - Zhiyuan Chen
 date: 2022-05-04
 ---
+
+# CHANfiG
 
 ## Introduction
 
@@ -15,7 +16,7 @@ To configure all these parameters, researchers usually need to write gigantic co
 Most of the configs are just replicates of the default arguments of certain functions, resulting in many unnecessary declarations.
 It is also very hard to alter the configurations.
 One needs to navigate and open the right configuration file, make changes, save and exit.
-These had wasted an uncountable[^uncountable] amount of precious time ~~and is no doubt a crime~~.
+These had wasted an uncountable[^uncountable] amount of precious time ~~and are no doubt a crime~~.
 Using `argparse` could relieve the burdens to some extent, however, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
 CHANfiG would like to make a change.
 
@@ -30,7 +31,7 @@ The paradigm of CHANfiG is:
 
 ## Features
 
-CHANfiG features a fully funcional `OrderedDict` and `NestedDict` with integrated IO operations (`load`, `dump`, `jsons`, `yamls`, etc.), cooperation ability (`difference`, `intersection`, `update`) and ease to use APIs (`all_items`, `all_keys`, `all_values`).
+CHANfiG features a fully functional `FlatDict` and `NestedDict` with integrated IO operations (`load`, `dump`, `jsons`, `yamls`, etc.), cooperation ability (`difference`, `intersection`, `update`) and eases to use APIs (`all_items`, `all_keys`, `all_values`).
 
 With `ConfigParser`, you can easily parse command line arguments into a `Config` object.
 
@@ -42,7 +43,7 @@ Just wrap the value with `Variable`, and one alteration will be reflected everyw
 
 CHANfiG has great backward compatibility with previous configs.
 
-No matter your old config is json or yaml, you could directly read from them.
+No matter if your old config is json or yaml, you could directly read from them.
 
 And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
