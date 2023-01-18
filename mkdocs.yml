@@ -176,7 +176,7 @@ plugins:
   - git-revision-date-localized:
       type: iso_datetime
   - privacy:
-      externals_exclude:
+      external_assets_exclude:
         - cdn.jsdelivr.net/npm/mathjax@3/*
         - giscus.app/*
         - github-readme-stats.vercel.app/*
@@ -189,5 +189,4 @@ plugins:
         - tags
   - search:
       separator: '[\s\u200b\-]'
-  - search
   - tags

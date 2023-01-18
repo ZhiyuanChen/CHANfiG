@@ -494,8 +494,9 @@ class Config(NestedDict):
 
         Parameters
         ----------
-            args (Optional[Sequence[str]]): The arguments to parse. Defaults to sys.argv[1:].
-            default_config (Optional[str]): The path to a config file.
+        args: Optional[Sequence[str]] = sys.argv[1:]
+        default_config: Optional[str] = None
+            The path to a config file.
 
         Examples
         --------

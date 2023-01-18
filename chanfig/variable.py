@@ -231,7 +231,8 @@ class Variable:
 
         Parameters
         ----------
-            cls (Callable): The type to convert to.
+        cls: Callable
+            The type to convert to.
 
         Examples
         --------

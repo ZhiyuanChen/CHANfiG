@@ -1,34 +1,35 @@
 ---
-title: CHANfiG
 summary: Easier Configuration
 authors:
-    - Zhiyuan Chen
+  - Zhiyuan Chen
 date: 2022-05-04
 ---
 
+# CHANfiG
+
 ## 介绍
 
-CHANfiG希望能让你的配置更加简单。
+CHANfiG 希望能让你的配置更加简单。
 
 训练一个机器学习模型有无数个可调节的参数。
 为了调节所有参数，研究员们常常需要撰写巨大的配置文件，有时甚至长达数千行。
 大多数参数只是方法默认参数的简单重复，这导致了很多不必要的声明。
 此外，调节这些参数同样很繁琐，需要定位并打开配置文件，作出修改，然后保存关闭。
-这个过程浪费了无数的宝贵时间~~甚至是一种犯罪~~。
+这个过程浪费了无数的宝贵时间 ~~甚至是一种犯罪~~ 。
 使用 `argparse`可以在一定程度上缓解调参的不变，但是，要让他和配置文件适配依然需要很多工作，并且缺乏嵌套也限制了他的潜力。
-CHANfiG旨在带来改变。
+CHANfiG 旨在带来改变。
 
 你只需要在命令行中运行你的实验。
 
-CHANfiG启发自[YACS](https://github.com/rbgirshick/yacs)。
-不同于YACS的范式（`代码 + 实验E的YACS配置文件 (+ 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E`），
-CHANfiG的范式是：
+CHANfiG 启发自[YACS](https://github.com/rbgirshick/yacs)。
+不同于 YACS 的范式（`代码 + 实验E的YACS配置文件 (+ 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E`），
+CHANfiG 的范式是：
 
 `代码 + 命令行参数 (+ 可选的CHANfiG配置文件 + 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E (+ 可选的CHANfiG配置文件)`
 
 ## 特性
 
-CHANfiG包括一个功能完全的`OrderedDict`和`NestedDict`，具有完善的IO操作（`load`、`dump`、`jsons`、`yamls`等），协作能力（`difference`、`intersection`、`update`）和简单易用的APIs（`all_items`、`all_keys`、`all_values`）。
+CHANfiG 包括一个功能完全的`FlatDict`和`NestedDict`，他们具有完善的 IO 操作（`load`、`dump`、`jsons`、`yamls`等），协作能力（`difference`、`intersection`、`update`）和简单易用的 APIs（`all_items`、`all_keys`、`all_values`）。
 
 与`ConfigParser`相配合，你可以简单的从命令行参数创建`Config`对象。
 
@@ -38,11 +39,9 @@ CHANfiG包括一个功能完全的`OrderedDict`和`NestedDict`，具有完善的
 
 ## 使用
 
-CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于yaml和json的配置文件。
+CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 yaml 和 json 的配置文件。
 
-如果你此前使用yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有CHANfiG所提供的便利。
-
-现有代码：
+如果你此前使用 yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有 CHANfiG 所提供的便利。
 
 ```python
 from chanfig import Config, Variable
@@ -138,13 +137,13 @@ model:
       "num_layers": 8,
       "dropout": 0.2
     },
-  "dropout": 0.2,
-  "activation": "GELU",
-  },
+    "dropout": 0.2,
+    "activation": "GELU"
+  }
 }
 ```
 
-在方法中定义默认参数，在命令行中修改，然后将剩下的交给CHANfiG。
+在方法中定义默认参数，在命令行中修改，然后将剩下的交给 CHANfiG。
 
 ## 安装
 
