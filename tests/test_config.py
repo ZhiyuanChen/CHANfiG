@@ -5,6 +5,7 @@ class TestConfig(Config):
     __test__ = False
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
         num_classes = Variable(10)
         self.name = "CHANfiG"
         self.seed = Variable(1013)

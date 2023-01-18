@@ -12,6 +12,7 @@ from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
 from typing import IO, Any, Callable, Iterable, Optional, Union
+from warnings import warn
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
@@ -50,6 +51,19 @@ class FlatDict(OrderedDict):
     You can directly call `FlatDict.cpu()` or `FlatDict.to("cpu")` to move all `torch.Tensor` objects across devices.
 
     `FlatDict` works best with `Variable` objects.
+
+    Note that since `FlatDict` supports attribute-style access to keys.
+    Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
+
+    `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
+    Although it is possible to override other internal methods, it is not recommended.
+
+    Attributes
+    ----------
+    indent: int
+        Indentation level in printing and dumping to json or yaml.
+    default_factory: Optional[Callable]
+        Default factory for defaultdict behavior.
 
     Examples
     --------
@@ -93,7 +107,7 @@ class FlatDict(OrderedDict):
                 self.setattr("default_factory", default_factory)
             else:
                 raise TypeError(
-                    f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}"
+                    f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}."
                 )
         self._init(*args, **kwargs)
 
@@ -113,6 +127,11 @@ class FlatDict(OrderedDict):
             self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
+
+    def __getattribute__(self, name):
+        if name not in ("__class__", "__dict__", "getattr") and name in self:
+            return self[name]
+        return super().__getattribute__(name)
 
     def get(self, name: str, default: Optional[Any] = None) -> Any:
         r"""
@@ -155,7 +174,7 @@ class FlatDict(OrderedDict):
         2
         >>> d.get('f')
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain f'
+        KeyError: 'FlatDict does not contain f.'
 
         ```
         """
@@ -233,11 +252,11 @@ class FlatDict(OrderedDict):
         >>> d.delete('d')
         >>> d.d
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain d'
+        KeyError: 'FlatDict does not contain d.'
         >>> del d.n
         >>> d.n
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain n'
+        KeyError: 'FlatDict does not contain n.'
         >>> del d.f
         Traceback (most recent call last):
         KeyError: 'f'
@@ -276,7 +295,7 @@ class FlatDict(OrderedDict):
         2
         >>> d.getattr('a')
         Traceback (most recent call last):
-        AttributeError: FlatDict has no attribute a
+        AttributeError: FlatDict has no attribute a.
 
         ```
         """
@@ -290,7 +309,7 @@ class FlatDict(OrderedDict):
         except AttributeError:
             if default is not None:
                 return default
-            raise AttributeError(f"{self.__class__.__name__} has no attribute {name}") from None
+            raise AttributeError(f"{self.__class__.__name__} has no attribute {name}.") from None
 
     def setattr(self, name: str, value: Any) -> None:
         r"""
@@ -303,6 +322,11 @@ class FlatDict(OrderedDict):
         name: str
         value: Any
 
+        Warns
+        ------
+        RuntimeWarning
+            If name already exists in FlatDict.
+
         Examples
         --------
         ```python
@@ -310,10 +334,24 @@ class FlatDict(OrderedDict):
         >>> d.setattr('attr', 'value')
         >>> d.getattr('attr')
         'value'
+        >>> d.set('d', 1013)
+        >>> d.setattr('d', 1031)  # Trigger RuntimeWarning: d already exists in FlatDict.
+        >>> d.get('d')
+        1013
+        >>> d.d
+        1013
+        >>> d.getattr('d')
+        1031
 
         ```
         """
 
+        if name in self:
+            warn(
+                f"{name} already exists in {self.__class__.__name__}.\n"
+                "Users must call `{self.__class__.__name__}.getattr()` to retrieve conflicting attribute value.",
+                RuntimeWarning,
+            )
         self.__dict__[name] = value
 
     def hasattr(self, name: str) -> bool:
@@ -365,7 +403,7 @@ class FlatDict(OrderedDict):
         >>> d.delattr('name')
         >>> d.getattr('name')
         Traceback (most recent call last):
-        AttributeError: FlatDict has no attribute name
+        AttributeError: FlatDict has no attribute name.
 
         ```
         """
@@ -373,37 +411,10 @@ class FlatDict(OrderedDict):
         del self.__dict__[name]
 
     def __missing__(self, name: str, default: Optional[Any] = None) -> Any:
-        r"""
-        Allow dict to have default value if it doesn't exist.
-
-        Parameters
-        ----------
-        name: str
-        default: Optional[Any] = None
-
-        Returns
-        -------
-        value: Any
-            If name does not exist, return `default`.
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(default_factory=list)
-        >>> d.n
-        []
-        >>> d.get('d', 1013)
-        1013
-        >>> d.__missing__('d', 1013)
-        1013
-
-        ```
-        """
-
         if default is None:
             # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
             if "default_factory" not in self.__dict__:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
             default_factory = self.getattr("default_factory")
             default = default_factory()
             if isinstance(default, FlatDict):
@@ -488,7 +499,7 @@ class FlatDict(OrderedDict):
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -498,7 +509,7 @@ class FlatDict(OrderedDict):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         return self.empty_like(
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
@@ -534,7 +545,7 @@ class FlatDict(OrderedDict):
         {'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>
+        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -544,7 +555,7 @@ class FlatDict(OrderedDict):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}")
+            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty_like(
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
@@ -715,7 +726,7 @@ class FlatDict(OrderedDict):
                     self[k] = v.to(cls)
             return self
 
-        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}")
+        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
 
     def cpu(self) -> FlatDict:
         r"""
@@ -1014,7 +1025,7 @@ class FlatDict(OrderedDict):
 
         if method is None:
             if isinstance(file, IO):
-                raise ValueError("method must be specified when dumping to file-like object")
+                raise ValueError("method must be specified when dumping to file-like object.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
         if extension in YAML:
@@ -1044,14 +1055,14 @@ class FlatDict(OrderedDict):
 
         if method is None:
             if isinstance(file, IO):
-                raise ValueError("method must be specified when loading from file-like object")
+                raise ValueError("method must be specified when loading from file-like object.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
         if extension in JSON:
             return cls.from_json(file, *args, **kwargs)
         if extension in YAML:
             return cls.from_yaml(file, *args, **kwargs)
-        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}")
+        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}.")
 
     @staticmethod
     @contextmanager
@@ -1069,28 +1080,13 @@ class FlatDict(OrderedDict):
         elif isinstance(file, (IO,)):
             yield file
         else:
-            raise TypeError(
-                f"file={file} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}"  # type: ignore
-            )
+            raise TypeError(f"file={file!r} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}.")
 
     @staticmethod
     def extra_repr() -> str:  # pylint: disable=C0116
         return ""
 
     def __repr__(self) -> str:
-        r"""
-        Representation of FlatDict.
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> repr(d)
-        'FlatDict(\n  (a): 1\n  (b): 2\n  (c): 3\n)'
-
-        ```
-        """
-
         extra_lines = []
         extra_repr = self.extra_repr()
         # empty string will be split into list ['']
