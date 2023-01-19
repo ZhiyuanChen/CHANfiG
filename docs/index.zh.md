@@ -15,23 +15,79 @@ CHANfiG 希望能让你的配置更加简单。
 为了调节所有参数，研究员们常常需要撰写巨大的配置文件，有时甚至长达数千行。
 大多数参数只是方法默认参数的简单重复，这导致了很多不必要的声明。
 此外，调节这些参数同样很繁琐，需要定位并打开配置文件，作出修改，然后保存关闭。
-这个过程浪费了无数的宝贵时间 ~~甚至是一种犯罪~~ 。
-使用 `argparse`可以在一定程度上缓解调参的不变，但是，要让他和配置文件适配依然需要很多工作，并且缺乏嵌套也限制了他的潜力。
+这个过程浪费了无数的宝贵时间 ~~这无疑是一种犯罪~~ 。
+使用`argparse`可以在一定程度上缓解调参的不变，但是，要让他和配置文件适配依然需要很多工作，并且缺乏嵌套也限制了他的潜力。
+
 CHANfiG 旨在带来改变。
 
-你只需要在命令行中运行你的实验。
+你只需要在命令行中输入你的修改，然后把剩下的交给CHANfiG。
 
-CHANfiG 启发自[YACS](https://github.com/rbgirshick/yacs)。
+CHANfiG 很大程度上启发自[YACS](https://github.com/rbgirshick/yacs)。
 不同于 YACS 的范式（`代码 + 实验E的YACS配置文件 (+ 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E`），
 CHANfiG 的范式是：
 
 `代码 + 命令行参数 (+ 可选的CHANfiG配置文件 + 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E (+ 可选的CHANfiG配置文件)`
 
-## 特性
+## 组件
 
-CHANfiG 包括一个功能完全的`FlatDict`和`NestedDict`，他们具有完善的 IO 操作（`load`、`dump`、`jsons`、`yamls`等），协作能力（`difference`、`intersection`、`update`）和简单易用的 APIs（`all_items`、`all_keys`、`all_values`）。
+一个配置文件可以被看作一个嵌套的字典结构。
 
-与`ConfigParser`相配合，你可以简单的从命令行参数创建`Config`对象。
+但是，默认的 Python 字典十分难以操作。
+
+访问字典成员的唯一方式是 `dict['name']` ，这无疑是极其繁琐的。
+更糟糕的，如果这个字典和配置一样是一个嵌套结构，访问成员将会变成类似于`dict['parent']['children']['name']`的样子。
+
+够了就是够了，是时候做出改变了。
+
+我们需要属性方式的访问，并且我们现在就需要。
+
+尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性可字典成员的冲突。
+
+为了解决上述限制，我们继承了 Python 内置的`collections.OrderedDict`来创建`FlatDict`、`NestedDict`和`Config`对象。
+
+### FlatDict
+
+`FlatDict`在三个方面对默认的`collections.OrderedDict`做出改进。
+
+`FlatDict`同时接受`default_factory`，并且可以被简单的作为`defaultdict`使用。
+
+#### 字典操作
+
+`FlatDict`扩充原始的`collections.OrderedDict`的`update`方法，使其支持传递另一个`Mapping`、`Iterable`或者一个路径。
+
+更进一步的，`FlatDict`引入了`difference`和`intersection`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
+
+#### 机器学习操作
+
+`FlatDict`支持与 Pytorch Tensor 类似的`to`方法。
+你可以很简单的通过相同的方式将所有`FlatDict`的成员值转换为某种类型或者转一道某个设备上。
+
+`FlatDict`同时集成了`cpu`、`gpu`、`tpu`方法来提供更便捷的访问。
+
+#### IO 操作
+
+`FlatDict`支持`json`、`jsons`、`yaml`和`yamls`方法来将`FlatDict`对象存储到文件或者转换成字符串。
+它还提供了`from_json`、`from_jsons`、`from_yaml`和`from_yamls`来从一个字符串或者文件中构建`FlatDict`对象。
+
+`FlatDict`也包括了`dump`和`load`方法，他们可以从文件扩展名中自动推断类型然后将`FlatDict`对象存储到文件中/从文件中加载`FlatDict`对象。
+
+### NestedDict
+
+由于大多数配置都是一个嵌套的结构，我们进一步提出了`NestedDict`。
+
+基于`FlatDict`，`NestedDict`提供了`all_keys`、`all_values`、`all_items`方法来允许一次性遍历整个嵌套结构。
+
+`NestedDict`同时提供了一个`apply`方法，它可以使操纵嵌套结构更加容易。
+
+### Config
+
+`Config`通过两个方面来进一步提升功能性：
+支持`freeze`来冻结和`defrost`解冻字典和
+加入内置的`ConfigParser`来解析命令行语句。
+
+注意`Config`默认设置`default_factory=Config()`来提供便利。
+
+### Variable
 
 有一个值在多个地方以多个名字出现？我们给你提供掩护。
 

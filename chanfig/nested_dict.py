@@ -11,20 +11,19 @@ from .variable import Variable
 
 class NestedDict(FlatDict):
     r"""
-    `NestedDict` further extends `FlatDict` object by introducing a nested structure with delimiter.
+    `NestedDict` further extends [`FlatDict`][chanfig.FlatDict] object by introducing a nested structure with delimiter.
+    By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
 
     `d = NestedDict(**{"a.b.c": 1})` is equivalent to `d = NestedDict(**{"a": {"b": {"c": 1}}})`,
-    and you can access the value by `d["a.b.c"]` or more simply `d.a.b.c`.
+    and you can access the members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
 
-    With `default_factory`, you can create nested `NestedDict` objects automatically.
+    With `default_factory`, you can create nested `NestedDict` objects automatically if a member does not exist,
+    like a `collections.defaultdict`.
 
     This behavior allows you to pass keyword arguments to other function like `func1(**d.func1)`.
 
     `NestedDict` also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
-
-    When `convert_mapping` specified, all new values with a type of `Mapping` will be converted to `default_mapping`.
-    Note that `convert_mapping` is automatically applied to arguments at initialisation.
 
     Attributes
     ----------
@@ -34,6 +33,12 @@ class NestedDict(FlatDict):
         If `True`, all new values with a type of `Mapping` will be converted to `default_mapping`.
     delimiter: str = "."
         Delimiter for nested structure.
+
+    Notes
+    -----
+    When `convert_mapping` specified, all new values with a type of `Mapping` will be converted to `default_mapping`.
+
+    `convert_mapping` is automatically applied to arguments at initialisation.
 
     Examples
     --------
@@ -152,17 +157,13 @@ class NestedDict(FlatDict):
         >>> d.set('i.d', 1013)
         >>> d.get('i.d')
         1013
-        >>> d
-        NestedDict(
-          (i): NestedDict(
-            (d): 1013
-          )
-        )
-        >>> d['n.l'] = 'chang'
-        >>> d.n.l
+        >>> d.dict()
+        {'i': {'d': 1013}}
+        >>> d['f.n'] = 'chang'
+        >>> d.f.n
         'chang'
-        >>> d.f.n = 'liu'
-        >>> d['f.n']
+        >>> d.n.l = 'liu'
+        >>> d['n.l']
         'liu'
         >>> d.setattr('convert_mapping', True)
         >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
@@ -241,29 +242,6 @@ class NestedDict(FlatDict):
     __delattr__ = delete
 
     def __contains__(self, name: str) -> bool:  # type: ignore
-        r"""
-        Determine if NestedDict contains name.
-
-        Parameters
-        ----------
-        name: str
-
-        Examples
-        --------
-        ```python
-        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
-        >>> 'i.d' in d
-        True
-        >>> 'f.n' in d
-        True
-        >>> 'i' in d
-        True
-        >>> 'd' in d
-        False
-
-        ```
-        """
-
         delimiter = self.getattr("delimiter", ".")
         while delimiter in name:
             name, rest = name.split(delimiter, 1)
@@ -405,7 +383,7 @@ class NestedDict(FlatDict):
         func(self)
         return self
 
-    def difference(  # pylint: disable=W0221
+    def difference(  # pylint: disable=W0221, C0103
         self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
     ) -> NestedDict:
         r"""
@@ -438,8 +416,6 @@ class NestedDict(FlatDict):
 
         ```
         """
-
-        # pylint: disable=R0801
 
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
@@ -539,7 +515,7 @@ class NestedDict(FlatDict):
         ```
         """
 
-        return self.apply(lambda d: super().to(cls))
+        return self.apply(lambda _: super().to(cls))
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""

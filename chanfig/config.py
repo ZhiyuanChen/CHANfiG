@@ -50,11 +50,25 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Examples
         --------
         ```python
-        >>> c = Config(a=0)
-        >>> c.dict()
-        {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
-        {'a': 1, 'b': 2, 'c': 3}
+        >>> p = ConfigParser()
+        >>> p.parse(['--i.d', '1013', '--n.f', 'chang']).dict()
+        {'i': {'d': 1013}, 'n': {'f': 'chang'}}
+
+        # Values in command line arguments overrides values in `default_config` file.
+        >>> p = ConfigParser()
+        >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
+        {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+
+        # Values in `default_config` file overrides values in `Config` object.
+        >>> c = Config(a=2)
+        >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
+        {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+
+        # ValueError will be raised when `default_config` name is specified but not presented in command line arguments.
+        >>> p = ConfigParser()
+        >>> p.parse(['--a', '2'], default_config='config').dict()
+        Traceback (most recent call last):
+        ValueError: default_config is set to config, but not found in args.
 
         ```
         """
@@ -78,7 +92,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 # create a temp config to avoid issues when users inherit from Config
                 config = config.update(Config.load(path))  # type: ignore
             else:
-                raise ValueError(f"default_config is set to {default_config}, but not found in args")
+                raise ValueError(f"default_config is set to {default_config}, but not found in args.")
 
         # parse the command line arguments
         config = config.update(parsed)  # type: ignore
@@ -140,18 +154,8 @@ class Config(NestedDict):
     1013
     >>> c.d.i
     Config()
-    >>> c.freeze()
-    Config(
-      (f): Config(
-        (n): 'chang'
-      )
-      (i): Config(
-        (d): 1013
-      )
-      (d): Config(
-        (i): Config()
-      )
-    )
+    >>> c.freeze().dict()
+    {'f': {'n': 'chang'}, 'i': {'d': 1013}, 'd': {'i': {}}}
     >>> c.d.i = 1013
     Traceback (most recent call last):
     ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
@@ -163,6 +167,7 @@ class Config(NestedDict):
     >>> c.dict()
     {'f': {'n': 'chang'}, 'i': {'d': 1013}}
 
+    ```
     """
 
     parser: ConfigParser
@@ -385,12 +390,18 @@ class Config(NestedDict):
         Examples
         --------
         ```python
-        >>> c = Config()
+        >>> c = Config(**{'i.d': 1013})
         >>> c.getattr('frozen')
         False
-        >>> c.freeze().dict()
-        {}
+        >>> c.freeze(recursive=False).dict()
+        {'i': {'d': 1013}}
         >>> c.getattr('frozen')
+        True
+        >>> c.i.getattr('frozen')
+        False
+        >>> c.freeze(recursive=True).dict()
+        {'i': {'d': 1013}}
+        >>> c.i.getattr('frozen')
         True
 
         ```
@@ -423,16 +434,22 @@ class Config(NestedDict):
         Examples
         --------
         ```python
-        >>> c = Config()
+        >>> c = Config(**{'i.d': 1013})
         >>> c.getattr('frozen')
         False
         >>> c.freeze().dict()
-        {}
+        {'i': {'d': 1013}}
         >>> c.getattr('frozen')
         True
-        >>> c.defrost().dict()
-        {}
+        >>> c.defrost(recursive=False).dict()
+        {'i': {'d': 1013}}
         >>> c.getattr('frozen')
+        False
+        >>> c.i.getattr('frozen')
+        True
+        >>> c.defrost().dict()
+        {'i': {'d': 1013}}
+        >>> c.i.getattr('frozen')
         False
 
         ```
@@ -463,7 +480,7 @@ class Config(NestedDict):
         {}
         >>> with c.unlocked():
         ...     c['i.d'] = 1013
-        >>> c.dict()
+        >>> c.defrost().dict()
         {'i': {'d': 1013}}
 
         ```

@@ -51,12 +51,7 @@ class FlatDict(OrderedDict):
     You can directly call `FlatDict.cpu()` or `FlatDict.to("cpu")` to move all `torch.Tensor` objects across devices.
 
     `FlatDict` works best with `Variable` objects.
-
-    Note that since `FlatDict` supports attribute-style access to keys.
-    Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
-
-    `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
-    Although it is possible to override other internal methods, it is not recommended.
+    Just simply call ``FlatDict.a = Variable(1); FlatDict.b = FlatDict.a``, and their values will be sync.
 
     Attributes
     ----------
@@ -64,6 +59,14 @@ class FlatDict(OrderedDict):
         Indentation level in printing and dumping to json or yaml.
     default_factory: Optional[Callable]
         Default factory for defaultdict behavior.
+
+    Warnings
+    --------
+    `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
+    Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
+
+    Although it is possible to override other internal methods, it is not recommended to do so.
+    `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
 
     Examples
     --------
@@ -128,7 +131,7 @@ class FlatDict(OrderedDict):
         for key, value in kwargs.items():
             self.set(key, value)
 
-    def __getattribute__(self, name):
+    def __getattribute__(self, name) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
             return self[name]
         return super().__getattribute__(name)
@@ -354,35 +357,6 @@ class FlatDict(OrderedDict):
             )
         self.__dict__[name] = value
 
-    def hasattr(self, name: str) -> bool:
-        r"""
-        Determine if an attribute exists in FlatDict.
-
-        Parameters
-        ----------
-        name: str
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict()
-        >>> d.setattr('name', 'chang')
-        >>> d.hasattr('name')
-        True
-        >>> d.delattr('name')
-        >>> d.hasattr('name')
-        False
-
-        ```
-        """
-
-        try:
-            if name in self.__dict__ or name in self.__class__.__dict__:
-                return True
-            return super().hasattr(name)  # type: ignore
-        except AttributeError:
-            return False
-
     def delattr(self, name: str) -> None:
         r"""
         Delete attribute of FlatDict.
@@ -410,6 +384,39 @@ class FlatDict(OrderedDict):
 
         del self.__dict__[name]
 
+    def hasattr(self, name: str) -> bool:
+        r"""
+        Determine if an attribute exists in FlatDict.
+
+        Parameters
+        ----------
+        name: str
+
+        Returns
+        -------
+        bool
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict()
+        >>> d.setattr('name', 'chang')
+        >>> d.hasattr('name')
+        True
+        >>> d.delattr('name')
+        >>> d.hasattr('name')
+        False
+
+        ```
+        """
+
+        try:
+            if name in self.__dict__ or name in self.__class__.__dict__:
+                return True
+            return super().hasattr(name)  # type: ignore
+        except AttributeError:
+            return False
+
     def __missing__(self, name: str, default: Optional[Any] = None) -> Any:
         if default is None:
             # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
@@ -422,6 +429,31 @@ class FlatDict(OrderedDict):
             super().__setitem__(name, default)
         return default
 
+    def dict(self, cls: Callable = dict) -> Mapping:
+        r"""
+        Convert FlatDict to other Mapping.
+
+        Parameters
+        ----------
+        cls: Callable = dict
+            Target class to be converted to.
+
+        Returns
+        -------
+        Mapping
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
+
     def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
         r"""
         Update FlatDict values w.r.t. other.
@@ -432,7 +464,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        self: FlatDict
 
         **Alias**:
 
@@ -481,7 +513,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         **Alias**:
 
@@ -527,7 +559,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         **Alias**:
 
@@ -562,13 +594,123 @@ class FlatDict(OrderedDict):
 
     inter = intersection
 
+    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
+        r"""
+        Convert values of `FlatDict` to target class.
+
+        Parameters
+        ----------
+        cls: str | torch.device | torch.dtype
+
+        Returns
+        -------
+        self: FlatDict
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        # pylint: disable=C0103
+
+        if isinstance(cls, str):
+            if cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
+                return getattr(self, cls)()
+        if TORCH_AVAILABLE and isinstance(cls, (TorchDevice, TorchDtype)):
+            for k, v in self.items():
+                if isinstance(v, TorchTensor):
+                    self[k] = v.to(cls)
+            return self
+
+        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
+
+    def cpu(self) -> FlatDict:  # pylint: disable=C0103
+        r"""
+        Move all tensors to cpu.
+
+        Returns
+        -------
+        self: FlatDict
+
+        Examples
+        --------
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.cpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='cpu')}
+
+        ```
+        """
+
+        return self.to(TorchDevice("cpu"))
+
+    def gpu(self) -> FlatDict:  # pylint: disable=C0103
+        r"""
+        Move all tensors to gpu.
+
+        Returns
+        -------
+        self: FlatDict
+
+        **Alias**:
+
+        + `cuda`
+
+        Examples
+        --------
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.gpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='cuda:0')}
+
+        ```
+        """
+
+        return self.to(TorchDevice("cuda"))
+
+    cuda = gpu
+
+    def tpu(self) -> FlatDict:
+        r"""
+        Move all tensors to tpu.
+
+        Returns
+        -------
+        self: FlatDict
+
+        **Alias**:
+
+        + `xla`
+
+        Examples
+        --------
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.tpu().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='xla:0')}
+
+        ```
+        """
+
+        return self.to(TorchDevice("xla"))
+
+    xla = tpu
+
     def copy(self) -> FlatDict:
         r"""
         Create a shallow copy of FlatDict.
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         Examples
         --------
@@ -595,7 +737,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         **Alias**:
 
@@ -635,202 +777,59 @@ class FlatDict(OrderedDict):
 
     clone = deepcopy
 
+    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
+        r"""
+        Dump FlatDict to file.
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d.dump("example.yaml")
+
+        ```
+        """
+
+        if method is None:
+            if isinstance(file, IO):
+                raise ValueError("method must be specified when dumping to file-like object.")
+            method = splitext(file)[-1][1:]  # type: ignore
+        extension = method.lower()  # type: ignore
+        if extension in YAML:
+            return self.yaml(file=file, *args, **kwargs)  # type: ignore
+        if extension in JSON:
+            return self.json(file=file, *args, **kwargs)  # type: ignore
+        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")  # type: ignore
+
     @classmethod
-    def empty(cls, *args, **kwargs):
-        r"""
-        Initialise an empty `FlatDict`.
-
-        This method is helpful when you inheriting the `FlatDict` with default values defined in `__init__()`.
-        As use `type(self)()` in this case would copy all the default values, which might now be desired.
-
-        This method will preserve everything in `FlatDict.__class__.__dict__`.
-
-        Returns
-        -------
-        dict: FlatDict
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> c = d.empty()
-        >>> c.dict()
-        {}
-
-        ```
+    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
         """
-
-        empty = cls()
-        empty.clear()
-        empty._init(*args, **kwargs)
-        return empty
-
-    def empty_like(self, *args, **kwargs):
-        r"""
-        Initialise an empty copy of FlatDict.
-
-        This method will preserve everything in `FlatDict.__class__.__dict__` and `FlatDict.__dict__`.
+        Load FlatDict from file.
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         Examples
         --------
         ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.empty_like()
-        >>> c.dict()
-        {}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
-        """
-
-        empty = self.empty(*args, **kwargs)
-        empty.__dict__.update(self.__dict__)
-        return empty
-
-    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
-        r"""
-        Convert values of `FlatDict` to target class.
-
-        Parameters
-        ----------
-        cls: str | torch.device | torch.dtype
-
-        Returns
-        -------
-        dict: FlatDict
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> d = FlatDict.load("example.yaml")
         >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
 
         ```
         """
 
-        # pylint: disable=C0103
-
-        if isinstance(cls, str):
-            if cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
-                return getattr(self, cls)()
-        if TORCH_AVAILABLE and isinstance(cls, (TorchDevice, TorchDtype)):
-            for k, v in self.items():
-                if isinstance(v, TorchTensor):
-                    self[k] = v.to(cls)
-            return self
-
-        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
-
-    def cpu(self) -> FlatDict:
-        r"""
-        Move all tensors to cpu.
-
-        Returns
-        -------
-        dict: FlatDict
-
-        Examples
-        --------
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.cpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='cpu')}
-
-        ```
-        """
-
-        # pylint: disable=C0103
-
-        return self.to(TorchDevice("cpu"))
-
-    def gpu(self) -> FlatDict:
-        r"""
-        Move all tensors to gpu.
-
-        Returns
-        -------
-        dict: FlatDict
-
-        **Alias**:
-
-        + `cuda`
-
-        Examples
-        --------
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.gpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='cuda:0')}
-
-        ```
-        """
-
-        # pylint: disable=C0103
-
-        return self.to(TorchDevice("cuda"))
-
-    cuda = gpu
-
-    def tpu(self) -> FlatDict:
-        r"""
-        Move all tensors to tpu.
-
-        Returns
-        -------
-        dict: FlatDict
-
-        **Alias**:
-
-        + `xla`
-
-        Examples
-        --------
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.tpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='xla:0')}
-
-        ```
-        """
-
-        return self.to(TorchDevice("xla"))
-
-    xla = tpu
-
-    def dict(self, cls: Callable = dict) -> Mapping:
-        r"""
-        Convert FlatDict to other Mapping.
-
-        Parameters
-        ----------
-        cls: Callable = dict
-            Target class to be converted to.
-
-        Returns
-        -------
-        dict: Mapping
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
+        if method is None:
+            if isinstance(file, IO):
+                raise ValueError("method must be specified when loading from file-like object.")
+            method = splitext(file)[-1][1:]  # type: ignore
+        extension = method.lower()  # type: ignore
+        if extension in JSON:
+            return cls.from_json(file, *args, **kwargs)
+        if extension in YAML:
+            return cls.from_yaml(file, *args, **kwargs)
+        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}.")
 
     def json(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -861,7 +860,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         Examples
         --------
@@ -907,7 +906,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         Examples
         --------
@@ -950,7 +949,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         ```python
         >>> d = FlatDict.from_yaml('example.yaml')
@@ -994,7 +993,7 @@ class FlatDict(OrderedDict):
 
         Returns
         -------
-        dict: FlatDict
+        FlatDict
 
         Examples
         --------
@@ -1010,65 +1009,36 @@ class FlatDict(OrderedDict):
             kwargs["Loader"] = YamlLoader
         return cls(**yaml_load(string, *args, **kwargs))
 
-    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
-        r"""
-        Dump FlatDict to file.
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dump("example.yaml")
-
-        ```
-        """
-
-        if method is None:
-            if isinstance(file, IO):
-                raise ValueError("method must be specified when dumping to file-like object.")
-            method = splitext(file)[-1][1:]  # type: ignore
-        extension = method.lower()  # type: ignore
-        if extension in YAML:
-            return self.yaml(file=file, *args, **kwargs)  # type: ignore
-        if extension in JSON:
-            return self.json(file=file, *args, **kwargs)  # type: ignore
-        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")  # type: ignore
-
-    @classmethod
-    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
-        """
-        Load FlatDict from file.
-
-        Returns
-        -------
-        dict: FlatDict
-
-        Examples
-        --------
-        ```python
-        >>> d = FlatDict.load("example.yaml")
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        if method is None:
-            if isinstance(file, IO):
-                raise ValueError("method must be specified when loading from file-like object.")
-            method = splitext(file)[-1][1:]  # type: ignore
-        extension = method.lower()  # type: ignore
-        if extension in JSON:
-            return cls.from_json(file, *args, **kwargs)
-        if extension in YAML:
-            return cls.from_yaml(file, *args, **kwargs)
-        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}.")
-
     @staticmethod
     @contextmanager
     def open(file: File, *args, **kwargs):
         """
         Open file IO from file path or file-like object.
+
+        This methods extends the ability of built-in `open` by allowing it to accept an `IO` object.
+
+        Parameters
+        ----------
+        file: File
+            File path or file-like object.
+        *args, **kwargs: Any
+            Additional arguments passed to `open`.
+
+        Yields
+        -------
+        FileIO: FileIO
+
+        Examples
+        --------
+        ```python
+        >>> with FlatDict.open("example.yaml") as fp:
+        ...     print(fp.read())
+        a: 1
+        b: 2
+        c: 3
+        <BLANKLINE>
+
+        ```
         """
 
         if isinstance(file, (PathLike, str)):
@@ -1081,6 +1051,64 @@ class FlatDict(OrderedDict):
             yield file
         else:
             raise TypeError(f"file={file!r} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}.")
+
+    @classmethod
+    def empty(cls, *args, **kwargs):
+        r"""
+        Initialise an empty `FlatDict`.
+
+        This method is helpful when you inheriting the `FlatDict` with default values defined in `__init__()`.
+        As use `type(self)()` in this case would copy all the default values, which might now be desired.
+
+        This method will preserve everything in `FlatDict.__class__.__dict__`.
+
+        Returns
+        -------
+        FlatDict
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict(a=[])
+        >>> c = d.empty()
+        >>> c.dict()
+        {}
+
+        ```
+        """
+
+        empty = cls()
+        empty.clear()
+        empty._init(*args, **kwargs)
+        return empty
+
+    def empty_like(self, *args, **kwargs):
+        r"""
+        Initialise an empty copy of FlatDict.
+
+        This method will preserve everything in `FlatDict.__class__.__dict__` and `FlatDict.__dict__`.
+
+        Returns
+        -------
+        FlatDict
+
+        Examples
+        --------
+        ```python
+        >>> d = FlatDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.empty_like()
+        >>> c.dict()
+        {}
+        >>> c.getattr("name")
+        'Chang'
+
+        ```
+        """
+
+        empty = self.empty(*args, **kwargs)
+        empty.__dict__.update(self.__dict__)
+        return empty
 
     @staticmethod
     def extra_repr() -> str:  # pylint: disable=C0116
