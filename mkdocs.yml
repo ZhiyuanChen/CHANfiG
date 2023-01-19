@@ -15,7 +15,7 @@ nav:
   - FlatDict: flat_dict.md
   - ConfigParser: parser.md
   - Utilities: utils.md
-  - package: package.md
+  # - package: package.md
   # - Blog: blog/index.md
 
 theme:
@@ -151,6 +151,7 @@ markdown_extensions:
       permalink: true
 
 plugins:
+  - autorefs
   - meta
   # - blog:
   #     post_date_format: full

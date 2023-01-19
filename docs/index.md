@@ -17,10 +17,12 @@ Most of the configs are just replicates of the default arguments of certain func
 It is also very hard to alter the configurations.
 One needs to navigate and open the right configuration file, make changes, save and exit.
 These had wasted an uncountable[^uncountable] amount of precious time ~~and are no doubt a crime~~.
-Using `argparse` could relieve the burdens to some extent, however, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
+Using `argparse` could relieve the burdens to some extent.
+However, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
+
 CHANfiG would like to make a change.
 
-You just run your experiment with arguments, and leave everything else to CHANfiG.
+You just type the alternations in command line, and leave everything else to CHANfiG.
 
 CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs).
 Different from the paradigm of YACS(
@@ -29,11 +31,66 @@ The paradigm of CHANfiG is:
 
 `your code + command line arguments (+ optional CHANfiG config + external dependencies + hardware + other nuisance terms ...) = reproducible experiment E (+ optional CHANfiG config for experiment E)`
 
-## Features
+## Components
 
-CHANfiG features a fully functional `FlatDict` and `NestedDict` with integrated IO operations (`load`, `dump`, `jsons`, `yamls`, etc.), cooperation ability (`difference`, `intersection`, `update`) and eases to use APIs (`all_items`, `all_keys`, `all_values`).
+A Config is basically a nested dict structure.
 
-With `ConfigParser`, you can easily parse command line arguments into a `Config` object.
+However, the default Python dict is hard to manipulate.
+
+The only way to access a dict member is through `dict['name']`, which is obviously extremely complex.
+Even worse, if the dict is nested like a config, member access could be something like `dict['parent']['children']['name']`.
+
+Enough is enough, it is time to make a change.
+
+We need attribute-style access, and we need it now.
+
+Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
+Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
+or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
+
+To overcome the aforementioned limitations, we inherit the Python built-in `collections.OrderedDict` to create the `FlatDict`, `NestedDict`, and `Config` objects.
+
+### FlatDict
+
+`FlatDict` improve the default `collections.OrderedDict` in 3 aspects.
+
+`FlatDict` also accepts `default_factory`, and can be easily used as `defaultdict`.
+
+#### Dict Operations
+
+`FlatDict` extends the `update` method of the original `collections.OrderedDict`, allowing to pass another `Mapping`, `Iterable` or a path.
+
+More over, `FlatDict` comes with `difference` and `intersection`, these makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+
+#### ML Operations
+
+`FlatDict` supports the `to` method similar to PyTorch Tensors.
+You can simply convert all member values of `FlatDict` to a certain type or pass to a device in the same way.
+
+`FlatDict` also integrates `cpu`, `gpu`, and `tpu` methods for easier access.
+
+#### IO Operations
+
+`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump the  `FlatDict` object to a file or string.
+It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build `FlatDict` object from a string or file.
+
+`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load the `FlatDict` object to/from a file.
+
+### NestedDict
+
+Since most Configs are in a nested structure, we further propose a `NestedDict`.
+
+Based on `FlatDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
+
+`NestedDict` also comes with `apply` method, which made it easier to manipulate nested structure.
+
+### Config
+
+`Config` extends the functionality by supporting `freeze` and `defrost` the dict, and by adding a built-in `ConfigParser` to pare command line arguments.
+
+Note that `Config` also has `default_factory=Config()` by default for convenience.
+
+### Variable
 
 Have one value for multiple names at multiple places? We got you covered.
 
@@ -141,9 +198,9 @@ model:
       "num_layers": 8,
       "dropout": 0.2
     },
-  "dropout": 0.2,
-  "activation": "GELU",
-  },
+    "dropout": 0.2,
+    "activation": "GELU"
+  }
 }
 ```
 
