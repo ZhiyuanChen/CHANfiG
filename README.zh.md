@@ -1,10 +1,4 @@
-# CHANfiG
-
-Read this in English: [English](README.md), [简体中文](README.zh.md)
-
-在其他语言中阅读本文：[简体中文](README.zh.md)、[English](README.md)
-
-[Document site](https://chanfig.danling.org)
+# [CHANfiG](https://chanfig.danling.org/zh)
 
 ## 介绍
 
