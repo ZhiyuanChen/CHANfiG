@@ -64,7 +64,7 @@ You can simply convert all member values of `FlatDict` to a certain type or pass
 
 #### IO Operations
 
-`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump the  `FlatDict` object to a file or string.
+`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump the `FlatDict` object to a file or string.
 It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build `FlatDict` object from a string or file.
 
 `FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load the `FlatDict` object to/from a file.
@@ -214,5 +214,20 @@ pip install git+https://github.com/ZhiyuanChen/CHANfiG
 ```
 
 It works the way it should have worked.
+
+## License
+
+CHANfiG is multi-licensed under the following licenses:
+
+- Unlicense
+- GNU GPL 2.0 (or any later version)
+- MIT
+- Apache 2.0
+- BSD 2-Clause
+- BSD 3-Clause
+
+You can choose any (one or more) of them if you use this work.
+
+`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause`
 
 [^uncountable]: fun fact: time is always uncountable.
