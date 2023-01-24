@@ -13,7 +13,7 @@ CHANfiG 希望能让你的配置更加简单。
 
 CHANfiG 旨在带来改变。
 
-你只需要在命令行中输入你的修改，然后把剩下的交给CHANfiG。
+你只需要在命令行中输入你的修改，然后把剩下的交给 CHANfiG。
 
 CHANfiG 很大程度上启发自[YACS](https://github.com/rbgirshick/yacs)。
 不同于 YACS 的范式（`代码 + 实验E的YACS配置文件 (+ 外部依赖 + 硬件 + 其他令人讨厌的术语 ...) = 可重复的实验E`），
@@ -209,3 +209,19 @@ pip install git+https://github.com/ZhiyuanChen/CHANfiG
 ```
 
 他本该如此工作。
+
+## 授权
+
+CHANfiG 依据下列许可证进行多重授权：
+
+- Unlicense
+- GPL 2.0 (or any later version)
+- MIT
+- Apache 2.0
+- BSD 2-Clause
+- BSD 3-Clause
+
+如果你使用本工作，你可以从中任选（一个或者多个）许可证。
+You can choose any (one or more) of them if you use this work.
+
+`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause`
