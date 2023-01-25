@@ -56,15 +56,15 @@ class Variable:
     wrap_type: bool = True
     storage: List[Any]
 
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self.storage = [value]
 
     @property  # type: ignore
-    def __class__(self):
+    def __class__(self) -> type:
         return self.value.__class__ if self.wrap_type else type(self)
 
     @property
-    def value(self):
+    def value(self) -> Any:
         r"""
         Actual object stored in the Variable.
         """
@@ -72,7 +72,7 @@ class Variable:
         return self.storage[0]
 
     @value.setter
-    def value(self, value):
+    def value(self, value) -> None:
         r"""
         Assign value to object stored in the Variable.
         """
@@ -80,21 +80,21 @@ class Variable:
         self.storage[0] = self._get_value(value)
 
     @property
-    def dtype(self):
+    def dtype(self) -> type:
         r"""
         Data type of Variable.
         """
 
         return self.value.__class__
 
-    def get(self):
+    def get(self) -> Any:
         r"""
         alias of value.
         """
 
         return self.value
 
-    def set(self, value):
+    def set(self, value) -> None:
         r"""
         alias of value.setter.
         """
@@ -102,7 +102,7 @@ class Variable:
         self.value = value
 
     @staticmethod
-    def _get_value(obj):
+    def _get_value(obj) -> Any:
         if isinstance(obj, Variable):
             return obj.value
         return obj
