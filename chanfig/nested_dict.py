@@ -15,10 +15,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from functools import wraps
 from os import PathLike
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any, Callable, Iterable, Mapping, Optional, Union
 
 from .flat_dict import FlatDict, PathStr, TorchDevice, TorchDtype
 from .variable import Variable

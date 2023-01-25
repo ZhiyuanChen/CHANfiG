@@ -13,10 +13,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Mapping, Optional
 
 
 class Variable:

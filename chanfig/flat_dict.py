@@ -19,14 +19,13 @@ from __future__ import annotations
 
 from ast import literal_eval
 from collections import OrderedDict
-from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Optional, Union
+from typing import IO, Any, Callable, Iterable, Mapping, Optional, Union
 from warnings import warn
 
 from yaml import dump as yaml_dump
