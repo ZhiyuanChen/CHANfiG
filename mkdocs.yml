@@ -163,8 +163,6 @@ plugins:
         python:
           selection:
             docstring_style: numpy
-      watch:
-        - chanfig/
   - i18n:
       default_language: en
       languages:
@@ -191,3 +189,6 @@ plugins:
   - search:
       separator: '[\s\u200b\-]'
   - tags
+
+watch:
+  - chanfig/
