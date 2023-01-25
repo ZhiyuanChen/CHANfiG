@@ -15,7 +15,7 @@ However, it takes a lot of work to make it compatible with existing config files
 
 CHANfiG would like to make a change.
 
-You just type the alternations in command line, and leave everything else to CHANfiG.
+You just type the alternations in the command line, and leave everything else to CHANfiG.
 
 CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs).
 Different from the paradigm of YACS(
@@ -45,15 +45,15 @@ To overcome the aforementioned limitations, we inherit the Python built-in `coll
 
 ### FlatDict
 
-`FlatDict` improve the default `collections.OrderedDict` in 3 aspects.
+`FlatDict` improves the default `collections.OrderedDict` in 3 aspects.
 
 `FlatDict` also accepts `default_factory`, and can be easily used as `defaultdict`.
 
 #### Dict Operations
 
-`FlatDict` extends the `update` method of the original `collections.OrderedDict`, allowing to pass another `Mapping`, `Iterable` or a path.
+`FlatDict` extends the `update` method of the original `collections.OrderedDict`, allows passing another `Mapping`, `Iterable` or a path.
 
-More over, `FlatDict` comes with `difference` and `intersection`, these makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+Moreover, `FlatDict` comes with `difference` and `intersection`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 
@@ -65,7 +65,7 @@ You can simply convert all member values of `FlatDict` to a certain type or pass
 #### IO Operations
 
 `FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump the `FlatDict` object to a file or string.
-It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build `FlatDict` object from a string or file.
+It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a `FlatDict` object from a string or file.
 
 `FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load the `FlatDict` object to/from a file.
 
@@ -75,7 +75,7 @@ Since most Configs are in a nested structure, we further propose a `NestedDict`.
 
 Based on `FlatDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
 
-`NestedDict` also comes with `apply` method, which made it easier to manipulate nested structure.
+`NestedDict` also comes with `apply` method, which made it easier to manipulate nested structures.
 
 ### Config
 
