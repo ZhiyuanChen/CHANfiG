@@ -964,7 +964,7 @@ class FlatDict(OrderedDict):
             *args: Additional arguments passed to `open`.
                 Defaults to ().
             **kwargs: Any
-                Additional arguments passed to `open`.
+                Additional keyword arguments passed to `open`.
                 Defaults to ().
 
         Yields:
