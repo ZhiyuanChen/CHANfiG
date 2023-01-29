@@ -34,14 +34,23 @@ class Variable:
     >>> v.value = 3
     >>> v, n
     (3, 3)
-    >>> v.set(4)
+    >>> n.set(4)
     >>> v, n
     (4, 4)
-    >>> v = 5
+    >>> n = 5
     >>> v, n
-    (5, 4)
-    >>> f'4 < {v}'
+    (4, 5)
+    >>> f'{v} < {n}'
     '4 < 5'
+    >>> isinstance(v, int)
+    True
+    >>> type(v)
+    <class 'chanfig.variable.Variable'>
+    >>> v.dtype
+    <class 'int'>
+    >>> with v.unwraped():
+    ...    isinstance(v, int)
+    False
     >>> v = Variable('hello')
     >>> f'{v}, world!'
     'hello, world!'
@@ -65,7 +74,7 @@ class Variable:
     @property
     def value(self) -> Any:
         r"""
-        Actual object stored in the Variable.
+        Actual object stored in the `Variable`.
         """
 
         return self.storage[0]
@@ -73,7 +82,7 @@ class Variable:
     @value.setter
     def value(self, value) -> None:
         r"""
-        Assign value to object stored in the Variable.
+        Assign value to object stored in the `Variable`.
         """
 
         self.storage[0] = self._get_value(value)
@@ -81,21 +90,33 @@ class Variable:
     @property
     def dtype(self) -> type:
         r"""
-        Data type of Variable.
+        Data type of `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> type(id)
+        <class 'chanfig.variable.Variable'>
+        >>> id.dtype
+        <class 'int'>
+        >>> isinstance(id, int)
+        True
+
+        ```
         """
 
         return self.value.__class__
 
     def get(self) -> Any:
         r"""
-        alias of value.
+        alias of `value`.
         """
 
         return self.value
 
     def set(self, value) -> None:
         r"""
-        alias of value.setter.
+        alias of `value.setter`.
         """
 
         self.value = value
@@ -304,18 +325,53 @@ class Variable:
 
         return self.to(str)
 
-    @contextmanager
-    def unwraped(self):
-        """
-        Context manager which temporarily unwrap the Variable.
+    def wrap(self) -> None:
+        r"""
+        Wrap the type of `Variable`.
 
         Examples:
         ```python
-        >>> v = Variable(1)
-        >>> isinstance(v, int)
+        >>> id = Variable(1013)
+        >>> id.unwrap()
+        >>> isinstance(id, int)
+        False
+        >>> id.wrap()
+        >>> isinstance(id, int)
         True
-        >>> with v.unwraped():
-        ...    isinstance(v, int)
+
+        ```
+        """
+
+        self.wrap_type = True
+
+    def unwrap(self) -> None:
+        r"""
+        Unwrap the type of `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.unwrap()
+        >>> isinstance(id, int)
+        False
+
+        ```
+        """
+
+        self.wrap_type = False
+
+    @contextmanager
+    def unwraped(self):
+        r"""
+        Context manager which temporarily unwrap the `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> isinstance(id, int)
+        True
+        >>> with id.unwraped():
+        ...    isinstance(id, int)
         False
 
         ```
