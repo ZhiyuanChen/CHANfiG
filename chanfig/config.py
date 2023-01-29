@@ -23,9 +23,26 @@ from typing import Any, Callable, Iterable, Optional, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
+from .utils import Null
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
+    r"""
+    Parser to parse command line arguments for CHANfiG.
+
+    `ConfigParser` is a subclass of `argparse.ArgumentParser`.
+    It provides a new `parse` method to parse command line arguments to `CHANfiG.Config` object.
+
+    Different to `ArgumentParser.parse_args`, `ConfigParser.parse` will try to parse any command line arguments,
+    even if they are not pre-defined by `ArgumentParser.add_argument`.
+    This allows to relief the burden of adding tons of arguments for each tuneable parameter.
+    In the meantime, there is no mechanism to notify you if you made a typo in command line arguments.
+
+    Note that `ArgumentParser.parse_args` method is not overridden in `ConfigParser`.
+    This is because it is still possible to construct `CHANfiG.Config` with `ArgumentParser.parse_args`,
+    which has strict checking on command line arguments.
+    """
+
     def parse(
         self,
         args: Optional[Sequence[str]] = None,
@@ -33,37 +50,32 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         default_config: Optional[str] = None,
     ) -> Config:
         r"""
-        Parse the arguments for config.
+        Parse the arguments for `Config`.
+
+        You may optionally specify a name for `default_config`,
+        and CHANfiG will read the file under this name.
 
         There are three levels of config:
 
-        1. The base config parsed into the function,
-        2. The config file located at the path of default_config (if specified),
+        1. The base `Config` parsed into the function,
+        2. The base config file located at the path of `default_config` (if specified),
         3. The config specified in arguments.
 
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
-        Parameters
-        ----------
-        args: Optional[Sequence[str]] = sys.argv[1:]
-            The arguments to parse.
-        config: Optional[Config] = Config()
-            The base config.
-        default_config: Optional[str] = None
-            The path to a config file.
+        Args:
+            args: The arguments to parse.
+                Defaults to sys.argv[1:].
+            config: The base `Config`.
+            default_config: Path to the base config file.
 
-        Returns
-        -------
-        config: Config
-            The parsed config.
+        Returns:
+            config: The parsed `Config`.
 
-        Raises
-        ------
-        ValueError
-            If default_config is specified but not found in args.
+        Raises:
+            ValueError: If `default_config` is specified but not found in args.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> p = ConfigParser()
         >>> p.parse(['--i.d', '1013', '--n.f', 'chang']).dict()
@@ -140,28 +152,29 @@ def frozen_check(func: Callable):
 
 class Config(NestedDict):
     r"""
-    Config is an extension of NestedDict.
+    `Config` is an extension of `NestedDict`.
 
-    The differences between Config and a regular NestedDict lies in 3 aspects:
+    The differences between `Config` and `NestedDict` lies in 3 aspects:
 
-    1. Config has `default_factory` set to `Config` and `convert_mapping` set to `True` by default.
-    2. Config has a `frozen` attribute, which can be toggled with `freeze`(`lock`), `defrost`(`unlock`), and `unlocked`.
-    3. Config has a ConfigParser built-in, and supports `add_argument` and `parse`.
+    1. `Config` has `default_factory` set to `Config` and `convert_mapping` set to `True` by default.
+    2. `Config` has a `frozen` attribute,
+        which can be toggled with `freeze`(`lock`), `defrost`(`unlock`), and `unlocked`.
+    3. `Config` has a `ConfigParser` built-in, and supports `add_argument` and `parse`.
 
-    Note that since Config has `default_factory` set to `Config`,
-    accessing anything that does not exist will create a new empty Config sub-attribute.
+    Notes:
+        Since `Config` has `default_factory` set to `Config`,
+        accessing anything that does not exist will create a new empty Config sub-attribute.
 
-    It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
+        A **frozen** `Config` does not have this behavior and
+        will raises `KeyError` when accessing anything that does not exist.
 
-    Attributes
-    ----------
-    parser: ConfigParser = ConfigParser()
-        Parser for command line arguments.
-    frozen: bool = False
-        If `True`, the config is frozen and cannot be altered.
+        It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
 
-    Examples
-    --------
+    Attributes:
+        parser (ConfigParser): Parser for command line arguments.
+        frozen (bool): If `True`, the config is frozen and cannot be altered.
+
+    Examples:
     ```python
     >>> c = Config(**{"f.n": "chang"})
     >>> c.i.d = 1013
@@ -196,35 +209,30 @@ class Config(NestedDict):
         super().__init__(*args, **kwargs)
         self.setattr("parser", ConfigParser())
 
-    def get(self, name: str, default: Optional[Any] = None) -> Any:
+    def get(self, name: str, default: Any = Null) -> Any:
         r"""
-        Get value from Config.
+        Get value from `Config`.
 
-        Note that `default` will override the `default_factory` if specified.
+        Note that `default` has higher priority than `default_factory`.
 
-        Parameters
-        ----------
-        name: str
-        default: Optional[Any] = None
+        Args:
+            name:
+            default:
 
-        Returns
-        -------
-        value: Any
-            If name does not exist, return `default`.
-            If `default` is not specified, return `default_factory()`.
+        Returns:
+            value:
+                If name does not exist, return `default`.
+                If `default` is not specified, return `default_factory()`.
 
-        Raises
-        ------
-        KeyError
-            If name does not exist and `default`/`default_factory` is not specified.
+        Raises:
+            KeyError: If name does not exist and `default`/`default_factory` is not specified.
 
         **Alias**:
 
         + `__getitem__`
         + `__getattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = Config(**{"i.d": 1013})
         >>> d.get('i.d')
@@ -268,25 +276,21 @@ class Config(NestedDict):
         convert_mapping: Optional[bool] = None,
     ) -> None:
         r"""
-        Set value of Config.
+        Set value of `Config`.
 
-        Parameters
-        ----------
-        name: str
-        value: Any
+        Args:
+            name:
+            value:
 
-        Raises
-        ------
-        ValueError
-            If Config is frozen.
+        Raises:
+            ValueError: If `Config` is frozen.
 
         **Alias**:
 
         + `__setitem__`
         + `__setattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config()
         >>> c['i.d'] = 1013
@@ -314,19 +318,17 @@ class Config(NestedDict):
     @frozen_check
     def delete(self, name: str) -> None:
         r"""
-        Delete value from Config.
+        Delete value from `Config`.
 
-        Parameters
-        ----------
-        name: str
+        Args:
+            name:
 
         **Alias**:
 
         + `__delitem__`
         + `__delattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
         >>> d.i.d
@@ -356,17 +358,18 @@ class Config(NestedDict):
     __delattr__ = delete
 
     @frozen_check
-    def pop(self, name: str, default: Optional[Any] = None) -> Any:
+    def pop(self, name: str, default: Any = Null) -> Any:
         r"""
-        Pop value from Config.
+        Pop value from `Config`.
 
-        Parameters
-        ----------
-        name: str
-        default: Optional[Any] = None
+        Args:
+            name:
+            default:
 
-        Examples
-        --------
+        Returns:
+            value: If name does not exist, return `default`.
+
+        Examples:
         ```python
         >>> c = Config()
         >>> c['i.d'] = 1013
@@ -392,18 +395,16 @@ class Config(NestedDict):
 
     def freeze(self, recursive: bool = True) -> Config:
         r"""
-        Freeze the config.
+        Freeze `Config`.
 
-        Parameters
-        ----------
-        recursive: bool = True
+        Args:
+            recursive:
 
         **Alias**:
 
         + `lock`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config(**{'i.d': 1013})
         >>> c.getattr('frozen')
@@ -436,18 +437,16 @@ class Config(NestedDict):
 
     def defrost(self, recursive: bool = True) -> Config:
         r"""
-        Defrost the config.
+        Defrost `Config`.
 
-        Parameters
-        ----------
-        recursive: bool = True
+        Args:
+            recursive:
 
         **Alias**:
 
         + `unlock`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config(**{'i.d': 1013})
         >>> c.getattr('frozen')
@@ -485,10 +484,9 @@ class Config(NestedDict):
     @contextmanager
     def unlocked(self):
         """
-        Context manager which temporarily unlocks the config.
+        Context manager which temporarily unlocks `Config`.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config()
         >>> c.freeze().dict()
@@ -515,23 +513,12 @@ class Config(NestedDict):
         default_config: Optional[str] = None,
     ) -> Config:
         r"""
-        Parse the arguments for config.
-        There are three levels of config:
 
-        1. The base config parsed into the function,
-        2. The config file located at the path of default_config (if specified),
-        3. The config specified in arguments.
+        Parse command line arguments with `ConfigParser`.
 
-        Higher levels override lower levels (i.e. 3 > 2 > 1).
+        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
 
-        Parameters
-        ----------
-        args: Optional[Sequence[str]] = sys.argv[1:]
-        default_config: Optional[str] = None
-            The path to a config file.
-
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config(a=0)
         >>> c.dict()
@@ -548,10 +535,9 @@ class Config(NestedDict):
 
     def add_argument(self, *args, **kwargs) -> None:
         r"""
-        Add an argument to the parser.
+        Add an argument to `ConfigParser`.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> c = Config(a=0)
         >>> c.add_argument("--a", type=int, default=1)

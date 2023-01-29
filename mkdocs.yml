@@ -11,6 +11,7 @@ nav:
   - CHANfiG: index.md
   - Variable: variable.md
   - Config: config.md
+  - DefaultDict: default_dict.md
   - NestedDict: nested_dict.md
   - FlatDict: flat_dict.md
   - ConfigParser: parser.md
@@ -157,12 +158,7 @@ plugins:
   #     post_date_format: full
   #     post_url_format: "{slug}"
   - git-committers
-  - mkdocstrings:
-      default_handler: python
-      handlers:
-        python:
-          selection:
-            docstring_style: numpy
+  - mkdocstrings
   - i18n:
       default_language: en
       languages:
@@ -189,6 +185,7 @@ plugins:
   - search:
       separator: '[\s\u200b\-]'
   - tags
+  - markdown-exec
 
 watch:
   - chanfig/

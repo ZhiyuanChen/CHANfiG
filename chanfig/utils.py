@@ -14,21 +14,61 @@
 # See the LICENSE file for more details.
 
 from json import JSONEncoder
-from typing import Any
+from typing import Any, Mapping
 
 from yaml import SafeDumper, SafeLoader
 
 from .variable import Variable
 
 
-class FileError(ValueError):
+class Singleton(type):
+    r"""
+    Metaclass for Singleton Classes.
     """
+
+    __instances__: Mapping[type, object] = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls.__instances__:
+            cls.__instances__[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls.__instances__[cls]
+
+
+class NULL(metaclass=Singleton):
+    r"""
+    NULL class.
+    """
+
+    def __repr__(self):
+        return "Null"
+
+    def __nonzero__(self):
+        return False
+
+    def __len__(self):
+        return 0
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def __contains__(self, name):
+        return False
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        raise StopIteration
+
+
+class FileError(ValueError):
+    r"""
     Error for file operations.
     """
 
 
 class JsonEncoder(JSONEncoder):
-    """
+    r"""
     JSON encoder for Config.
     """
 
@@ -41,7 +81,7 @@ class JsonEncoder(JSONEncoder):
 
 
 class YamlDumper(SafeDumper):
-    """
+    r"""
     YAML Dumper for Config.
     """
 
@@ -50,6 +90,9 @@ class YamlDumper(SafeDumper):
 
 
 class YamlLoader(SafeLoader):  # pylint: disable=R0901
-    """
+    r"""
     YAML Loader for Config.
     """
+
+
+Null = NULL()

@@ -6,5 +6,6 @@ mkdocs-rss-plugin
 mkdocs-static-i18n
 mkdocstrings
 mkdocstrings[python]
+markdown-exec
 python-markdown-math
 jieba
