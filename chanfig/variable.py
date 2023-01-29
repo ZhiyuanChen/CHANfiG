@@ -22,8 +22,7 @@ class Variable:
     r"""
     Mutable wrapper for immutable objects.
 
-    Examples
-    --------
+    Examples:
     ```python
     >>> v = Variable(1)
     >>> n = v
@@ -243,13 +242,10 @@ class Variable:
         r"""
         Convert the value to a different type.
 
-        Parameters
-        ----------
-        cls: Callable
-            The type to convert to.
+        Args:
+            cls: The type to convert to.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> id = Variable(1013)
         >>> id.to(float)
@@ -267,8 +263,7 @@ class Variable:
         r"""
         Convert the value to a python default int.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> id = Variable(1013.0)
         >>> id.int()
@@ -283,8 +278,7 @@ class Variable:
         r"""
         Convert the value to a python default float.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> id = Variable(1013)
         >>> id.float()
@@ -299,8 +293,7 @@ class Variable:
         r"""
         Convert the value to a python default float.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> id = Variable(1013)
         >>> id.str()
@@ -316,8 +309,7 @@ class Variable:
         """
         Context manager which temporarily unwrap the Variable.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> v = Variable(1)
         >>> isinstance(v, int)

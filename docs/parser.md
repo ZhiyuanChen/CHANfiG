@@ -10,5 +10,3 @@ date: 2022-05-04
     options:
       members:
         - parse
-      show_root_heading: false
-      show_source: true

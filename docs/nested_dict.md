@@ -21,5 +21,3 @@ date: 2022-05-04
         # - difference
         # - intersection
         # - to
-      show_root_heading: false
-      show_source: true

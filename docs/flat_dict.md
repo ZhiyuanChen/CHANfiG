@@ -39,5 +39,3 @@ date: 2022-05-04
         - open
         - empty
         - empty_like
-      show_root_heading: false
-      show_source: true

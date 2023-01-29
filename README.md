@@ -41,7 +41,7 @@ Although there have been some other works that achieve a similar functionality o
 Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `collections.OrderedDict` to create the `FlatDict`, `NestedDict`, and `Config` objects.
+To overcome the aforementioned limitations, we inherit the Python built-in `collections.OrderedDict` to create `FlatDict`, `NestedDict`, and `Config` objects.
 
 ### FlatDict
 
@@ -64,10 +64,10 @@ You can simply convert all member values of `FlatDict` to a certain type or pass
 
 #### IO Operations
 
-`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump the `FlatDict` object to a file or string.
+`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump `FlatDict` object to a file or string.
 It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a `FlatDict` object from a string or file.
 
-`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load the `FlatDict` object to/from a file.
+`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` object to/from a file.
 
 ### NestedDict
 

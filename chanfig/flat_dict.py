@@ -31,7 +31,7 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import FileError, JsonEncoder, YamlDumper, YamlLoader
+from .utils import FileError, JsonEncoder, Null, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
@@ -67,23 +67,19 @@ class FlatDict(OrderedDict):
     `FlatDict` works best with `Variable` objects.
     Just simply call ``FlatDict.a = Variable(1); FlatDict.b = FlatDict.a``, and their values will be sync.
 
-    Attributes
-    ----------
-    indent: int
-        Indentation level in printing and dumping to json or yaml.
-    default_factory: Optional[Callable]
-        Default factory for defaultdict behavior.
+    Attributes:
+        indent: Indentation level in printing and dumping to json or yaml.
+        default_factory: Default factory for defaultdict behavior.
 
-    Warnings
-    --------
-    `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
-    Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
+    Notes:
+        `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
+        Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
 
-    Although it is possible to override other internal methods, it is not recommended to do so.
-    `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
+        Although it is possible to override other internal methods, it is not recommended to do so.
 
-    Examples
-    --------
+        `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
+
+    Examples:
     ```python
     >>> d = FlatDict()
     >>> d.d = 1013
@@ -130,14 +126,9 @@ class FlatDict(OrderedDict):
 
     def _init(self, *args, **kwargs) -> None:
         r"""
-        Initialise values from arguments for FlatDict.
+        Initialise values from arguments for `FlatDict`.
 
         This method is called in `__init__`.
-
-        Parameters
-        ----------
-        *args: [(key1, value1), (key2, value2)].
-        **kwargs: {key1: value1, key2: value2}.
         """
 
         for key, value in args:
@@ -150,35 +141,30 @@ class FlatDict(OrderedDict):
             return self[name]
         return super().__getattribute__(name)
 
-    def get(self, name: str, default: Optional[Any] = None) -> Any:
+    def get(self, name: str, default: Any = Null) -> Any:
         r"""
-        Get value from FlatDict.
+        Get value from `FlatDict`.
 
-        Note that `default` will override the `default_factory` if specified.
+        Note that `default` has higher priority than `default_factory`.
 
-        Parameters
-        ----------
-        name: str
-        default: Optional[Any] = None
+        Args:
+            name:
+            default:
 
-        Returns
-        -------
-        value: Any
-            If name does not exist, return `default`.
-            If `default` is not specified, return `default_factory()`.
+        Returns:
+            value:
+                If name does not exist, return `default`.
+                If `default` is not specified, return `default_factory()`.
 
-        Raises
-        ------
-        KeyError
-            If name does not exist and `default`/`default_factory` is not specified.
+        Raises:
+            KeyError: If name does not exist and `default`/`default_factory` is not specified.
 
         **Alias**:
 
         + `__getitem__`
         + `__getattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(d=1013)
         >>> d.get('d')
@@ -196,27 +182,25 @@ class FlatDict(OrderedDict):
         ```
         """
 
-        return super().__getitem__(name) if default is None else self.__missing__(name, default)
+        return super().__getitem__(name) if default is Null else self.__missing__(name, default)
 
     __getitem__ = get
     __getattr__ = get
 
     def set(self, name: str, value: Any) -> None:
         r"""
-        Set value of FlatDict.
+        Set value of `FlatDict`.
 
-        Parameters
-        ----------
-        name: str
-        value: Any
+        Args:
+            name:
+            value:
 
         **Alias**:
 
         + `__setitem__`
         + `__setattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict()
         >>> d.set('d', 1013)
@@ -247,19 +231,17 @@ class FlatDict(OrderedDict):
 
     def delete(self, name: str) -> None:
         r"""
-        Delete value from FlatDict.
+        Delete value from `FlatDict`.
 
-        Parameters
-        ----------
-        name: str
+        Args:
+            name:
 
         **Alias**:
 
         + `__delitem__`
         + `__delattr__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(d=1016, n='chang')
         >>> d.d
@@ -286,24 +268,21 @@ class FlatDict(OrderedDict):
     __delitem__ = delete
     __delattr__ = delete
 
-    def getattr(self, name: str, default: Optional[Any] = None) -> Any:
+    def getattr(self, name: str, default: Any = Null) -> Any:
         r"""
-        Get attribute of FlatDict.
+        Get attribute of `FlatDict`.
 
-        Note that if won't retrieve value in the FlatDict, nor will it create new one if default_factory is specified.
+        Note that it won't retrieve value in `FlatDict`,
+        nor will it create new `default_factory` even if it is assigned.
 
-        Parameters
-        ----------
-        name: str
-        default: Optional[Any] = None
+        Args:
+            name:
+            default:
 
-        Returns
-        -------
-        value: Any
-            If name does not exist, return `default`.
+        Returns:
+            value: If name does not exist, return `default`.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, default_factory=list)
         >>> d.getattr('default_factory')
@@ -324,35 +303,31 @@ class FlatDict(OrderedDict):
                 return self.__class__.__dict__[name]
             return super().getattr(name, default)  # type: ignore
         except AttributeError:
-            if default is not None:
+            if default is not Null:
                 return default
             raise AttributeError(f"{self.__class__.__name__} has no attribute {name}.") from None
 
     def setattr(self, name: str, value: Any) -> None:
         r"""
-        Set attribute of FlatDict.
+        Set attribute of `FlatDict`.
 
-        Note that it won't alter values in the FlatDict.
+        Note that it won't alter values in `FlatDict`.
 
-        Parameters
-        ----------
-        name: str
-        value: Any
+        Args:
+            name:
+            value:
 
-        Warns
-        ------
-        RuntimeWarning
-            If name already exists in FlatDict.
+        Warns:
+            RuntimeWarning: If name already exists in `FlatDict`.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict()
         >>> d.setattr('attr', 'value')
         >>> d.getattr('attr')
         'value'
         >>> d.set('d', 1013)
-        >>> d.setattr('d', 1031)  # Trigger RuntimeWarning: d already exists in FlatDict.
+        >>> d.setattr('d', 1031)  # RuntimeWarning: d already exists in FlatDict.
         >>> d.get('d')
         1013
         >>> d.d
@@ -373,16 +348,14 @@ class FlatDict(OrderedDict):
 
     def delattr(self, name: str) -> None:
         r"""
-        Delete attribute of FlatDict.
+        Delete attribute of `FlatDict`.
 
-        Note that it won't delete values in the FlatDict.
+        Note that it won't delete values in `FlatDict`.
 
-        Parameters
-        ----------
-        name: str
+        Args:
+            name:
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict()
         >>> d.setattr('name', 'chang')
@@ -400,18 +373,15 @@ class FlatDict(OrderedDict):
 
     def hasattr(self, name: str) -> bool:
         r"""
-        Determine if an attribute exists in FlatDict.
+        Determine if an attribute exists in `FlatDict`.
 
-        Parameters
-        ----------
-        name: str
+        Args:
+            name:
 
-        Returns
-        -------
-        bool
+        Returns:
+            (bool):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict()
         >>> d.setattr('name', 'chang')
@@ -431,8 +401,8 @@ class FlatDict(OrderedDict):
         except AttributeError:
             return False
 
-    def __missing__(self, name: str, default: Optional[Any] = None) -> Any:
-        if default is None:
+    def __missing__(self, name: str, default: Any = Null) -> Any:
+        if default is Null:
             # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
             if "default_factory" not in self.__dict__:
                 raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
@@ -445,19 +415,15 @@ class FlatDict(OrderedDict):
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""
-        Convert FlatDict to other Mapping.
+        Convert `FlatDict` to other `Mapping`.
 
-        Parameters
-        ----------
-        cls: Callable = dict
-            Target class to be converted to.
+        Args:
+            cls: Target class to be converted to.
 
-        Returns
-        -------
-        Mapping
+        Returns:
+            (Mapping):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.dict()
@@ -470,15 +436,13 @@ class FlatDict(OrderedDict):
 
     def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
         r"""
-        Update FlatDict values w.r.t. other.
+        Update `FlatDict` values w.r.t. `other`.
 
-        Parameters
-        ----------
-        other: Mapping | Iterable | PathStr
+        Args:
+            other:
 
-        Returns
-        -------
-        self: FlatDict
+        Returns:
+            self:
 
         **Alias**:
 
@@ -486,8 +450,7 @@ class FlatDict(OrderedDict):
         + `merge_from_file`
         + `union`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -519,22 +482,19 @@ class FlatDict(OrderedDict):
 
     def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Difference between FlatDict values and other.
+        Difference between `FlatDict` values and `other`.
 
-        Parameters
-        ----------
-        other: Mapping | Iterable | PathStr
+        Args:
+            other:
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
         **Alias**:
 
         + `diff`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -565,22 +525,19 @@ class FlatDict(OrderedDict):
 
     def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Intersection between FlatDict values and other.
+        Intersection between `FlatDict` values and `other`.
 
-        Parameters
-        ----------
-        other: Mapping | Iterable | PathStr
+        Args:
+            other (Mapping | Iterable | PathStr):
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
         **Alias**:
 
         + `inter`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
@@ -610,18 +567,15 @@ class FlatDict(OrderedDict):
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
         r"""
-        Convert values of `FlatDict` to target class.
+        Convert values of `FlatDict` to target `cls`.
 
-        Parameters
-        ----------
-        cls: str | torch.device | torch.dtype
+        Args:
+            cls (str | torch.device | torch.dtype):
 
-        Returns
-        -------
-        self: FlatDict
+        Returns:
+            self:
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.dict()
@@ -647,12 +601,10 @@ class FlatDict(OrderedDict):
         r"""
         Move all tensors to cpu.
 
-        Returns
-        -------
-        self: FlatDict
+        Returns:
+            self:
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> import torch
         >>> d = FlatDict(a=torch.tensor(1))
@@ -668,16 +620,14 @@ class FlatDict(OrderedDict):
         r"""
         Move all tensors to gpu.
 
-        Returns
-        -------
-        self: FlatDict
+        Returns:
+            self:
 
         **Alias**:
 
         + `cuda`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> import torch
         >>> d = FlatDict(a=torch.tensor(1))
@@ -695,16 +645,14 @@ class FlatDict(OrderedDict):
         r"""
         Move all tensors to tpu.
 
-        Returns
-        -------
-        self: FlatDict
+        Returns:
+            self:
 
         **Alias**:
 
         + `xla`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> import torch
         >>> d = FlatDict(a=torch.tensor(1))
@@ -720,14 +668,12 @@ class FlatDict(OrderedDict):
 
     def copy(self) -> FlatDict:
         r"""
-        Create a shallow copy of FlatDict.
+        Create a shallow copy of `FlatDict`.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
@@ -747,19 +693,17 @@ class FlatDict(OrderedDict):
 
     def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:
         r"""
-        Create a deep copy of FlatDict.
+        Create a deep copy of `FlatDict`.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
         **Alias**:
 
         + `clone`
         + `__deepcopy__`
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
@@ -793,10 +737,9 @@ class FlatDict(OrderedDict):
 
     def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""
-        Dump FlatDict to file.
+        Dump `FlatDict` to file.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.dump("example.yaml")
@@ -818,14 +761,12 @@ class FlatDict(OrderedDict):
     @classmethod
     def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
         """
-        Load FlatDict from file.
+        Load `FlatDict` from file.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict.load("example.yaml")
         >>> d.dict()
@@ -847,13 +788,12 @@ class FlatDict(OrderedDict):
 
     def json(self, file: File, *args, **kwargs) -> None:
         r"""
-        Dump FlatDict to json file.
+        Dump `FlatDict` to json file.
 
         This function calls `self.jsons()` to generate json string.
         You may overwrite `jsons` in case something is not json serializable.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.json("example.json")
@@ -867,17 +807,15 @@ class FlatDict(OrderedDict):
     @classmethod
     def from_json(cls, file: File, *args, **kwargs) -> FlatDict:
         r"""
-        Construct FlatDict from json file.
+        Construct `FlatDict` from json file.
 
         This function calls `self.from_jsons()` to construct object from json string.
         You may overwrite `from_jsons` in case something is not json serializable.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict.from_json('example.json')
         >>> d.dict()
@@ -891,14 +829,12 @@ class FlatDict(OrderedDict):
 
     def jsons(self, *args, **kwargs) -> str:
         r"""
-        Dump FlatDict to json string.
+        Dump `FlatDict` to json string.
 
-        Returns
-        -------
-        str
+        Returns:
+            (str):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.jsons()
@@ -916,14 +852,12 @@ class FlatDict(OrderedDict):
     @classmethod
     def from_jsons(cls, string: str, *args, **kwargs) -> FlatDict:
         r"""
-        Construct FlatDict from json string.
+        Construct `FlatDict` from json string.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
         >>> d.dict()
@@ -936,13 +870,12 @@ class FlatDict(OrderedDict):
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
-        Dump FlatDict to yaml file.
+        Dump `FlatDict` to yaml file.
 
         This function calls `self.yamls()` to generate yaml string.
         You may overwrite `yamls` in case something is not yaml serializable.
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.yaml("example.yaml")
@@ -956,14 +889,13 @@ class FlatDict(OrderedDict):
     @classmethod
     def from_yaml(cls, file: File, *args, **kwargs) -> FlatDict:
         r"""
-        Construct FlatDict from yaml file.
+        Construct `FlatDict` from yaml file.
 
         This function calls `self.from_yamls()` to construct object from yaml string.
         You may overwrite `from_yamls` in case something is not yaml serializable.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
         ```python
         >>> d = FlatDict.from_yaml('example.yaml')
@@ -978,14 +910,12 @@ class FlatDict(OrderedDict):
 
     def yamls(self, *args, **kwargs) -> str:
         r"""
-        Dump FlatDict to yaml string.
+        Dump `FlatDict` to yaml string.
 
-        Returns
-        -------
-        str
+        Returns:
+            (str):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.yamls()
@@ -1003,14 +933,12 @@ class FlatDict(OrderedDict):
     @classmethod
     def from_yamls(cls, string: str, *args, **kwargs) -> FlatDict:
         r"""
-        Construct FlatDict from yaml string.
+        Construct `FlatDict` from yaml string.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
         >>> d.dict()
@@ -1031,19 +959,18 @@ class FlatDict(OrderedDict):
 
         This methods extends the ability of built-in `open` by allowing it to accept an `IO` object.
 
-        Parameters
-        ----------
-        file: File
-            File path or file-like object.
-        *args, **kwargs: Any
-            Additional arguments passed to `open`.
+        Args:
+            file: File path or file-like object.
+            *args: Additional arguments passed to `open`.
+                Defaults to ().
+            **kwargs: Any
+                Additional arguments passed to `open`.
+                Defaults to ().
 
-        Yields
-        -------
-        FileIO: FileIO
+        Yields:
+            (FileIO):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> with FlatDict.open("example.yaml") as fp:
         ...     print(fp.read())
@@ -1071,17 +998,15 @@ class FlatDict(OrderedDict):
         r"""
         Initialise an empty `FlatDict`.
 
-        This method is helpful when you inheriting the `FlatDict` with default values defined in `__init__()`.
-        As use `type(self)()` in this case would copy all the default values, which might now be desired.
+        This method is helpful when you inheriting `FlatDict` with default values defined in `__init__()`.
+        As use `type(self)()` in this case would copy all the default values, which might not be desired.
 
         This method will preserve everything in `FlatDict.__class__.__dict__`.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=[])
         >>> c = d.empty()
@@ -1098,16 +1023,14 @@ class FlatDict(OrderedDict):
 
     def empty_like(self, *args, **kwargs):
         r"""
-        Initialise an empty copy of FlatDict.
+        Initialise an empty copy of `FlatDict`.
 
         This method will preserve everything in `FlatDict.__class__.__dict__` and `FlatDict.__dict__`.
 
-        Returns
-        -------
-        FlatDict
+        Returns:
+            (FlatDict):
 
-        Examples
-        --------
+        Examples:
         ```python
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")

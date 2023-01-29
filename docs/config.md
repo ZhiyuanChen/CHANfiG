@@ -18,5 +18,3 @@ date: 2022-05-04
         # - set
         # - delete
         # - pop
-      show_root_heading: false
-      show_source: true
