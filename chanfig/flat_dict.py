@@ -994,7 +994,7 @@ class FlatDict(OrderedDict):
             raise TypeError(f"file={file!r} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}.")
 
     @classmethod
-    def empty(cls, *args, **kwargs):
+    def empty(cls, *args, **kwargs) -> FlatDict:
         r"""
         Initialise an empty `FlatDict`.
 
@@ -1021,7 +1021,7 @@ class FlatDict(OrderedDict):
         empty._init(*args, **kwargs)
         return empty
 
-    def empty_like(self, *args, **kwargs):
+    def empty_like(self, *args, **kwargs) -> FlatDict:
         r"""
         Initialise an empty copy of `FlatDict`.
 
@@ -1075,16 +1075,16 @@ class FlatDict(OrderedDict):
         main_str += ")"
         return main_str
 
-    def _add_indent(self, text):
+    def _add_indent(self, text: str) -> str:
         lines = text.split("\n")
         # don't do anything for single-line stuff
         if len(lines) == 1:
             return text
         first = lines.pop(0)
         lines = [(self.getattr("indent", 2) * " ") + line for line in lines]
-        lines = "\n".join(lines)
-        lines = first + "\n" + lines
-        return lines
+        text = "\n".join(lines)
+        text = first + "\n" + text
+        return text
 
     def __setstate__(self, states, *args, **kwargs):
         for name, value in states.items():
