@@ -37,6 +37,11 @@ class Singleton(type):
 class NULL(metaclass=Singleton):
     r"""
     NULL class.
+
+    `get` method in CHANfiG may accept `None` or `Ellipse`(`...`) as value of `default`.
+    Therefore, it is mandatory to have a different default value for `default`.
+
+    `Null` is an instance of `NULL` and is recommended to be used as `obj is Null`.
     """
 
     def __repr__(self):
