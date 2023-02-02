@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 from ast import literal_eval
-from collections import OrderedDict
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from json import dumps as json_dumps
@@ -51,11 +50,11 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
-class FlatDict(OrderedDict):
+class FlatDict(dict):
     r"""
     `FlatDict` with attribute-style access.
 
-    `FlatDict` inherits from built-in `collections.OrderedDict`.
+    `FlatDict` inherits from built-in `dict`.
 
     It comes with many easy to use helper function, such as `difference`, `intersection`.
 
@@ -1059,21 +1058,22 @@ class FlatDict(OrderedDict):
             extra_lines = extra_repr.split("\n")
         child_lines = []
         for key, value in self.items():
-            value_str = repr(value)
-            value_str = self._add_indent(value_str)
-            child_lines.append("(" + key + "): " + value_str)
+            key_repr = repr(key)
+            value_repr = repr(value)
+            value_repr = self._add_indent(value_repr)
+            child_lines.append("(" + key_repr + "): " + value_repr)
         lines = extra_lines + child_lines
 
-        main_str = self.__class__.__name__ + "("
+        main_repr = self.__class__.__name__ + "("
         if lines:
             # simple one-liner info, which most builtin Modules will use
             if len(extra_lines) == 1 and not child_lines:
-                main_str += extra_lines[0]
+                main_repr += extra_lines[0]
             else:
-                main_str += "\n  " + "\n  ".join(lines) + "\n"
+                main_repr += "\n  " + "\n  ".join(lines) + "\n"
 
-        main_str += ")"
-        return main_str
+        main_repr += ")"
+        return main_repr
 
     def _add_indent(self, text: str) -> str:
         lines = text.split("\n")
@@ -1085,6 +1085,9 @@ class FlatDict(OrderedDict):
         text = "\n".join(lines)
         text = first + "\n" + text
         return text
+
+    def __getstate__(self, *args, **kwargs):
+        return self.__dict__
 
     def __setstate__(self, states, *args, **kwargs):
         for name, value in states.items():
