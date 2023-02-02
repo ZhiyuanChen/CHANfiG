@@ -41,17 +41,17 @@ Although there have been some other works that achieve a similar functionality o
 Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `collections.OrderedDict` to create `FlatDict`, `NestedDict`, and `Config` objects.
+To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `NestedDict`, and `Config` objects.
 
 ### FlatDict
 
-`FlatDict` improves the default `collections.OrderedDict` in 3 aspects.
+`FlatDict` improves the default `dict` in 3 aspects.
 
 `FlatDict` also accepts `default_factory`, and can be easily used as `defaultdict`.
 
 #### Dict Operations
 
-`FlatDict` extends the `update` method of the original `collections.OrderedDict`, allows passing another `Mapping`, `Iterable` or a path.
+`FlatDict` extends the `update` method of the original `dict`, allows passing another `Mapping`, `Iterable` or a path.
 
 Moreover, `FlatDict` comes with `difference` and `intersection`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 

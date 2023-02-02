@@ -36,17 +36,17 @@ CHANfiG 的范式是：
 
 尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性可字典成员的冲突。
 
-为了解决上述限制，我们继承了 Python 内置的`collections.OrderedDict`来创建`FlatDict`、`NestedDict`和`Config`对象。
+为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`NestedDict`和`Config`对象。
 
 ### FlatDict
 
-`FlatDict`在三个方面对默认的`collections.OrderedDict`做出改进。
+`FlatDict`在三个方面对默认的`dict`做出改进。
 
 `FlatDict`同时接受`default_factory`，并且可以被简单的作为`defaultdict`使用。
 
 #### 字典操作
 
-`FlatDict`扩充原始的`collections.OrderedDict`的`update`方法，使其支持传递另一个`Mapping`、`Iterable`或者一个路径。
+`FlatDict`扩充原始的`dict`的`update`方法，使其支持传递另一个`Mapping`、`Iterable`或者一个路径。
 
 更进一步的，`FlatDict`引入了`difference`和`intersection`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 

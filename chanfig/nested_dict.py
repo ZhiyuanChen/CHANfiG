@@ -136,7 +136,7 @@ class NestedDict(FlatDict):
         """
 
         delimiter = self.getattr("delimiter", ".")
-        while delimiter in name:
+        while isinstance(name, str) and delimiter in name:
             name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
         return super().get(name, default)
@@ -193,7 +193,7 @@ class NestedDict(FlatDict):
         default_mapping = self.getattr("default_mapping", NestedDict)
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
-        while delimiter in name:
+        while isinstance(name, str) and delimiter in name:
             name, rest = name.split(delimiter, 1)
             if name not in self:
                 if convert_mapping:
@@ -245,7 +245,7 @@ class NestedDict(FlatDict):
         """
 
         delimiter = self.getattr("delimiter", ".")
-        while delimiter in name:
+        while isinstance(name, str) and delimiter in name:
             name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
         super().__delitem__(name)
@@ -255,7 +255,7 @@ class NestedDict(FlatDict):
 
     def __contains__(self, name: str) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
-        while delimiter in name:
+        while isinstance(name, str) and delimiter in name:
             name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
         return super().__contains__(name)

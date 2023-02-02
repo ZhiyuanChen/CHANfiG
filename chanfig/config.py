@@ -248,8 +248,8 @@ class Config(NestedDict):
         >>> del d.f
         >>> d.freeze()
         Config(
-          (i): Config(
-            (d): 1013
+          ('i'): Config(
+            ('d'): 1013
           )
         )
         >>> d.f
