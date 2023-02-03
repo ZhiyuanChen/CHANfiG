@@ -22,6 +22,14 @@ class Variable:
     r"""
     Mutable wrapper for immutable objects.
 
+    Notes:
+        `Variable` by default wrap the instance type to type of the wrapped object.
+        Therefore, `isinstance(Variable(1), int)` will return `True`.
+
+        To temporarily disable this behavior, you can call context manager `with Variable.unwraped()`.
+
+        To permanently disable this behavior, you can call `Variable.unwrap()`.
+
     Examples:
     ```python
     >>> v = Variable(1)
@@ -74,7 +82,7 @@ class Variable:
     @property
     def value(self) -> Any:
         r"""
-        Actual object stored in the `Variable`.
+        Fetch the object wrapped in `Variable`.
         """
 
         return self.storage[0]
@@ -82,7 +90,7 @@ class Variable:
     @value.setter
     def value(self, value) -> None:
         r"""
-        Assign value to object stored in the `Variable`.
+        Assign value to the object wrapped in `Variable`.
         """
 
         self.storage[0] = self._get_value(value)
@@ -90,7 +98,7 @@ class Variable:
     @property
     def dtype(self) -> type:
         r"""
-        Data type of `Variable`.
+        Data type of the object wrapped in `Variable`.
 
         Examples:
         ```python
@@ -99,7 +107,7 @@ class Variable:
         <class 'chanfig.variable.Variable'>
         >>> id.dtype
         <class 'int'>
-        >>> isinstance(id, int)
+        >>> issubclass(id.dtype, int)
         True
 
         ```
@@ -109,17 +117,146 @@ class Variable:
 
     def get(self) -> Any:
         r"""
-        alias of `value`.
+        Fetch the object wrapped in `Variable`.
         """
 
         return self.value
 
     def set(self, value) -> None:
         r"""
-        alias of `value.setter`.
+        Assign value to the object wrapped in `Variable`.
+
+        `Variable.set` is extremely useful when you want to change the value without changing the reference.
+
+        In `FlatDict.set`, all assignments of `Variable` calls `Variable.set` Internally.
         """
 
         self.value = value
+
+    def to(self, cls: Callable) -> Any:  # pylint: disable=C0103
+        r"""
+        Convert the object wrapped in `Variable` to target `cls`.
+
+        Args:
+            cls: The type to convert to.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.to(float)
+        1013.0
+        >>> id.to(str)
+        '1013.0'
+
+        ```
+        """
+
+        self.value = cls(self.value)
+        return self
+
+    def int(self) -> int:
+        r"""
+        Convert the object wrapped in `Variable` to python `int`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013.0)
+        >>> id.int()
+        1013
+
+        ```
+        """
+
+        return self.to(int)
+
+    def float(self) -> float:
+        r"""
+        Convert the object wrapped in `Variable` to python `float`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.float()
+        1013.0
+
+        ```
+        """
+
+        return self.to(float)
+
+    def str(self) -> str:
+        r"""
+        Convert the object wrapped in `Variable` to python `float`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.str()
+        '1013'
+
+        ```
+        """
+
+        return self.to(str)
+
+    def wrap(self) -> None:
+        r"""
+        Wrap the type of `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.unwrap()
+        >>> isinstance(id, int)
+        False
+        >>> id.wrap()
+        >>> isinstance(id, int)
+        True
+
+        ```
+        """
+
+        self.wrap_type = True
+
+    def unwrap(self) -> None:
+        r"""
+        Unwrap the type of `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> id.unwrap()
+        >>> isinstance(id, int)
+        False
+
+        ```
+        """
+
+        self.wrap_type = False
+
+    @contextmanager
+    def unwraped(self):
+        r"""
+        Context manager which temporarily unwrap the `Variable`.
+
+        Examples:
+        ```python
+        >>> id = Variable(1013)
+        >>> isinstance(id, int)
+        True
+        >>> with id.unwraped():
+        ...    isinstance(id, int)
+        False
+
+        ```
+        """
+
+        wrap_type = self.wrap_type
+        self.wrap_type = False
+        try:
+            yield self
+        finally:
+            self.wrap_type = wrap_type
 
     @staticmethod
     def _get_value(obj) -> Any:
@@ -148,8 +285,8 @@ class Variable:
     def __gt__(self, other) -> bool:
         return self.value > self._get_value(other)
 
-    def __index__(self) -> int:  # pylint: disable=E0601
-        return int(self.value)
+    def __index__(self):
+        return self.value.__index__()
 
     def __invert__(self):
         return ~self.value
@@ -258,128 +395,3 @@ class Variable:
 
     def __repr__(self):
         return repr(self.value)
-
-    def to(self, cls: Callable) -> Any:  # pylint: disable=C0103
-        r"""
-        Convert the value to a different type.
-
-        Args:
-            cls: The type to convert to.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.to(float)
-        1013.0
-        >>> id.to(str)
-        '1013.0'
-
-        ```
-        """
-
-        self.value = cls(self.value)
-        return self
-
-    def int(self) -> int:
-        r"""
-        Convert the value to a python default int.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013.0)
-        >>> id.int()
-        1013
-
-        ```
-        """
-
-        return self.to(int)
-
-    def float(self) -> float:
-        r"""
-        Convert the value to a python default float.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.float()
-        1013.0
-
-        ```
-        """
-
-        return self.to(float)
-
-    def str(self) -> str:
-        r"""
-        Convert the value to a python default float.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.str()
-        '1013'
-
-        ```
-        """
-
-        return self.to(str)
-
-    def wrap(self) -> None:
-        r"""
-        Wrap the type of `Variable`.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.unwrap()
-        >>> isinstance(id, int)
-        False
-        >>> id.wrap()
-        >>> isinstance(id, int)
-        True
-
-        ```
-        """
-
-        self.wrap_type = True
-
-    def unwrap(self) -> None:
-        r"""
-        Unwrap the type of `Variable`.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.unwrap()
-        >>> isinstance(id, int)
-        False
-
-        ```
-        """
-
-        self.wrap_type = False
-
-    @contextmanager
-    def unwraped(self):
-        r"""
-        Context manager which temporarily unwrap the `Variable`.
-
-        Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> isinstance(id, int)
-        True
-        >>> with id.unwraped():
-        ...    isinstance(id, int)
-        False
-
-        ```
-        """
-
-        wrap_type = self.wrap_type
-        self.wrap_type = False
-        try:
-            yield self
-        finally:
-            self.wrap_type = wrap_type
