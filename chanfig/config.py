@@ -209,6 +209,162 @@ class Config(NestedDict):
         super().__init__(*args, **kwargs)
         self.setattr("parser", ConfigParser())
 
+    def freeze(self, recursive: bool = True) -> Config:
+        r"""
+        Freeze `Config`.
+
+        Args:
+            recursive:
+
+        **Alias**:
+
+        + `lock`
+
+        Examples:
+        ```python
+        >>> c = Config(**{'i.d': 1013})
+        >>> c.getattr('frozen')
+        False
+        >>> c.freeze(recursive=False).dict()
+        {'i': {'d': 1013}}
+        >>> c.getattr('frozen')
+        True
+        >>> c.i.getattr('frozen')
+        False
+        >>> c.freeze(recursive=True).dict()
+        {'i': {'d': 1013}}
+        >>> c.i.getattr('frozen')
+        True
+
+        ```
+        """
+
+        @wraps(self.freeze)
+        def freeze(config: Config) -> None:
+            config.setattr("frozen", True)
+
+        if recursive:
+            self.apply(freeze)
+        else:
+            freeze(self)
+        return self
+
+    lock = freeze
+
+    def defrost(self, recursive: bool = True) -> Config:
+        r"""
+        Defrost `Config`.
+
+        Args:
+            recursive:
+
+        **Alias**:
+
+        + `unlock`
+
+        Examples:
+        ```python
+        >>> c = Config(**{'i.d': 1013})
+        >>> c.getattr('frozen')
+        False
+        >>> c.freeze().dict()
+        {'i': {'d': 1013}}
+        >>> c.getattr('frozen')
+        True
+        >>> c.defrost(recursive=False).dict()
+        {'i': {'d': 1013}}
+        >>> c.getattr('frozen')
+        False
+        >>> c.i.getattr('frozen')
+        True
+        >>> c.defrost().dict()
+        {'i': {'d': 1013}}
+        >>> c.i.getattr('frozen')
+        False
+
+        ```
+        """
+
+        @wraps(self.defrost)
+        def defrost(config: Config) -> None:
+            config.setattr("frozen", False)
+
+        if recursive:
+            self.apply(defrost)
+        else:
+            defrost(self)
+        return self
+
+    unlock = defrost
+
+    @contextmanager
+    def unlocked(self):
+        """
+        Context manager which temporarily unlocks `Config`.
+
+        Examples:
+        ```python
+        >>> c = Config()
+        >>> c.freeze().dict()
+        {}
+        >>> with c.unlocked():
+        ...     c['i.d'] = 1013
+        >>> c.defrost().dict()
+        {'i': {'d': 1013}}
+
+        ```
+        """
+
+        was_frozen = self.getattr("frozen", False)
+        try:
+            self.defrost()
+            yield self
+        finally:
+            if was_frozen:
+                self.freeze()
+
+    def parse(
+        self,
+        args: Optional[Iterable[str]] = None,
+        default_config: Optional[str] = None,
+    ) -> Config:
+        r"""
+
+        Parse command line arguments with `ConfigParser`.
+
+        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
+
+        Examples:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.dict()
+        {'a': 0}
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        return self.getattr("parser", ConfigParser()).parse(args, self, default_config)
+
+    parse_config = parse
+
+    def add_argument(self, *args, **kwargs) -> None:
+        r"""
+        Add an argument to `ConfigParser`.
+
+        Examples:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.add_argument("--a", type=int, default=1)
+        >>> c.parse([]).dict()
+        {'a': 1}
+
+        ```
+        """
+
+        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
+
     def get(self, name: str, default: Any = Null) -> Any:
         r"""
         Get value from `Config`.
@@ -392,159 +548,3 @@ class Config(NestedDict):
         """
 
         return super().pop(name, default)
-
-    def freeze(self, recursive: bool = True) -> Config:
-        r"""
-        Freeze `Config`.
-
-        Args:
-            recursive:
-
-        **Alias**:
-
-        + `lock`
-
-        Examples:
-        ```python
-        >>> c = Config(**{'i.d': 1013})
-        >>> c.getattr('frozen')
-        False
-        >>> c.freeze(recursive=False).dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        True
-        >>> c.i.getattr('frozen')
-        False
-        >>> c.freeze(recursive=True).dict()
-        {'i': {'d': 1013}}
-        >>> c.i.getattr('frozen')
-        True
-
-        ```
-        """
-
-        @wraps(self.freeze)
-        def freeze(config: Config) -> None:
-            config.setattr("frozen", True)
-
-        if recursive:
-            self.apply(freeze)
-        else:
-            freeze(self)
-        return self
-
-    lock = freeze
-
-    def defrost(self, recursive: bool = True) -> Config:
-        r"""
-        Defrost `Config`.
-
-        Args:
-            recursive:
-
-        **Alias**:
-
-        + `unlock`
-
-        Examples:
-        ```python
-        >>> c = Config(**{'i.d': 1013})
-        >>> c.getattr('frozen')
-        False
-        >>> c.freeze().dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        True
-        >>> c.defrost(recursive=False).dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        False
-        >>> c.i.getattr('frozen')
-        True
-        >>> c.defrost().dict()
-        {'i': {'d': 1013}}
-        >>> c.i.getattr('frozen')
-        False
-
-        ```
-        """
-
-        @wraps(self.defrost)
-        def defrost(config: Config) -> None:
-            config.setattr("frozen", False)
-
-        if recursive:
-            self.apply(defrost)
-        else:
-            defrost(self)
-        return self
-
-    unlock = defrost
-
-    @contextmanager
-    def unlocked(self):
-        """
-        Context manager which temporarily unlocks `Config`.
-
-        Examples:
-        ```python
-        >>> c = Config()
-        >>> c.freeze().dict()
-        {}
-        >>> with c.unlocked():
-        ...     c['i.d'] = 1013
-        >>> c.defrost().dict()
-        {'i': {'d': 1013}}
-
-        ```
-        """
-
-        was_frozen = self.getattr("frozen", False)
-        try:
-            self.defrost()
-            yield self
-        finally:
-            if was_frozen:
-                self.freeze()
-
-    def parse(
-        self,
-        args: Optional[Iterable[str]] = None,
-        default_config: Optional[str] = None,
-    ) -> Config:
-        r"""
-
-        Parse command line arguments with `ConfigParser`.
-
-        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
-
-        Examples:
-        ```python
-        >>> c = Config(a=0)
-        >>> c.dict()
-        {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        return self.getattr("parser", ConfigParser()).parse(args, self, default_config)
-
-    parse_config = parse
-
-    def add_argument(self, *args, **kwargs) -> None:
-        r"""
-        Add an argument to `ConfigParser`.
-
-        Examples:
-        ```python
-        >>> c = Config(a=0)
-        >>> c.add_argument("--a", type=int, default=1)
-        >>> c.parse([]).dict()
-        {'a': 1}
-
-        ```
-        """
-
-        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)

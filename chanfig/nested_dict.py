@@ -90,6 +90,113 @@ class NestedDict(FlatDict):
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
+    def all_keys(self) -> Iterator:
+        r"""
+        Get all keys of `NestedDict`.
+
+        Returns:
+            (Iterator):
+
+        Examples:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_keys())
+        ['a', 'b.c', 'b.d']
+
+        ```
+        """
+
+        delimiter = self.getattr("delimiter", ".")
+
+        @wraps(self.all_keys)
+        def all_keys(self, prefix=""):
+            for key, value in self.items():
+                if prefix:
+                    key = prefix + delimiter + key
+                if isinstance(value, NestedDict):
+                    yield from all_keys(value, key)
+                else:
+                    yield key
+
+        return all_keys(self)
+
+    def all_values(self) -> Iterator:
+        r"""
+        Get all values of `NestedDict`.
+
+        Returns:
+            (Iterator):
+
+        Examples:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_values())
+        [1, 2, 3]
+
+        ```
+        """
+
+        for value in self.values():
+            if isinstance(value, NestedDict):
+                yield from value.all_values()
+            else:
+                yield value
+
+    def all_items(self) -> Iterator[Tuple]:
+        r"""
+        Get all items of `NestedDict`.
+
+        Returns:
+            (Iterator):
+
+        Examples:
+        ```python
+        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> list(d.all_items())
+        [('a', 1), ('b.c', 2), ('b.d', 3)]
+
+        ```
+        """
+
+        delimiter = self.getattr("delimiter", ".")
+
+        @wraps(self.all_items)
+        def all_items(self, prefix=""):
+            for key, value in self.items():
+                if prefix:
+                    key = prefix + delimiter + key
+                if isinstance(value, NestedDict):
+                    yield from all_items(value, key)
+                else:
+                    yield key, value
+
+        return all_items(self)
+
+    def apply(self, func: Callable) -> NestedDict:
+        r"""
+        Recursively apply a function to `NestedDict` and its children.
+
+        Args:
+            func(Callable):
+
+        Examples:
+        ```python
+        >>> d = NestedDict()
+        >>> d.a = NestedDict()
+        >>> def func(d):
+        ...     d.t = 1
+        >>> d.apply(func).dict()
+        {'a': {'t': 1}, 't': 1}
+
+        ```
+        """
+
+        for value in self.values():
+            if isinstance(value, NestedDict):
+                value.apply(func)
+        func(self)
+        return self
+
     def get(self, name: str, default: Any = Null) -> Any:
         r"""
         Get value from `NestedDict`.
@@ -253,152 +360,33 @@ class NestedDict(FlatDict):
     __delitem__ = delete
     __delattr__ = delete
 
-    def __contains__(self, name: str) -> bool:  # type: ignore
-        delimiter = self.getattr("delimiter", ".")
-        while isinstance(name, str) and delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            self, name = self[name], rest  # pylint: disable=W0642
-        return super().__contains__(name)
-
-    def pop(self, name: str, default: Any = Null) -> Any:
+    def dict(self, cls: Callable = dict) -> Mapping:
         r"""
-        Pop value from `NestedDict`.
+        Convert `NestedDict` to other `Mapping`.
 
         Args:
-            name:
-            default:
-
-        Returns:
-            value: If name does not exist, return `default`.
+            cls: Target class to be converted to.
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
-        >>> d.pop('i.d')
-        1013
-        >>> d.pop('i.d', True)
-        True
-        >>> d.pop('i.d')
-        Traceback (most recent call last):
-        KeyError: 'd'
+        >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
+        >>> d['i.d'] = 1013
+        >>> d.dict()
+        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
 
         ```
         """
 
-        delimiter = self.getattr("delimiter", ".")
-        if delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            if name not in self:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
-            return self[name].pop(rest, default)
-        return super().pop(name, default) if default is not Null else super().pop(name)
+        # pylint: disable=C0103
 
-    def all_keys(self) -> Iterator:
-        r"""
-        Get all keys of `NestedDict`.
-
-        Returns:
-            (Iterator):
-
-        Examples:
-        ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_keys())
-        ['a', 'b.c', 'b.d']
-
-        ```
-        """
-
-        delimiter = self.getattr("delimiter", ".")
-
-        @wraps(self.all_keys)
-        def all_keys(self, prefix=""):
-            for key, value in self.items():
-                if prefix:
-                    key = prefix + delimiter + key
-                if isinstance(value, NestedDict):
-                    yield from all_keys(value, key)
-                else:
-                    yield key
-
-        return all_keys(self)
-
-    def all_values(self) -> Iterator:
-        r"""
-        Get all values of `NestedDict`.
-
-        Returns:
-            (Iterator):
-
-        Examples:
-        ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_values())
-        [1, 2, 3]
-
-        ```
-        """
-
-        for value in self.values():
-            if isinstance(value, NestedDict):
-                yield from value.all_values()
-            else:
-                yield value
-
-    def all_items(self) -> Iterator[Tuple]:
-        r"""
-        Get all items of `NestedDict`.
-
-        Returns:
-            (Iterator):
-
-        Examples:
-        ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_items())
-        [('a', 1), ('b.c', 2), ('b.d', 3)]
-
-        ```
-        """
-
-        delimiter = self.getattr("delimiter", ".")
-
-        @wraps(self.all_items)
-        def all_items(self, prefix=""):
-            for key, value in self.items():
-                if prefix:
-                    key = prefix + delimiter + key
-                if isinstance(value, NestedDict):
-                    yield from all_items(value, key)
-                else:
-                    yield key, value
-
-        return all_items(self)
-
-    def apply(self, func: Callable) -> NestedDict:
-        r"""
-        Recursively apply a function to `NestedDict` and its children.
-
-        Args:
-            func(Callable):
-
-        Examples:
-        ```python
-        >>> d = NestedDict()
-        >>> d.a = NestedDict()
-        >>> def func(d):
-        ...     d.t = 1
-        >>> d.apply(func).dict()
-        {'a': {'t': 1}, 't': 1}
-
-        ```
-        """
-
-        for value in self.values():
-            if isinstance(value, NestedDict):
-                value.apply(func)
-        func(self)
-        return self
+        ret = cls()
+        for k, v in self.items():
+            if isinstance(v, Variable):
+                v = v.value
+            if isinstance(v, FlatDict):
+                v = v.dict(cls)
+            ret[k] = v
+        return ret
 
     def difference(  # pylint: disable=W0221, C0103
         self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
@@ -528,33 +516,45 @@ class NestedDict(FlatDict):
 
         return self.apply(lambda _: super().to(cls))
 
-    def dict(self, cls: Callable = dict) -> Mapping:
+    def pop(self, name: str, default: Any = Null) -> Any:
         r"""
-        Convert `NestedDict` to other `Mapping`.
+        Pop value from `NestedDict`.
 
         Args:
-            cls: Target class to be converted to.
+            name:
+            default:
+
+        Returns:
+            value: If name does not exist, return `default`.
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
-        >>> d['i.d'] = 1013
-        >>> d.dict()
-        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
+        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+        >>> d.pop('i.d')
+        1013
+        >>> d.pop('i.d', True)
+        True
+        >>> d.pop('i.d')
+        Traceback (most recent call last):
+        KeyError: 'd'
 
         ```
         """
 
-        # pylint: disable=C0103
+        delimiter = self.getattr("delimiter", ".")
+        if delimiter in name:
+            name, rest = name.split(delimiter, 1)
+            if name not in self:
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+            return self[name].pop(rest, default)
+        return super().pop(name, default) if default is not Null else super().pop(name)
 
-        ret = cls()
-        for k, v in self.items():
-            if isinstance(v, Variable):
-                v = v.value
-            if isinstance(v, FlatDict):
-                v = v.dict(cls)
-            ret[k] = v
-        return ret
+    def __contains__(self, name: str) -> bool:  # type: ignore
+        delimiter = self.getattr("delimiter", ".")
+        while isinstance(name, str) and delimiter in name:
+            name, rest = name.split(delimiter, 1)
+            self, name = self[name], rest  # pylint: disable=W0642
+        return super().__contains__(name)
 
 
 class DefaultDict(NestedDict):
