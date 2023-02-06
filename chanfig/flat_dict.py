@@ -401,6 +401,8 @@ class FlatDict(dict):
             return False
 
     def __missing__(self, name: str, default: Any = Null) -> Any:
+        if name == "_ipython_canary_method_should_not_exist_":
+            return
         if default is Null:
             # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
             if "default_factory" not in self.__dict__:
