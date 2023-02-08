@@ -400,7 +400,7 @@ class FlatDict(dict):
         except AttributeError:
             return False
 
-    def __missing__(self, name: str, default: Any = Null) -> Any:
+    def __missing__(self, name: str, default: Any = Null) -> Any:  # pylint: disable=R1710
         if name == "_ipython_canary_method_should_not_exist_":
             return
         if default is Null:
@@ -867,7 +867,9 @@ class FlatDict(dict):
         ```
         """
 
-        return cls(**json_loads(string, *args, **kwargs))
+        config = cls()
+        config.update(json_loads(string, *args, **kwargs))
+        return config
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -950,7 +952,10 @@ class FlatDict(dict):
 
         if "Loader" not in kwargs:
             kwargs["Loader"] = YamlLoader
-        return cls(**yaml_load(string, *args, **kwargs))
+
+        config = cls()
+        config.update(yaml_load(string, *args, **kwargs))
+        return config
 
     @staticmethod
     @contextmanager
