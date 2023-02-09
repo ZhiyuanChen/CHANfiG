@@ -19,9 +19,17 @@ from functools import wraps
 from os import PathLike
 from typing import Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
 
-from .flat_dict import FlatDict, PathStr, TorchDevice, TorchDtype
+from .flat_dict import FlatDict, PathStr
 from .utils import Null
 from .variable import Variable
+
+try:
+    from torch import device as TorchDevice
+    from torch import dtype as TorchDtype
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
 
 
 class NestedDict(FlatDict):
