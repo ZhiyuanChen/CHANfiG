@@ -393,5 +393,11 @@ class Variable:
     def __format__(self, format_spec):
         return self.value if isinstance(self, str) else format(self.value, format_spec)
 
+    def __iter__(self):
+        return iter(self.value)
+
+    def __next__(self):
+        return next(self.value)
+
     def __repr__(self):
         return repr(self.value)
