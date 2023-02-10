@@ -1099,3 +1099,6 @@ class FlatDict(dict):
     def __setstate__(self, states, *args, **kwargs):
         for name, value in states.items():
             self.setattr(name, value)
+
+    def __wrapped__(self, *args, **kwargs):
+        pass
