@@ -399,5 +399,8 @@ class Variable:
     def __next__(self):
         return next(self.value)
 
+    def __hash__(self):
+        return hash(self.value)
+
     def __repr__(self):
         return repr(self.value)
