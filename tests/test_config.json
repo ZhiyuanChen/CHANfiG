@@ -1,0 +1,17 @@
+{
+  "name": "Test",
+  "seed": 1014,
+  "network": {
+    "name": "ResNet18",
+    "num_classes": 12,
+    "nested": {
+      "value": 1
+    }
+  },
+  "dataset": {
+    "num_classes": 12
+  },
+  "_pytestfixturefunction": {},
+  "__bases__": {},
+  "id": "test_1014"
+}

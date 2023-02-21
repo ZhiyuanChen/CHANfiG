@@ -119,6 +119,8 @@ class TestConfig(Config):
     def __init__(self):
         super().__init__()
         dropout = Variable(0.1)
+        self.name = "CHANfiG"
+        self.seed = 1013
         self.data.batch_size = 64
         self.model.encoder.num_layers = 6
         self.model.decoder.num_layers = 6
@@ -127,6 +129,9 @@ class TestConfig(Config):
         self.model.decoder.dropout = dropout
         self.activation = "GELU"
         self.optim.lr = 1e-3
+
+    def post(self):
+        self.id = f"{self.name}_{self.seed}"
 
 
 if __name__ == '__main__':
@@ -164,36 +169,47 @@ python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0
 If you have made it dump current configurations, this should be in the written file:
 
 ```yaml
+activation: GELU
 data:
   batch_size: 64
+id: CHANfiG_1013
 model:
-  encoder:
-    num_layers: 8
-    dropout: 0.2
   decoder:
-    num_layers: 8
-    dropout: 0.2
-  dropout: 0.2
-  activation: GELU
+    dropout: 0.1
+    num_layers: 6
+  dropout: 0.1
+  encoder:
+    dropout: 0.1
+    num_layers: 6
+name: CHANfiG
+optim:
+  lr: 0.001
+seed: 1013
 ```
 
 ```json
 {
+  "name": "CHANfiG",
+  "seed": 1013,
   "data": {
     "batch_size": 64
   },
   "model": {
     "encoder": {
-      "num_layers": 8,
-      "dropout": 0.2
+      "num_layers": 6,
+      "dropout": 0.1
     },
     "decoder": {
-      "num_layers": 8,
-      "dropout": 0.2
+      "num_layers": 6,
+      "dropout": 0.1
     },
-    "dropout": 0.2,
-    "activation": "GELU"
-  }
+    "dropout": 0.1
+  },
+  "activation": "GELU",
+  "optim": {
+    "lr": 0.001
+  },
+  "id": "CHANfiG_1013"
 }
 ```
 

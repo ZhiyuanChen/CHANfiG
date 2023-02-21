@@ -161,6 +161,13 @@ class Config(NestedDict):
         which can be toggled with `freeze`(`lock`), `defrost`(`unlock`), and `unlocked`.
     3. `Config` has a `ConfigParser` built-in, and supports `add_argument` and `parse`.
 
+    Config also supports a `post` method, which will be called after `Config` is parsed.
+
+    This is useful when you want to perform some post-processing on the config.
+    For example, some values may be a combination of other values, and you may define them in `post`.
+
+    You could also manually call `post` if you you don't need to parse command-line arguments.
+
     Notes:
         Since `Config` has `default_factory` set to `Config`,
         accessing anything that does not exist will create a new empty Config sub-attribute.
@@ -208,6 +215,86 @@ class Config(NestedDict):
             kwargs["default_factory"] = Config
         super().__init__(*args, **kwargs)
         self.setattr("parser", ConfigParser())
+
+    def post(self) -> Config:
+        r"""
+        Post process of `Config`.
+
+        Some `Config` may need to do some post process after `Config` is initialized.
+
+        You can override this method to do such post process.
+
+        By default, `post` does nothing and returns `self`.
+
+        Returns:
+            self:
+
+        Examples:
+        ```python
+        >>> class PostConfig(Config):
+        ...     def post(self):
+        ...         if isinstance(self.data, str):
+        ...             self.data = Config(feature=self.data, label=self.data)
+        ...         return self
+        >>> c = PostConfig(data="path")
+        >>> c.post()
+        PostConfig(
+          ('data'): Config(
+            ('feature'): 'path'
+            ('label'): 'path'
+          )
+        )
+
+        ```
+        """
+
+        return self
+
+    def parse(
+        self,
+        args: Optional[Iterable[str]] = None,
+        default_config: Optional[str] = None,
+    ) -> Config:
+        r"""
+
+        Parse command line arguments with `ConfigParser`.
+
+        This function internally calls `Config.post`.
+
+        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
+
+        Examples:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.dict()
+        {'a': 0}
+        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
+        {'a': 1, 'b': 2, 'c': 3}
+
+        ```
+        """
+
+        self.getattr("parser", ConfigParser()).parse(args, self, default_config)
+        self.post()
+        return self
+
+    parse_config = parse
+
+    def add_argument(self, *args, **kwargs) -> None:
+        r"""
+        Add an argument to `ConfigParser`.
+
+        Examples:
+        ```python
+        >>> c = Config(a=0)
+        >>> c.add_argument("--a", type=int, default=1)
+        >>> c.parse([]).dict()
+        {'a': 1}
+
+        ```
+        """
+
+        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
 
     def freeze(self, recursive: bool = True) -> Config:
         r"""
@@ -322,48 +409,6 @@ class Config(NestedDict):
         finally:
             if was_frozen:
                 self.freeze()
-
-    def parse(
-        self,
-        args: Optional[Iterable[str]] = None,
-        default_config: Optional[str] = None,
-    ) -> Config:
-        r"""
-
-        Parse command line arguments with `ConfigParser`.
-
-        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
-
-        Examples:
-        ```python
-        >>> c = Config(a=0)
-        >>> c.dict()
-        {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
-        """
-
-        return self.getattr("parser", ConfigParser()).parse(args, self, default_config)
-
-    parse_config = parse
-
-    def add_argument(self, *args, **kwargs) -> None:
-        r"""
-        Add an argument to `ConfigParser`.
-
-        Examples:
-        ```python
-        >>> c = Config(a=0)
-        >>> c.add_argument("--a", type=int, default=1)
-        >>> c.parse([]).dict()
-        {'a': 1}
-
-        ```
-        """
-
-        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
 
     def get(self, name: str, default: Any = Null) -> Any:
         r"""
