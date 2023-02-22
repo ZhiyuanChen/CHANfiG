@@ -13,9 +13,22 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from yaml import add_representer
+from yaml.representer import SafeRepresenter
+
 from .config import Config, ConfigParser
 from .flat_dict import FlatDict
 from .nested_dict import DefaultDict, NestedDict
 from .variable import Variable
 
 __all__ = ["Config", "NestedDict", "FlatDict", "Variable", "DefaultDict", "ConfigParser"]
+
+
+add_representer(FlatDict, SafeRepresenter.represent_dict)
+add_representer(NestedDict, SafeRepresenter.represent_dict)
+add_representer(DefaultDict, SafeRepresenter.represent_dict)
+add_representer(Config, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(FlatDict, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(NestedDict, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(DefaultDict, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(Config, SafeRepresenter.represent_dict)
