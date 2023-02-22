@@ -17,6 +17,7 @@ class TestConfig(Config):
         self.name = self.name.lower()
         self.id = f"{self.name}_{self.seed}"
 
+
 class Test:
 
     config = TestConfig()
