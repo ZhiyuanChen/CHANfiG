@@ -104,7 +104,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             args = argv[1:]
         for arg in args:
             if arg.startswith("--") and args != "--":
-                arg = arg.split("=")[0]
+                arg = arg.split("=", maxsplit=1)[0]
                 if arg not in self._option_string_actions:
                     self.add_argument(arg)
         if config is None:
