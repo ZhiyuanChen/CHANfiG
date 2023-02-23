@@ -410,3 +410,6 @@ site/
 
 # example files
 example*
+
+# version
+**/_version.py

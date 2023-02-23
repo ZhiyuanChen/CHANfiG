@@ -1,19 +1,20 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "chanfig"
-version = "0.0.0"
 description = "Easier Configuration"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["Machine Learning", "Config", "Dict"]
 maintainers = [
-    "Zhiyuan Chen <this@zyc.ai>"
+    {name = "Zhiyuan Chen", email = "this@zyc.ai"},
 ]
 authors = [
-    "Zhiyuan Chen <this@zyc.ai>",
-    "Evian C. Liu <evian.liu@outlook.com>"
+    {name = "Zhiyuan Chen", email = "this@zyc.ai"},
+    {name = "Evian C. Liu", email = "evian.liu@outlook.com"},
 ]
-readme = "README.md"
-homepage = "https://chanfig.danling.org"
-repository = "https://github.com/ZhiyuanChen/CHANfiG"
-documentation = "https://chanfig.danling.org"
-keywords = ["Machine Learning", "Config", "Dict"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -22,19 +23,19 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-
-[tool.poetry.dependencies]
-python = "^3"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-style = "pep440"
-
-[tool.poetry-dynamic-versioning.substitution]
-folders = [
-  { path = "chanfig" }
+requires-python = ">=3"
+dependencies = [
+    "pyyaml",
 ]
+dynamic = ["version"]
 
-[build-system]
-requires = ["poetry-core>=1.2.0", "poetry-dynamic-versioning"]
-build-backend = "poetry_dynamic_versioning.backend"
+[project.urls]
+homepage = "https://chanfig.danling.org"
+repository = "https://github.com/ZhiyuanChen/CHANfiG"
+documentation = "https://chanfig.danling.org"
+
+[tool.setuptools]
+packages = ["chanfig"]
+
+[tool.setuptools_scm]
+write_to = "chanfig/_version.py"
