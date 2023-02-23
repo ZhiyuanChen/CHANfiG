@@ -130,8 +130,17 @@ class FlatDict(dict):
         This method is called in `__init__`.
         """
 
-        for key, value in args:
-            self.set(key, value)
+        if len(args) == 1:
+            args = args[0]
+            if isinstance(args, Mapping):
+                for key, value in args.items():
+                    self.set(key, value)
+            elif isinstance(args, Iterable):
+                for key, value in args:
+                    self.set(key, value)
+        else:
+            for key, value in args:
+                self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
 
@@ -401,8 +410,6 @@ class FlatDict(dict):
             return False
 
     def __missing__(self, name: str, default: Any = Null) -> Any:  # pylint: disable=R1710
-        if name == "_ipython_canary_method_should_not_exist_":
-            return
         if default is Null:
             # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
             if "default_factory" not in self.__dict__:
@@ -1102,3 +1109,9 @@ class FlatDict(dict):
 
     def __wrapped__(self, *args, **kwargs):
         pass
+
+    def _ipython_display_(self):
+        return repr(self)
+
+    def _ipython_canary_method_should_not_exist_(self):
+        return None

@@ -93,8 +93,17 @@ class NestedDict(FlatDict):
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
-        for key, value in args:
-            self.set(key, value, convert_mapping=True)
+        if len(args) == 1:
+            args = args[0]
+            if isinstance(args, Mapping):
+                for key, value in args.items():
+                    self.set(key, value, convert_mapping=True)
+            elif isinstance(args, Iterable):
+                for key, value in args:
+                    self.set(key, value, convert_mapping=True)
+        else:
+            for key, value in args:
+                self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
@@ -317,7 +326,7 @@ class NestedDict(FlatDict):
                     self.__missing__(name)
             self, name = self[name], rest  # pylint: disable=W0642
         if convert_mapping and isinstance(value, Mapping):
-            value = default_mapping(**value)
+            value = default_mapping(value)
         super().set(name, value)
 
     __setitem__ = set

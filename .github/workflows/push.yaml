@@ -45,6 +45,8 @@ jobs:
         with:
           python-version: 3.x
           cache: "pip"
+      - name: Install dependencies for building
+        run: pip install setuptools_scm
       - name: build package
         run: python setup.py sdist
       - name: create release
@@ -69,6 +71,8 @@ jobs:
         with:
           python-version: 3.x
           cache: "pip"
+      - name: Install dependencies for building
+        run: pip install setuptools_scm
       - name: build package
         run: python setup.py sdist
       - name: create release
