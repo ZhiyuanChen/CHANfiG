@@ -131,16 +131,12 @@ class FlatDict(dict):
         """
 
         if len(args) == 1:
-            args = args[0]
-            if isinstance(args, Mapping):
-                for key, value in args.items():
-                    self.set(key, value)
-            elif isinstance(args, Iterable):
-                for key, value in args:
-                    self.set(key, value)
-        else:
-            for key, value in args:
-                self.set(key, value)
+            if isinstance(args[0], Mapping):
+                args, kwargs = (), args[0].update(kwargs) or args[0]  # type: ignore
+            elif isinstance(args[0], Iterable):
+                args = args[0]  # type: ignore
+        for key, value in args:
+            self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
 
@@ -1113,5 +1109,5 @@ class FlatDict(dict):
     def _ipython_display_(self):
         return repr(self)
 
-    def _ipython_canary_method_should_not_exist_(self):
+    def _ipython_canary_method_should_not_exist_(self):  # pylint: disable=R0201
         return None
