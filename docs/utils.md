@@ -24,12 +24,6 @@ Since the metaclass of `NULL` is `Singleton`, it is advised to use `obj is Null`
     options:
         heading_level: 0
 
-## chanfig.utils.FileError
-
-::: chanfig.utils.FileError
-    options:
-        heading_level: 0
-
 ## chanfig.utils.JsonEncoder
 
 ::: chanfig.utils.JsonEncoder

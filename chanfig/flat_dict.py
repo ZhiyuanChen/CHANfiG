@@ -20,6 +20,7 @@ from __future__ import annotations
 from ast import literal_eval
 from contextlib import contextmanager
 from copy import copy, deepcopy
+from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
@@ -30,7 +31,7 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import FileError, JsonEncoder, Null, YamlDumper, YamlLoader
+from .utils import JsonEncoder, Null, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
@@ -70,6 +71,9 @@ class FlatDict(dict):
         indent: Indentation level in printing and dumping to json or yaml.
         default_factory: Default factory for defaultdict behavior.
 
+    Raises:
+        TypeError: If `default_factory` is not callable.
+
     Notes:
         `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
         Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
@@ -103,6 +107,13 @@ class FlatDict(dict):
     >>> d.a = d.a + ', world!'
     >>> d.b
     'hello, world!'
+    >>> d = FlatDict(default_factory=list)
+    >>> d.a.append(1)
+    >>> d.a
+    [1]
+    >>> d = FlatDict(default_factory=[])
+    Traceback (most recent call last):
+    TypeError: `default_factory=[]` should be of type Callable, but got <class 'list'>.
 
     ```
     """
@@ -119,7 +130,7 @@ class FlatDict(dict):
                 self.setattr("default_factory", default_factory)
             else:
                 raise TypeError(
-                    f"default_factory={default_factory} should be of type Callable, but got {type(default_factory)}."
+                    f"`default_factory={default_factory}` should be of type Callable, but got {type(default_factory)}."
                 )
         self._init(*args, **kwargs)
 
@@ -131,12 +142,16 @@ class FlatDict(dict):
         """
 
         if len(args) == 1:
-            if isinstance(args[0], Mapping):
-                args, kwargs = (), args[0].update(kwargs) or args[0]  # type: ignore
-            elif isinstance(args[0], Iterable):
-                args = args[0]  # type: ignore
-        for key, value in args:
-            self.set(key, value)
+            args = args[0]
+            if isinstance(args, Mapping):
+                for key, value in args.items():
+                    self.set(key, value)
+            elif isinstance(args, Iterable):
+                for key, value in args:
+                    self.set(key, value)
+        else:
+            for key, value in args:
+                self.set(key, value)
         for key, value in kwargs.items():
             self.set(key, value)
 
@@ -157,11 +172,11 @@ class FlatDict(dict):
 
         Returns:
             value:
-                If name does not exist, return `default`.
+                If `FlatDict` does not contain `name`, return `default`.
                 If `default` is not specified, return `default_factory()`.
 
         Raises:
-            KeyError: If name does not exist and `default`/`default_factory` is not specified.
+            KeyError: If `FlatDict` does not contain `name` and `default`/`default_factory` is not specified.
 
         **Alias**:
 
@@ -284,7 +299,10 @@ class FlatDict(dict):
             default:
 
         Returns:
-            value: If name does not exist, return `default`.
+            value: If `FlatDict` does not contain `name`, return `default`.
+
+        Raises:
+            AttributeError: If `FlatDict` does not contain `name` and `default`/`default_factory` is not specified.
 
         Examples:
         ```python
@@ -463,6 +481,8 @@ class FlatDict(dict):
         >>> l = [('c', 3), ('d', 4)]
         >>> d.update(l).dict()
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+        >>> d.update("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
 
         ```
         """
@@ -507,9 +527,11 @@ class FlatDict(dict):
         >>> l = [('c', 3), ('d', 4)]
         >>> d.difference(l).dict()
         {'d': 4}
+        >>> d.update(l).difference("example.yaml").dict()
+        {}
         >>> d.difference(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -519,7 +541,7 @@ class FlatDict(dict):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         return self.empty_like(
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
@@ -550,9 +572,11 @@ class FlatDict(dict):
         >>> l = [('c', 3), ('d', 4)]
         >>> d.intersection(l).dict()
         {'c': 3}
+        >>> d.update(l).intersection("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3}
         >>> d.intersection(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -562,7 +586,7 @@ class FlatDict(dict):
         if isinstance(other, (Mapping,)):
             other = other.items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty_like(
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
@@ -582,8 +606,9 @@ class FlatDict(dict):
         Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
+        >>> d.to(int)
+        Traceback (most recent call last):
+        TypeError: to() only support torch.dtype and torch.device, but got <class 'int'>.
 
         ```
         """
@@ -743,24 +768,35 @@ class FlatDict(dict):
         r"""
         Dump `FlatDict` to file.
 
+        Raises:
+            ValueError: If dump to `IO` and `method` is not specified.
+            TypeError: If dump to unsupported extension.
+
         Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> d.dump("example.yaml")
+        >>> d.dump("example.conf")
+        Traceback (most recent call last):
+        TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+        >>> with open("test.yaml", "w") as f:
+        ...     d.dump(f)
+        Traceback (most recent call last):
+        ValueError: `method` must be specified when dumping to IO.
 
         ```
         """
 
         if method is None:
-            if isinstance(file, IO):
-                raise ValueError("method must be specified when dumping to file-like object.")
+            if isinstance(file, IOBase):
+                raise ValueError("`method` must be specified when dumping to IO.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
         if extension in YAML:
             return self.yaml(file=file, *args, **kwargs)  # type: ignore
         if extension in JSON:
             return self.json(file=file, *args, **kwargs)  # type: ignore
-        raise FileError(f"file {file} should be in {JSON} or {YAML}, but got {extension}")  # type: ignore
+        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
 
     @classmethod
     def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
@@ -770,25 +806,36 @@ class FlatDict(dict):
         Returns:
             (FlatDict):
 
+        Raises:
+            ValueError: If load from `IO` and `method` is not specified.
+            TypeError: If dump to unsupported extension.
+
         Examples:
         ```python
         >>> d = FlatDict.load("example.yaml")
         >>> d.dict()
         {'a': 1, 'b': 2, 'c': 3}
+        >>> d.load("example.conf")
+        Traceback (most recent call last):
+        TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+        >>> with open("test.yaml") as f:
+        ...     d.load(f)
+        Traceback (most recent call last):
+        ValueError: `method` must be specified when loading from IO.
 
         ```
         """
 
         if method is None:
-            if isinstance(file, IO):
-                raise ValueError("method must be specified when loading from file-like object.")
+            if isinstance(file, IOBase):
+                raise ValueError("`method` must be specified when loading from IO.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
         if extension in JSON:
             return cls.from_json(file, *args, **kwargs)
         if extension in YAML:
             return cls.from_yaml(file, *args, **kwargs)
-        raise FileError("file {file} should be in {JSON} or {YAML}, but got {extension}.")
+        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
     def json(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -964,12 +1011,12 @@ class FlatDict(dict):
     @contextmanager
     def open(file: File, *args, **kwargs):
         """
-        Open file IO from file path or file-like object.
+        Open file IO from file path or IO.
 
-        This methods extends the ability of built-in `open` by allowing it to accept an `IO` object.
+        This methods extends the ability of built-in `open` by allowing it to accept an `IOBase` object.
 
         Args:
-            file: File path or file-like object.
+            file: File path or IO.
             *args: Additional arguments passed to `open`.
                 Defaults to ().
             **kwargs: Any
@@ -987,6 +1034,13 @@ class FlatDict(dict):
         b: 2
         c: 3
         <BLANKLINE>
+        >>> io = open("example.yaml")
+        >>> with FlatDict.open(io) as fp:
+        ...     print(fp.read())
+        a: 1
+        b: 2
+        c: 3
+        <BLANKLINE>
 
         ```
         """
@@ -997,10 +1051,12 @@ class FlatDict(dict):
                 yield file
             finally:
                 file.close()  # type: ignore
-        elif isinstance(file, (IO,)):
+        elif isinstance(file, (IOBase,)):
             yield file
         else:
-            raise TypeError(f"file={file!r} should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}.")
+            raise TypeError(
+                f"`file={file!r}` should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}."
+            )
 
     @classmethod
     def empty(cls, *args, **kwargs) -> FlatDict:
@@ -1109,5 +1165,5 @@ class FlatDict(dict):
     def _ipython_display_(self):
         return repr(self)
 
-    def _ipython_canary_method_should_not_exist_(self):  # pylint: disable=R0201
+    def _ipython_canary_method_should_not_exist_(self):
         return None

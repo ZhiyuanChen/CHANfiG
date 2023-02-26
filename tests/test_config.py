@@ -19,7 +19,6 @@ class TestConfig(Config):
 
 
 class Test:
-
     config = TestConfig()
 
     def test_value(self):
