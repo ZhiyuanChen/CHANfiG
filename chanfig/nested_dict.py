@@ -17,19 +17,15 @@ from __future__ import annotations
 
 from functools import wraps
 from os import PathLike
-from typing import Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
 
 from .flat_dict import FlatDict, PathStr
 from .utils import Null
 from .variable import Variable
 
-try:
+if TYPE_CHECKING:
     from torch import device as TorchDevice
     from torch import dtype as TorchDtype
-
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
 
 
 class NestedDict(FlatDict):
@@ -37,7 +33,7 @@ class NestedDict(FlatDict):
     `NestedDict` further extends `FlatDict` object by introducing a nested structure with `delimiter`.
     By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
 
-    `d = NestedDict(**{"a.b.c": 1})` is equivalent to `d = NestedDict(**{"a": {"b": {"c": 1}}})`,
+    `d = NestedDict({"a.b.c": 1})` is equivalent to `d = NestedDict({"a": {"b": {"c": 1}}})`,
     and you can access the members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
 
     This behavior allows you to pass keyword arguments to other function as easy as `func1(**d.func1)`.
@@ -71,7 +67,7 @@ class NestedDict(FlatDict):
 
     Examples:
     ```python
-    >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
+    >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
     >>> d.i.d = 1013
     >>> d['i.d']
     1013
@@ -87,19 +83,18 @@ class NestedDict(FlatDict):
     convert_mapping: bool = False
     delimiter: str = "."
 
-    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        if not self.hasattr("default_mapping"):
-            self.setattr("default_mapping", NestedDict)
-        super().__init__(*args, default_factory=default_factory, **kwargs)
-
     def _init(self, *args, **kwargs) -> None:
         if len(args) == 1:
-            if isinstance(args[0], Mapping):
-                args, kwargs = (), args[0].update(kwargs) or args[0]  # type: ignore
-            elif isinstance(args[0], Iterable):
-                args = args[0]  # type: ignore
-        for key, value in args:
-            self.set(key, value, convert_mapping=True)
+            args = args[0]
+            if isinstance(args, Mapping):
+                for key, value in args.items():
+                    self.set(key, value, convert_mapping=True)
+            elif isinstance(args, Iterable):
+                for key, value in args:
+                    self.set(key, value, convert_mapping=True)
+        else:
+            for key, value in args:
+                self.set(key, value, convert_mapping=True)
         for key, value in kwargs.items():
             self.set(key, value, convert_mapping=True)
 
@@ -112,7 +107,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_keys())
         ['a', 'b.c', 'b.d']
 
@@ -142,7 +137,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_values())
         [1, 2, 3]
 
@@ -164,7 +159,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b': {'c': 2, 'd': 3}})
+        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
         >>> list(d.all_items())
         [('a', 1), ('b.c', 2), ('b.d', 3)]
 
@@ -222,11 +217,11 @@ class NestedDict(FlatDict):
 
         Returns:
             value:
-                If name does not exist, return `default`.
+                If `NestedDict` does not contain `name`, return `default`.
                 If `default` is not specified, return `default_factory()`.
 
         Raises:
-            KeyError: If name does not exist and `default`/`default_factory` is not specified.
+            KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
 
         **Alias**:
 
@@ -235,7 +230,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"i.d": 1013}, default_factory=NestedDict)
+        >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
         >>> d.get('i.d')
         1013
         >>> d['i.d']
@@ -321,6 +316,8 @@ class NestedDict(FlatDict):
                 else:
                     self.__missing__(name)
             self, name = self[name], rest  # pylint: disable=W0642
+        # if not isinstance(self, FlatDict):
+        #     self = default_mapping()
         if convert_mapping and isinstance(value, Mapping):
             value = default_mapping(value)
         super().set(name, value)
@@ -342,7 +339,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+        >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
         >>> d.i.d
         1013
         >>> d.f.n
@@ -382,7 +379,7 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"f.n": "chang"}, default_factory=NestedDict)
+        >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
         >>> d['i.d'] = 1013
         >>> d.dict()
         {'f': {'n': 'chang'}, 'i': {'d': 1013}}
@@ -417,10 +414,12 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
+        >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
         >>> d.difference(n).dict()
         {'b': {'c': 3}, 'e': 4}
+        >>> d.difference("example.yaml").dict()
+        {'b': 2, 'c': 3}
         >>> d.difference(n, recursive=False).dict()
         {'b': {'c': 3, 'd': 3}, 'e': 4}
         >>> l = [('a', 1), ('d', 4)]
@@ -428,7 +427,7 @@ class NestedDict(FlatDict):
         {'d': 4}
         >>> d.difference(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -436,9 +435,9 @@ class NestedDict(FlatDict):
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(**other).items()
+            other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         @wraps(self.difference)
         def difference(this: NestedDict, that: Iterable) -> Mapping:
@@ -446,13 +445,13 @@ class NestedDict(FlatDict):
             for key, value in that:
                 if key not in this:
                     ret[key] = value
-                elif isinstance(this[key], NestedDict) and recursive:
+                elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
                     ret[key] = this[key].difference(value)
                 elif this[key] != value:
                     ret[key] = value
             return ret
 
-        return self.empty_like(**difference(self, other))  # type: ignore
+        return self.empty_like(difference(self, other))  # type: ignore
 
     diff = difference
 
@@ -472,10 +471,12 @@ class NestedDict(FlatDict):
 
         Examples:
         ```python
-        >>> d = NestedDict(**{'a': 1, 'b.c': 2, 'b.d': 3})
+        >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
         >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
         >>> d.intersection(n).dict()
         {'a': 1, 'b': {'d': 3}}
+        >>> d.intersection("example.yaml").dict()
+        {'a': 1}
         >>> d.intersection(n, recursive=False).dict()
         {'a': 1}
         >>> l = [('a', 1), ('d', 4)]
@@ -483,7 +484,7 @@ class NestedDict(FlatDict):
         {'a': 1}
         >>> d.intersection(1)
         Traceback (most recent call last):
-        TypeError: other=1 should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
 
         ```
         """
@@ -491,22 +492,22 @@ class NestedDict(FlatDict):
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(**other).items()
+            other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
-            raise TypeError(f"other={other} should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
         @wraps(self.intersection)
         def intersection(this: NestedDict, that: Iterable) -> Mapping:
             ret = {}
             for key, value in that:
                 if key in this:
-                    if isinstance(this[key], NestedDict) and recursive:
+                    if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
                         ret[key] = this[key].intersection(value)
                     elif this[key] == value:
                         ret[key] = value
             return ret
 
-        return self.empty_like(**intersection(self, other))  # type: ignore
+        return self.empty_like(intersection(self, other))  # type: ignore
 
     inter = intersection
 
@@ -520,7 +521,7 @@ class NestedDict(FlatDict):
         Examples:
         ```python
         >>> import torch
-        >>> d = NestedDict(**{'i.d': torch.tensor(1013)})
+        >>> d = NestedDict({'i.d': torch.tensor(1013)})
         >>> d.cpu().dict()
         {'i': {'d': tensor(1013)}}
 
@@ -538,11 +539,11 @@ class NestedDict(FlatDict):
             default:
 
         Returns:
-            value: If name does not exist, return `default`.
+            value: If `NestedDict` does not contain `name`, return `default`.
 
         Examples:
         ```python
-        >>> d = NestedDict(**{"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+        >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
         >>> d.pop('i.d')
         1013
         >>> d.pop('i.d', True)
@@ -550,6 +551,9 @@ class NestedDict(FlatDict):
         >>> d.pop('i.d')
         Traceback (most recent call last):
         KeyError: 'd'
+        >>> d.pop('n.l')
+        Traceback (most recent call last):
+        KeyError: 'NestedDict does not contain n.'
 
         ```
         """
@@ -558,16 +562,19 @@ class NestedDict(FlatDict):
         if delimiter in name:
             name, rest = name.split(delimiter, 1)
             if name not in self:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+                raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
             return self[name].pop(rest, default)
         return super().pop(name, default) if default is not Null else super().pop(name)
 
-    def __contains__(self, name: str) -> bool:  # type: ignore
+    def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
-        while isinstance(name, str) and delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            self, name = self[name], rest  # pylint: disable=W0642
-        return super().__contains__(name)
+        try:
+            while isinstance(name, str) and delimiter in name:
+                name, rest = name.split(delimiter, 1)
+                self, name = self[name], rest  # pylint: disable=W0642
+            return super().__contains__(name)
+        except (TypeError, KeyError):  # TypeError when name is not in self
+            return False
 
 
 class DefaultDict(NestedDict):
