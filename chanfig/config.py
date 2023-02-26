@@ -78,8 +78,8 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Examples:
         ```python
         >>> p = ConfigParser()
-        >>> p.parse(['--i.d', '1013', '--n.f', 'chang']).dict()
-        {'i': {'d': 1013}, 'n': {'f': 'chang'}}
+        >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
+        {'i': {'d': 1013}, 'f': {'n': 'chang'}}
 
         # Values in command line arguments overrides values in `default_config` file.
         >>> p = ConfigParser()
@@ -196,7 +196,7 @@ class Config(NestedDict):
     ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
     >>> c.d.e
     Traceback (most recent call last):
-    KeyError: 'Config does not contain e'
+    KeyError: 'Config does not contain e.'
     >>> with c.unlocked():
     ...     del c.d
     >>> c.dict()
@@ -422,11 +422,11 @@ class Config(NestedDict):
 
         Returns:
             value:
-                If name does not exist, return `default`.
+                If `Config` does not contain `name`, return `default`.
                 If `default` is not specified, return `default_factory()`.
 
         Raises:
-            KeyError: If name does not exist and `default`/`default_factory` is not specified.
+            KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
 
         **Alias**:
 
@@ -455,7 +455,7 @@ class Config(NestedDict):
         )
         >>> d.f
         Traceback (most recent call last):
-        KeyError: 'Config does not contain f'
+        KeyError: 'Config does not contain f.'
 
         ```
         """
@@ -464,7 +464,7 @@ class Config(NestedDict):
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
             return super().get(name, default)
-        raise KeyError(f"{self.__class__.__name__} does not contain {name}")
+        raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
 
     __getitem__ = get
     __getattr__ = get
@@ -568,7 +568,7 @@ class Config(NestedDict):
             default:
 
         Returns:
-            value: If name does not exist, return `default`.
+            value: If `Config` does not contain `name`, return `default`.
 
         Examples:
         ```python

@@ -413,3 +413,6 @@ example*
 
 # version
 **/_version.py
+
+# pytest
+test.yaml
