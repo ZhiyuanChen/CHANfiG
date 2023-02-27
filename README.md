@@ -36,6 +36,7 @@ Even worse, if the dict is nested like a config, member access could be somethin
 Enough is enough, it is time to make a change.
 
 We need attribute-style access, and we need it now.
+`dict.name` and `dict.parent.children.name` are all you need.
 
 Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
 Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
@@ -60,7 +61,7 @@ Moreover, `FlatDict` comes with `difference` and `intersection`, which makes it 
 `FlatDict` supports the `to` method similar to PyTorch Tensors.
 You can simply convert all member values of `FlatDict` to a certain type or pass to a device in the same way.
 
-`FlatDict` also integrates `cpu`, `gpu`, and `tpu` methods for easier access.
+`FlatDict` also integrates `cpu`, `gpu` (`cuda`), and `tpu` methods for easier access.
 
 #### IO Operations
 
@@ -242,7 +243,7 @@ CHANfiG is multi-licensed under the following licenses:
 - BSD 2-Clause
 - BSD 3-Clause
 
-You can choose any (one or more) of them if you use this work.
+You can choose any (one or more) of these license if you use this work.
 
 `SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause`
 

@@ -33,6 +33,7 @@ CHANfiG 的范式是：
 够了就是够了，是时候做出改变了。
 
 我们需要属性方式的访问，并且我们现在就需要。
+`dict.name`和`dict.parent.children.name`是所有你需要的。
 
 尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性可字典成员的冲突。
 
@@ -55,7 +56,7 @@ CHANfiG 的范式是：
 `FlatDict`支持与 Pytorch Tensor 类似的`to`方法。
 你可以很简单的通过相同的方式将所有`FlatDict`的成员值转换为某种类型或者转一道某个设备上。
 
-`FlatDict`同时集成了`cpu`、`gpu`、`tpu`方法来提供更便捷的访问。
+`FlatDict`同时集成了`cpu`、`gpu` (`cuda`)、`tpu`方法来提供更便捷的访问。
 
 #### IO 操作
 
@@ -238,6 +239,5 @@ CHANfiG 依据下列许可证进行多重授权：
 - BSD 3-Clause
 
 如果你使用本工作，你可以从中任选（一个或者多个）许可证。
-You can choose any (one or more) of them if you use this work.
 
 `SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause`
