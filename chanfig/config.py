@@ -102,11 +102,20 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         if args is None:
             args = argv[1:]
+        key_value_args = []
         for arg in args:
-            if arg.startswith("--") and args != "--":
-                arg = arg.split("=", maxsplit=1)[0]
-                if arg not in self._option_string_actions:
-                    self.add_argument(arg)
+            if args == "--":
+                break
+            if arg.startswith("--"):
+                key_value_args.append(arg.split("=", maxsplit=1))
+            else:
+                key_value_args[-1].append(arg)
+        for key_value in key_value_args:
+            if key_value[0] not in self._option_string_actions:
+                if len(key_value) > 2:
+                    self.add_argument(key_value[0], nargs="+")
+                else:
+                    self.add_argument(key_value[0])
         if config is None:
             config = Config()
         parsed = vars(self.parse_args(args))
