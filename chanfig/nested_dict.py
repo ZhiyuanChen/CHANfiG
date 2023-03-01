@@ -254,6 +254,10 @@ class NestedDict(FlatDict):
         while isinstance(name, str) and delimiter in name:
             name, rest = name.split(delimiter, 1)
             self, name = self[name], rest  # pylint: disable=W0642
+        if not isinstance(self, NestedDict):
+            if default is not Null:
+                return self[name] if name in self else default
+            return self[name]
         return super().get(name, default)
 
     __getitem__ = get
@@ -316,11 +320,12 @@ class NestedDict(FlatDict):
                 else:
                     self.__missing__(name)
             self, name = self[name], rest  # pylint: disable=W0642
-        # if not isinstance(self, FlatDict):
-        #     self = default_mapping()
         if convert_mapping and isinstance(value, Mapping):
             value = default_mapping(value)
-        super().set(name, value)
+        if not isinstance(self, NestedDict):
+            self[name] = value
+        else:
+            super().__setitem__(name, value)
 
     __setitem__ = set
     __setattr__ = set
