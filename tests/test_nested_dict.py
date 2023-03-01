@@ -17,3 +17,8 @@ class Test:
         assert "f.n" in self.dict
         assert "n.f" not in self.dict
         assert "f.n.a" not in self.dict
+
+    def test_sub_dict(self):
+        self.dict["n"] = {}
+        self.dict["n.l"] = "liu"
+        assert self.dict["n.l"] == "liu"
