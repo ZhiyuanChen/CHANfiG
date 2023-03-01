@@ -918,7 +918,7 @@ class FlatDict(dict):
         """
 
         config = cls()
-        config.update(json_loads(string, *args, **kwargs))
+        config._init(json_loads(string, *args, **kwargs))
         return config
 
     def yaml(self, file: File, *args, **kwargs) -> None:
@@ -1004,7 +1004,7 @@ class FlatDict(dict):
             kwargs["Loader"] = YamlLoader
 
         config = cls()
-        config.update(yaml_load(string, *args, **kwargs))
+        config._init(yaml_load(string, *args, **kwargs))
         return config
 
     @staticmethod
