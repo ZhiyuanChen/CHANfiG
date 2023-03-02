@@ -65,6 +65,12 @@ class NULL(metaclass=Singleton):
     def __next__(self):
         raise StopIteration
 
+    def __getattr__(self, name):
+        return self
+
+    def __getitem__(self, index):
+        return self
+
 
 class JsonEncoder(JSONEncoder):
     r"""
