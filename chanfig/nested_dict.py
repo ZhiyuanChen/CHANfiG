@@ -278,7 +278,6 @@ class NestedDict(FlatDict):
             convert_mapping: Whether convert mapping to NestedDict.
                 Defaults to self.convert_mapping.
 
-
         **Alias**:
 
         + `__setitem__`
@@ -451,7 +450,9 @@ class NestedDict(FlatDict):
                 if key not in this:
                     ret[key] = value
                 elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                    ret[key] = this[key].difference(value)
+                    diff = this[key].difference(value)
+                    if diff:
+                        ret[key] = diff
                 elif this[key] != value:
                     ret[key] = value
             return ret
