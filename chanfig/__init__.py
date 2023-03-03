@@ -20,6 +20,7 @@ from ._version import __version__, __version_tuple__
 from .config import Config, ConfigParser
 from .flat_dict import FlatDict
 from .nested_dict import DefaultDict, NestedDict
+from .registry import Registry
 from .variable import Variable
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "NestedDict",
     "FlatDict",
     "Variable",
+    "Registry",
     "DefaultDict",
     "ConfigParser",
     "__version__",
