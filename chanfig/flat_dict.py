@@ -192,16 +192,22 @@ class FlatDict(dict):
         1013
         >>> d.d
         1013
+        >>> d.get('d', None)
+        1013
         >>> d.get('f', 2)
         2
         >>> d.get('f')
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain f.'
+        KeyError: 'f'
 
         ```
         """
 
-        return super().__getitem__(name) if default is Null else self.__missing__(name, default)
+        if name in self:
+            return super().__getitem__(name)
+        if default is not Null:
+            return default
+        return self.__missing__(name)
 
     __getitem__ = get
     __getattr__ = get
@@ -270,11 +276,11 @@ class FlatDict(dict):
         >>> d.delete('d')
         >>> d.d
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain d.'
+        KeyError: 'd'
         >>> del d.n
         >>> d.n
         Traceback (most recent call last):
-        KeyError: 'FlatDict does not contain n.'
+        KeyError: 'n'
         >>> del d.f
         Traceback (most recent call last):
         KeyError: 'f'
@@ -423,16 +429,13 @@ class FlatDict(dict):
         except AttributeError:
             return False
 
-    def __missing__(self, name: str, default: Any = Null) -> Any:  # pylint: disable=R1710
-        if default is Null:
-            # default_factory might not in __dict__ and cannot be replaced with if self.getattr("default_factory")
-            if "default_factory" not in self.__dict__:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
-            default_factory = self.getattr("default_factory")
-            default = default_factory()
-            if isinstance(default, FlatDict):
-                default.__dict__.update(self.__dict__)
-            super().__setitem__(name, default)
+    def __missing__(self, name: str) -> Any:  # pylint: disable=R1710
+        if not self.hasattr("default_factory"):
+            raise KeyError(name) from None
+        default = self.getattr("default_factory")()
+        if isinstance(default, FlatDict):
+            default.__dict__.update(self.__dict__)
+        super().__setitem__(name, default)
         return default
 
     def dict(self, cls: Callable = dict) -> Mapping:
