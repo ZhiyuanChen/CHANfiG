@@ -245,20 +245,26 @@ class NestedDict(FlatDict):
         NestedDict()
         >>> del d.f
         >>> d = NestedDict()
-        >>> d.f
+        >>> d.e
         Traceback (most recent call last):
-        KeyError: 'f'
+        KeyError: 'e'
+        >>> d.e.f
+        Traceback (most recent call last):
+        KeyError: 'e'
 
         ```
         """
 
         delimiter = self.getattr("delimiter", ".")
-        while isinstance(name, str) and delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            self, name = self[name], rest  # pylint: disable=W0642
+        try:
+            while isinstance(name, str) and delimiter in name:
+                name, rest = name.split(delimiter, 1)
+                self, name = self[name], rest  # pylint: disable=W0642
+        except (AttributeError, TypeError):
+            raise KeyError(name) from None
         if not isinstance(self, NestedDict):
-            if default is not Null:
-                return self[name] if name in self else default
+            if default is not Null and name not in self:
+                return default
             return self[name]
         return super().get(name, default)
 
@@ -299,6 +305,12 @@ class NestedDict(FlatDict):
         >>> d.n.l = 'liu'
         >>> d['n.l']
         'liu'
+        >>> d['f.n.e'] = "error"
+        Traceback (most recent call last):
+        ValueError: Cannot set `f.n.e` to `error`, as `f.n=chang`.
+        >>> d['f.n.e.a'] = "error"
+        Traceback (most recent call last):
+        KeyError: 'e'
         >>> d.setattr('convert_mapping', True)
         >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
         >>> d.a.b.c.d
@@ -313,20 +325,29 @@ class NestedDict(FlatDict):
         default_mapping = self.getattr("default_mapping", NestedDict)
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
-        while isinstance(name, str) and delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            if name not in self:
-                if convert_mapping:
-                    super().__setitem__(name, default_mapping())
-                else:
-                    self.__missing__(name)
-            self, name = self[name], rest  # pylint: disable=W0642
+        full_name = name
+        try:
+            while isinstance(name, str) and delimiter in name:
+                name, rest = name.split(delimiter, 1)
+                if name not in self:
+                    if convert_mapping:
+                        super().__setitem__(name, default_mapping())
+                    else:
+                        self.__missing__(name)
+                self, name = self[name], rest  # pylint: disable=W0642
+        except (AttributeError, TypeError):
+            raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
             value = default_mapping(value)
-        if not isinstance(self, NestedDict):
-            self[name] = value
+        if isinstance(self, Mapping):
+            if not isinstance(self, NestedDict):
+                self[name] = value
+            else:
+                super().__setitem__(name, value)
         else:
-            super().__setitem__(name, value)
+            raise ValueError(
+                f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
+            )
 
     __setitem__ = set
     __setattr__ = set
@@ -360,21 +381,71 @@ class NestedDict(FlatDict):
         >>> d.f.n
         Traceback (most recent call last):
         KeyError: 'n'
-        >>> del d.c
+        >>> del d.e
         Traceback (most recent call last):
-        KeyError: 'c'
+        KeyError: 'e'
+        >>> del d.e.f
+        Traceback (most recent call last):
+        KeyError: 'f'
 
         ```
         """
 
         delimiter = self.getattr("delimiter", ".")
-        while isinstance(name, str) and delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            self, name = self[name], rest  # pylint: disable=W0642
+        try:
+            while isinstance(name, str) and delimiter in name:
+                name, rest = name.split(delimiter, 1)
+                self, name = self[name], rest  # pylint: disable=W0642
+        except (AttributeError, TypeError):
+            raise KeyError(name) from None
         super().__delitem__(name)
 
     __delitem__ = delete
     __delattr__ = delete
+
+    def pop(self, name: str, default: Any = Null) -> Any:
+        r"""
+        Pop value from `NestedDict`.
+
+        Args:
+            name:
+            default:
+
+        Returns:
+            value: If `NestedDict` does not contain `name`, return `default`.
+
+        Examples:
+        ```python
+        >>> d = NestedDict({"i.d": 1013, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
+        >>> d.pop('i.d')
+        1013
+        >>> d.pop('i.d', True)
+        True
+        >>> d.pop('i.d')
+        Traceback (most recent call last):
+        KeyError: 'd'
+        >>> d.pop('e')
+        Traceback (most recent call last):
+        KeyError: 'e'
+        >>> d.pop('e.f')
+        Traceback (most recent call last):
+        KeyError: 'f'
+
+        ```
+        """
+
+        delimiter = self.getattr("delimiter", ".")
+        try:
+            while isinstance(name, str) and delimiter in name:
+                name, rest = name.split(delimiter, 1)
+                self, name = self[name], rest  # pylint: disable=W0642
+        except (AttributeError, TypeError):
+            raise KeyError(name) from None
+        if not isinstance(self, dict) or name not in self:
+            if default is not Null:
+                return default
+            raise KeyError(name)
+        return super().pop(name)
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""
@@ -537,42 +608,6 @@ class NestedDict(FlatDict):
         """
 
         return self.apply(lambda _: super().to(cls))
-
-    def pop(self, name: str, default: Any = Null) -> Any:
-        r"""
-        Pop value from `NestedDict`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value: If `NestedDict` does not contain `name`, return `default`.
-
-        Examples:
-        ```python
-        >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
-        >>> d.pop('i.d')
-        1013
-        >>> d.pop('i.d', True)
-        True
-        >>> d.pop('i.d')
-        Traceback (most recent call last):
-        KeyError: 'd'
-        >>> d.pop('n.l')
-        Traceback (most recent call last):
-        KeyError: 'n'
-
-        ```
-        """
-
-        delimiter = self.getattr("delimiter", ".")
-        if delimiter in name:
-            name, rest = name.split(delimiter, 1)
-            if name not in self:
-                raise KeyError(name)
-            return self[name].pop(rest, default)
-        return super().pop(name, default) if default is not Null else super().pop(name)
 
     def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
