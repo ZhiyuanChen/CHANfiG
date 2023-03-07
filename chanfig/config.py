@@ -205,7 +205,7 @@ class Config(NestedDict):
     ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
     >>> c.d.e
     Traceback (most recent call last):
-    KeyError: 'Config does not contain e.'
+    KeyError: 'e'
     >>> with c.unlocked():
     ...     del c.d
     >>> c.dict()
@@ -464,7 +464,7 @@ class Config(NestedDict):
         )
         >>> d.f
         Traceback (most recent call last):
-        KeyError: 'Config does not contain f.'
+        KeyError: 'f'
 
         ```
         """
@@ -473,7 +473,7 @@ class Config(NestedDict):
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
             return super().get(name, default)
-        raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
+        raise KeyError(name)
 
     __getitem__ = get
     __getattr__ = get

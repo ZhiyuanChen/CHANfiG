@@ -237,6 +237,8 @@ class NestedDict(FlatDict):
         1013
         >>> d.i.d
         1013
+        >>> d.get('i.d', None)
+        1013
         >>> d.get('f', 2)
         2
         >>> d.f
@@ -245,7 +247,7 @@ class NestedDict(FlatDict):
         >>> d = NestedDict()
         >>> d.f
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain f.'
+        KeyError: 'f'
 
         ```
         """
@@ -353,11 +355,11 @@ class NestedDict(FlatDict):
         False
         >>> d.i.d
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain d.'
+        KeyError: 'd'
         >>> del d.f.n
         >>> d.f.n
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain n.'
+        KeyError: 'n'
         >>> del d.c
         Traceback (most recent call last):
         KeyError: 'c'
@@ -559,7 +561,7 @@ class NestedDict(FlatDict):
         KeyError: 'd'
         >>> d.pop('n.l')
         Traceback (most recent call last):
-        KeyError: 'NestedDict does not contain n.'
+        KeyError: 'n'
 
         ```
         """
@@ -568,7 +570,7 @@ class NestedDict(FlatDict):
         if delimiter in name:
             name, rest = name.split(delimiter, 1)
             if name not in self:
-                raise KeyError(f"{self.__class__.__name__} does not contain {name}.")
+                raise KeyError(name)
             return self[name].pop(rest, default)
         return super().pop(name, default) if default is not Null else super().pop(name)
 
