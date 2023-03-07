@@ -465,6 +465,9 @@ class Config(NestedDict):
         >>> d.f
         Traceback (most recent call last):
         KeyError: 'f'
+        >>> d["f.n"]
+        Traceback (most recent call last):
+        KeyError: 'f.n'
 
         ```
         """
