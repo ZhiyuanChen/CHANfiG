@@ -26,7 +26,7 @@ class Variable:
         `Variable` by default wrap the instance type to type of the wrapped object.
         Therefore, `isinstance(Variable(1), int)` will return `True`.
 
-        To temporarily disable this behavior, you can call context manager `with Variable.unwraped()`.
+        To temporarily disable this behavior, you can call context manager `with Variable.unwrapped()`.
 
         To permanently disable this behavior, you can call `Variable.unwrap()`.
 
@@ -56,7 +56,7 @@ class Variable:
     <class 'chanfig.variable.Variable'>
     >>> v.dtype
     <class 'int'>
-    >>> with v.unwraped():
+    >>> with v.unwrapped():
     ...    isinstance(v, int)
     False
     >>> v = Variable('hello')
@@ -235,7 +235,7 @@ class Variable:
         self.wrap_type = False
 
     @contextmanager
-    def unwraped(self):
+    def unwrapped(self):
         r"""
         Context manager which temporarily unwrap the `Variable`.
 
@@ -244,7 +244,7 @@ class Variable:
         >>> id = Variable(1013)
         >>> isinstance(id, int)
         True
-        >>> with id.unwraped():
+        >>> with id.unwrapped():
         ...    isinstance(id, int)
         False
 
