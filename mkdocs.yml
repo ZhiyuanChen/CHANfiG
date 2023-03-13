@@ -153,7 +153,6 @@ markdown_extensions:
 
 plugins:
   - autorefs
-  - meta
   # - blog:
   #     post_date_format: full
   #     post_url_format: "{slug}"
@@ -174,11 +173,6 @@ plugins:
           build: true
   - git-revision-date-localized:
       type: iso_datetime
-  - privacy:
-      external_assets_exclude:
-        - cdn.jsdelivr.net/npm/mathjax@3/*
-        - giscus.app/*
-        - github-readme-stats.vercel.app/*
   - rss:
       match_path: .*
       date_from_meta:

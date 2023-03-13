@@ -25,7 +25,6 @@ jobs:
         with:
           key: ${{ github.ref }}
           path: .cache
-      - run: pip install git+https://${{ secrets.GH_TOKEN }}@github.com/squidfunk/mkdocs-material-insiders.git
       - run: pip install -r requirements-doc.txt
       - run: mkdocs build
       - name: Deploy
