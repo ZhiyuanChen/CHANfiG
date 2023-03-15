@@ -43,7 +43,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     which has strict checking on command line arguments.
     """
 
-    def parse(
+    def parse(  # pylint: disable=R0912
         self,
         args: Optional[Sequence[str]] = None,
         config: Optional[Config] = None,

@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies for testing
         run: pip install pytest pytest-cov torch
       - name: pytest
-        run: ls . && pytest --doctest-modules --cov=chanfig
+        run: pytest --doctest-modules --cov=chanfig --cov-report term-missing --cov-report xml .
   release:
     if: startsWith(github.event.ref, 'refs/tags/v')
     needs: [lint, test]

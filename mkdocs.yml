@@ -11,9 +11,10 @@ nav:
   - CHANfiG: index.md
   - Variable: variable.md
   - Config: config.md
-  - DefaultDict: default_dict.md
   - NestedDict: nested_dict.md
   - FlatDict: flat_dict.md
+  - Registry: registry.md
+  - DefaultDict: default_dict.md
   - ConfigParser: parser.md
   - Utilities: utils.md
   # - package: package.md
