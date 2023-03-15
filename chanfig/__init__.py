@@ -16,19 +16,23 @@
 from yaml import add_representer
 from yaml.representer import SafeRepresenter
 
+from . import utils
 from ._version import __version__, __version_tuple__
 from .config import Config, ConfigParser
 from .flat_dict import FlatDict
 from .nested_dict import DefaultDict, NestedDict
+from .registry import Registry
 from .variable import Variable
 
 __all__ = [
+    "Variable",
     "Config",
     "NestedDict",
     "FlatDict",
-    "Variable",
+    "Registry",
     "DefaultDict",
     "ConfigParser",
+    "utils",
     "__version__",
     "__version_tuple__",
 ]
