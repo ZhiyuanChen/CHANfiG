@@ -237,7 +237,8 @@ CHANfiG 依据下列许可证进行多重授权：
 - Apache 2.0
 - BSD 2-Clause
 - BSD 3-Clause
+- BSD 4-Clause
 
 如果你使用本工作，你可以从中任选（一个或者多个）许可证。
 
-`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause`
+`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR BSD-4-Clause`
