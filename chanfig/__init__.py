@@ -8,6 +8,7 @@
 # - Apache 2.0
 # - BSD 2-Clause
 # - BSD 3-Clause
+# - BSD 4-Clause
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -17,7 +18,7 @@ from yaml import add_representer
 from yaml.representer import SafeRepresenter
 
 from . import utils
-from ._version import __version__, __version_tuple__
+from ._version import __version__, __version_tuple__, version
 from .config import Config, ConfigParser
 from .flat_dict import FlatDict
 from .nested_dict import DefaultDict, NestedDict
@@ -33,6 +34,7 @@ __all__ = [
     "DefaultDict",
     "ConfigParser",
     "utils",
+    "version",
     "__version__",
     "__version_tuple__",
 ]

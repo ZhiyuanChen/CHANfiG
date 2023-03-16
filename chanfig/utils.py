@@ -8,6 +8,7 @@
 # - Apache 2.0
 # - BSD 2-Clause
 # - BSD 3-Clause
+# - BSD 4-Clause
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
