@@ -110,6 +110,8 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             if arg.startswith("--"):
                 key_value_args.append(arg.split("=", maxsplit=1))
             else:
+                if not key_value_args:
+                    continue
                 key_value_args[-1].append(arg)
         for key_value in key_value_args:
             if key_value[0] not in self._option_string_actions:
