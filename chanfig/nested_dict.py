@@ -20,6 +20,7 @@ from functools import wraps
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
 
+from .default_dict import DefaultDict
 from .flat_dict import FlatDict, PathStr
 from .utils import Null
 from .variable import Variable
@@ -29,27 +30,22 @@ if TYPE_CHECKING:
     from torch import dtype as TorchDtype
 
 
-class NestedDict(FlatDict):
+class NestedDict(DefaultDict):
     r"""
-    `NestedDict` further extends `FlatDict` object by introducing a nested structure with `delimiter`.
+    `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.
     By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
 
     `d = NestedDict({"a.b.c": 1})` is equivalent to `d = NestedDict({"a": {"b": {"c": 1}}})`,
-    and you can access the members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
+    and you can access members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
 
     This behavior allows you to pass keyword arguments to other function as easy as `func1(**d.func1)`.
 
-    `NestedDict` supports `default_factory` in the same manner as `collections.defaultdict`.
-    It `default_factory is not None`, the value will be set to `default_factory()`
-    when you access a key that does not exist in `NestedDict`.
+    Since `NestedDict` inherits from `DefaultDict`, it also supports `default_factory`.
     With `default_factory`, you can assign `d.a.b.c = 1` without assign `d.a = NestedDict()` in the first place.
+    Note that the constructor of `NestedDict` is different from `DefaultDict`, `default_factory` is not a positional
+    argument, and must be set in a keyword argument.
 
-    You may specify `default_factory=NestedDict` when creating the `NestedDict` or
-    by calling `dict.setattr('default_factory', NestedD`ict)`.
-
-    Note that just like `collections.defaultdict`, `default_factory()` is called without any arguments.
-
-    `NestedDict` also has `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
+    `NestedDict` also introduce `all_keys`, `all_values`, `all_items` methods to get all keys, values, items
     respectively in the nested structure.
 
     Attributes:
@@ -61,10 +57,10 @@ class NestedDict(FlatDict):
             Delimiter for nested structure.
 
     Notes:
-        When `convert_mapping` specified, all new values with a type of `Mapping`
+        When `convert_mapping` specified, all new values with type of `Mapping`
         will be converted to `default_mapping`.
 
-        `convert_mapping` is automatically applied to arguments at initialisation.
+        `convert_mapping` is automatically applied to arguments during initialisation.
 
     Examples:
     ```python
@@ -83,6 +79,9 @@ class NestedDict(FlatDict):
     default_mapping: Callable
     convert_mapping: bool = False
     delimiter: str = "."
+
+    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs) -> None:
+        super().__init__(default_factory, *args, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
         if len(args) == 1:
@@ -243,7 +242,7 @@ class NestedDict(FlatDict):
         >>> d.get('f', 2)
         2
         >>> d.f
-        NestedDict()
+        NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
         >>> del d.f
         >>> d = NestedDict()
         >>> d.e
@@ -619,14 +618,3 @@ class NestedDict(FlatDict):
             return super().__contains__(name)
         except (TypeError, KeyError):  # TypeError when name is not in self
             return False
-
-
-class DefaultDict(NestedDict):
-    r"""
-    `NestedDict` with `default_factory` set to `NestedDict` by default.
-    """
-
-    def __init__(self, *args, **kwargs):
-        if "default_factory" not in kwargs:
-            kwargs["default_factory"] = NestedDict
-        super().__init__(*args, **kwargs)

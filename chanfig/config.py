@@ -200,7 +200,7 @@ class Config(NestedDict):
     >>> c.i.d
     1013
     >>> c.d.i
-    Config()
+    Config(<class 'chanfig.config.Config'>, )
     >>> c.freeze().dict()
     {'f': {'n': 'chang'}, 'i': {'d': 1013}, 'd': {'i': {}}}
     >>> c.d.i = 1013
@@ -250,8 +250,8 @@ class Config(NestedDict):
         ...         return self
         >>> c = PostConfig(data="path")
         >>> c.post()
-        PostConfig(
-          ('data'): Config(
+        PostConfig(<class 'chanfig.config.Config'>,
+          ('data'): Config(<class 'chanfig.config.Config'>,
             ('feature'): 'path'
             ('label'): 'path'
           )
@@ -457,11 +457,11 @@ class Config(NestedDict):
         >>> d.get('f', 2)
         2
         >>> d.f
-        Config()
+        Config(<class 'chanfig.config.Config'>, )
         >>> del d.f
         >>> d.freeze()
-        Config(
-          ('i'): Config(
+        Config(<class 'chanfig.config.Config'>,
+          ('i'): Config(<class 'chanfig.config.Config'>,
             ('d'): 1013
           )
         )
@@ -555,12 +555,12 @@ class Config(NestedDict):
         >>> "i.d" in d
         False
         >>> d.i.d
-        Config()
+        Config(<class 'chanfig.config.Config'>, )
         >>> "i.d" in d
         True
         >>> del d.f.n
         >>> d.f.n
-        Config()
+        Config(<class 'chanfig.config.Config'>, )
         >>> del d.c
         Traceback (most recent call last):
         KeyError: 'c'

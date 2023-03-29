@@ -20,8 +20,9 @@ from yaml.representer import SafeRepresenter
 from . import utils
 from ._version import __version__, __version_tuple__, version
 from .config import Config, ConfigParser
+from .default_dict import DefaultDict
 from .flat_dict import FlatDict
-from .nested_dict import DefaultDict, NestedDict
+from .nested_dict import NestedDict
 from .registry import Registry
 from .variable import Variable
 

@@ -60,20 +60,16 @@ class FlatDict(dict):
 
     It comes with many easy to use helper function, such as `difference`, `intersection`.
 
-    It also has full support for  IO operations, such as `json` and `yaml`.
+    It also has full support for IO operations, such as `json` and `yaml`.
 
     Even better, `FlatDict` has pytorch support built-in.
     You can directly call `FlatDict.cpu()` or `FlatDict.to("cpu")` to move all `torch.Tensor` objects across devices.
 
     `FlatDict` works best with `Variable` objects.
-    Just simply call ``FlatDict.a = Variable(1); FlatDict.b = FlatDict.a``, and their values will be sync.
+    Just simply call ``FlatDict.a = Variable(1); FlatDict.b = FlatDict.a``, and their values will be synced.
 
     Attributes:
         indent: Indentation level in printing and dumping to json or yaml.
-        default_factory: Default factory for defaultdict behavior.
-
-    Raises:
-        TypeError: If `default_factory` is not callable.
 
     Notes:
         `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
@@ -81,7 +77,7 @@ class FlatDict(dict):
 
         Although it is possible to override other internal methods, it is not recommended to do so.
 
-        `__class__`, `__dict__`, and `getattr` are reserved and cannot be override in any manner.
+        `__class__`, `__dict__`, and `getattr` are reserved and cannot be overrided in any manner.
 
     Examples:
     ```python
@@ -108,13 +104,6 @@ class FlatDict(dict):
     >>> d.a = d.a + ', world!'
     >>> d.b
     'hello, world!'
-    >>> d = FlatDict(default_factory=list)
-    >>> d.a.append(1)
-    >>> d.a
-    [1]
-    >>> d = FlatDict(default_factory=[])
-    Traceback (most recent call last):
-    TypeError: `default_factory=[]` should be of type Callable, but got <class 'list'>.
 
     ```
     """
@@ -122,17 +111,9 @@ class FlatDict(dict):
     # pylint: disable=R0904
 
     indent: int = 2
-    default_factory: Optional[Callable]
 
-    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__()
-        if default_factory is not None:
-            if callable(default_factory):
-                self.setattr("default_factory", default_factory)
-            else:
-                raise TypeError(
-                    f"`default_factory={default_factory}` should be of type Callable, but got {type(default_factory)}."
-                )
         self._init(*args, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
@@ -165,8 +146,6 @@ class FlatDict(dict):
         r"""
         Get value from `FlatDict`.
 
-        Note that `default` has higher priority than `default_factory`.
-
         Args:
             name:
             default:
@@ -174,10 +153,9 @@ class FlatDict(dict):
         Returns:
             value:
                 If `FlatDict` does not contain `name`, return `default`.
-                If `default` is not specified, return `default_factory()`.
 
         Raises:
-            KeyError: If `FlatDict` does not contain `name` and `default`/`default_factory` is not specified.
+            KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
 
         **Alias**:
 
@@ -299,7 +277,6 @@ class FlatDict(dict):
         Get attribute of `FlatDict`.
 
         Note that it won't retrieve value in `FlatDict`,
-        nor will it create new `default_factory` even if it is assigned.
 
         Args:
             name:
@@ -309,18 +286,21 @@ class FlatDict(dict):
             value: If `FlatDict` does not contain `name`, return `default`.
 
         Raises:
-            AttributeError: If `FlatDict` does not contain `name` and `default`/`default_factory` is not specified.
+            AttributeError: If `FlatDict` does not contain `name` and `default` is not specified.
 
         Examples:
         ```python
-        >>> d = FlatDict(a=1, default_factory=list)
-        >>> d.getattr('default_factory')
-        <class 'list'>
-        >>> d.getattr('b', 2)
-        2
+        >>> d = FlatDict(a=1)
+        >>> d.get('a')
+        1
         >>> d.getattr('a')
         Traceback (most recent call last):
         AttributeError: FlatDict has no attribute a.
+        >>> d.getattr('b', 2)
+        2
+        >>> d.setattr('b', 3)
+        >>> d.getattr('b')
+        3
 
         ```
         """
@@ -370,7 +350,7 @@ class FlatDict(dict):
         if name in self:
             warn(
                 f"{name} already exists in {self.__class__.__name__}.\n"
-                "Users must call `{self.__class__.__name__}.getattr()` to retrieve conflicting attribute value.",
+                f"Users must call `{self.__class__.__name__}.getattr()` to retrieve conflicting attribute value.",
                 RuntimeWarning,
             )
         self.__dict__[name] = value
@@ -431,13 +411,7 @@ class FlatDict(dict):
             return False
 
     def __missing__(self, name: str) -> Any:  # pylint: disable=R1710
-        if not self.hasattr("default_factory"):
-            raise KeyError(name) from None
-        default = self.getattr("default_factory")()
-        if isinstance(default, FlatDict):
-            default.__dict__.update(self.__dict__)
-        super().__setitem__(name, default)
-        return default
+        raise KeyError(name)
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""
