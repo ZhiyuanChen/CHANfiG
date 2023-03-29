@@ -8,9 +8,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ricardochaves/python-lint@v1.4.0
         with:
-          use-pylint: false
+          use-pycodestyle: false
           python-root-list: "chanfig"
-          extra-pylint-options: "--max-line-length 120"
+          extra-pylint-options: "--max-line-length 120 --disable E0012,E0401 --fail-under 9.8 --output-format=colorized"
           extra-pycodestyle-options: "--max-line-length 120"
           extra-flake8-options: "--max-line-length 120"
           extra-black-options: "--line-length 120"

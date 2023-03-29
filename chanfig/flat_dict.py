@@ -896,7 +896,7 @@ class FlatDict(dict):
         """
 
         config = cls()
-        config._init(json_loads(string, *args, **kwargs))
+        config._init(json_loads(string, *args, **kwargs))  # pylint: disable=W0212
         return config
 
     def yaml(self, file: File, *args, **kwargs) -> None:
@@ -982,7 +982,7 @@ class FlatDict(dict):
             kwargs["Loader"] = YamlLoader
 
         config = cls()
-        config._init(yaml_load(string, *args, **kwargs))
+        config._init(yaml_load(string, *args, **kwargs))  # pylint: disable=W0212
         return config
 
     @staticmethod
@@ -1061,7 +1061,7 @@ class FlatDict(dict):
 
         empty = cls()
         empty.clear()
-        empty._init(*args, **kwargs)
+        empty._init(*args, **kwargs)  # pylint: disable=W0212
         return empty
 
     def empty_like(self, *args, **kwargs) -> FlatDict:
