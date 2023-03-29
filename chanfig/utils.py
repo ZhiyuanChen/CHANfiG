@@ -86,7 +86,7 @@ class JsonEncoder(JSONEncoder):
         return super().default(o)
 
 
-class YamlDumper(SafeDumper):
+class YamlDumper(SafeDumper):  # pylint: disable=R0903
     r"""
     YAML Dumper for Config.
     """
@@ -95,7 +95,7 @@ class YamlDumper(SafeDumper):
         return super().increase_indent(flow, indentless)
 
 
-class YamlLoader(SafeLoader):  # pylint: disable=R0901
+class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
     r"""
     YAML Loader for Config.
     """
