@@ -37,13 +37,11 @@ CHANfiG 的范式是：
 
 尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性可字典成员的冲突。
 
-为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`NestedDict`和`Config`对象。
+为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`DefaultDict`、`NestedDict`、`Config`和`Registry`对象。
 
 ### FlatDict
 
 `FlatDict`在三个方面对默认的`dict`做出改进。
-
-`FlatDict`同时接受`default_factory`，并且可以被简单的作为`defaultdict`使用。
 
 #### 字典操作
 
@@ -65,6 +63,10 @@ CHANfiG 的范式是：
 
 `FlatDict`也包括了`dump`和`load`方法，他们可以从文件扩展名中自动推断类型然后将`FlatDict`对象存储到文件中/从文件中加载`FlatDict`对象。
 
+### DefaultDict
+
+为了满足默认值的需要，我们包括了一个`DefaultDict`，他接受`default_factory`参数，并和`collections.defaultdict`一样工作。
+
 ### NestedDict
 
 由于大多数配置都是一个嵌套的结构，我们进一步提出了`NestedDict`。
@@ -80,6 +82,10 @@ CHANfiG 的范式是：
 加入内置的`ConfigParser`来解析命令行语句。
 
 注意`Config`默认设置`default_factory=Config()`来提供便利。
+
+### Registry
+
+`Registry`继承自`NestedDict`，并且提供`register`、`lookup`和`build`来帮助你注册构造函数并从`Config`来创建对象。
 
 ### Variable
 

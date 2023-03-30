@@ -12,9 +12,9 @@ nav:
   - Variable: variable.md
   - Config: config.md
   - NestedDict: nested_dict.md
+  - DefaultDict: default_dict.md
   - FlatDict: flat_dict.md
   - Registry: registry.md
-  - DefaultDict: default_dict.md
   - ConfigParser: parser.md
   - Utilities: utils.md
   # - package: package.md
