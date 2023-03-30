@@ -42,13 +42,11 @@ Although there have been some other works that achieve a similar functionality o
 Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `NestedDict`, and `Config` objects.
+To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry` objects.
 
 ### FlatDict
 
 `FlatDict` improves the default `dict` in 3 aspects.
-
-`FlatDict` also accepts `default_factory`, and can be easily used as `defaultdict`.
 
 #### Dict Operations
 
@@ -70,19 +68,27 @@ It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods
 
 `FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` object to/from a file.
 
+### DefaultDict
+
+To facilities the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
+
 ### NestedDict
 
 Since most Configs are in a nested structure, we further propose a `NestedDict`.
 
 Based on `FlatDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
 
-`NestedDict` also comes with `apply` method, which made it easier to manipulate nested structures.
+`NestedDict` also comes with `apply` method, which made it easier to manipulate the nested structure.
 
 ### Config
 
 `Config` extends the functionality by supporting `freeze` and `defrost` the dict, and by adding a built-in `ConfigParser` to pare command line arguments.
 
 Note that `Config` also has `default_factory=Config()` by default for convenience.
+
+### Registry
+
+`Registry` extends the `NestedDict` and supports `register`, `lookup`, and `build` to help you register constructors and build objects from a `Config`.
 
 ### Variable
 
