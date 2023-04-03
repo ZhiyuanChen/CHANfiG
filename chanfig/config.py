@@ -16,10 +16,11 @@
 
 from __future__ import annotations
 
+import sys
+
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from functools import wraps
-from sys import argv
 from typing import Any, Callable, Iterable, Optional, Sequence
 from warnings import warn
 
@@ -102,7 +103,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         """
 
         if args is None:
-            args = argv[1:]
+            args = sys.argv[1:]
         key_value_args = []
         for arg in args:
             if args == "--":
