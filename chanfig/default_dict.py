@@ -1,6 +1,7 @@
 from typing import Any, Callable, Optional
 
 from .flat_dict import FlatDict
+from .utils import Null
 
 
 class DefaultDict(FlatDict):
@@ -45,13 +46,14 @@ class DefaultDict(FlatDict):
                     f"`default_factory={default_factory}` must be Callable, but got {type(default_factory)}."
                 )
 
-    def __missing__(self, name: str) -> Any:  # pylint: disable=R1710
-        if not self.hasattr("default_factory"):
-            raise KeyError(name) from None
-        default = self.getattr("default_factory")()
+    def __missing__(self, name: str, default=Null) -> Any:  # pylint: disable=R1710
+        if default is Null:
+            if not self.hasattr("default_factory"):
+                raise KeyError(name) from None
+            default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
             default.__dict__.update(self.__dict__)
-        super().__setitem__(name, default)
+        super().set(name, default)
         return default
 
     def __repr__(self) -> str:

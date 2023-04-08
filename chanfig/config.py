@@ -17,7 +17,6 @@
 from __future__ import annotations
 
 import sys
-
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from functools import wraps
@@ -209,7 +208,7 @@ class Config(NestedDict):
     ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
     >>> c.d.e
     Traceback (most recent call last):
-    KeyError: 'e'
+    AttributeError: 'Config' object has no attribute 'e'
     >>> with c.unlocked():
     ...     del c.d
     >>> c.dict()
@@ -468,7 +467,7 @@ class Config(NestedDict):
         )
         >>> d.f
         Traceback (most recent call last):
-        KeyError: 'f'
+        AttributeError: 'Config' object has no attribute 'f'
         >>> d["f.n"]
         Traceback (most recent call last):
         KeyError: 'f.n'
@@ -481,9 +480,6 @@ class Config(NestedDict):
         if name in self or not self.getattr("frozen", False):
             return super().get(name, default)
         raise KeyError(name)
-
-    __getitem__ = get
-    __getattr__ = get
 
     @frozen_check
     def set(
@@ -529,9 +525,6 @@ class Config(NestedDict):
 
         return super().set(name, value, convert_mapping)
 
-    __setitem__ = set
-    __setattr__ = set
-
     @frozen_check
     def delete(self, name: str) -> None:
         r"""
@@ -564,15 +557,12 @@ class Config(NestedDict):
         Config(<class 'chanfig.config.Config'>, )
         >>> del d.c
         Traceback (most recent call last):
-        KeyError: 'c'
+        AttributeError: 'Config' object has no attribute 'c'
 
         ```
         """
 
         super().delete(name)
-
-    __delitem__ = delete
-    __delattr__ = delete
 
     @frozen_check
     def pop(self, name: str, default: Any = Null) -> Any:
