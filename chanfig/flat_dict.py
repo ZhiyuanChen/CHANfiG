@@ -188,10 +188,16 @@ class FlatDict(dict):
             return default
         return self.__missing__(name)
 
-    __getitem__ = get
-    __getattr__ = get
+    def __getitem__(self, name: str) -> Any:
+        return self.get(name)
 
-    def set(self, name: str, value: Any) -> None:
+    def __getattr__(self, name) -> Any:
+        try:
+            return self.get(name)
+        except KeyError:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+
+    def set(self, name: Any, value: Any) -> None:
         r"""
         Set value of `FlatDict`.
 
@@ -228,10 +234,16 @@ class FlatDict(dict):
         if name in self and isinstance(self[name], Variable):
             self[name].set(value)
         else:
-            super().__setitem__(name, value)
+            dict.__setitem__(self, name, value)
 
-    __setitem__ = set
-    __setattr__ = set
+    def __setitem__(self, name: Any, value: Any) -> None:
+        self.set(name, value)
+
+    def __setattr__(self, name, value) -> None:
+        try:
+            self.set(name, value)
+        except KeyError:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
     def delete(self, name: str) -> None:
         r"""
@@ -255,22 +267,28 @@ class FlatDict(dict):
         >>> d.delete('d')
         >>> d.d
         Traceback (most recent call last):
-        KeyError: 'd'
+        AttributeError: 'FlatDict' object has no attribute 'd'
         >>> del d.n
         >>> d.n
         Traceback (most recent call last):
-        KeyError: 'n'
+        AttributeError: 'FlatDict' object has no attribute 'n'
         >>> del d.f
         Traceback (most recent call last):
-        KeyError: 'f'
+        AttributeError: 'FlatDict' object has no attribute 'f'
 
         ```
         """
 
         super().__delitem__(name)
 
-    __delitem__ = delete
-    __delattr__ = delete
+    def __delitem__(self, name: str) -> None:
+        return self.delete(name)
+
+    def __delattr__(self, name) -> None:
+        try:
+            self.delete(name)
+        except KeyError:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
     def getattr(self, name: str, default: Any = Null) -> Any:
         r"""
@@ -295,7 +313,7 @@ class FlatDict(dict):
         1
         >>> d.getattr('a')
         Traceback (most recent call last):
-        AttributeError: FlatDict has no attribute a.
+        AttributeError: 'FlatDict' object has no attribute 'a'
         >>> d.getattr('b', 2)
         2
         >>> d.setattr('b', 3)
@@ -314,7 +332,7 @@ class FlatDict(dict):
         except AttributeError:
             if default is not Null:
                 return default
-            raise AttributeError(f"{self.__class__.__name__} has no attribute {name}.") from None
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
     def setattr(self, name: str, value: Any) -> None:
         r"""
@@ -373,7 +391,7 @@ class FlatDict(dict):
         >>> d.delattr('name')
         >>> d.getattr('name')
         Traceback (most recent call last):
-        AttributeError: FlatDict has no attribute name.
+        AttributeError: 'FlatDict' object has no attribute 'name'
 
         ```
         """

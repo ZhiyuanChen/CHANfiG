@@ -64,6 +64,12 @@ class NestedDict(DefaultDict):
 
     Examples:
     ```python
+    >>> NestedDict({"f.n": "chang"})
+    NestedDict(
+      ('f'): NestedDict(
+        ('n'): 'chang'
+      )
+    )
     >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
     >>> d.i.d = 1013
     >>> d['i.d']
@@ -247,10 +253,10 @@ class NestedDict(DefaultDict):
         >>> d = NestedDict()
         >>> d.e
         Traceback (most recent call last):
-        KeyError: 'e'
+        AttributeError: 'NestedDict' object has no attribute 'e'
         >>> d.e.f
         Traceback (most recent call last):
-        KeyError: 'e'
+        AttributeError: 'NestedDict' object has no attribute 'e'
 
         ```
         """
@@ -267,9 +273,6 @@ class NestedDict(DefaultDict):
                 return default
             return self[name]
         return super().get(name, default)
-
-    __getitem__ = get
-    __getattr__ = get
 
     def set(  # pylint: disable=W0221
         self,
@@ -311,29 +314,35 @@ class NestedDict(DefaultDict):
         >>> d['f.n.e.a'] = "error"
         Traceback (most recent call last):
         KeyError: 'e'
+        >>> d.f.n.e.a = "error"
+        Traceback (most recent call last):
+        AttributeError: 'str' object has no attribute 'e'
         >>> d.setattr('convert_mapping', True)
         >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
         >>> d.a.b.c.d
         1
-        >>> d.a.b.e.f
+        >>> d['c.d'] = {'c': {'d': 1}, 'e.f' : 2}
+        >>> d.c.d['e.f']
         2
+        >>> d.setattr('convert_mapping', False)
+        >>> d.set('e.f', {'c': {'d': 1}, 'e.f' : 2}, convert_mapping=True)
+        >>> d['e.f']['c.d']
+        1
 
         ```
         """
 
-        delimiter = self.getattr("delimiter", ".")
-        default_mapping = self.getattr("default_mapping", NestedDict)
+        full_name = name
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
-        full_name = name
+        delimiter = self.getattr("delimiter", ".")
+        default_mapping = self.getattr("default_mapping", NestedDict)
+        default = default_mapping() if convert_mapping else Null
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
                 if name not in self:
-                    if convert_mapping:
-                        super().__setitem__(name, default_mapping())
-                    else:
-                        self.__missing__(name)
+                    self.__missing__(name, default)
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
@@ -343,14 +352,11 @@ class NestedDict(DefaultDict):
             if not isinstance(self, NestedDict):
                 self[name] = value
             else:
-                super().__setitem__(name, value)
+                super().set(name, value)
         else:
             raise ValueError(
                 f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
             )
-
-    __setitem__ = set
-    __setattr__ = set
 
     def delete(self, name: str) -> None:
         r"""
@@ -376,15 +382,15 @@ class NestedDict(DefaultDict):
         False
         >>> d.i.d
         Traceback (most recent call last):
-        KeyError: 'd'
+        AttributeError: 'NestedDict' object has no attribute 'd'
         >>> del d.f.n
         >>> d.f.n
         Traceback (most recent call last):
-        KeyError: 'n'
+        AttributeError: 'NestedDict' object has no attribute 'n'
         >>> del d.e
         Traceback (most recent call last):
-        KeyError: 'e'
-        >>> del d.e.f
+        AttributeError: 'NestedDict' object has no attribute 'e'
+        >>> del d['e.f']
         Traceback (most recent call last):
         KeyError: 'f'
 
@@ -398,10 +404,7 @@ class NestedDict(DefaultDict):
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
-        super().__delitem__(name)
-
-    __delitem__ = delete
-    __delattr__ = delete
+        super().delete(name)
 
     def pop(self, name: str, default: Any = Null) -> Any:
         r"""
