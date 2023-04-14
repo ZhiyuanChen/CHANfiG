@@ -1148,6 +1148,9 @@ class FlatDict(dict):
         text = first + "\n" + text
         return text
 
+    def __hash__(self):
+        return hash(frozenset(self.items()))
+
     def __getstate__(self, *args, **kwargs):
         return self.__dict__
 
