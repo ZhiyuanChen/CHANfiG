@@ -211,7 +211,7 @@ class NestedDict(DefaultDict):
         func(self)
         return self
 
-    def get(self, name: str, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = Null) -> Any:
         r"""
         Get value from `NestedDict`.
 
@@ -276,7 +276,7 @@ class NestedDict(DefaultDict):
 
     def set(  # pylint: disable=W0221
         self,
-        name: str,
+        name: Any,
         value: Any,
         convert_mapping: Optional[bool] = None,
     ) -> None:
@@ -337,12 +337,11 @@ class NestedDict(DefaultDict):
             convert_mapping = self.convert_mapping
         delimiter = self.getattr("delimiter", ".")
         default_mapping = self.getattr("default_mapping", NestedDict)
-        default = default_mapping() if convert_mapping else Null
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
                 if name not in self:
-                    self.__missing__(name, default)
+                    self.__missing__(name, default_mapping())
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
@@ -358,7 +357,7 @@ class NestedDict(DefaultDict):
                 f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
             )
 
-    def delete(self, name: str) -> None:
+    def delete(self, name: Any) -> None:
         r"""
         Delete value from `NestedDict`.
 
@@ -406,7 +405,7 @@ class NestedDict(DefaultDict):
             raise KeyError(name) from None
         super().delete(name)
 
-    def pop(self, name: str, default: Any = Null) -> Any:
+    def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
         Pop value from `NestedDict`.
 

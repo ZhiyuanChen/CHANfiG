@@ -265,7 +265,7 @@ class Variable:
             return obj.value
         return obj
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> Any:
         return getattr(self.value, attr)
 
     def __lt__(self, other) -> bool:

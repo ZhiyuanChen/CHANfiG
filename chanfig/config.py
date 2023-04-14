@@ -422,7 +422,7 @@ class Config(NestedDict):
             if was_frozen:
                 self.freeze()
 
-    def get(self, name: str, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = Null) -> Any:
         r"""
         Get value from `Config`.
 
@@ -484,7 +484,7 @@ class Config(NestedDict):
     @frozen_check
     def set(
         self,
-        name: str,
+        name: Any,
         value: Any,
         convert_mapping: Optional[bool] = None,
     ) -> None:
@@ -526,7 +526,7 @@ class Config(NestedDict):
         return super().set(name, value, convert_mapping)
 
     @frozen_check
-    def delete(self, name: str) -> None:
+    def delete(self, name: Any) -> None:
         r"""
         Delete value from `Config`.
 
@@ -565,7 +565,7 @@ class Config(NestedDict):
         super().delete(name)
 
     @frozen_check
-    def pop(self, name: str, default: Any = Null) -> Any:
+    def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
         Pop value from `Config`.
 
