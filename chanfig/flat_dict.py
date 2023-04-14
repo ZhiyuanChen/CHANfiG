@@ -137,12 +137,12 @@ class FlatDict(dict):
         for key, value in kwargs.items():
             self.set(key, value)
 
-    def __getattribute__(self, name) -> Any:
+    def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
             return self[name]
         return super().__getattribute__(name)
 
-    def get(self, name: str, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = Null) -> Any:
         r"""
         Get value from `FlatDict`.
 
@@ -183,15 +183,15 @@ class FlatDict(dict):
         """
 
         if name in self:
-            return super().__getitem__(name)
+            return dict.__getitem__(self, name)
         if default is not Null:
             return default
         return self.__missing__(name)
 
-    def __getitem__(self, name: str) -> Any:
+    def __getitem__(self, name: Any) -> Any:
         return self.get(name)
 
-    def __getattr__(self, name) -> Any:
+    def __getattr__(self, name: Any) -> Any:
         try:
             return self.get(name)
         except KeyError:
@@ -239,13 +239,13 @@ class FlatDict(dict):
     def __setitem__(self, name: Any, value: Any) -> None:
         self.set(name, value)
 
-    def __setattr__(self, name, value) -> None:
+    def __setattr__(self, name: Any, value: Any) -> None:
         try:
             self.set(name, value)
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
-    def delete(self, name: str) -> None:
+    def delete(self, name: Any) -> None:
         r"""
         Delete value from `FlatDict`.
 
@@ -279,12 +279,12 @@ class FlatDict(dict):
         ```
         """
 
-        super().__delitem__(name)
+        dict.__delitem__(self, name)
 
-    def __delitem__(self, name: str) -> None:
+    def __delitem__(self, name: Any) -> None:
         return self.delete(name)
 
-    def __delattr__(self, name) -> None:
+    def __delattr__(self, name: Any) -> None:
         try:
             self.delete(name)
         except KeyError:
@@ -428,7 +428,7 @@ class FlatDict(dict):
         except AttributeError:
             return False
 
-    def __missing__(self, name: str) -> Any:  # pylint: disable=R1710
+    def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
         raise KeyError(name)
 
     def dict(self, cls: Callable = dict) -> Mapping:

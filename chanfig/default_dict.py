@@ -62,7 +62,7 @@ class DefaultDict(FlatDict):
                     f"`default_factory={default_factory}` must be Callable, but got {type(default_factory)}."
                 )
 
-    def __missing__(self, name: str, default=Null) -> Any:  # pylint: disable=R1710
+    def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
             if not self.hasattr("default_factory"):
                 raise KeyError(name) from None
