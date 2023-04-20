@@ -49,6 +49,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         args: Optional[Sequence[str]] = None,
         config: Optional[Config] = None,
         default_config: Optional[str] = None,
+        no_default_config_action: str = "raise",
     ) -> Config:
         r"""
         Parse the arguments for `Config`.
@@ -69,12 +70,15 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 Defaults to sys.argv[1:].
             config: The base `Config`.
             default_config: Path to the base config file.
+            no_default_config_action: What to do when `default_config` is specified but not found in args.
 
         Returns:
             config: The parsed `Config`.
 
         Raises:
-            ValueError: If `default_config` is specified but not found in args.
+            ValueError: If `default_config` is specified but not found in args,
+                and `no_default_config_action` is neither `warn` nor `igonre`.
+            ValueError: If `no_default_config_action` is not in `raise`, `warn` and `igonre`.
 
         Examples:
         ```python
@@ -92,14 +96,31 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
         {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-        # ValueError will be raised when `default_config` name is specified but not presented in command line arguments.
+        # ValueError will be raised when `default_config` is specified but not presented in command line arguments.
         >>> p = ConfigParser()
         >>> p.parse(['--a', '2'], default_config='config').dict()
         Traceback (most recent call last):
         ValueError: default_config is set to config, but not found in args.
 
+        # ValueError will be suppressed when `default_config` is specified bug not presented in command line arguments,
+        # and `no_default_config_action` is set to `ignore` or `warn`.
+        >>> p = ConfigParser()
+        >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='ignore').dict()
+        {'a': 2}
+
+        # ValueError will be raised when `no_default_config_action` is not in `raise`, `ignore`, and `warn`.
+        >>> p = ConfigParser()
+        >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='suppress').dict()
+        Traceback (most recent call last):
+        ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got suppress
+
         ```
         """
+
+        if no_default_config_action not in ("warn", "ignore", "raise"):
+            raise ValueError(
+                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
+            )
 
         if args is None:
             args = sys.argv[1:]
@@ -130,6 +151,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
                 # create a temp config to avoid issues when users inherit from Config
                 config = config.update(Config.load(path))  # type: ignore
+            elif no_default_config_action == "ignore":
+                pass
+            elif no_default_config_action == "warn":
+                warn(f"default_config is set to {default_config}, but not found in args.")
             else:
                 raise ValueError(f"default_config is set to {default_config}, but not found in args.")
 
@@ -266,6 +291,7 @@ class Config(NestedDict):
         self,
         args: Optional[Iterable[str]] = None,
         default_config: Optional[str] = None,
+        no_default_config_action: str = "raise",
     ) -> Config:
         r"""
 
@@ -286,7 +312,7 @@ class Config(NestedDict):
         ```
         """
 
-        self.getattr("parser", ConfigParser()).parse(args, self, default_config)
+        self.getattr("parser", ConfigParser()).parse(args, self, default_config, no_default_config_action)
         self.post()
         return self
 
