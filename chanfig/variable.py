@@ -405,3 +405,6 @@ class Variable:
 
     def __repr__(self):
         return repr(self.value)
+
+    def __str__(self):
+        return self.value if isinstance(self, str) else str(self.value)
