@@ -20,7 +20,7 @@ import sys
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional, Sequence
+from typing import Any, Callable, Iterable, List, Optional, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
@@ -198,12 +198,20 @@ class Config(NestedDict):
         which can be toggled with `freeze`(`lock`), `defrost`(`unlock`), and `unlocked`.
     3. `Config` has a `ConfigParser` built-in, and supports `add_argument` and `parse`.
 
-    Config also supports a `post` method, which will be called after `Config` is parsed.
-
+    Config also supports `post` (staticmethod) for the lazy-initialization of attributes.
     This is useful when you want to perform some post-processing on the config.
     For example, some values may be a combination of other values, and you may define them in `post`.
 
-    You could also manually call `post` if you you don't need to parse command-line arguments.
+    In addition, CHANfiG also exports a `register` decorator to register a function as a post function.
+    Functions decorated with `register` are stored in `config.getattr("posts")`.
+
+    By default, `boot` will be called to apply all post functions to all sub-configs after `Config` is parsed.
+    You can disable this behavior by setting `apply_posts` to `False` when calling `parse`.
+
+    Note that `boot` calls the registered post functions in the order of their registration,
+    and the `post` function will be called at last.
+
+    You can manually call `boot` if you you don't need to parse command-line arguments.
 
     Notes:
         Since `Config` has `default_factory` set to `Config`,
@@ -242,8 +250,9 @@ class Config(NestedDict):
     ```
     """
 
-    parser: ConfigParser
     frozen: bool = False
+    parser: ConfigParser
+    posts: List[Callable]
 
     def __init__(self, *args, **kwargs):
         if not self.hasattr("default_mapping"):
@@ -252,8 +261,47 @@ class Config(NestedDict):
             kwargs["default_factory"] = Config
         super().__init__(*args, **kwargs)
         self.setattr("parser", ConfigParser())
+        self.setattr("posts", [])
 
-    def post(self) -> Config:
+    def register(self, func: Callable):
+        r"""
+        Register a function to be called in `boot`.
+
+        Args:
+            func (Callable): Function to be called in `boot`.
+
+        Returns:
+            self:
+
+        Examples:
+        ```python
+        >>> c = Config({"data": "path", "nested.data": "dir"})
+        >>> @c.register
+        ... def func(config):
+        ...     if "data" in config and isinstance(config.data, str):
+        ...         config.data = Config(feature=config.data, label=config.data)
+        >>> c.boot()
+        Config(<class 'chanfig.config.Config'>,
+          ('data'): Config(<class 'chanfig.config.Config'>,
+            ('feature'): 'path'
+            ('label'): 'path'
+          )
+          ('nested'): Config(<class 'chanfig.config.Config'>,
+            ('data'): Config(<class 'chanfig.config.Config'>,
+              ('feature'): 'dir'
+              ('label'): 'dir'
+            )
+          )
+        )
+
+        ```
+        """
+
+        self.getattr("posts").append(func)
+        return self
+
+    @staticmethod
+    def post(config) -> Config:
         r"""
         Post process of `Config`.
 
@@ -269,35 +317,72 @@ class Config(NestedDict):
         Examples:
         ```python
         >>> class PostConfig(Config):
-        ...     def post(self):
-        ...         if isinstance(self.data, str):
-        ...             self.data = Config(feature=self.data, label=self.data)
-        ...         return self
+        ...     def __init__(self, *args, **kwargs):
+        ...         super().__init__(*args, **kwargs)
+        ...         self.nested.data = "dir"
+        ...     @staticmethod
+        ...     def post(config):
+        ...         if "data" in config and isinstance(config.data, str):
+        ...             config.data = Config(feature=config.data, label=config.data)
+        ...         return config
         >>> c = PostConfig(data="path")
-        >>> c.post()
+        >>> c.boot()
         PostConfig(<class 'chanfig.config.Config'>,
           ('data'): Config(<class 'chanfig.config.Config'>,
             ('feature'): 'path'
             ('label'): 'path'
+          )
+          ('nested'): Config(<class 'chanfig.config.Config'>,
+            ('data'): Config(<class 'chanfig.config.Config'>,
+              ('feature'): 'dir'
+              ('label'): 'dir'
+            )
           )
         )
 
         ```
         """
 
+        return config
+
+    def boot(self, recursive: bool = True) -> Config:
+        r"""
+        Run all `post` methods and functions.
+
+        Returns:
+            self:
+
+        """
+
+        @wraps(self.boot)
+        def boot(config: Config) -> None:
+            for post in config.getattr("posts"):
+                config.apply(post)
+            config.apply(config.post)
+
+        if recursive:
+            self.apply(boot)
+        else:
+            boot(self)
         return self
 
-    def parse(
+    def parse(  # pylint: disable=R0913
         self,
         args: Optional[Iterable[str]] = None,
         default_config: Optional[str] = None,
         no_default_config_action: str = "raise",
+        apply_posts: bool = True,
+        apply_posts_recursive: bool = True,
     ) -> Config:
         r"""
 
         Parse command line arguments with `ConfigParser`.
 
-        This function internally calls `Config.post`.
+        Args:
+            apply_posts (bool): If True, `boot` will be called after parsing.
+                Default: True.
+            apply_posts_recursive (bool): If True, `boot` will be called recursively.
+                Default: True.
 
         See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
 
@@ -313,7 +398,8 @@ class Config(NestedDict):
         """
 
         self.getattr("parser", ConfigParser()).parse(args, self, default_config, no_default_config_action)
-        self.post()
+        if apply_posts:
+            self.boot(apply_posts_recursive)
         return self
 
     parse_config = parse
