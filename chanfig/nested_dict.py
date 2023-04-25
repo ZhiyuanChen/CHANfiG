@@ -268,8 +268,9 @@ class NestedDict(DefaultDict):
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
+        # if value is a normal dict
         if not isinstance(self, NestedDict):
-            if default is not Null and name not in self:
+            if name not in self and default is not Null:
                 return default
             return self[name]
         return super().get(name, default)

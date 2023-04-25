@@ -1,15 +1,22 @@
 {
   "name": "Test",
   "seed": 1014,
+  "datasets": {
+    "a": {
+      "name": "cifar10",
+      "num_classes": 12
+    },
+    "b": {
+      "name": "cifar10",
+      "num_classes": 12
+    }
+  },
   "network": {
     "name": "ResNet18",
     "num_classes": 12,
     "nested": {
       "value": 1
     }
-  },
-  "dataset": {
-    "num_classes": 12
   },
   "_pytestfixturefunction": {},
   "__bases__": {},
