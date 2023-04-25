@@ -247,12 +247,12 @@ class Config(NestedDict):
     parser: ConfigParser
     frozen: bool = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         if not self.hasattr("default_mapping"):
             self.setattr("default_mapping", Config)
-        if "default_factory" not in kwargs:
-            kwargs["default_factory"] = Config
-        super().__init__(*args, **kwargs)
+        if default_factory is None:
+            default_factory = Config
+        super().__init__(*args, default_factory=default_factory, **kwargs)
         self.setattr("parser", ConfigParser())
 
     def post(self) -> Config:
