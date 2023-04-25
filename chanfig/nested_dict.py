@@ -17,10 +17,8 @@
 from __future__ import annotations
 
 from functools import wraps
-from inspect import ismethod
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
-from warnings import warn
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, PathStr
@@ -210,15 +208,7 @@ class NestedDict(DefaultDict):
         for value in self.values():
             if isinstance(value, NestedDict):
                 value.apply(func)
-        if ismethod(func):
-            # func.__self__ = self
-            func()
-            warn(
-                f"{func} is a method, applying a method to {self.__class__.__name__} is experimental"
-                "and is known to broke in nested structure. Please use a function instead."
-            )
-        else:
-            func(self)
+        func(self)
         return self
 
     def get(self, name: Any, default: Any = Null) -> Any:
