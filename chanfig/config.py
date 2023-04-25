@@ -248,10 +248,10 @@ class Config(NestedDict):
     frozen: bool = False
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
-        if not self.hasattr("default_mapping"):
-            self.setattr("default_mapping", Config)
         if default_factory is None:
             default_factory = Config
+        if not self.hasattr("default_mapping"):
+            self.setattr("default_mapping", Config)
         super().__init__(*args, default_factory=default_factory, **kwargs)
         self.setattr("parser", ConfigParser())
 
@@ -558,7 +558,7 @@ class Config(NestedDict):
         ```
         """
 
-        if "default_factory" not in self:  # did not call super().__init__() in sub-class
+        if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
             return super().get(name, default)

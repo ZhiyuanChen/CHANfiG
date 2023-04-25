@@ -1,4 +1,17 @@
+from functools import partial
+
 from chanfig import Config, Variable
+
+
+class DataConfig(Config):
+    __test__ = False
+
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+
+    def post(self):
+        self.name = self.name.lower()
 
 
 class TestConfig(Config):
@@ -9,9 +22,12 @@ class TestConfig(Config):
         num_classes = Variable(10)
         self.name = "CHANfiG"
         self.seed = Variable(1013)
+        data_factory = partial(DataConfig, name="CIFAR10")
+        self.datasets = Config(default_factory=data_factory)
+        self.datasets.a.num_classes = num_classes
+        self.datasets.b.num_classes = num_classes
         self.network.name = "ResNet18"
         self.network.num_classes = num_classes
-        self.dataset.num_classes = num_classes
 
     def post(self):
         self.name = self.name.lower()
@@ -25,9 +41,10 @@ class Test:
         assert self.config.name == "CHANfiG"
 
     def test_post(self):
-        self.config.post()
+        self.config.boot()
         assert self.config.name == "chanfig"
         assert self.config.id == "chanfig_1013"
+        assert self.config.datasets.a.name == "cifar10"
 
     def test_parse(self):
         self.config.parse(["--name", "Test", "--seed", "1014"])
@@ -41,17 +58,17 @@ class Test:
     def test_variable(self):
         assert self.config.network.num_classes == 10
         self.config.network.num_classes += 1
-        assert self.config.dataset.num_classes == 11
+        assert self.config.datasets.a.num_classes == 11
 
     def test_fstring(self):
         assert f"seed{self.config.seed}" == "seed1014"
 
     def test_load(self):
         self.config.name = "Test"
-        self.config.dataset.num_classes = 12
+        self.config.datasets.a.num_classes = 12
         self.config.dump("tests/test_config.json")
         self.config = self.config.load("tests/test_config.json")
         assert self.config.name == "Test"
         assert self.config.network.name == "ResNet18"
         assert self.config.network.num_classes == 12
-        assert self.config.dataset.num_classes == 12
+        assert self.config.datasets.a.num_classes == 12
