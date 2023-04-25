@@ -69,7 +69,7 @@ class Registry(NestedDict):
         super().__init__()
         self.setattr("override", override)
 
-    def register(self, component: Optional[Callable] = None, name: Optional[str] = None) -> Callable:
+    def register(self, component: Any = None, name: Optional[Any] = None) -> Callable:
         r"""
         Register a new component.
 
@@ -79,6 +79,7 @@ class Registry(NestedDict):
 
         Returns:
             component: The registered component.
+                Registered component are expected to be `Callable`.
 
         Raises:
             ValueError: If the component with the same name already registered and `Registry.override=False`.
@@ -109,20 +110,25 @@ class Registry(NestedDict):
         # Registry.register()
         if name is not None:
             self.set(name, component)
-
-        # @Registry.register()
-        @wraps(self.register)
-        def register(component, name=None):
-            if name is None:
-                name = component.__name__
-            self.set(name, component)
+            return component  # type: ignore
+        # @Registry.register
+        elif callable(component) and name is None:
+            self.set(component.__name__, component)
             return component
 
-        # @Registry.register
-        if callable(component) and name is None:
-            return register(component)
+        # @Registry.register()
+        def decorator(name: Optional[Any] = None):
+            @wraps(self.register)
+            def wrapper(component):
+                if name is None:
+                    self.set(component.__name__, component)
+                else:
+                    self.set(name, component)
+                return component
 
-        return lambda x: register(x, component)
+            return wrapper
+
+        return decorator(component)
 
     def lookup(self, name: str) -> Any:
         r"""
