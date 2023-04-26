@@ -229,11 +229,6 @@ class NestedDict(DefaultDict):
         Raises:
             KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
 
-        **Alias**:
-
-        + `__getitem__`
-        + `__getattr__`
-
         Examples:
         ```python
         >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
@@ -289,11 +284,6 @@ class NestedDict(DefaultDict):
             value:
             convert_mapping: Whether convert mapping to NestedDict.
                 Defaults to self.convert_mapping.
-
-        **Alias**:
-
-        + `__setitem__`
-        + `__setattr__`
 
         Examples:
         ```python
@@ -364,11 +354,6 @@ class NestedDict(DefaultDict):
 
         Args:
             name:
-
-        **Alias**:
-
-        + `__delitem__`
-        + `__delattr__`
 
         Examples:
         ```python
@@ -488,10 +473,6 @@ class NestedDict(DefaultDict):
             other (Mapping | Iterable | PathStr):
             recursive (bool):
 
-        **Alias**:
-
-        + `diff`
-
         Examples:
         ```python
         >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
@@ -546,10 +527,6 @@ class NestedDict(DefaultDict):
         Args:
             other (Mapping | Iterable | PathStr):
             recursive (bool):
-
-        **Alias**:
-
-        + `inter`
 
         Examples:
         ```python
