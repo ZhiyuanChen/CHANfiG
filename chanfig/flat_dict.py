@@ -157,11 +157,6 @@ class FlatDict(dict):
         Raises:
             KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
 
-        **Alias**:
-
-        + `__getitem__`
-        + `__getattr__`
-
         Examples:
         ```python
         >>> d = FlatDict(d=1013)
@@ -205,11 +200,6 @@ class FlatDict(dict):
             name:
             value:
 
-        **Alias**:
-
-        + `__setitem__`
-        + `__setattr__`
-
         Examples:
         ```python
         >>> d = FlatDict()
@@ -251,11 +241,6 @@ class FlatDict(dict):
 
         Args:
             name:
-
-        **Alias**:
-
-        + `__delitem__`
-        + `__delattr__`
 
         Examples:
         ```python
@@ -462,12 +447,6 @@ class FlatDict(dict):
         Returns:
             self:
 
-        **Alias**:
-
-        + `merge`
-        + `merge_from_file`
-        + `union`
-
         Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
@@ -496,9 +475,77 @@ class FlatDict(dict):
                 self[key] = value
         return self
 
-    merge = update
-    merge_from_file = update
-    union = update
+    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of `FlatDict.update`.
+
+        See Also:
+            [`update`][chanfig.FlatDict.update]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> d.update(n).dict()
+        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> l = [('c', 3), ('d', 4)]
+        >>> d.update(l).dict()
+        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+        >>> d.update("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+
+        ```
+        """
+
+        return self.update(other)
+
+    def merge_from_file(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of `FlatDict.update`.
+
+        See Also:
+            [`update`][chanfig.FlatDict.update]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> d.merge_from_file(n).dict()
+        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> l = [('c', 3), ('d', 4)]
+        >>> d.merge_from_file(l).dict()
+        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+        >>> d.merge_from_file("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+
+        ```
+        """
+
+        return self.update(other)
+
+    def union(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of `FlatDict.update`.
+
+        See Also:
+            [`update`][chanfig.FlatDict.update]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> d.union(n).dict()
+        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> l = [('c', 3), ('d', 4)]
+        >>> d.union(l).dict()
+        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+        >>> d.union("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
+
+        ```
+        """
+
+        return self.update(other)
 
     def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
@@ -509,10 +556,6 @@ class FlatDict(dict):
 
         Returns:
             (FlatDict):
-
-        **Alias**:
-
-        + `diff`
 
         Examples:
         ```python
@@ -543,7 +586,32 @@ class FlatDict(dict):
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
-    diff = difference
+    def diff(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of `FlatDict.difference`.
+
+        See Also:
+            [`difference`][chanfig.FlatDict.difference]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> d.diff(n).dict()
+        {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> l = [('c', 3), ('d', 4)]
+        >>> d.diff(l).dict()
+        {'d': 4}
+        >>> d.update(l).diff("example.yaml").dict()
+        {}
+        >>> d.diff(1)
+        Traceback (most recent call last):
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+
+        ```
+        """
+
+        return self.difference(other)
 
     def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
@@ -554,10 +622,6 @@ class FlatDict(dict):
 
         Returns:
             (FlatDict):
-
-        **Alias**:
-
-        + `inter`
 
         Examples:
         ```python
@@ -587,7 +651,32 @@ class FlatDict(dict):
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
 
-    inter = intersection
+    def inter(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of `FlatDict.intersection`.
+
+        See Also:
+            [`intersection`][chanfig.FlatDict.intersection]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=1, b=2, c=3)
+        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+        >>> d.inter(n).dict()
+        {}
+        >>> l = [('c', 3), ('d', 4)]
+        >>> d.inter(l).dict()
+        {'c': 3}
+        >>> d.update(l).inter("example.yaml").dict()
+        {'a': 1, 'b': 2, 'c': 3}
+        >>> d.inter(1)
+        Traceback (most recent call last):
+        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+
+        ```
+        """
+
+        return self.intersection(other)
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
         r"""
@@ -648,10 +737,6 @@ class FlatDict(dict):
         Returns:
             self:
 
-        **Alias**:
-
-        + `cuda`
-
         Examples:
         ```python
         >>> import torch
@@ -664,7 +749,24 @@ class FlatDict(dict):
 
         return self.to(TorchDevice("cuda"))
 
-    cuda = gpu
+    def cuda(self) -> FlatDict:
+        r"""
+        Alias of `gpu`.
+
+        See Also:
+            [`gpu`][chanfig.FlatDict.gpu]: Move all tensors to gpu.
+
+        Examples:
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.cuda().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='cuda:0')}
+
+        ```
+        """
+
+        return self.gpu()
 
     def tpu(self) -> FlatDict:
         r"""
@@ -672,10 +774,6 @@ class FlatDict(dict):
 
         Returns:
             self:
-
-        **Alias**:
-
-        + `xla`
 
         Examples:
         ```python
@@ -689,7 +787,24 @@ class FlatDict(dict):
 
         return self.to(TorchDevice("xla"))
 
-    xla = tpu
+    def xla(self) -> FlatDict:
+        r"""
+        Alias of `tpu`.
+
+        See Also:
+            [`tpu`][chanfig.FlatDict.tpu]: Move all tensors to tpu.
+
+        Examples:
+        ```python
+        >>> import torch
+        >>> d = FlatDict(a=torch.tensor(1))
+        >>> d.xla().dict()  # doctest: +SKIP
+        {'a': tensor(1, device='xla:0')}
+
+        ```
+        """
+
+        return self.tpu()
 
     def copy(self) -> FlatDict:
         r"""
@@ -723,8 +838,6 @@ class FlatDict(dict):
         Returns:
             (FlatDict):
 
-        **Alias**:
-
         + `clone`
         + `__deepcopy__`
 
@@ -756,9 +869,55 @@ class FlatDict(dict):
                 ret[k] = deepcopy(v)
         return ret
 
-    __deepcopy__ = deepcopy
+    def __deepcopy__(self, memo: Optional[Mapping] = None) -> FlatDict:
+        r"""
+        Alias of `deepcopy`.
 
-    clone = deepcopy
+        See Also:
+            [`deepcopy`][chanfig.FlatDict.deepcopy]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.deepcopy()
+        >>> c.dict()
+        {'a': []}
+        >>> d.a.append(1)
+        >>> c.dict()
+        {'a': []}
+        >>> c.getattr("name")
+        'Chang'
+
+        ```
+        """
+
+        return self.deepcopy(memo=memo)
+
+    def clone(self, memo: Optional[Mapping] = None) -> FlatDict:
+        r"""
+        Create a deep copy of `FlatDict`.
+
+        See Also:
+            [`deepcopy`][chanfig.FlatDict.deepcopy]
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=[])
+        >>> d.setattr("name", "Chang")
+        >>> c = d.deepcopy()
+        >>> c.dict()
+        {'a': []}
+        >>> d.a.append(1)
+        >>> c.dict()
+        {'a': []}
+        >>> c.getattr("name")
+        'Chang'
+
+        ```
+        """
+
+        return self.deepcopy(memo=memo)
 
     def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""

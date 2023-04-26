@@ -523,11 +523,6 @@ class Config(NestedDict):
         Raises:
             KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
 
-        **Alias**:
-
-        + `__getitem__`
-        + `__getattr__`
-
         Examples:
         ```python
         >>> d = Config(**{"i.d": 1013})
@@ -581,11 +576,6 @@ class Config(NestedDict):
         Raises:
             ValueError: If `Config` is frozen.
 
-        **Alias**:
-
-        + `__setitem__`
-        + `__setattr__`
-
         Examples:
         ```python
         >>> c = Config()
@@ -615,11 +605,6 @@ class Config(NestedDict):
 
         Args:
             name:
-
-        **Alias**:
-
-        + `__delitem__`
-        + `__delattr__`
 
         Examples:
         ```python
