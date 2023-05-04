@@ -53,6 +53,11 @@ class StoreAction(_StoreAction):  # pylint: disable=R0903
             help=help,
             metavar=metavar,
         )
+        if self.default is not Null:
+            warn(
+                f"Default value for argument {self.dest} is set to {self.default}, "
+                "Default value defined in argument will be overwritten by default value defined in Config",
+            )
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
