@@ -104,6 +104,8 @@ No matter if your old config is json or yaml, you could directly read from them.
 
 And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
+Moreover, if you find name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
+
 ```python
 from chanfig import Config, Variable
 
@@ -136,6 +138,8 @@ class TestConfig(Config):
         self.model.decoder.dropout = dropout
         self.activation = "GELU"
         self.optim.lr = 1e-3
+        self.add_argument("--batch_size", dest="data.batch_size", type=int)
+        self.add_argument("--lr", dest="optim.lr", type=float)
 
     def post(self):
         self.id = f"{self.name}_{self.seed}"
@@ -162,7 +166,7 @@ if __name__ == '__main__':
 All you need to do is just run a line:
 
 ```shell
-python main.py --model.encoder.num_layers 8 --model.dropout=0.2
+python main.py --model.encoder.num_layers 8 --model.dropout=0.2 --lr 5e-3
 ```
 
 You could also load a default configure file and make changes based on it:
@@ -170,7 +174,7 @@ You could also load a default configure file and make changes based on it:
 Note, you must specify `config.parse(default_config='config')` to correctly load the default config.
 
 ```shell
-python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0.2
+python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0.2 --lr 5e-3
 ```
 
 If you have made it dump current configurations, this should be in the written file:
@@ -190,7 +194,7 @@ model:
     num_layers: 6
 name: CHANfiG
 optim:
-  lr: 0.001
+  lr: 0.005
 seed: 1013
 ```
 
@@ -214,7 +218,7 @@ seed: 1013
   },
   "activation": "GELU",
   "optim": {
-    "lr": 0.001
+    "lr": 0.005
   },
   "id": "CHANfiG_1013"
 }

@@ -99,6 +99,8 @@ CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 ya
 
 如果你此前使用 yacs，只需简单将`CfgNode`替换为`Config`便可以享受所有 CHANfiG 所提供的便利。
 
+更进一步的，如果你发现`Config`中的名字对于命令行来说过长，你可以简单的调用`self.add_argument`并设置恰当的`dest`来在命令行中使用更短的名字，正如`argparse`所做的那样。
+
 ```python
 from chanfig import Config, Variable
 
@@ -131,6 +133,8 @@ class TestConfig(Config):
         self.model.decoder.dropout = dropout
         self.activation = "GELU"
         self.optim.lr = 1e-3
+        self.add_argument("--batch_size", dest="data.batch_size", type=int)
+        self.add_argument("--lr", dest="optim.lr", type=float)
 
     def post(self):
         self.id = f"{self.name}_{self.seed}"
@@ -157,7 +161,7 @@ if __name__ == '__main__':
 所有你需要做的仅仅是运行一行：
 
 ```shell
-python main.py --model.encoder.num_layers 8 --model.dropout=0.2
+python main.py --model.encoder.num_layers 8 --model.dropout=0.2 --lr 5e-3
 ```
 
 当然，你也可以读取一个默认配置文件然后在他基础上修改：
@@ -165,7 +169,7 @@ python main.py --model.encoder.num_layers 8 --model.dropout=0.2
 注意，你必须指定`config.parse(default_config='config')`来正确读取默认配置文件。
 
 ```shell
-python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0.2
+python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0.2 --lr 5e-3
 ```
 
 如果你保存了配置文件，那他应该看起来像这样：
@@ -185,7 +189,7 @@ model:
     num_layers: 6
 name: CHANfiG
 optim:
-  lr: 0.001
+  lr: 0.005
 seed: 1013
 ```
 
@@ -209,7 +213,7 @@ seed: 1013
   },
   "activation": "GELU",
   "optim": {
-    "lr": 0.001
+    "lr": 0.005
   },
   "id": "CHANfiG_1013"
 }
