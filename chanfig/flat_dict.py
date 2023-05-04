@@ -581,7 +581,6 @@ class FlatDict(dict):
             other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-
         return self.empty_like(
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
@@ -831,32 +830,7 @@ class FlatDict(dict):
 
         return copy(self)
 
-    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:
-        r"""
-        Create a deep copy of `FlatDict`.
-
-        Returns:
-            (FlatDict):
-
-        + `clone`
-        + `__deepcopy__`
-
-        Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.deepcopy()
-        >>> c.dict()
-        {'a': []}
-        >>> d.a.append(1)
-        >>> c.dict()
-        {'a': []}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
-        """
-
+    def __deepcopy__(self, memo: Optional[Mapping] = None) -> FlatDict:
         # pylint: disable=C0103
 
         if memo is not None and id(self) in memo:
@@ -869,12 +843,12 @@ class FlatDict(dict):
                 ret[k] = deepcopy(v)
         return ret
 
-    def __deepcopy__(self, memo: Optional[Mapping] = None) -> FlatDict:
+    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:
         r"""
-        Alias of `deepcopy`.
+        Create a deep copy of `FlatDict`.
 
-        See Also:
-            [`deepcopy`][chanfig.FlatDict.deepcopy]
+        Returns:
+            (FlatDict):
 
         Examples:
         ```python
@@ -892,11 +866,11 @@ class FlatDict(dict):
         ```
         """
 
-        return self.deepcopy(memo=memo)
+        return deepcopy(self)
 
     def clone(self, memo: Optional[Mapping] = None) -> FlatDict:
         r"""
-        Create a deep copy of `FlatDict`.
+        Alias of `deepcopy`.
 
         See Also:
             [`deepcopy`][chanfig.FlatDict.deepcopy]
@@ -905,7 +879,7 @@ class FlatDict(dict):
         ```python
         >>> d = FlatDict(a=[])
         >>> d.setattr("name", "Chang")
-        >>> c = d.deepcopy()
+        >>> c = d.clone()
         >>> c.dict()
         {'a': []}
         >>> d.a.append(1)
@@ -1236,8 +1210,7 @@ class FlatDict(dict):
         ```
         """
 
-        empty = cls()
-        empty.clear()
+        empty = cls.__new__(cls)
         empty._init(*args, **kwargs)  # pylint: disable=W0212
         return empty
 
