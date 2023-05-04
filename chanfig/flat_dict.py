@@ -822,7 +822,7 @@ class FlatDict(dict):
                 ret[k] = deepcopy(v)
         return ret
 
-    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:
+    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:  # pylint: disable=W0613
         r"""
         Create a deep copy of `FlatDict`.
 

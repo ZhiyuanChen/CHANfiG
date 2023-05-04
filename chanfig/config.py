@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace, _StoreAction
 from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Iterable, Optional, Sequence
@@ -25,6 +25,34 @@ from warnings import warn
 
 from .nested_dict import NestedDict
 from .utils import Null
+
+
+class StoreAction(_StoreAction):  # pylint: disable=R0903
+    def __init__(
+        self,  # pylint: disable=R0913
+        option_strings,
+        dest,
+        nargs=None,
+        const=None,
+        default=Null,
+        type=None,  # pylint: disable=W0622
+        choices=None,
+        required=False,
+        help=None,  # pylint: disable=W0622
+        metavar=None,
+    ):
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            nargs=nargs,
+            const=const,
+            default=default,
+            type=type,
+            choices=choices,
+            required=required,
+            help=help,
+            metavar=metavar,
+        )
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
@@ -43,6 +71,11 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     This is because it is still possible to construct `CHANfiG.Config` with `ArgumentParser.parse_args`,
     which has strict checking on command line arguments.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._registries["action"][None] = StoreAction
+        self._registries["action"]["store"] = StoreAction
 
     def parse(  # pylint: disable=R0912
         self,
@@ -142,7 +175,15 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                     self.add_argument(key_value[0])
         if config is None:
             config = Config()
-        parsed = vars(self.parse_args(args))
+        namespace = config.clone()
+        if "help" not in namespace:
+            namespace.help = Null
+        parsed: dict = self.parse_args(args)  # type: ignore
+        if isinstance(parsed, Namespace):
+            parsed = vars(parsed)
+        if not isinstance(parsed, NestedDict):
+            parsed = NestedDict(parsed)
+        parsed = parsed.dropnull()
 
         # parse the config file
         if default_config is not None:
@@ -379,12 +420,15 @@ class Config(NestedDict):
         r"""
         Add an argument to `ConfigParser`.
 
+        Note that value defined in `Config` will override the default value defined in `add_argument`.
+
         Examples:
         ```python
-        >>> c = Config(a=0)
+        >>> c = Config(a=0, c=1)
         >>> c.add_argument("--a", type=int, default=1)
-        >>> c.parse([]).dict()
-        {'a': 1}
+        >>> c.add_argument("--b", type=int, default=2)
+        >>> c.parse(['--c', '4']).dict()
+        {'a': 1, 'c': 4, 'b': 2}
 
         ```
         """
