@@ -208,8 +208,7 @@ class NestedDict(DefaultDict):
         for value in self.values():
             if isinstance(value, NestedDict):
                 value.apply(func)
-        func(self)
-        return self
+        return func(self) or self
 
     def get(self, name: Any, default: Any = Null) -> Any:
         r"""
@@ -588,6 +587,26 @@ class NestedDict(DefaultDict):
         """
 
         return self.apply(lambda _: super().to(cls))
+
+    def dropnull(self) -> NestedDict:
+        r"""
+        Drop key-value pairs with `Null` value.
+
+        Returns:
+            (NestedDict):
+
+        Examples:
+        ```python
+        >>> d = NestedDict({"a.b": Null, "b.c.d": Null, "b.c.e.f": Null, "c.d.e.f": Null, "h.j": 1})
+        >>> d.dict()
+        {'a': {'b': Null}, 'b': {'c': {'d': Null, 'e': {'f': Null}}}, 'c': {'d': {'e': {'f': Null}}}, 'h': {'j': 1}}
+        >>> d.dropnull().dict()
+        {'h': {'j': 1}}
+
+        ```
+        """
+
+        return NestedDict({k: v for k, v in self.all_items() if v is not Null})
 
     def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
