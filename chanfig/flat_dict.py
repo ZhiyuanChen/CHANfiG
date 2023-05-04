@@ -477,21 +477,18 @@ class FlatDict(dict):
 
     def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of `FlatDict.update`.
-
-        See Also:
-            [`update`][chanfig.FlatDict.update]
+        Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
         ```python
         >>> d = FlatDict(a=1, b=2, c=3)
         >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.update(n).dict()
+        >>> d.merge(n).dict()
         {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         >>> l = [('c', 3), ('d', 4)]
-        >>> d.update(l).dict()
+        >>> d.merge(l).dict()
         {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-        >>> d.update("example.yaml").dict()
+        >>> d.merge("example.yaml").dict()
         {'a': 1, 'b': 2, 'c': 3, 'd': 4}
 
         ```
@@ -501,10 +498,7 @@ class FlatDict(dict):
 
     def merge_from_file(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of `FlatDict.update`.
-
-        See Also:
-            [`update`][chanfig.FlatDict.update]
+        Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
         ```python
@@ -525,10 +519,7 @@ class FlatDict(dict):
 
     def union(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of `FlatDict.update`.
-
-        See Also:
-            [`update`][chanfig.FlatDict.update]
+        Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
         ```python
@@ -587,10 +578,7 @@ class FlatDict(dict):
 
     def diff(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of `FlatDict.difference`.
-
-        See Also:
-            [`difference`][chanfig.FlatDict.difference]
+        Alias of [`difference`][chanfig.FlatDict.difference].
 
         Examples:
         ```python
@@ -652,10 +640,7 @@ class FlatDict(dict):
 
     def inter(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of `FlatDict.intersection`.
-
-        See Also:
-            [`intersection`][chanfig.FlatDict.intersection]
+        Alias of [`intersection`][chanfig.FlatDict.intersection].
 
         Examples:
         ```python
@@ -750,10 +735,7 @@ class FlatDict(dict):
 
     def cuda(self) -> FlatDict:
         r"""
-        Alias of `gpu`.
-
-        See Also:
-            [`gpu`][chanfig.FlatDict.gpu]: Move all tensors to gpu.
+        Alias of [`gpu`][chanfig.FlatDict.gpu].
 
         Examples:
         ```python
@@ -788,10 +770,7 @@ class FlatDict(dict):
 
     def xla(self) -> FlatDict:
         r"""
-        Alias of `tpu`.
-
-        See Also:
-            [`tpu`][chanfig.FlatDict.tpu]: Move all tensors to tpu.
+        Alias of [`tpu`][chanfig.FlatDict.tpu].
 
         Examples:
         ```python
@@ -870,10 +849,7 @@ class FlatDict(dict):
 
     def clone(self, memo: Optional[Mapping] = None) -> FlatDict:
         r"""
-        Alias of `deepcopy`.
-
-        See Also:
-            [`deepcopy`][chanfig.FlatDict.deepcopy]
+        Alias of [`deepcopy`][chanfig.FlatDict.deepcopy].
 
         Examples:
         ```python
@@ -1239,6 +1215,43 @@ class FlatDict(dict):
         empty = self.empty(*args, **kwargs)
         empty.__dict__.update(self.__dict__)
         return empty
+
+    def dropnull(self) -> FlatDict:
+        r"""
+        Drop key-value pairs with `Null` value.
+
+        Returns:
+            (FlatDict):
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=Null, b=Null, c=3)
+        >>> d.dict()
+        {'a': Null, 'b': Null, 'c': 3}
+        >>> d.dropnull().dict()
+        {'c': 3}
+
+        ```
+        """
+
+        return self.empty_like({k: v for k, v in self.items() if v is not Null})
+
+    def dropna(self) -> FlatDict:
+        r"""
+        Alias of [`dropnull`][chanfig.FlatDict.dropnull].
+
+        Examples:
+        ```python
+        >>> d = FlatDict(a=Null, b=Null, c=3)
+        >>> d.dict()
+        {'a': Null, 'b': Null, 'c': 3}
+        >>> d.dropna().dict()
+        {'c': 3}
+
+        ```
+        """
+
+        return self.dropnull()
 
     @staticmethod
     def extra_repr() -> str:  # pylint: disable=C0116
