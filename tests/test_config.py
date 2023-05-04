@@ -1,3 +1,4 @@
+from copy import copy, deepcopy
 from functools import partial
 
 from chanfig import Config, Variable
@@ -72,3 +73,7 @@ class Test:
         assert self.config.network.name == "ResNet18"
         assert self.config.network.num_classes == 12
         assert self.config.datasets.a.num_classes == 12
+
+    def test_copy(self):
+        assert self.config.copy() == copy(self.config)
+        assert self.config.deepcopy() == deepcopy(self.config)
