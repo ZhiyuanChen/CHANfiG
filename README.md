@@ -138,8 +138,8 @@ class TestConfig(Config):
         self.model.decoder.dropout = dropout
         self.activation = "GELU"
         self.optim.lr = 1e-3
-        self.add_argument("--batch_size", dest="data.batch_size", type=int)
-        self.add_argument("--lr", dest="optim.lr", type=float)
+        self.add_argument("--batch_size", dest="data.batch_size")
+        self.add_argument("--lr", dest="optim.lr")
 
     def post(self):
         self.id = f"{self.name}_{self.seed}"
