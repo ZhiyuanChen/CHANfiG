@@ -65,19 +65,19 @@ class StoreAction(_StoreAction):  # pylint: disable=R0903
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     r"""
-    Parser to parse command line arguments for CHANfiG.
+    Parser to parse command-line arguments for CHANfiG.
 
     `ConfigParser` is a subclass of `argparse.ArgumentParser`.
-    It provides a new `parse` method to parse command line arguments to `CHANfiG.Config` object.
+    It provides a new `parse` method to parse command-line arguments to `CHANfiG.Config` object.
 
-    Different to `ArgumentParser.parse_args`, `ConfigParser.parse` will try to parse any command line arguments,
+    Different to `ArgumentParser.parse_args`, `ConfigParser.parse` will try to parse any command-line arguments,
     even if they are not pre-defined by `ArgumentParser.add_argument`.
     This allows to relief the burden of adding tons of arguments for each tuneable parameter.
-    In the meantime, there is no mechanism to notify you if you made a typo in command line arguments.
+    In the meantime, there is no mechanism to notify you if you made a typo in command-line arguments.
 
     Note that `ArgumentParser.parse_args` method is not overridden in `ConfigParser`.
     This is because it is still possible to construct `CHANfiG.Config` with `ArgumentParser.parse_args`,
-    which has strict checking on command line arguments.
+    which has strict checking on command-line arguments.
     """
 
     def __init__(self, *args, **kwargs):
@@ -126,7 +126,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
             {'i': {'d': 1013}, 'f': {'n': 'chang'}}
 
-            # Values in command line arguments overrides values in `default_config` file.
+            # Values in command line overrides values in `default_config` file.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
             {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
@@ -136,13 +136,13 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
             {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-            # ValueError will be raised when `default_config` is specified but not presented in command line arguments.
+            # ValueError will be raised when `default_config` is specified but not presented in command line.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config').dict()
             Traceback (most recent call last):
             ValueError: default_config is set to config, but not found in args.
 
-            # ValueError will be suppressed when `default_config` is specified bug not presented in command line arguments,
+            # ValueError will be suppressed when `default_config` is specified bug not presented in command line,
             # and `no_default_config_action` is set to `ignore` or `warn`.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='ignore').dict()
@@ -204,7 +204,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             else:
                 raise ValueError(f"default_config is set to {default_config}, but not found in args.")
 
-        # parse the command line arguments
+        # parse the command-line arguments
         config = config.update(parsed)  # type: ignore
         return config  # type: ignore
 
@@ -263,7 +263,7 @@ class Config(NestedDict):
         It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
 
     Attributes:
-        parser (ConfigParser): Parser for command line arguments.
+        parser (ConfigParser): Parser for command-line arguments.
         frozen (bool): If `True`, the config is frozen and cannot be altered.
 
     Examples:
@@ -387,7 +387,7 @@ class Config(NestedDict):
     ) -> Config:
         r"""
 
-        Parse command line arguments with `ConfigParser`.
+        Parse command-line arguments with `ConfigParser`.
 
         This function internally calls `Config.post`.
 
