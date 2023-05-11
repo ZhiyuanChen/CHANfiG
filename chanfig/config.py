@@ -444,7 +444,7 @@ class Config(NestedDict):
             True
             >>> c.i.getattr('frozen')
             False
-            >>> c.freeze(recursive=True).dict()
+            >>> c.lock().dict()  # alias
             {'i': {'d': 1013}}
             >>> c.i.getattr('frozen')
             True
@@ -460,7 +460,11 @@ class Config(NestedDict):
             freeze(self)
         return self
 
-    lock = freeze
+    def lock(self) -> Config:
+        r"""
+        Alias of [`freeze`][chanfig.Config.freeze].
+        """
+        return self.freeze()
 
     def defrost(self, recursive: bool = True) -> Config:
         r"""
@@ -487,7 +491,7 @@ class Config(NestedDict):
             False
             >>> c.i.getattr('frozen')
             True
-            >>> c.defrost().dict()
+            >>> c.unlock().dict()  # alias
             {'i': {'d': 1013}}
             >>> c.i.getattr('frozen')
             False
@@ -503,7 +507,11 @@ class Config(NestedDict):
             defrost(self)
         return self
 
-    unlock = defrost
+    def unlock(self) -> Config:
+        r"""
+        Alias of [`defrost`][chanfig.Config.defrost].
+        """
+        return self.defrost()
 
     @contextmanager
     def unlocked(self):
