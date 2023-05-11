@@ -47,7 +47,7 @@ CHANfiG 的范式是：
 
 `FlatDict`扩充原始的`dict`的`update`方法，使其支持传递另一个`Mapping`、`Iterable`或者一个路径。
 
-更进一步的，`FlatDict`引入了`difference`和`intersection`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
+更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
 #### 机器学习操作
 
@@ -147,8 +147,8 @@ if __name__ == '__main__':
     # config = Config(**existing_configs)  # 如果你有些config需要读取
     config = TestConfig()
     config = config.parse()
-    # config.update('dataset.yaml')  # 如果你想合并一个 yaml
-    # config.update('dataset.json')  # 如果你想合并一个 json
+    # config.merge('dataset.yaml')  # 如果你想合并一个 yaml
+    # config.merge('dataset.json')  # 如果你想合并一个 json
     # 注意被合并的值具有更高的优先级
     config.model.decoder.num_layers = 8
     config.freeze()

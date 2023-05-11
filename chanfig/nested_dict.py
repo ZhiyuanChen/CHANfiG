@@ -307,6 +307,7 @@ class NestedDict(DefaultDict):
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
+                default_factory = self.getattr("default_factory", self.empty)
                 if name not in self:
                     self.__missing__(name, default_factory())
                 self, name = self[name], rest  # pylint: disable=W0642
@@ -430,11 +431,92 @@ class NestedDict(DefaultDict):
             ret[k] = v
         return ret
 
+    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> NestedDict:
+        r"""
+        Merge `other` into `NestedDict`.
+
+        Args:
+            other:
+
+        Returns:
+            self:
+
+        **Alias**:
+
+        + `merge_from_file`
+        + `union`
+
+        Examples:
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
+            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d.merge(n).dict()
+            {'a': 1, 'b': {'c': 3, 'd': 3}, 'e': 4}
+            >>> NestedDict(a=1, b=1, c=1).merge_from_file("example.yaml").dict()  # alias
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> NestedDict(a=1, b=1, c=1).union(NestedDict(b='b', c='c', d='d')).dict()  # alias
+            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+        """
+
+        if isinstance(other, (PathLike, str, bytes)):
+            other = self.load(other)
+        if not isinstance(other, NestedDict):
+            other = NestedDict(other)
+        for name, value in other.all_items():
+            self[name] = value
+        return self
+
+    def intersect(  # pylint: disable=W0221
+        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
+    ) -> NestedDict:
+        r"""
+        Intersection of `NestedDict` and `other`.
+
+        Args:
+            other (Mapping | Iterable | PathStr):
+            recursive (bool):
+
+        Examples:
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
+            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d.intersect(n).dict()
+            {'a': 1, 'b': {'d': 3}}
+            >>> d.intersect("example.yaml").dict()
+            {'a': 1}
+            >>> d.intersect(n, recursive=False).dict()
+            {'a': 1}
+            >>> l = [('a', 1), ('d', 4)]
+            >>> d.intersect(l).dict()
+            {'a': 1}
+            >>> d.intersect(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+        """
+
+        if isinstance(other, (PathLike, str, bytes)):
+            other = self.load(other)
+        if isinstance(other, (Mapping,)):
+            other = self.empty_like(other).items()
+        if not isinstance(other, Iterable):
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+
+        @wraps(self.intersect)
+        def intersect(this: NestedDict, that: Iterable) -> Mapping:
+            ret = {}
+            for key, value in that:
+                if key in this:
+                    if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
+                        ret[key] = this[key].intersect(value)
+                    elif this[key] == value:
+                        ret[key] = value
+            return ret
+
+        return self.empty_like(intersect(self, other))  # type: ignore
+
     def difference(  # pylint: disable=W0221, C0103
         self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
     ) -> NestedDict:
         r"""
-        Difference between `NestedDict` values and `other`.
+        Difference between `NestedDict` and `other`.
 
         Args:
             other (Mapping | Iterable | PathStr):
@@ -479,57 +561,6 @@ class NestedDict(DefaultDict):
             return ret
 
         return self.empty_like(difference(self, other))  # type: ignore
-
-    diff = difference
-
-    def intersection(  # pylint: disable=W0221
-        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
-    ) -> NestedDict:
-        r"""
-        Intersection between `NestedDict` values and `other`.
-
-        Args:
-            other (Mapping | Iterable | PathStr):
-            recursive (bool):
-
-        Examples:
-            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
-            >>> d.intersection(n).dict()
-            {'a': 1, 'b': {'d': 3}}
-            >>> d.intersection("example.yaml").dict()
-            {'a': 1}
-            >>> d.intersection(n, recursive=False).dict()
-            {'a': 1}
-            >>> l = [('a', 1), ('d', 4)]
-            >>> d.intersection(l).dict()
-            {'a': 1}
-            >>> d.intersection(1)
-            Traceback (most recent call last):
-            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-        """
-
-        if isinstance(other, (PathLike, str, bytes)):
-            other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            other = self.empty_like(other).items()
-        if not isinstance(other, Iterable):
-            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-
-        @wraps(self.intersection)
-        def intersection(this: NestedDict, that: Iterable) -> Mapping:
-            ret = {}
-            for key, value in that:
-                if key in this:
-                    if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                        ret[key] = this[key].intersection(value)
-                    elif this[key] == value:
-                        ret[key] = value
-            return ret
-
-        return self.empty_like(intersection(self, other))  # type: ignore
-
-    inter = intersection
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> Any:
         r"""
