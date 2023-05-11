@@ -58,7 +58,7 @@ class FlatDict(dict):
 
     `FlatDict` inherits from built-in `dict`.
 
-    It comes with many easy to use helper function, such as `difference`, `intersection`.
+    It comes with many easy to use helper function, such as `difference`, `intersect`.
 
     It also has full support for IO operations, such as `json` and `yaml`.
 
@@ -410,9 +410,9 @@ class FlatDict(dict):
 
         return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
 
-    def update(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:  # type: ignore
+    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Update `FlatDict` values w.r.t. `other`.
+        Merge `other` into `FlatDict`.
 
         Args:
             other:
@@ -422,22 +422,19 @@ class FlatDict(dict):
 
         **Alias**:
 
-        + `merge`
         + `merge_from_file`
         + `union`
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
             >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-            >>> d.update(n).dict()
+            >>> d.merge(n).dict()
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
             >>> l = [('c', 3), ('d', 4)]
-            >>> d.update(l).dict()
+            >>> d.merge(l).dict()
             {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-            >>> d.update("example.yaml").dict()
+            >>> d.merge("example.yaml").dict()
             {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-            >>> FlatDict(a=1, b=1, c=1).merge(FlatDict(b='b', c='c', d='d')).dict()  # alias
-            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
             >>> FlatDict(a=1, b=1, c=1).merge_from_file("example.yaml").dict()  # alias
             {'a': 1, 'b': 2, 'c': 3}
             >>> FlatDict(a=1, b=1, c=1).union(FlatDict(b='b', c='c', d='d')).dict()  # alias
@@ -446,38 +443,74 @@ class FlatDict(dict):
 
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            for key, value in other.items():
-                if key in self and isinstance(self[key], (Mapping,)) and isinstance(value, (Mapping,)):
-                    self[key].update(value)
-                else:
-                    self[key] = value
-        elif isinstance(other, Iterable):
-            for key, value in other:  # type: ignore
-                self[key] = value
+        if not isinstance(other, FlatDict):
+            other = FlatDict(other)
+        for name, value in other.items():
+            self[name] = value
         return self
-
-    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
-        r"""
-        Alias of [`update`][chanfig.FlatDict.update].
-        """
-        return self.update(other)
 
     def merge_from_file(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of [`update`][chanfig.FlatDict.update].
+        Alias of [`merge`][chanfig.FlatDict.merge].
         """
-        return self.update(other)
+        return self.merge(other)
 
     def union(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Alias of [`update`][chanfig.FlatDict.update].
+        Alias of [`merge`][chanfig.FlatDict.merge].
         """
-        return self.update(other)
+        return self.merge(other)
+
+    def intersect(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Intersection of `FlatDict` and `other`.
+
+        Args:
+            other (Mapping | Iterable | PathStr):
+
+        Returns:
+            (FlatDict):
+
+        **Alias**:
+
+        + `inter`
+
+        Examples:
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.intersect(n).dict()
+            {}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.intersect(l).dict()
+            {'c': 3}
+            >>> d.merge(l).intersect("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> d.intersect(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
+            >>> d.inter(FlatDict(b='b', c='c', d='d')).dict()  # alias
+            {}
+        """
+
+        if isinstance(other, (PathLike, str, bytes)):
+            other = self.load(other)
+        if isinstance(other, (Mapping,)):
+            other = other.items()
+        if not isinstance(other, Iterable):
+            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
+        return self.empty_like(
+            **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
+        )
+
+    def inter(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+        r"""
+        Alias of [`intersect`][chanfig.FlatDict.intersect].
+        """
+        return self.intersect(other)
 
     def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
-        Difference between `FlatDict` values and `other`.
+        Difference between `FlatDict` and `other`.
 
         Args:
             other:
@@ -497,7 +530,7 @@ class FlatDict(dict):
             >>> l = [('c', 3), ('d', 4)]
             >>> d.difference(l).dict()
             {'d': 4}
-            >>> d.update(l).difference("example.yaml").dict()
+            >>> d.merge(l).difference("example.yaml").dict()
             {}
             >>> d.difference(1)
             Traceback (most recent call last):
@@ -521,53 +554,6 @@ class FlatDict(dict):
         Alias of [`difference`][chanfig.FlatDict.difference].
         """
         return self.difference(other)
-
-    def intersection(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
-        r"""
-        Intersection between `FlatDict` values and `other`.
-
-        Args:
-            other (Mapping | Iterable | PathStr):
-
-        Returns:
-            (FlatDict):
-
-        **Alias**:
-
-        + `inter`
-
-        Examples:
-            >>> d = FlatDict(a=1, b=2, c=3)
-            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-            >>> d.intersection(n).dict()
-            {}
-            >>> l = [('c', 3), ('d', 4)]
-            >>> d.intersection(l).dict()
-            {'c': 3}
-            >>> d.update(l).intersection("example.yaml").dict()
-            {'a': 1, 'b': 2, 'c': 3}
-            >>> d.intersection(1)
-            Traceback (most recent call last):
-            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-            >>> d.inter(FlatDict(b='b', c='c', d='d')).dict()  # alias
-            {}
-        """
-
-        if isinstance(other, (PathLike, str, bytes)):
-            other = self.load(other)
-        if isinstance(other, (Mapping,)):
-            other = other.items()
-        if not isinstance(other, Iterable):
-            raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty_like(
-            **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
-        )
-
-    def inter(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
-        r"""
-        Alias of [`intersection`][chanfig.FlatDict.intersection].
-        """
-        return self.intersection(other)
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
         r"""

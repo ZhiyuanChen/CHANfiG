@@ -52,7 +52,7 @@ To overcome the aforementioned limitations, we inherit the Python built-in `dict
 
 `FlatDict` extends the `update` method of the original `dict`, allows passing another `Mapping`, `Iterable` or a path.
 
-Moreover, `FlatDict` comes with `difference` and `intersection`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 
@@ -152,8 +152,8 @@ if __name__ == '__main__':
     # config = Config(**existing_configs)  # in case you have some config in dict to load
     config = TestConfig()
     config = config.parse()
-    # config.update('dataset.yaml')  # in case you want to merge a yaml
-    # config.update('dataset.json')  # in case you want to merge a json
+    # config.merge('dataset.yaml')  # in case you want to merge a yaml
+    # config.merge('dataset.json')  # in case you want to merge a json
     # note that the value of merge will override current values
     config.model.decoder.num_layers = 8
     config.freeze()

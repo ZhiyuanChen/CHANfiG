@@ -28,8 +28,8 @@ from .utils import Null
 
 
 class StoreAction(_StoreAction):  # pylint: disable=R0903
-    def __init__(
-        self,  # pylint: disable=R0913
+    def __init__(  # pylint: disable=R0913
+        self,
         option_strings,
         dest,
         nargs=None,
@@ -196,7 +196,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 path = parsed[default_config]
                 warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
                 # create a temp config to avoid issues when users inherit from Config
-                config = config.update(Config.load(path))  # type: ignore
+                config = config.merge(Config.load(path))  # type: ignore
             elif no_default_config_action == "ignore":
                 pass
             elif no_default_config_action == "warn":
@@ -205,7 +205,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 raise ValueError(f"default_config is set to {default_config}, but not found in args.")
 
         # parse the command-line arguments
-        config = config.update(parsed)  # type: ignore
+        config = config.merge(parsed)  # type: ignore
         return config  # type: ignore
 
     parse_config = parse
@@ -401,7 +401,9 @@ class Config(NestedDict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        self.getattr("parser", ConfigParser()).parse(args, self, default_config, no_default_config_action)
+        if not self.hasattr("parser"):
+            self.setattr("parser", ConfigParser())
+        self.getattr("parser").parse(args, self, default_config, no_default_config_action)
         self.boot()
         return self
 
@@ -415,13 +417,15 @@ class Config(NestedDict):
 
         Examples:
             >>> c = Config(a=0, c=1)
-            >>> c.add_argument("--a", type=int, default=1)
-            >>> c.add_argument("--b", type=int, default=2)
+            >>> arg = c.add_argument("--a", type=int, default=1)
+            >>> arg = c.add_argument("--b", type=int, default=2)
             >>> c.parse(['--c', '4']).dict()
             {'a': 1, 'c': 4, 'b': 2}
         """
 
-        self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
+        if not self.hasattr("parser"):
+            self.setattr("parser", ConfigParser())
+        return self.getattr("parser").add_argument(*args, **kwargs)
 
     def freeze(self, recursive: bool = True) -> Config:
         r"""
