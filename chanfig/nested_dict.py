@@ -49,16 +49,15 @@ class NestedDict(DefaultDict):
     respectively in the nested structure.
 
     Attributes:
-        default_mapping: Callable = NestedDict
-            Default mapping when performing `convert_mapping`.
         convert_mapping: bool = False
-            If `True`, all new values with a type of `Mapping` will be converted to `default_mapping`.
+            If `True`, all new values with a type of `Mapping` will be converted to `default_factory`.
+                If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
         delimiter: str = "."
             Delimiter for nested structure.
 
     Notes:
-        When `convert_mapping` specified, all new values with type of `Mapping`
-        will be converted to `default_mapping`.
+        When `convert_mapping` specified, all new values with type of `Mapping` will be converted to `default_factory`.
+            If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
 
         `convert_mapping` is automatically applied to arguments during initialisation.
 
@@ -82,7 +81,6 @@ class NestedDict(DefaultDict):
     ```
     """
 
-    default_mapping: Callable
     convert_mapping: bool = False
     delimiter: str = "."
 
@@ -326,17 +324,17 @@ class NestedDict(DefaultDict):
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
         delimiter = self.getattr("delimiter", ".")
-        default_mapping = self.getattr("default_mapping", NestedDict)
+        default_factory = self.getattr("default_factory", self.empty)
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
                 if name not in self:
-                    self.__missing__(name, default_mapping())
+                    self.__missing__(name, default_factory())
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
-            value = default_mapping(value)
+            value = default_factory(value)
         if isinstance(self, Mapping):
             if not isinstance(self, NestedDict):
                 self[name] = value
