@@ -299,8 +299,6 @@ class Config(NestedDict):
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
         if default_factory is None:
             default_factory = Config
-        if not self.hasattr("default_mapping"):
-            self.setattr("default_mapping", Config)
         super().__init__(*args, default_factory=default_factory, **kwargs)
         self.setattr("parser", ConfigParser())
 
