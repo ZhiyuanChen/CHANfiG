@@ -80,32 +80,29 @@ class FlatDict(dict):
         `__class__`, `__dict__`, and `getattr` are reserved and cannot be overrided in any manner.
 
     Examples:
-    ```python
-    >>> d = FlatDict()
-    >>> d.d = 1013
-    >>> d['d']
-    1013
-    >>> d['i'] = 1013
-    >>> d.i
-    1013
-    >>> d.a = Variable(1)
-    >>> d.b = d.a
-    >>> d.a, d.b
-    (1, 1)
-    >>> d.a += 1
-    >>> d.a, d.b
-    (2, 2)
-    >>> d.a = 3
-    >>> d.a, d.b
-    (3, 3)
-    >>> d.a = Variable('hello')
-    >>> f"{d.a}, world!"
-    'hello, world!'
-    >>> d.a = d.a + ', world!'
-    >>> d.b
-    'hello, world!'
-
-    ```
+        >>> d = FlatDict()
+        >>> d.d = 1013
+        >>> d['d']
+        1013
+        >>> d['i'] = 1013
+        >>> d.i
+        1013
+        >>> d.a = Variable(1)
+        >>> d.b = d.a
+        >>> d.a, d.b
+        (1, 1)
+        >>> d.a += 1
+        >>> d.a, d.b
+        (2, 2)
+        >>> d.a = 3
+        >>> d.a, d.b
+        (3, 3)
+        >>> d.a = Variable('hello')
+        >>> f"{d.a}, world!"
+        'hello, world!'
+        >>> d.a = d.a + ', world!'
+        >>> d.b
+        'hello, world!'
     """
 
     # pylint: disable=R0904
@@ -158,23 +155,20 @@ class FlatDict(dict):
             KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
 
         Examples:
-        ```python
-        >>> d = FlatDict(d=1013)
-        >>> d.get('d')
-        1013
-        >>> d['d']
-        1013
-        >>> d.d
-        1013
-        >>> d.get('d', None)
-        1013
-        >>> d.get('f', 2)
-        2
-        >>> d.get('f')
-        Traceback (most recent call last):
-        KeyError: 'f'
-
-        ```
+            >>> d = FlatDict(d=1013)
+            >>> d.get('d')
+            1013
+            >>> d['d']
+            1013
+            >>> d.d
+            1013
+            >>> d.get('d', None)
+            1013
+            >>> d.get('f', 2)
+            2
+            >>> d.get('f')
+            Traceback (most recent call last):
+            KeyError: 'f'
         """
 
         if name in self:
@@ -201,19 +195,16 @@ class FlatDict(dict):
             value:
 
         Examples:
-        ```python
-        >>> d = FlatDict()
-        >>> d.set('d', 1013)
-        >>> d.get('d')
-        1013
-        >>> d['n'] = 'chang'
-        >>> d.n
-        'chang'
-        >>> d.n = 'liu'
-        >>> d['n']
-        'liu'
-
-        ```
+            >>> d = FlatDict()
+            >>> d.set('d', 1013)
+            >>> d.get('d')
+            1013
+            >>> d['n'] = 'chang'
+            >>> d.n
+            'chang'
+            >>> d.n = 'liu'
+            >>> d['n']
+            'liu'
         """
 
         if isinstance(value, str):
@@ -243,25 +234,22 @@ class FlatDict(dict):
             name:
 
         Examples:
-        ```python
-        >>> d = FlatDict(d=1016, n='chang')
-        >>> d.d
-        1016
-        >>> d.n
-        'chang'
-        >>> d.delete('d')
-        >>> d.d
-        Traceback (most recent call last):
-        AttributeError: 'FlatDict' object has no attribute 'd'
-        >>> del d.n
-        >>> d.n
-        Traceback (most recent call last):
-        AttributeError: 'FlatDict' object has no attribute 'n'
-        >>> del d.f
-        Traceback (most recent call last):
-        AttributeError: 'FlatDict' object has no attribute 'f'
-
-        ```
+            >>> d = FlatDict(d=1016, n='chang')
+            >>> d.d
+            1016
+            >>> d.n
+            'chang'
+            >>> d.delete('d')
+            >>> d.d
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'd'
+            >>> del d.n
+            >>> d.n
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'n'
+            >>> del d.f
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'f'
         """
 
         dict.__delitem__(self, name)
@@ -292,20 +280,17 @@ class FlatDict(dict):
             AttributeError: If `FlatDict` does not contain `name` and `default` is not specified.
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1)
-        >>> d.get('a')
-        1
-        >>> d.getattr('a')
-        Traceback (most recent call last):
-        AttributeError: 'FlatDict' object has no attribute 'a'
-        >>> d.getattr('b', 2)
-        2
-        >>> d.setattr('b', 3)
-        >>> d.getattr('b')
-        3
-
-        ```
+            >>> d = FlatDict(a=1)
+            >>> d.get('a')
+            1
+            >>> d.getattr('a')
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'a'
+            >>> d.getattr('b', 2)
+            2
+            >>> d.setattr('b', 3)
+            >>> d.getattr('b')
+            3
         """
 
         try:
@@ -333,21 +318,18 @@ class FlatDict(dict):
             RuntimeWarning: If name already exists in `FlatDict`.
 
         Examples:
-        ```python
-        >>> d = FlatDict()
-        >>> d.setattr('attr', 'value')
-        >>> d.getattr('attr')
-        'value'
-        >>> d.set('d', 1013)
-        >>> d.setattr('d', 1031)  # RuntimeWarning: d already exists in FlatDict.
-        >>> d.get('d')
-        1013
-        >>> d.d
-        1013
-        >>> d.getattr('d')
-        1031
-
-        ```
+            >>> d = FlatDict()
+            >>> d.setattr('attr', 'value')
+            >>> d.getattr('attr')
+            'value'
+            >>> d.set('d', 1013)
+            >>> d.setattr('d', 1031)  # RuntimeWarning: d already exists in FlatDict.
+            >>> d.get('d')
+            1013
+            >>> d.d
+            1013
+            >>> d.getattr('d')
+            1031
         """
 
         if name in self:
@@ -368,17 +350,14 @@ class FlatDict(dict):
             name:
 
         Examples:
-        ```python
-        >>> d = FlatDict()
-        >>> d.setattr('name', 'chang')
-        >>> d.getattr('name')
-        'chang'
-        >>> d.delattr('name')
-        >>> d.getattr('name')
-        Traceback (most recent call last):
-        AttributeError: 'FlatDict' object has no attribute 'name'
-
-        ```
+            >>> d = FlatDict()
+            >>> d.setattr('name', 'chang')
+            >>> d.getattr('name')
+            'chang'
+            >>> d.delattr('name')
+            >>> d.getattr('name')
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'name'
         """
 
         del self.__dict__[name]
@@ -394,16 +373,13 @@ class FlatDict(dict):
             (bool):
 
         Examples:
-        ```python
-        >>> d = FlatDict()
-        >>> d.setattr('name', 'chang')
-        >>> d.hasattr('name')
-        True
-        >>> d.delattr('name')
-        >>> d.hasattr('name')
-        False
-
-        ```
+            >>> d = FlatDict()
+            >>> d.setattr('name', 'chang')
+            >>> d.hasattr('name')
+            True
+            >>> d.delattr('name')
+            >>> d.hasattr('name')
+            False
         """
 
         try:
@@ -427,12 +403,9 @@ class FlatDict(dict):
             (Mapping):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
@@ -448,18 +421,15 @@ class FlatDict(dict):
             self:
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.update(n).dict()
-        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.update(l).dict()
-        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-        >>> d.update("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.update(n).dict()
+            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.update(l).dict()
+            {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+            >>> d.update("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         """
 
         if isinstance(other, (PathLike, str, bytes)):
@@ -480,18 +450,15 @@ class FlatDict(dict):
         Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.merge(n).dict()
-        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.merge(l).dict()
-        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-        >>> d.merge("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.merge(n).dict()
+            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.merge(l).dict()
+            {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+            >>> d.merge("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         """
 
         return self.update(other)
@@ -501,18 +468,15 @@ class FlatDict(dict):
         Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.merge_from_file(n).dict()
-        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.merge_from_file(l).dict()
-        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-        >>> d.merge_from_file("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.merge_from_file(n).dict()
+            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.merge_from_file(l).dict()
+            {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+            >>> d.merge_from_file("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         """
 
         return self.update(other)
@@ -522,18 +486,15 @@ class FlatDict(dict):
         Alias of [`update`][chanfig.FlatDict.update].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.union(n).dict()
-        {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.union(l).dict()
-        {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-        >>> d.union("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.union(n).dict()
+            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.union(l).dict()
+            {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
+            >>> d.union("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         """
 
         return self.update(other)
@@ -549,21 +510,18 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.difference(n).dict()
-        {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.difference(l).dict()
-        {'d': 4}
-        >>> d.update(l).difference("example.yaml").dict()
-        {}
-        >>> d.difference(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.difference(n).dict()
+            {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.difference(l).dict()
+            {'d': 4}
+            >>> d.update(l).difference("example.yaml").dict()
+            {}
+            >>> d.difference(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         if isinstance(other, (PathLike, str, bytes)):
@@ -581,21 +539,18 @@ class FlatDict(dict):
         Alias of [`difference`][chanfig.FlatDict.difference].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.diff(n).dict()
-        {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.diff(l).dict()
-        {'d': 4}
-        >>> d.update(l).diff("example.yaml").dict()
-        {}
-        >>> d.diff(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.diff(n).dict()
+            {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.diff(l).dict()
+            {'d': 4}
+            >>> d.update(l).diff("example.yaml").dict()
+            {}
+            >>> d.diff(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         return self.difference(other)
@@ -611,21 +566,18 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.intersection(n).dict()
-        {}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.intersection(l).dict()
-        {'c': 3}
-        >>> d.update(l).intersection("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3}
-        >>> d.intersection(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.intersection(n).dict()
+            {}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.intersection(l).dict()
+            {'c': 3}
+            >>> d.update(l).intersection("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> d.intersection(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         if isinstance(other, (PathLike, str, bytes)):
@@ -643,21 +595,18 @@ class FlatDict(dict):
         Alias of [`intersection`][chanfig.FlatDict.intersection].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
-        >>> d.inter(n).dict()
-        {}
-        >>> l = [('c', 3), ('d', 4)]
-        >>> d.inter(l).dict()
-        {'c': 3}
-        >>> d.update(l).inter("example.yaml").dict()
-        {'a': 1, 'b': 2, 'c': 3}
-        >>> d.inter(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> n = {'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d.inter(n).dict()
+            {}
+            >>> l = [('c', 3), ('d', 4)]
+            >>> d.inter(l).dict()
+            {'c': 3}
+            >>> d.update(l).inter("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> d.inter(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         return self.intersection(other)
@@ -673,13 +622,10 @@ class FlatDict(dict):
             self:
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.to(int)
-        Traceback (most recent call last):
-        TypeError: to() only support torch.dtype and torch.device, but got <class 'int'>.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.to(int)
+            Traceback (most recent call last):
+            TypeError: to() only support torch.dtype and torch.device, but got <class 'int'>.
         """
 
         # pylint: disable=C0103
@@ -703,13 +649,10 @@ class FlatDict(dict):
             self:
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.cpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='cpu')}
-
-        ```
+            >>> import torch
+            >>> d = FlatDict(a=torch.tensor(1))
+            >>> d.cpu().dict()  # doctest: +SKIP
+            {'a': tensor(1, device='cpu')}
         """
 
         return self.to(TorchDevice("cpu"))
@@ -722,13 +665,10 @@ class FlatDict(dict):
             self:
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.gpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='cuda:0')}
-
-        ```
+            >>> import torch
+            >>> d = FlatDict(a=torch.tensor(1))
+            >>> d.gpu().dict()  # doctest: +SKIP
+            {'a': tensor(1, device='cuda:0')}
         """
 
         return self.to(TorchDevice("cuda"))
@@ -738,13 +678,10 @@ class FlatDict(dict):
         Alias of [`gpu`][chanfig.FlatDict.gpu].
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.cuda().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='cuda:0')}
-
-        ```
+            >>> import torch
+            >>> d = FlatDict(a=torch.tensor(1))
+            >>> d.cuda().dict()  # doctest: +SKIP
+            {'a': tensor(1, device='cuda:0')}
         """
 
         return self.gpu()
@@ -757,13 +694,10 @@ class FlatDict(dict):
             self:
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.tpu().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='xla:0')}
-
-        ```
+            >>> import torch
+            >>> d = FlatDict(a=torch.tensor(1))
+            >>> d.tpu().dict()  # doctest: +SKIP
+            {'a': tensor(1, device='xla:0')}
         """
 
         return self.to(TorchDevice("xla"))
@@ -773,13 +707,10 @@ class FlatDict(dict):
         Alias of [`tpu`][chanfig.FlatDict.tpu].
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = FlatDict(a=torch.tensor(1))
-        >>> d.xla().dict()  # doctest: +SKIP
-        {'a': tensor(1, device='xla:0')}
-
-        ```
+            >>> import torch
+            >>> d = FlatDict(a=torch.tensor(1))
+            >>> d.xla().dict()  # doctest: +SKIP
+            {'a': tensor(1, device='xla:0')}
         """
 
         return self.tpu()
@@ -792,19 +723,16 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.copy()
-        >>> c.dict()
-        {'a': []}
-        >>> d.a.append(1)
-        >>> c.dict()
-        {'a': [1]}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
+            >>> d = FlatDict(a=[])
+            >>> d.setattr("name", "Chang")
+            >>> c = d.copy()
+            >>> c.dict()
+            {'a': []}
+            >>> d.a.append(1)
+            >>> c.dict()
+            {'a': [1]}
+            >>> c.getattr("name")
+            'Chang'
         """
 
         return copy(self)
@@ -830,19 +758,16 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.deepcopy()
-        >>> c.dict()
-        {'a': []}
-        >>> d.a.append(1)
-        >>> c.dict()
-        {'a': []}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
+            >>> d = FlatDict(a=[])
+            >>> d.setattr("name", "Chang")
+            >>> c = d.deepcopy()
+            >>> c.dict()
+            {'a': []}
+            >>> d.a.append(1)
+            >>> c.dict()
+            {'a': []}
+            >>> c.getattr("name")
+            'Chang'
         """
 
         return deepcopy(self)
@@ -852,19 +777,16 @@ class FlatDict(dict):
         Alias of [`deepcopy`][chanfig.FlatDict.deepcopy].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.clone()
-        >>> c.dict()
-        {'a': []}
-        >>> d.a.append(1)
-        >>> c.dict()
-        {'a': []}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
+            >>> d = FlatDict(a=[])
+            >>> d.setattr("name", "Chang")
+            >>> c = d.clone()
+            >>> c.dict()
+            {'a': []}
+            >>> d.a.append(1)
+            >>> c.dict()
+            {'a': []}
+            >>> c.getattr("name")
+            'Chang'
         """
 
         return self.deepcopy(memo=memo)
@@ -878,18 +800,15 @@ class FlatDict(dict):
             TypeError: If dump to unsupported extension.
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.dump("example.yaml")
-        >>> d.dump("example.conf")
-        Traceback (most recent call last):
-        TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
-        >>> with open("test.yaml", "w") as f:
-        ...     d.dump(f)
-        Traceback (most recent call last):
-        ValueError: `method` must be specified when dumping to IO.
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.dump("example.yaml")
+            >>> d.dump("example.conf")
+            Traceback (most recent call last):
+            TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            >>> with open("test.yaml", "w") as f:
+            ...     d.dump(f)
+            Traceback (most recent call last):
+            ValueError: `method` must be specified when dumping to IO.
         """
 
         if method is None:
@@ -908,6 +827,10 @@ class FlatDict(dict):
         """
         Load `FlatDict` from file.
 
+        Args:
+            file: File to load from.
+            method: File type, should be in `JSON` or `YAML`.
+
         Returns:
             (FlatDict):
 
@@ -916,19 +839,16 @@ class FlatDict(dict):
             TypeError: If dump to unsupported extension.
 
         Examples:
-        ```python
-        >>> d = FlatDict.load("example.yaml")
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-        >>> d.load("example.conf")
-        Traceback (most recent call last):
-        TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
-        >>> with open("test.yaml") as f:
-        ...     d.load(f)
-        Traceback (most recent call last):
-        ValueError: `method` must be specified when loading from IO.
-
-        ```
+            >>> d = FlatDict.load("example.yaml")
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> d.load("example.conf")
+            Traceback (most recent call last):
+            TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            >>> with open("test.yaml") as f:
+            ...     d.load(f)
+            Traceback (most recent call last):
+            ValueError: `method` must be specified when loading from IO.
         """
 
         if method is None:
@@ -950,11 +870,8 @@ class FlatDict(dict):
         You may overwrite `jsons` in case something is not json serializable.
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.json("example.json")
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.json("example.json")
         """
 
         with self.open(file, mode="w") as fp:  # pylint: disable=C0103
@@ -972,12 +889,9 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict.from_json('example.json')
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+            >>> d = FlatDict.from_json('example.json')
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
@@ -991,12 +905,9 @@ class FlatDict(dict):
             (str):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.jsons()
-        '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.jsons()
+            '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
         """
 
         if "cls" not in kwargs:
@@ -1014,12 +925,9 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+            >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         config = cls()
@@ -1034,11 +942,8 @@ class FlatDict(dict):
         You may overwrite `yamls` in case something is not yaml serializable.
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.yaml("example.yaml")
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.yaml("example.yaml")
         """
 
         with self.open(file, mode="w") as fp:  # pylint: disable=C0103
@@ -1055,12 +960,10 @@ class FlatDict(dict):
         Returns:
             (FlatDict):
 
-        ```python
-        >>> d = FlatDict.from_yaml('example.yaml')
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+        Examples:
+            >>> d = FlatDict.from_yaml('example.yaml')
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
@@ -1074,12 +977,9 @@ class FlatDict(dict):
             (str):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=1, b=2, c=3)
-        >>> d.yamls()
-        'a: 1\nb: 2\nc: 3\n'
-
-        ```
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.yamls()
+            'a: 1\nb: 2\nc: 3\n'
         """
 
         if "Dumper" not in kwargs:
@@ -1097,12 +997,9 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
-        >>> d.dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+            >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
+            >>> d.dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         if "Loader" not in kwargs:
@@ -1115,7 +1012,7 @@ class FlatDict(dict):
     @staticmethod
     @contextmanager
     def open(file: File, *args, **kwargs):
-        """
+        r"""
         Open file IO from file path or IO.
 
         This methods extends the ability of built-in `open` by allowing it to accept an `IOBase` object.
@@ -1126,28 +1023,25 @@ class FlatDict(dict):
                 Defaults to ().
             **kwargs: Any
                 Additional keyword arguments passed to `open`.
-                Defaults to ().
+                Defaults to {}.
 
         Yields:
             (FileIO):
 
         Examples:
-        ```python
-        >>> with FlatDict.open("example.yaml") as fp:
-        ...     print(fp.read())
-        a: 1
-        b: 2
-        c: 3
-        <BLANKLINE>
-        >>> io = open("example.yaml")
-        >>> with FlatDict.open(io) as fp:
-        ...     print(fp.read())
-        a: 1
-        b: 2
-        c: 3
-        <BLANKLINE>
-
-        ```
+            >>> with FlatDict.open("example.yaml") as fp:
+            ...     print(fp.read())
+            a: 1
+            b: 2
+            c: 3
+            <BLANKLINE>
+            >>> io = open("example.yaml")
+            >>> with FlatDict.open(io) as fp:
+            ...     print(fp.read())
+            a: 1
+            b: 2
+            c: 3
+            <BLANKLINE>
         """
 
         if isinstance(file, (PathLike, str)):
@@ -1177,13 +1071,10 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> c = d.empty()
-        >>> c.dict()
-        {}
-
-        ```
+            >>> d = FlatDict(a=[])
+            >>> c = d.empty()
+            >>> c.dict()
+            {}
         """
 
         empty = cls.__new__(cls)
@@ -1200,16 +1091,13 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=[])
-        >>> d.setattr("name", "Chang")
-        >>> c = d.empty_like()
-        >>> c.dict()
-        {}
-        >>> c.getattr("name")
-        'Chang'
-
-        ```
+            >>> d = FlatDict(a=[])
+            >>> d.setattr("name", "Chang")
+            >>> c = d.empty_like()
+            >>> c.dict()
+            {}
+            >>> c.getattr("name")
+            'Chang'
         """
 
         empty = self.empty(*args, **kwargs)
@@ -1224,14 +1112,11 @@ class FlatDict(dict):
             (FlatDict):
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=Null, b=Null, c=3)
-        >>> d.dict()
-        {'a': Null, 'b': Null, 'c': 3}
-        >>> d.dropnull().dict()
-        {'c': 3}
-
-        ```
+            >>> d = FlatDict(a=Null, b=Null, c=3)
+            >>> d.dict()
+            {'a': Null, 'b': Null, 'c': 3}
+            >>> d.dropnull().dict()
+            {'c': 3}
         """
 
         return self.empty_like({k: v for k, v in self.items() if v is not Null})
@@ -1241,14 +1126,11 @@ class FlatDict(dict):
         Alias of [`dropnull`][chanfig.FlatDict.dropnull].
 
         Examples:
-        ```python
-        >>> d = FlatDict(a=Null, b=Null, c=3)
-        >>> d.dict()
-        {'a': Null, 'b': Null, 'c': 3}
-        >>> d.dropna().dict()
-        {'c': 3}
-
-        ```
+            >>> d = FlatDict(a=Null, b=Null, c=3)
+            >>> d.dict()
+            {'a': Null, 'b': Null, 'c': 3}
+            >>> d.dropna().dict()
+            {'c': 3}
         """
 
         return self.dropnull()

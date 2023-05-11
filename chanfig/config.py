@@ -122,40 +122,37 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             ValueError: If `no_default_config_action` is not in `raise`, `warn` and `igonre`.
 
         Examples:
-        ```python
-        >>> p = ConfigParser()
-        >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
-        {'i': {'d': 1013}, 'f': {'n': 'chang'}}
+            >>> p = ConfigParser()
+            >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
+            {'i': {'d': 1013}, 'f': {'n': 'chang'}}
 
-        # Values in command line arguments overrides values in `default_config` file.
-        >>> p = ConfigParser()
-        >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
-        {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+            # Values in command line arguments overrides values in `default_config` file.
+            >>> p = ConfigParser()
+            >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
+            {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-        # Values in `default_config` file overrides values in `Config` object.
-        >>> c = Config(a=2)
-        >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
-        {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+            # Values in `default_config` file overrides values in `Config` object.
+            >>> c = Config(a=2)
+            >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
+            {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-        # ValueError will be raised when `default_config` is specified but not presented in command line arguments.
-        >>> p = ConfigParser()
-        >>> p.parse(['--a', '2'], default_config='config').dict()
-        Traceback (most recent call last):
-        ValueError: default_config is set to config, but not found in args.
+            # ValueError will be raised when `default_config` is specified but not presented in command line arguments.
+            >>> p = ConfigParser()
+            >>> p.parse(['--a', '2'], default_config='config').dict()
+            Traceback (most recent call last):
+            ValueError: default_config is set to config, but not found in args.
 
-        # ValueError will be suppressed when `default_config` is specified bug not presented in command line arguments,
-        # and `no_default_config_action` is set to `ignore` or `warn`.
-        >>> p = ConfigParser()
-        >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='ignore').dict()
-        {'a': 2}
+            # ValueError will be suppressed when `default_config` is specified bug not presented in command line arguments,
+            # and `no_default_config_action` is set to `ignore` or `warn`.
+            >>> p = ConfigParser()
+            >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='ignore').dict()
+            {'a': 2}
 
-        # ValueError will be raised when `no_default_config_action` is not in `raise`, `ignore`, and `warn`.
-        >>> p = ConfigParser()
-        >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='suppress').dict()
-        Traceback (most recent call last):
-        ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got suppress
-
-        ```
+            # ValueError will be raised when `no_default_config_action` is not in `raise`, `ignore`, and `warn`.
+            >>> p = ConfigParser()
+            >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='suppress').dict()
+            Traceback (most recent call last):
+            ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got suppress
         """
 
         if no_default_config_action not in ("warn", "ignore", "raise"):
@@ -270,27 +267,24 @@ class Config(NestedDict):
         frozen (bool): If `True`, the config is frozen and cannot be altered.
 
     Examples:
-    ```python
-    >>> c = Config(**{"f.n": "chang"})
-    >>> c.i.d = 1013
-    >>> c.i.d
-    1013
-    >>> c.d.i
-    Config(<class 'chanfig.config.Config'>, )
-    >>> c.freeze().dict()
-    {'f': {'n': 'chang'}, 'i': {'d': 1013}, 'd': {'i': {}}}
-    >>> c.d.i = 1013
-    Traceback (most recent call last):
-    ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-    >>> c.d.e
-    Traceback (most recent call last):
-    AttributeError: 'Config' object has no attribute 'e'
-    >>> with c.unlocked():
-    ...     del c.d
-    >>> c.dict()
-    {'f': {'n': 'chang'}, 'i': {'d': 1013}}
-
-    ```
+        >>> c = Config(**{"f.n": "chang"})
+        >>> c.i.d = 1013
+        >>> c.i.d
+        1013
+        >>> c.d.i
+        Config(<class 'chanfig.config.Config'>, )
+        >>> c.freeze().dict()
+        {'f': {'n': 'chang'}, 'i': {'d': 1013}, 'd': {'i': {}}}
+        >>> c.d.i = 1013
+        Traceback (most recent call last):
+        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
+        >>> c.d.e
+        Traceback (most recent call last):
+        AttributeError: 'Config' object has no attribute 'e'
+        >>> with c.unlocked():
+        ...     del c.d
+        >>> c.dict()
+        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
     """
 
     parser: ConfigParser
@@ -320,22 +314,19 @@ class Config(NestedDict):
             self:
 
         Examples:
-        ```python
-        >>> class PostConfig(Config):
-        ...     def post(self):
-        ...         if isinstance(self.data, str):
-        ...             self.data = Config(feature=self.data, label=self.data)
-        ...         return self
-        >>> c = PostConfig(data="path")
-        >>> c.post()
-        PostConfig(<class 'chanfig.config.Config'>,
-          ('data'): Config(<class 'chanfig.config.Config'>,
-            ('feature'): 'path'
-            ('label'): 'path'
-          )
-        )
-
-        ```
+            >>> class PostConfig(Config):
+            ...     def post(self):
+            ...         if isinstance(self.data, str):
+            ...             self.data = Config(feature=self.data, label=self.data)
+            ...         return self
+            >>> c = PostConfig(data="path")
+            >>> c.post()
+            PostConfig(<class 'chanfig.config.Config'>,
+              ('data'): Config(<class 'chanfig.config.Config'>,
+                ('feature'): 'path'
+                ('label'): 'path'
+              )
+            )
         """
 
         return self
@@ -356,33 +347,30 @@ class Config(NestedDict):
             self:
 
         Examples:
-        ```python
-        >>> class DataConfig(Config):
-        ...     def post(self):
-        ...         if isinstance(self.path, str):
-        ...             self.path = Config(feature=self.path, label=self.path)
-        ...         return self
-        >>> class BootConfig(Config):
-        ...     def __init__(self, *args, **kwargs):
-        ...         super().__init__(*args, **kwargs)
-        ...         self.dataset = DataConfig(path="path")
-        ...     def post(self):
-        ...         if isinstance(self.id, str):
-        ...             self.id += "_id"
-        ...         return self
-        >>> c = BootConfig(id="boot")
-        >>> c.boot()
-        BootConfig(<class 'chanfig.config.Config'>,
-          ('id'): 'boot_id'
-          ('dataset'): DataConfig(<class 'chanfig.config.Config'>,
-            ('path'): Config(<class 'chanfig.config.Config'>,
-              ('feature'): 'path'
-              ('label'): 'path'
+            >>> class DataConfig(Config):
+            ...     def post(self):
+            ...         if isinstance(self.path, str):
+            ...             self.path = Config(feature=self.path, label=self.path)
+            ...         return self
+            >>> class BootConfig(Config):
+            ...     def __init__(self, *args, **kwargs):
+            ...         super().__init__(*args, **kwargs)
+            ...         self.dataset = DataConfig(path="path")
+            ...     def post(self):
+            ...         if isinstance(self.id, str):
+            ...             self.id += "_id"
+            ...         return self
+            >>> c = BootConfig(id="boot")
+            >>> c.boot()
+            BootConfig(<class 'chanfig.config.Config'>,
+              ('id'): 'boot_id'
+              ('dataset'): DataConfig(<class 'chanfig.config.Config'>,
+                ('path'): Config(<class 'chanfig.config.Config'>,
+                  ('feature'): 'path'
+                  ('label'): 'path'
+                )
+              )
             )
-          )
-        )
-
-        ```
         """
 
         for value in self.values():
@@ -406,14 +394,11 @@ class Config(NestedDict):
         See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
 
         Examples:
-        ```python
-        >>> c = Config(a=0)
-        >>> c.dict()
-        {'a': 0}
-        >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
-        {'a': 1, 'b': 2, 'c': 3}
-
-        ```
+            >>> c = Config(a=0)
+            >>> c.dict()
+            {'a': 0}
+            >>> c.parse(['--a', '1', '--b', '2', '--c', '3']).dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
 
         self.getattr("parser", ConfigParser()).parse(args, self, default_config, no_default_config_action)
@@ -429,14 +414,11 @@ class Config(NestedDict):
         Note that value defined in `Config` will override the default value defined in `add_argument`.
 
         Examples:
-        ```python
-        >>> c = Config(a=0, c=1)
-        >>> c.add_argument("--a", type=int, default=1)
-        >>> c.add_argument("--b", type=int, default=2)
-        >>> c.parse(['--c', '4']).dict()
-        {'a': 1, 'c': 4, 'b': 2}
-
-        ```
+            >>> c = Config(a=0, c=1)
+            >>> c.add_argument("--a", type=int, default=1)
+            >>> c.add_argument("--b", type=int, default=2)
+            >>> c.parse(['--c', '4']).dict()
+            {'a': 1, 'c': 4, 'b': 2}
         """
 
         self.getattr("parser", ConfigParser()).add_argument(*args, **kwargs)
@@ -453,22 +435,19 @@ class Config(NestedDict):
         + `lock`
 
         Examples:
-        ```python
-        >>> c = Config(**{'i.d': 1013})
-        >>> c.getattr('frozen')
-        False
-        >>> c.freeze(recursive=False).dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        True
-        >>> c.i.getattr('frozen')
-        False
-        >>> c.freeze(recursive=True).dict()
-        {'i': {'d': 1013}}
-        >>> c.i.getattr('frozen')
-        True
-
-        ```
+            >>> c = Config(**{'i.d': 1013})
+            >>> c.getattr('frozen')
+            False
+            >>> c.freeze(recursive=False).dict()
+            {'i': {'d': 1013}}
+            >>> c.getattr('frozen')
+            True
+            >>> c.i.getattr('frozen')
+            False
+            >>> c.freeze(recursive=True).dict()
+            {'i': {'d': 1013}}
+            >>> c.i.getattr('frozen')
+            True
         """
 
         @wraps(self.freeze)
@@ -495,26 +474,23 @@ class Config(NestedDict):
         + `unlock`
 
         Examples:
-        ```python
-        >>> c = Config(**{'i.d': 1013})
-        >>> c.getattr('frozen')
-        False
-        >>> c.freeze().dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        True
-        >>> c.defrost(recursive=False).dict()
-        {'i': {'d': 1013}}
-        >>> c.getattr('frozen')
-        False
-        >>> c.i.getattr('frozen')
-        True
-        >>> c.defrost().dict()
-        {'i': {'d': 1013}}
-        >>> c.i.getattr('frozen')
-        False
-
-        ```
+            >>> c = Config(**{'i.d': 1013})
+            >>> c.getattr('frozen')
+            False
+            >>> c.freeze().dict()
+            {'i': {'d': 1013}}
+            >>> c.getattr('frozen')
+            True
+            >>> c.defrost(recursive=False).dict()
+            {'i': {'d': 1013}}
+            >>> c.getattr('frozen')
+            False
+            >>> c.i.getattr('frozen')
+            True
+            >>> c.defrost().dict()
+            {'i': {'d': 1013}}
+            >>> c.i.getattr('frozen')
+            False
         """
 
         @wraps(self.defrost)
@@ -535,16 +511,13 @@ class Config(NestedDict):
         Context manager which temporarily unlocks `Config`.
 
         Examples:
-        ```python
-        >>> c = Config()
-        >>> c.freeze().dict()
-        {}
-        >>> with c.unlocked():
-        ...     c['i.d'] = 1013
-        >>> c.defrost().dict()
-        {'i': {'d': 1013}}
-
-        ```
+            >>> c = Config()
+            >>> c.freeze().dict()
+            {}
+            >>> with c.unlocked():
+            ...     c['i.d'] = 1013
+            >>> c.defrost().dict()
+            {'i': {'d': 1013}}
         """
 
         was_frozen = self.getattr("frozen", False)
@@ -574,33 +547,30 @@ class Config(NestedDict):
             KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
 
         Examples:
-        ```python
-        >>> d = Config(**{"i.d": 1013})
-        >>> d.get('i.d')
-        1013
-        >>> d['i.d']
-        1013
-        >>> d.i.d
-        1013
-        >>> d.get('f', 2)
-        2
-        >>> d.f
-        Config(<class 'chanfig.config.Config'>, )
-        >>> del d.f
-        >>> d.freeze()
-        Config(<class 'chanfig.config.Config'>,
-          ('i'): Config(<class 'chanfig.config.Config'>,
-            ('d'): 1013
-          )
-        )
-        >>> d.f
-        Traceback (most recent call last):
-        AttributeError: 'Config' object has no attribute 'f'
-        >>> d["f.n"]
-        Traceback (most recent call last):
-        KeyError: 'f.n'
-
-        ```
+            >>> d = Config(**{"i.d": 1013})
+            >>> d.get('i.d')
+            1013
+            >>> d['i.d']
+            1013
+            >>> d.i.d
+            1013
+            >>> d.get('f', 2)
+            2
+            >>> d.f
+            Config(<class 'chanfig.config.Config'>, )
+            >>> del d.f
+            >>> d.freeze()
+            Config(<class 'chanfig.config.Config'>,
+              ('i'): Config(<class 'chanfig.config.Config'>,
+                ('d'): 1013
+              )
+            )
+            >>> d.f
+            Traceback (most recent call last):
+            AttributeError: 'Config' object has no attribute 'f'
+            >>> d["f.n"]
+            Traceback (most recent call last):
+            KeyError: 'f.n'
         """
 
         if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
@@ -627,23 +597,20 @@ class Config(NestedDict):
             ValueError: If `Config` is frozen.
 
         Examples:
-        ```python
-        >>> c = Config()
-        >>> c['i.d'] = 1013
-        >>> c.i.d
-        1013
-        >>> c.freeze().dict()
-        {'i': {'d': 1013}}
-        >>> c['i.d'] = 1013
-        Traceback (most recent call last):
-        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-        >>> c.defrost().dict()
-        {'i': {'d': 1013}}
-        >>> c['i.d'] = 1013
-        >>> c.i.d
-        1013
-
-        ```
+            >>> c = Config()
+            >>> c['i.d'] = 1013
+            >>> c.i.d
+            1013
+            >>> c.freeze().dict()
+            {'i': {'d': 1013}}
+            >>> c['i.d'] = 1013
+            Traceback (most recent call last):
+            ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
+            >>> c.defrost().dict()
+            {'i': {'d': 1013}}
+            >>> c['i.d'] = 1013
+            >>> c.i.d
+            1013
         """
 
         return super().set(name, value, convert_mapping)
@@ -657,27 +624,24 @@ class Config(NestedDict):
             name:
 
         Examples:
-        ```python
-        >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
-        >>> d.i.d
-        1013
-        >>> d.f.n
-        'chang'
-        >>> d.delete('i.d')
-        >>> "i.d" in d
-        False
-        >>> d.i.d
-        Config(<class 'chanfig.config.Config'>, )
-        >>> "i.d" in d
-        True
-        >>> del d.f.n
-        >>> d.f.n
-        Config(<class 'chanfig.config.Config'>, )
-        >>> del d.c
-        Traceback (most recent call last):
-        AttributeError: 'Config' object has no attribute 'c'
-
-        ```
+            >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
+            >>> d.i.d
+            1013
+            >>> d.f.n
+            'chang'
+            >>> d.delete('i.d')
+            >>> "i.d" in d
+            False
+            >>> d.i.d
+            Config(<class 'chanfig.config.Config'>, )
+            >>> "i.d" in d
+            True
+            >>> del d.f.n
+            >>> d.f.n
+            Config(<class 'chanfig.config.Config'>, )
+            >>> del d.c
+            Traceback (most recent call last):
+            AttributeError: 'Config' object has no attribute 'c'
         """
 
         super().delete(name)
@@ -695,25 +659,22 @@ class Config(NestedDict):
             value: If `Config` does not contain `name`, return `default`.
 
         Examples:
-        ```python
-        >>> c = Config()
-        >>> c['i.d'] = 1013
-        >>> c.pop('i.d')
-        1013
-        >>> c.pop('i.d', True)
-        True
-        >>> c.freeze().dict()
-        {'i': {}}
-        >>> c['i.d'] = 1013
-        Traceback (most recent call last):
-        ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-        >>> c.defrost().dict()
-        {'i': {}}
-        >>> c['i.d'] = 1013
-        >>> c.pop('i.d')
-        1013
-
-        ```
+            >>> c = Config()
+            >>> c['i.d'] = 1013
+            >>> c.pop('i.d')
+            1013
+            >>> c.pop('i.d', True)
+            True
+            >>> c.freeze().dict()
+            {'i': {}}
+            >>> c['i.d'] = 1013
+            Traceback (most recent call last):
+            ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
+            >>> c.defrost().dict()
+            {'i': {}}
+            >>> c['i.d'] = 1013
+            >>> c.pop('i.d')
+            1013
         """
 
         return super().pop(name, default)
