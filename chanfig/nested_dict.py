@@ -62,23 +62,20 @@ class NestedDict(DefaultDict):
         `convert_mapping` is automatically applied to arguments during initialisation.
 
     Examples:
-    ```python
-    >>> NestedDict({"f.n": "chang"})
-    NestedDict(
-      ('f'): NestedDict(
-        ('n'): 'chang'
-      )
-    )
-    >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
-    >>> d.i.d = 1013
-    >>> d['i.d']
-    1013
-    >>> d.i.d
-    1013
-    >>> d.dict()
-    {'f': {'n': 'chang'}, 'i': {'d': 1013}}
-
-    ```
+        >>> NestedDict({"f.n": "chang"})
+        NestedDict(
+          ('f'): NestedDict(
+            ('n'): 'chang'
+          )
+        )
+        >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
+        >>> d.i.d = 1013
+        >>> d['i.d']
+        1013
+        >>> d.i.d
+        1013
+        >>> d.dict()
+        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
     """
 
     convert_mapping: bool = False
@@ -110,12 +107,9 @@ class NestedDict(DefaultDict):
             (Iterator):
 
         Examples:
-        ```python
-        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_keys())
-        ['a', 'b.c', 'b.d']
-
-        ```
+            >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
+            >>> list(d.all_keys())
+            ['a', 'b.c', 'b.d']
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -140,12 +134,9 @@ class NestedDict(DefaultDict):
             (Iterator):
 
         Examples:
-        ```python
-        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_values())
-        [1, 2, 3]
-
-        ```
+            >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
+            >>> list(d.all_values())
+            [1, 2, 3]
         """
 
         for value in self.values():
@@ -162,12 +153,9 @@ class NestedDict(DefaultDict):
             (Iterator):
 
         Examples:
-        ```python
-        >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
-        >>> list(d.all_items())
-        [('a', 1), ('b.c', 2), ('b.d', 3)]
-
-        ```
+            >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
+            >>> list(d.all_items())
+            [('a', 1), ('b.c', 2), ('b.d', 3)]
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -192,15 +180,12 @@ class NestedDict(DefaultDict):
             func(Callable):
 
         Examples:
-        ```python
-        >>> d = NestedDict()
-        >>> d.a = NestedDict()
-        >>> def func(d):
-        ...     d.t = 1
-        >>> d.apply(func).dict()
-        {'a': {'t': 1}, 't': 1}
-
-        ```
+            >>> d = NestedDict()
+            >>> d.a = NestedDict()
+            >>> def func(d):
+            ...     d.t = 1
+            >>> d.apply(func).dict()
+            {'a': {'t': 1}, 't': 1}
         """
 
         for value in self.values():
@@ -227,30 +212,27 @@ class NestedDict(DefaultDict):
             KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
 
         Examples:
-        ```python
-        >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
-        >>> d.get('i.d')
-        1013
-        >>> d['i.d']
-        1013
-        >>> d.i.d
-        1013
-        >>> d.get('i.d', None)
-        1013
-        >>> d.get('f', 2)
-        2
-        >>> d.f
-        NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
-        >>> del d.f
-        >>> d = NestedDict()
-        >>> d.e
-        Traceback (most recent call last):
-        AttributeError: 'NestedDict' object has no attribute 'e'
-        >>> d.e.f
-        Traceback (most recent call last):
-        AttributeError: 'NestedDict' object has no attribute 'e'
-
-        ```
+            >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
+            >>> d.get('i.d')
+            1013
+            >>> d['i.d']
+            1013
+            >>> d.i.d
+            1013
+            >>> d.get('i.d', None)
+            1013
+            >>> d.get('f', 2)
+            2
+            >>> d.f
+            NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
+            >>> del d.f
+            >>> d = NestedDict()
+            >>> d.e
+            Traceback (most recent call last):
+            AttributeError: 'NestedDict' object has no attribute 'e'
+            >>> d.e.f
+            Traceback (most recent call last):
+            AttributeError: 'NestedDict' object has no attribute 'e'
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -283,41 +265,38 @@ class NestedDict(DefaultDict):
                 Defaults to self.convert_mapping.
 
         Examples:
-        ```python
-        >>> d = NestedDict(default_factory=NestedDict)
-        >>> d.set('i.d', 1013)
-        >>> d.get('i.d')
-        1013
-        >>> d.dict()
-        {'i': {'d': 1013}}
-        >>> d['f.n'] = 'chang'
-        >>> d.f.n
-        'chang'
-        >>> d.n.l = 'liu'
-        >>> d['n.l']
-        'liu'
-        >>> d['f.n.e'] = "error"
-        Traceback (most recent call last):
-        ValueError: Cannot set `f.n.e` to `error`, as `f.n=chang`.
-        >>> d['f.n.e.a'] = "error"
-        Traceback (most recent call last):
-        KeyError: 'e'
-        >>> d.f.n.e.a = "error"
-        Traceback (most recent call last):
-        AttributeError: 'str' object has no attribute 'e'
-        >>> d.setattr('convert_mapping', True)
-        >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
-        >>> d.a.b.c.d
-        1
-        >>> d['c.d'] = {'c': {'d': 1}, 'e.f' : 2}
-        >>> d.c.d['e.f']
-        2
-        >>> d.setattr('convert_mapping', False)
-        >>> d.set('e.f', {'c': {'d': 1}, 'e.f' : 2}, convert_mapping=True)
-        >>> d['e.f']['c.d']
-        1
-
-        ```
+            >>> d = NestedDict(default_factory=NestedDict)
+            >>> d.set('i.d', 1013)
+            >>> d.get('i.d')
+            1013
+            >>> d.dict()
+            {'i': {'d': 1013}}
+            >>> d['f.n'] = 'chang'
+            >>> d.f.n
+            'chang'
+            >>> d.n.l = 'liu'
+            >>> d['n.l']
+            'liu'
+            >>> d['f.n.e'] = "error"
+            Traceback (most recent call last):
+            ValueError: Cannot set `f.n.e` to `error`, as `f.n=chang`.
+            >>> d['f.n.e.a'] = "error"
+            Traceback (most recent call last):
+            KeyError: 'e'
+            >>> d.f.n.e.a = "error"
+            Traceback (most recent call last):
+            AttributeError: 'str' object has no attribute 'e'
+            >>> d.setattr('convert_mapping', True)
+            >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
+            >>> d.a.b.c.d
+            1
+            >>> d['c.d'] = {'c': {'d': 1}, 'e.f' : 2}
+            >>> d.c.d['e.f']
+            2
+            >>> d.setattr('convert_mapping', False)
+            >>> d.set('e.f', {'c': {'d': 1}, 'e.f' : 2}, convert_mapping=True)
+            >>> d['e.f']['c.d']
+            1
         """
 
         full_name = name
@@ -353,30 +332,27 @@ class NestedDict(DefaultDict):
             name:
 
         Examples:
-        ```python
-        >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
-        >>> d.i.d
-        1013
-        >>> d.f.n
-        'chang'
-        >>> d.delete('i.d')
-        >>> "i.d" in d
-        False
-        >>> d.i.d
-        Traceback (most recent call last):
-        AttributeError: 'NestedDict' object has no attribute 'd'
-        >>> del d.f.n
-        >>> d.f.n
-        Traceback (most recent call last):
-        AttributeError: 'NestedDict' object has no attribute 'n'
-        >>> del d.e
-        Traceback (most recent call last):
-        AttributeError: 'NestedDict' object has no attribute 'e'
-        >>> del d['e.f']
-        Traceback (most recent call last):
-        KeyError: 'f'
-
-        ```
+            >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+            >>> d.i.d
+            1013
+            >>> d.f.n
+            'chang'
+            >>> d.delete('i.d')
+            >>> "i.d" in d
+            False
+            >>> d.i.d
+            Traceback (most recent call last):
+            AttributeError: 'NestedDict' object has no attribute 'd'
+            >>> del d.f.n
+            >>> d.f.n
+            Traceback (most recent call last):
+            AttributeError: 'NestedDict' object has no attribute 'n'
+            >>> del d.e
+            Traceback (most recent call last):
+            AttributeError: 'NestedDict' object has no attribute 'e'
+            >>> del d['e.f']
+            Traceback (most recent call last):
+            KeyError: 'f'
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -400,23 +376,20 @@ class NestedDict(DefaultDict):
             value: If `NestedDict` does not contain `name`, return `default`.
 
         Examples:
-        ```python
-        >>> d = NestedDict({"i.d": 1013, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
-        >>> d.pop('i.d')
-        1013
-        >>> d.pop('i.d', True)
-        True
-        >>> d.pop('i.d')
-        Traceback (most recent call last):
-        KeyError: 'd'
-        >>> d.pop('e')
-        Traceback (most recent call last):
-        KeyError: 'e'
-        >>> d.pop('e.f')
-        Traceback (most recent call last):
-        KeyError: 'f'
-
-        ```
+            >>> d = NestedDict({"i.d": 1013, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
+            >>> d.pop('i.d')
+            1013
+            >>> d.pop('i.d', True)
+            True
+            >>> d.pop('i.d')
+            Traceback (most recent call last):
+            KeyError: 'd'
+            >>> d.pop('e')
+            Traceback (most recent call last):
+            KeyError: 'e'
+            >>> d.pop('e.f')
+            Traceback (most recent call last):
+            KeyError: 'f'
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -440,13 +413,10 @@ class NestedDict(DefaultDict):
             cls: Target class to be converted to.
 
         Examples:
-        ```python
-        >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
-        >>> d['i.d'] = 1013
-        >>> d.dict()
-        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
-
-        ```
+            >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
+            >>> d['i.d'] = 1013
+            >>> d.dict()
+            {'f': {'n': 'chang'}, 'i': {'d': 1013}}
         """
 
         # pylint: disable=C0103
@@ -471,23 +441,20 @@ class NestedDict(DefaultDict):
             recursive (bool):
 
         Examples:
-        ```python
-        >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-        >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
-        >>> d.difference(n).dict()
-        {'b': {'c': 3}, 'e': 4}
-        >>> d.difference("example.yaml").dict()
-        {'b': 2, 'c': 3}
-        >>> d.difference(n, recursive=False).dict()
-        {'b': {'c': 3, 'd': 3}, 'e': 4}
-        >>> l = [('a', 1), ('d', 4)]
-        >>> d.difference(l).dict()
-        {'d': 4}
-        >>> d.difference(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
+            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d.difference(n).dict()
+            {'b': {'c': 3}, 'e': 4}
+            >>> d.difference("example.yaml").dict()
+            {'b': 2, 'c': 3}
+            >>> d.difference(n, recursive=False).dict()
+            {'b': {'c': 3, 'd': 3}, 'e': 4}
+            >>> l = [('a', 1), ('d', 4)]
+            >>> d.difference(l).dict()
+            {'d': 4}
+            >>> d.difference(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         if isinstance(other, (PathLike, str, bytes)):
@@ -526,23 +493,20 @@ class NestedDict(DefaultDict):
             recursive (bool):
 
         Examples:
-        ```python
-        >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-        >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
-        >>> d.intersection(n).dict()
-        {'a': 1, 'b': {'d': 3}}
-        >>> d.intersection("example.yaml").dict()
-        {'a': 1}
-        >>> d.intersection(n, recursive=False).dict()
-        {'a': 1}
-        >>> l = [('a', 1), ('d', 4)]
-        >>> d.intersection(l).dict()
-        {'a': 1}
-        >>> d.intersection(1)
-        Traceback (most recent call last):
-        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
-
-        ```
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
+            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d.intersection(n).dict()
+            {'a': 1, 'b': {'d': 3}}
+            >>> d.intersection("example.yaml").dict()
+            {'a': 1}
+            >>> d.intersection(n, recursive=False).dict()
+            {'a': 1}
+            >>> l = [('a', 1), ('d', 4)]
+            >>> d.intersection(l).dict()
+            {'a': 1}
+            >>> d.intersection(1)
+            Traceback (most recent call last):
+            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got <class 'int'>.
         """
 
         if isinstance(other, (PathLike, str, bytes)):
@@ -575,13 +539,10 @@ class NestedDict(DefaultDict):
             cls (str | torch.device | torch.dtype):
 
         Examples:
-        ```python
-        >>> import torch
-        >>> d = NestedDict({'i.d': torch.tensor(1013)})
-        >>> d.cpu().dict()
-        {'i': {'d': tensor(1013)}}
-
-        ```
+            >>> import torch
+            >>> d = NestedDict({'i.d': torch.tensor(1013)})
+            >>> d.cpu().dict()
+            {'i': {'d': tensor(1013)}}
         """
 
         return self.apply(lambda _: super().to(cls))
@@ -594,14 +555,11 @@ class NestedDict(DefaultDict):
             (NestedDict):
 
         Examples:
-        ```python
-        >>> d = NestedDict({"a.b": Null, "b.c.d": Null, "b.c.e.f": Null, "c.d.e.f": Null, "h.j": 1})
-        >>> d.dict()
-        {'a': {'b': Null}, 'b': {'c': {'d': Null, 'e': {'f': Null}}}, 'c': {'d': {'e': {'f': Null}}}, 'h': {'j': 1}}
-        >>> d.dropnull().dict()
-        {'h': {'j': 1}}
-
-        ```
+            >>> d = NestedDict({"a.b": Null, "b.c.d": Null, "b.c.e.f": Null, "c.d.e.f": Null, "h.j": 1})
+            >>> d.dict()
+            {'a': {'b': Null}, 'b': {'c': {'d': Null, 'e': {'f': Null}}}, 'c': {'d': {'e': {'f': Null}}}, 'h': {'j': 1}}
+            >>> d.dropnull().dict()
+            {'h': {'j': 1}}
         """
 
         return NestedDict({k: v for k, v in self.all_items() if v is not Null})

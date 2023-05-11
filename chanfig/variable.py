@@ -32,42 +32,39 @@ class Variable:
         To permanently disable this behavior, you can call `Variable.unwrap()`.
 
     Examples:
-    ```python
-    >>> v = Variable(1)
-    >>> n = v
-    >>> v, n
-    (1, 1)
-    >>> v += 1
-    >>> v, n
-    (2, 2)
-    >>> v.value = 3
-    >>> v, n
-    (3, 3)
-    >>> n.set(4)
-    >>> v, n
-    (4, 4)
-    >>> n = 5
-    >>> v, n
-    (4, 5)
-    >>> f'{v} < {n}'
-    '4 < 5'
-    >>> isinstance(v, int)
-    True
-    >>> type(v)
-    <class 'chanfig.variable.Variable'>
-    >>> v.dtype
-    <class 'int'>
-    >>> with v.unwrapped():
-    ...    isinstance(v, int)
-    False
-    >>> v = Variable('hello')
-    >>> f'{v}, world!'
-    'hello, world!'
-    >>> v += ', world!'
-    >>> v
-    'hello, world!'
-
-    ```
+        >>> v = Variable(1)
+        >>> n = v
+        >>> v, n
+        (1, 1)
+        >>> v += 1
+        >>> v, n
+        (2, 2)
+        >>> v.value = 3
+        >>> v, n
+        (3, 3)
+        >>> n.set(4)
+        >>> v, n
+        (4, 4)
+        >>> n = 5
+        >>> v, n
+        (4, 5)
+        >>> f'{v} < {n}'
+        '4 < 5'
+        >>> isinstance(v, int)
+        True
+        >>> type(v)
+        <class 'chanfig.variable.Variable'>
+        >>> v.dtype
+        <class 'int'>
+        >>> with v.unwrapped():
+        ...    isinstance(v, int)
+        False
+        >>> v = Variable('hello')
+        >>> f'{v}, world!'
+        'hello, world!'
+        >>> v += ', world!'
+        >>> v
+        'hello, world!'
     """
 
     wrap_type: bool = True
@@ -102,16 +99,13 @@ class Variable:
         Data type of the object wrapped in `Variable`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> type(id)
-        <class 'chanfig.variable.Variable'>
-        >>> id.dtype
-        <class 'int'>
-        >>> issubclass(id.dtype, int)
-        True
-
-        ```
+            >>> id = Variable(1013)
+            >>> type(id)
+            <class 'chanfig.variable.Variable'>
+            >>> id.dtype
+            <class 'int'>
+            >>> issubclass(id.dtype, int)
+            True
         """
 
         return self.value.__class__
@@ -142,14 +136,11 @@ class Variable:
             cls: The type to convert to.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.to(float)
-        1013.0
-        >>> id.to(str)
-        '1013.0'
-
-        ```
+            >>> id = Variable(1013)
+            >>> id.to(float)
+            1013.0
+            >>> id.to(str)
+            '1013.0'
         """
 
         self.value = cls(self.value)
@@ -160,12 +151,9 @@ class Variable:
         Convert the object wrapped in `Variable` to python `int`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013.0)
-        >>> id.int()
-        1013
-
-        ```
+            >>> id = Variable(1013.0)
+            >>> id.int()
+            1013
         """
 
         return self.to(int)
@@ -175,12 +163,9 @@ class Variable:
         Convert the object wrapped in `Variable` to python `float`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.float()
-        1013.0
-
-        ```
+            >>> id = Variable(1013)
+            >>> id.float()
+            1013.0
         """
 
         return self.to(float)
@@ -190,12 +175,9 @@ class Variable:
         Convert the object wrapped in `Variable` to python `float`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.str()
-        '1013'
-
-        ```
+            >>> id = Variable(1013)
+            >>> id.str()
+            '1013'
         """
 
         return self.to(str)
@@ -205,16 +187,13 @@ class Variable:
         Wrap the type of `Variable`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.unwrap()
-        >>> isinstance(id, int)
-        False
-        >>> id.wrap()
-        >>> isinstance(id, int)
-        True
-
-        ```
+            >>> id = Variable(1013)
+            >>> id.unwrap()
+            >>> isinstance(id, int)
+            False
+            >>> id.wrap()
+            >>> isinstance(id, int)
+            True
         """
 
         self.wrap_type = True
@@ -224,13 +203,10 @@ class Variable:
         Unwrap the type of `Variable`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> id.unwrap()
-        >>> isinstance(id, int)
-        False
-
-        ```
+            >>> id = Variable(1013)
+            >>> id.unwrap()
+            >>> isinstance(id, int)
+            False
         """
 
         self.wrap_type = False
@@ -241,15 +217,12 @@ class Variable:
         Context manager which temporarily unwrap the `Variable`.
 
         Examples:
-        ```python
-        >>> id = Variable(1013)
-        >>> isinstance(id, int)
-        True
-        >>> with id.unwrapped():
-        ...    isinstance(id, int)
-        False
-
-        ```
+            >>> id = Variable(1013)
+            >>> isinstance(id, int)
+            True
+            >>> with id.unwrapped():
+            ...    isinstance(id, int)
+            False
         """
 
         wrap_type = self.wrap_type

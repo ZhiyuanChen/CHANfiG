@@ -38,16 +38,14 @@ class DefaultDict(FlatDict):
     Raises:
         TypeError: If `default_factory` is not callable.
 
-    ```python
-    >>> d = DefaultDict(list)
-    >>> d.a.append(1)
-    >>> d.a
-    [1]
-    >>> d = DefaultDict([])
-    Traceback (most recent call last):
-    TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
-
-    ```
+    Examples:
+        >>> d = DefaultDict(list)
+        >>> d.a.append(1)
+        >>> d.a
+        [1]
+        >>> d = DefaultDict([])
+        Traceback (most recent call last):
+        TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
     """
 
     default_factory: Optional[Callable] = None
@@ -91,20 +89,17 @@ class DefaultDict(FlatDict):
             ValueError: If `default_factory` is None.
 
         Examples:
-        ```python
-        >>> d = DefaultDict(default_factory=DefaultDict)
-        >>> d.add('d')
-        DefaultDict()
-        >>> d.get('d')
-        DefaultDict()
-        >>> d['n'] = 'chang'
-        >>> d.n
-        'chang'
-        >>> d.n = 'liu'
-        >>> d['n']
-        'liu'
-
-        ```
+            >>> d = DefaultDict(default_factory=DefaultDict)
+            >>> d.add('d')
+            DefaultDict()
+            >>> d.get('d')
+            DefaultDict()
+            >>> d['n'] = 'chang'
+            >>> d.n
+            'chang'
+            >>> d.n = 'liu'
+            >>> d['n']
+            'liu'
         """
         if self.default_factory is None:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")

@@ -33,34 +33,31 @@ class Registry(NestedDict):
         and access through `registry.sub_registry.register()`.
 
     Examples:
-    ```python
-    >>> registry = Registry("test")
-    >>> @registry.register
-    ... @registry.register("Module1")
-    ... class Module:
-    ...     def __init__(self, a, b):
-    ...         self.a = a
-    ...         self.b = b
-    >>> module = registry.register(Module, "Module2")
-    >>> registry
-    Registry(
-      ('Module1'): <class 'chanfig.registry.Module'>
-      ('Module'): <class 'chanfig.registry.Module'>
-      ('Module2'): <class 'chanfig.registry.Module'>
-    )
-    >>> registry.lookup("Module")
-    <class 'chanfig.registry.Module'>
-    >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
-    >>> # registry.register(Module)
-    >>> module = registry.build(config["module"])
-    >>> type(module)
-    <class 'chanfig.registry.Module'>
-    >>> module.a
-    1
-    >>> module.b
-    2
-
-    ```
+        >>> registry = Registry("test")
+        >>> @registry.register
+        ... @registry.register("Module1")
+        ... class Module:
+        ...     def __init__(self, a, b):
+        ...         self.a = a
+        ...         self.b = b
+        >>> module = registry.register(Module, "Module2")
+        >>> registry
+        Registry(
+          ('Module1'): <class 'chanfig.registry.Module'>
+          ('Module'): <class 'chanfig.registry.Module'>
+          ('Module2'): <class 'chanfig.registry.Module'>
+        )
+        >>> registry.lookup("Module")
+        <class 'chanfig.registry.Module'>
+        >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
+        >>> # registry.register(Module)
+        >>> module = registry.build(config["module"])
+        >>> type(module)
+        <class 'chanfig.registry.Module'>
+        >>> module.a
+        1
+        >>> module.b
+        2
     """
 
     override: bool = False
@@ -85,23 +82,20 @@ class Registry(NestedDict):
             ValueError: If the component with the same name already registered and `Registry.override=False`.
 
         Examples:
-        ```python
-        >>> registry = Registry("test")
-        >>> @registry.register
-        ... @registry.register("Module1")
-        ... class Module:
-        ...     def __init__(self, a, b):
-        ...         self.a = a
-        ...         self.b = b
-        >>> module = registry.register(Module, "Module2")
-        >>> registry
-        Registry(
-          ('Module1'): <class 'chanfig.registry.Module'>
-          ('Module'): <class 'chanfig.registry.Module'>
-          ('Module2'): <class 'chanfig.registry.Module'>
-        )
-
-        ```
+            >>> registry = Registry("test")
+            >>> @registry.register
+            ... @registry.register("Module1")
+            ... class Module:
+            ...     def __init__(self, a, b):
+            ...         self.a = a
+            ...         self.b = b
+            >>> module = registry.register(Module, "Module2")
+            >>> registry
+            Registry(
+              ('Module1'): <class 'chanfig.registry.Module'>
+              ('Module'): <class 'chanfig.registry.Module'>
+              ('Module2'): <class 'chanfig.registry.Module'>
+            )
         """
 
         if name in self and not self.override:
@@ -144,17 +138,14 @@ class Registry(NestedDict):
             KeyError: If the component is not registered.
 
         Examples:
-        ```python
-        >>> registry = Registry("test")
-        >>> @registry.register
-        ... class Module:
-        ...     def __init__(self, a, b):
-        ...         self.a = a
-        ...         self.b = b
-        >>> registry.lookup("Module")
-        <class 'chanfig.registry.Module'>
-
-        ```
+            >>> registry = Registry("test")
+            >>> @registry.register
+            ... class Module:
+            ...     def __init__(self, a, b):
+            ...         self.a = a
+            ...         self.b = b
+            >>> registry.lookup("Module")
+            <class 'chanfig.registry.Module'>
         """
 
         return self.get(name)
@@ -177,27 +168,24 @@ class Registry(NestedDict):
             KeyError: If the component is not registered.
 
         Examples:
-        ```python
-        >>> registry = Registry("test")
-        >>> @registry.register
-        ... class Module:
-        ...     def __init__(self, a, b):
-        ...         self.a = a
-        ...         self.b = b
-        >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
-        >>> # registry.register(Module)
-        >>> module = registry.build(**config["module"])
-        >>> type(module)
-        <class 'chanfig.registry.Module'>
-        >>> module.a
-        1
-        >>> module.b
-        2
-        >>> module = registry.build(config["module"], a=2)
-        >>> module.a
-        2
-
-        ```
+            >>> registry = Registry("test")
+            >>> @registry.register
+            ... class Module:
+            ...     def __init__(self, a, b):
+            ...         self.a = a
+            ...         self.b = b
+            >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
+            >>> # registry.register(Module)
+            >>> module = registry.build(**config["module"])
+            >>> type(module)
+            <class 'chanfig.registry.Module'>
+            >>> module.a
+            1
+            >>> module.b
+            2
+            >>> module = registry.build(config["module"], a=2)
+            >>> module.a
+            2
         """
 
         if isinstance(name, Mapping):
