@@ -36,7 +36,6 @@ from .utils import JsonEncoder, Null, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
-    from torch import Tensor as TorchTensor
     from torch import device as TorchDevice
     from torch import dtype as TorchDtype
 
@@ -577,9 +576,9 @@ class FlatDict(dict):
         if isinstance(cls, str):
             if cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
                 return getattr(self, cls)()
-        if TORCH_AVAILABLE and isinstance(cls, (TorchDevice, TorchDtype)):
+        if isinstance(cls, (TorchDevice, TorchDtype)):
             for k, v in self.items():
-                if isinstance(v, TorchTensor):
+                if hasattr(v, "to"):
                     self[k] = v.to(cls)
             return self
 
