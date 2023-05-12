@@ -21,9 +21,8 @@ from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
 
 from .default_dict import DefaultDict
-from .flat_dict import FlatDict, PathStr
+from .flat_dict import PathStr
 from .utils import Null
-from .variable import Variable
 
 if TYPE_CHECKING:
     from torch import device as TorchDevice
@@ -405,31 +404,6 @@ class NestedDict(DefaultDict):
                 return default
             raise KeyError(name)
         return super().pop(name)
-
-    def dict(self, cls: Callable = dict) -> Mapping:
-        r"""
-        Convert `NestedDict` to other `Mapping`.
-
-        Args:
-            cls: Target class to be converted to.
-
-        Examples:
-            >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
-            >>> d['i.d'] = 1013
-            >>> d.dict()
-            {'f': {'n': 'chang'}, 'i': {'d': 1013}}
-        """
-
-        # pylint: disable=C0103
-
-        ret = cls()
-        for k, v in self.items():
-            if isinstance(v, Variable):
-                v = v.value
-            if isinstance(v, FlatDict):
-                v = v.dict(cls)
-            ret[k] = v
-        return ret
 
     def merge(self, other: Union[Mapping, Iterable, PathStr]) -> NestedDict:
         r"""
