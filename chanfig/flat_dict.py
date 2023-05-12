@@ -51,6 +51,53 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
+def to_dict(obj: Any) -> Mapping[str, Any]:
+    r"""
+    Convert an object to a dict.
+
+    Args:
+        obj: Object to be converted.
+
+    Returns:
+        A dict.
+
+    Examples:
+        >>> to_dict(1)
+        1
+        >>> to_dict([1, 2, 3])
+        [1, 2, 3]
+        >>> to_dict((1, 2, 3))
+        (1, 2, 3)
+        >>> to_dict({1, 2, 3})
+        {1, 2, 3}
+        >>> to_dict({'a': 1, 'b': 2})
+        {'a': 1, 'b': 2}
+        >>> to_dict(Variable(1))
+        1
+        >>> to_dict(FlatDict(a=[[[[[FlatDict(b=1)]]]]]))
+        {'a': [[[[[{'b': 1}]]]]]}
+    """
+
+    if isinstance(obj, FlatDict):
+        return {k: to_dict(v) for k, v in obj.items()}
+    elif isinstance(obj, dict):
+        return obj
+    elif isinstance(obj, Variable):
+        return obj.value
+    elif isinstance(obj, list):
+        return [to_dict(v) for v in obj]  # type: ignore
+    elif isinstance(obj, tuple):
+        return tuple(to_dict(v) for v in obj)  # type: ignore
+    elif isinstance(obj, set):
+        return {to_dict(v) for v in obj}  # type: ignore
+    elif isinstance(obj, Variable):
+        return to_dict(obj.value)
+    elif isinstance(obj, (int, float, str, bool, type(None))):
+        return obj  # type: ignore
+    else:
+        return obj
+
+
 class FlatDict(dict):
     r"""
     `FlatDict` with attribute-style access.
@@ -407,7 +454,7 @@ class FlatDict(dict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        return cls({k: v.value if isinstance(v, Variable) else v for k, v in self.items()})
+        return cls(to_dict(self))
 
     def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""

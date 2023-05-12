@@ -6,6 +6,12 @@ date: 2022-05-04
 
 # Utilities
 
+## chanfig.to_dict
+
+::: chanfig.to_dict
+    options:
+        heading_level: 0
+
 ## chanfig.utils.Singleton
 
 ::: chanfig.utils.Singleton
