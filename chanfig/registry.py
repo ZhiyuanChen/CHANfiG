@@ -26,7 +26,7 @@ class Registry(NestedDict):
     `Registry` for components.
 
     Notes:
-        `Registry` inherits from NestedDict.
+        `Registry` inherits from `NestedDict`.
 
         Therefore, `Registry` comes in a nested structure by nature.
         You could create a sub-registry by simply calling `registry.sub_registry = Registry`,
