@@ -33,7 +33,7 @@ class Registry(NestedDict):
         and access through `registry.sub_registry.register()`.
 
     Examples:
-        >>> registry = Registry("test")
+        >>> registry = Registry()
         >>> @registry.register
         ... @registry.register("Module1")
         ... class Module:
@@ -47,6 +47,9 @@ class Registry(NestedDict):
           ('Module'): <class 'chanfig.registry.Module'>
           ('Module2'): <class 'chanfig.registry.Module'>
         )
+        >>> module = registry.register(Module, "Module")
+        Traceback (most recent call last):
+        ValueError: Component with name Module already registered.
         >>> registry.lookup("Module")
         <class 'chanfig.registry.Module'>
         >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
@@ -82,7 +85,7 @@ class Registry(NestedDict):
             ValueError: If the component with the same name already registered and `Registry.override=False`.
 
         Examples:
-            >>> registry = Registry("test")
+            >>> registry = Registry()
             >>> @registry.register
             ... @registry.register("Module1")
             ... class Module:
@@ -138,7 +141,7 @@ class Registry(NestedDict):
             KeyError: If the component is not registered.
 
         Examples:
-            >>> registry = Registry("test")
+            >>> registry = Registry()
             >>> @registry.register
             ... class Module:
             ...     def __init__(self, a, b):
@@ -168,7 +171,7 @@ class Registry(NestedDict):
             KeyError: If the component is not registered.
 
         Examples:
-            >>> registry = Registry("test")
+            >>> registry = Registry()
             >>> @registry.register
             ... class Module:
             ...     def __init__(self, a, b):
