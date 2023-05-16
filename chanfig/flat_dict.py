@@ -51,7 +51,7 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
-def to_dict(obj: Any) -> Mapping[str, Any]:
+def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     r"""
     Convert an object to a dict.
 
@@ -80,22 +80,21 @@ def to_dict(obj: Any) -> Mapping[str, Any]:
 
     if isinstance(obj, FlatDict):
         return {k: to_dict(v) for k, v in obj.items()}
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         return obj
-    elif isinstance(obj, Variable):
+    if isinstance(obj, Variable):
         return obj.value
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [to_dict(v) for v in obj]  # type: ignore
-    elif isinstance(obj, tuple):
+    if isinstance(obj, tuple):
         return tuple(to_dict(v) for v in obj)  # type: ignore
-    elif isinstance(obj, set):
+    if isinstance(obj, set):
         return {to_dict(v) for v in obj}  # type: ignore
-    elif isinstance(obj, Variable):
+    if isinstance(obj, Variable):
         return to_dict(obj.value)
-    elif isinstance(obj, (int, float, str, bool, type(None))):
+    if isinstance(obj, (int, float, str, bool, type(None))):
         return obj  # type: ignore
-    else:
-        return obj
+    return obj
 
 
 class FlatDict(dict):
