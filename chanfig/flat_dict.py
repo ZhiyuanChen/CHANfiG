@@ -181,7 +181,7 @@ class FlatDict(dict):
 
     def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
-            return self[name]
+            return self.get(name)
         return super().__getattribute__(name)
 
     def get(self, name: Any, default: Any = Null) -> Any:
@@ -257,8 +257,8 @@ class FlatDict(dict):
                 value = literal_eval(value)
             except (TypeError, ValueError, SyntaxError):
                 pass
-        if name in self and isinstance(self[name], Variable):
-            self[name].set(value)
+        if name in self and isinstance(self.get(name), Variable):
+            self.get(name).set(value)
         else:
             dict.__setitem__(self, name, value)
 
