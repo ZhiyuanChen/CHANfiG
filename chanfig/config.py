@@ -240,8 +240,8 @@ class Config(NestedDict):
     The differences between `Config` and `NestedDict` lies in 3 aspects:
 
     1. `Config` has `default_factory` set to `Config` and `convert_mapping` set to `True` by default.
-    2. `Config` has a `frozen` attribute,
-        which can be toggled with `freeze`(`lock`), `defrost`(`unlock`), and `unlocked`.
+    2. `Config` has a `frozen` attribute, which can be toggled with `freeze`(`lock`) & `defrost`(`unlock`)
+        or temporarily changed with `locked` & `unlocked`.
     3. `Config` has a `ConfigParser` built-in, and supports `add_argument` and `parse`.
 
     Config also features a `post` method and a `boot` method to support lazy-initilisation.
@@ -464,11 +464,35 @@ class Config(NestedDict):
             freeze(self)
         return self
 
-    def lock(self) -> Config:
+    def lock(self, recursive: bool = True) -> Config:
         r"""
         Alias of [`freeze`][chanfig.Config.freeze].
         """
-        return self.freeze()
+        return self.freeze(recursive=recursive)
+
+    @contextmanager
+    def locked(self):
+        """
+        Context manager which temporarily locks `Config`.
+
+        Examples:
+            >>> c = Config()
+            >>> with c.locked():
+            ...     c['i.d'] = 1013
+            Traceback (most recent call last):
+            ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
+            >>> c.i.d = 1013
+            >>> c.dict()
+            {'i': {'d': 1013}}
+        """
+
+        was_frozen = self.getattr("frozen", False)
+        try:
+            self.freeze()
+            yield self
+        finally:
+            if not was_frozen:
+                self.defrost()
 
     def defrost(self, recursive: bool = True) -> Config:
         r"""
@@ -511,11 +535,11 @@ class Config(NestedDict):
             defrost(self)
         return self
 
-    def unlock(self) -> Config:
+    def unlock(self, recursive: bool = True) -> Config:
         r"""
         Alias of [`defrost`][chanfig.Config.defrost].
         """
-        return self.defrost()
+        return self.defrost(recursive=recursive)
 
     @contextmanager
     def unlocked(self):
