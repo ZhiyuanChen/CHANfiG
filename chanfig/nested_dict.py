@@ -297,6 +297,7 @@ class NestedDict(DefaultDict):
             >>> d['e.f']['c.d']
             1
         """
+        # pylint: disable=W0642
 
         full_name = name
         if convert_mapping is None:
@@ -307,9 +308,12 @@ class NestedDict(DefaultDict):
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
                 default_factory = self.getattr("default_factory", self.empty)
-                if name not in self:
-                    self.__missing__(name, default_factory())
-                self, name = self[name], rest  # pylint: disable=W0642
+                if name in dir(self) and isinstance(getattr(self.__class__, name), property):
+                    self, name = getattr(self, name), rest
+                elif name not in self:
+                    self, name = self.__missing__(name, default_factory()), rest
+                else:
+                    self, name = self[name], rest
         except (AttributeError, TypeError):
             raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
