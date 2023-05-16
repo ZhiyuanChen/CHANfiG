@@ -241,11 +241,11 @@ class NestedDict(DefaultDict):
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
-        # if value is a normal dict
+        # if value is a python dict
         if not isinstance(self, NestedDict):
             if name not in self and default is not Null:
                 return default
-            return self[name]
+            return dict.get(self, name)
         return super().get(name, default)
 
     def set(  # pylint: disable=W0221
@@ -320,7 +320,7 @@ class NestedDict(DefaultDict):
             value = default_factory(value)
         if isinstance(self, Mapping):
             if not isinstance(self, NestedDict):
-                self[name] = value
+                dict.__setitem__(self, name, value)
             else:
                 super().set(name, value)
         else:

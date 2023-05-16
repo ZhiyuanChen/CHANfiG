@@ -103,5 +103,5 @@ class DefaultDict(FlatDict):
         """
         if self.default_factory is None:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")
-        self[name] = self.default_factory()  # pylint: disable=E1102
-        return self[name]
+        self.set(name, self.default_factory())  # pylint: disable=E1102
+        return self.get(name)
