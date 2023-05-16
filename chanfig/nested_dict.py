@@ -117,7 +117,7 @@ class NestedDict(DefaultDict):
         def all_keys(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + delimiter + key
+                    key = str(prefix) + str(delimiter) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
                 else:
@@ -163,7 +163,7 @@ class NestedDict(DefaultDict):
         def all_items(self, prefix=""):
             for key, value in self.items():
                 if prefix:
-                    key = prefix + delimiter + key
+                    key = str(prefix) + str(delimiter) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_items(value, key)
                 else:
