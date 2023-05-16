@@ -492,7 +492,7 @@ class FlatDict(dict):
         if not isinstance(other, FlatDict):
             other = FlatDict(other)
         for name, value in other.items():
-            self[name] = value
+            self.set(name, value)
         return self
 
     def merge_from_file(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
