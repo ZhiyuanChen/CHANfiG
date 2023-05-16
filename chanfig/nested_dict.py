@@ -436,7 +436,7 @@ class NestedDict(DefaultDict):
         if not isinstance(other, NestedDict):
             other = NestedDict(other)
         for name, value in other.all_items():
-            self[name] = value
+            self.set(name, value)
         return self
 
     def intersect(  # pylint: disable=W0221
