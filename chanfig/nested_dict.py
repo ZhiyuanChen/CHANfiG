@@ -171,7 +171,7 @@ class NestedDict(DefaultDict):
 
         return all_items(self)
 
-    def apply(self, func: Callable) -> NestedDict:
+    def apply(self, func: Callable, *args, **kwargs) -> NestedDict:
         r"""
         Recursively apply a function to `NestedDict` and its children.
 
@@ -189,8 +189,8 @@ class NestedDict(DefaultDict):
 
         for value in self.values():
             if isinstance(value, NestedDict):
-                value.apply(func)
-        return func(self) or self
+                value.apply(func, *args, **kwargs)
+        return func(self, *args, **kwargs) or self
 
     def get(self, name: Any, default: Any = Null) -> Any:
         r"""
