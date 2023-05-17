@@ -50,7 +50,8 @@ To overcome the aforementioned limitations, we inherit the Python built-in `dict
 
 #### Dict Operations
 
-`FlatDict` extends the `update` method of the original `dict`, allows passing another `Mapping`, `Iterable` or a path.
+`FlatDict` incorporates a `merge` method which allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict` object.
+Different to `update` method, `merge` assign value instead of replace values, which makes it work better with `DefaultDict` object.
 
 Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
@@ -59,7 +60,7 @@ Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it ver
 `FlatDict` supports the `to` method similar to PyTorch Tensors.
 You can simply convert all member values of `FlatDict` to a certain type or pass to a device in the same way.
 
-`FlatDict` also integrates `cpu`, `gpu` (`cuda`), and `tpu` methods for easier access.
+`FlatDict` also integrates `cpu`, `gpu` (`cuda`), and `tpu` (`xla`) methods for easier access.
 
 #### IO Operations
 
@@ -76,7 +77,7 @@ To facilities the needs of default values, we incorporate `DefaultDict` which ac
 
 Since most Configs are in a nested structure, we further propose a `NestedDict`.
 
-Based on `FlatDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
+Based on `DefaultDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
 
 `NestedDict` also comes with `apply` method, which made it easier to manipulate the nested structure.
 
