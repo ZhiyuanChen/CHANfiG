@@ -27,7 +27,7 @@ CHANfiG 的范式是：
 
 但是，默认的 Python 字典十分难以操作。
 
-访问字典成员的唯一方式是 `dict['name']` ，这无疑是极其繁琐的。
+访问字典成员的唯一方式是`dict['name']`，这无疑是极其繁琐的。
 更糟糕的，如果这个字典和配置一样是一个嵌套结构，访问成员将会变成类似于`dict['parent']['children']['name']`的样子。
 
 够了就是够了，是时候做出改变了。
@@ -35,7 +35,7 @@ CHANfiG 的范式是：
 我们需要属性方式的访问，并且我们现在就需要。
 `dict.name`和`dict.parent.children.name`是所有你需要的。
 
-尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性可字典成员的冲突。
+尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。
 
 为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`DefaultDict`、`NestedDict`、`Config`和`Registry`对象。
 
@@ -45,7 +45,8 @@ CHANfiG 的范式是：
 
 #### 字典操作
 
-`FlatDict`扩充原始的`dict`的`update`方法，使其支持传递另一个`Mapping`、`Iterable`或者一个路径。
+`FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`对象。
+与`update`方法不同，`merge`方法是赋值而不是替换，这使得他能更好的与`DefaultDict`对象配合使用。
 
 更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
@@ -54,7 +55,7 @@ CHANfiG 的范式是：
 `FlatDict`支持与 Pytorch Tensor 类似的`to`方法。
 你可以很简单的通过相同的方式将所有`FlatDict`的成员值转换为某种类型或者转一道某个设备上。
 
-`FlatDict`同时集成了`cpu`、`gpu` (`cuda`)、`tpu`方法来提供更便捷的访问。
+`FlatDict`同时集成了`cpu`、`gpu` (`cuda`)、`tpu` (`xla`)方法来提供更便捷的访问。
 
 #### IO 操作
 
@@ -71,7 +72,7 @@ CHANfiG 的范式是：
 
 由于大多数配置都是一个嵌套的结构，我们进一步提出了`NestedDict`。
 
-基于`FlatDict`，`NestedDict`提供了`all_keys`、`all_values`、`all_items`方法来允许一次性遍历整个嵌套结构。
+基于`DefaultDict`，`NestedDict`提供了`all_keys`、`all_values`、`all_items`方法来允许一次性遍历整个嵌套结构。
 
 `NestedDict`同时提供了一个`apply`方法，它可以使操纵嵌套结构更加容易。
 
