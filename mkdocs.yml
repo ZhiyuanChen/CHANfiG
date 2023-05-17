@@ -152,10 +152,22 @@ markdown_extensions:
   - pymdownx.smartsymbols
   - pymdownx.snippets
   - pymdownx.superfences:
+      preserve_tabs: true
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: python
+          class: python
+          validator: !!python/name:markdown_exec.validator
+          format: !!python/name:markdown_exec.formatter
+        - name: py
+          class: 'highlight'
+          format: !!python/object/apply:tools.pycon.py_command_formatter
+            kwds:
+              init: |
+                import markdown
+          validator: !!python/name:tools.pycon.py_command_validator
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:

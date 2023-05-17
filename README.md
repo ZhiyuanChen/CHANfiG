@@ -116,7 +116,7 @@ And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all th
 
 Moreover, if you find name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
-```python
+```py
 from chanfig import Config, Variable
 
 
