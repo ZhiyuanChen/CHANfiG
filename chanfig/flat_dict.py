@@ -302,6 +302,9 @@ class FlatDict(dict):
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
+    def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
+        raise KeyError(name)
+
     def getattr(self, name: str, default: Any = Null) -> Any:
         r"""
         Get attribute of `FlatDict`.
@@ -427,9 +430,6 @@ class FlatDict(dict):
             return super().hasattr(name)  # type: ignore
         except AttributeError:
             return False
-
-    def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
-        raise KeyError(name)
 
     def dict(self, cls: Callable = dict) -> Mapping:
         r"""
