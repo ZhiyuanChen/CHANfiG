@@ -80,10 +80,6 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
 
     if isinstance(obj, FlatDict):
         return {k: to_dict(v) for k, v in obj.items()}
-    if isinstance(obj, dict):
-        return obj
-    if isinstance(obj, Variable):
-        return obj.value
     if isinstance(obj, list):
         return [to_dict(v) for v in obj]  # type: ignore
     if isinstance(obj, tuple):
@@ -91,9 +87,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     if isinstance(obj, set):
         return {to_dict(v) for v in obj}  # type: ignore
     if isinstance(obj, Variable):
-        return to_dict(obj.value)
-    if isinstance(obj, (int, float, str, bool, type(None))):
-        return obj  # type: ignore
+        return obj.value
     return obj
 
 
