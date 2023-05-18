@@ -55,6 +55,8 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     r"""
     Convert an object to a dict.
 
+    Note that when converting a `set` object, it may be converted to a `tuple` object if its values is not hashable.
+
     Args:
         obj: Object to be converted.
 
@@ -76,16 +78,21 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
         1
         >>> to_dict(FlatDict(a=[[[[[FlatDict(b=1)]]]]]))
         {'a': [[[[[{'b': 1}]]]]]}
+        >>> to_dict(FlatDict(a={FlatDict(b=1)}))
+        {'a': ({'b': 1},)}
     """
 
-    if isinstance(obj, FlatDict):
+    if isinstance(obj, Mapping):
         return {k: to_dict(v) for k, v in obj.items()}
     if isinstance(obj, list):
         return [to_dict(v) for v in obj]  # type: ignore
     if isinstance(obj, tuple):
         return tuple(to_dict(v) for v in obj)  # type: ignore
     if isinstance(obj, set):
-        return {to_dict(v) for v in obj}  # type: ignore
+        try:
+            return set(to_dict(v) for v in obj)  # type: ignore
+        except TypeError:
+            return tuple(to_dict(v) for v in obj)  # type: ignore
     if isinstance(obj, Variable):
         return obj.value
     return obj
