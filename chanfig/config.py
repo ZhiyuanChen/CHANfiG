@@ -90,29 +90,29 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
             {'i': {'d': 1013}, 'f': {'n': 'chang'}}
 
-            # Values in command line overrides values in `default_config` file.
+            Values in command line overrides values in `default_config` file.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
             {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-            # Values in `default_config` file overrides values in `Config` object.
+            Values in `default_config` file overrides values in `Config` object.
             >>> c = Config(a=2)
             >>> c.parse(['--config', 'example.yaml'], default_config='config').dict()
             {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
 
-            # ValueError will be raised when `default_config` is specified but not presented in command line.
+            ValueError will be raised when `default_config` is specified but not presented in command line.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config').dict()
             Traceback (most recent call last):
             ValueError: default_config is set to config, but not found in args.
 
-            # ValueError will be suppressed when `default_config` is specified bug not presented in command line,
-            # and `no_default_config_action` is set to `ignore` or `warn`.
+            ValueError will be suppressed when `default_config` is specified bug not presented in command line,
+            and `no_default_config_action` is set to `ignore` or `warn`.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='ignore').dict()
             {'a': 2}
 
-            # ValueError will be raised when `no_default_config_action` is not in `raise`, `ignore`, and `warn`.
+            ValueError will be raised when `no_default_config_action` is not in `raise`, `ignore`, and `warn`.
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='suppress').dict()
             Traceback (most recent call last):
