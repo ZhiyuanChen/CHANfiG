@@ -448,6 +448,9 @@ class FlatDict(dict):
         Returns:
             (Mapping):
 
+        See Also:
+            [`to_dict`][chanfig.flat_dict.to_dict]: implementation of `dict` method.
+
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
             >>> d.dict()

@@ -17,50 +17,14 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser, Namespace, _StoreAction
+from argparse import ArgumentParser, Namespace
 from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Iterable, Optional, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
-from .utils import Null
-
-
-class StoreAction(_StoreAction):  # pylint: disable=R0903
-    def __init__(  # pylint: disable=R0913
-        self,
-        option_strings,
-        dest,
-        nargs=None,
-        const=None,
-        default=Null,
-        type=None,  # pylint: disable=W0622
-        choices=None,
-        required=False,
-        help=None,  # pylint: disable=W0622
-        metavar=None,
-    ):
-        if dest is not None and type is not None:
-            warn(f"type of argument {dest} is set to {type}, but CHANfiG will ignore it.")
-            type = None
-        super().__init__(
-            option_strings=option_strings,
-            dest=dest,
-            nargs=nargs,
-            const=const,
-            default=default,
-            type=type,
-            choices=choices,
-            required=required,
-            help=help,
-            metavar=metavar,
-        )
-        if self.default is not Null:
-            warn(
-                f"Default value for argument {self.dest} is set to {self.default}, "
-                "Default value defined in argument will be overwritten by default value defined in Config",
-            )
+from .utils import Null, StoreAction
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
@@ -456,10 +420,11 @@ class Config(NestedDict):
 
         @wraps(self.freeze)
         def freeze(config: Config) -> None:
-            config.setattr("frozen", True)
+            if isinstance(config, Config):
+                config.setattr("frozen", True)
 
         if recursive:
-            self.apply(freeze)
+            self.apply_(freeze)
         else:
             freeze(self)
         return self
@@ -527,10 +492,11 @@ class Config(NestedDict):
 
         @wraps(self.defrost)
         def defrost(config: Config) -> None:
-            config.setattr("frozen", False)
+            if isinstance(config, Config):
+                config.setattr("frozen", False)
 
         if recursive:
-            self.apply(defrost)
+            self.apply_(defrost)
         else:
             defrost(self)
         return self

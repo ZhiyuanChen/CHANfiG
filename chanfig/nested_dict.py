@@ -17,52 +17,16 @@
 from __future__ import annotations
 
 from functools import wraps
-from inspect import ismethod
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
 
 from .default_dict import DefaultDict
 from .flat_dict import PathStr
-from .utils import Null
+from .utils import Null, apply, apply_
 
 if TYPE_CHECKING:
     from torch import device as TorchDevice
     from torch import dtype as TorchDtype
-
-
-def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
-    r"""
-    Apply `func` to all children of `obj`.
-
-    Note that this method is meant for non-in-place modification of `obj` and should return a new object.
-
-    Args:
-        obj: Object to apply function.
-        func: Function to be applied.
-        *args: Positional arguments to be passed to `func`.
-        **kwargs: Keyword arguments to be passed to `func`.
-
-    Returns:
-        (Any): Return value of `func`.
-
-    See Also:
-        [`apply_`][chanfig.nested_dict.apply_]: Apply a in-place operation.
-    """
-
-    if isinstance(obj, Mapping):
-        {k: apply(v, func, *args, **kwargs) for k, v in obj.items()}
-    if isinstance(obj, list):
-        [apply(v, func, *args, **kwargs) for v in obj]  # type: ignore
-    if isinstance(obj, tuple):
-        tuple(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-    if isinstance(obj, set):
-        try:
-            set(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-        except TypeError:
-            tuple(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-    if isinstance(obj, NestedDict):
-        return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
-    return obj
 
 
 class NestedDict(DefaultDict):
@@ -211,22 +175,60 @@ class NestedDict(DefaultDict):
         r"""
         Recursively apply a function to `NestedDict` and its children.
 
+        Note:
+            This method is meant for non-in-place modification of `obj`, for example, [`to`][chanfig.NestedDict.to].
+
         Args:
             func(Callable):
 
+        See Also:
+            [`apply_`][chanfig.NestedDict.apply_]: Apply a in-place operation.
+            [`apply`][chanfig.utils.apply]: implementation of `apply` method.
+
         Examples:
             >>> def func(d):
-            ...     d.t = 1
+            ...     if isinstance(d, NestedDict):
+            ...         d.t = 1
             >>> d = NestedDict()
             >>> d.a = NestedDict()
             >>> d.b = [NestedDict(),]
             >>> d.c = (NestedDict(),)
             >>> d.d = {NestedDict(),}
             >>> d.apply(func).dict()
+            {'a': {}, 'b': [{}], 'c': ({},), 'd': ({},)}
+        """
+
+        return apply(self, func, *args, **kwargs)
+
+    def apply_(self, func: Callable, *args, **kwargs) -> NestedDict:
+        r"""
+        Recursively apply a function to `NestedDict` and its children.
+
+        Note:
+            This method is meant for in-place modification of `obj`, for example, [`freeze`][chanfig.Config.freeze].
+
+        Args:
+            func(Callable):
+
+        See Also:
+            [`apply`][chanfig.NestedDict.apply]: Apply a non-in-place operation.
+            [`apply_`][chanfig.utils.apply_]: implementation of `apply_` method.
+
+        Examples:
+            >>> def func(d):
+            ...     if isinstance(d, NestedDict):
+            ...         d.t = 1
+            >>> d = NestedDict()
+            >>> d.a = NestedDict()
+            >>> d.b = [NestedDict(),]
+            >>> d.c = (NestedDict(),)
+            >>> d.d = {NestedDict(),}
+            >>> d.apply_(func).dict()
             {'a': {'t': 1}, 'b': [{'t': 1}], 'c': ({'t': 1},), 'd': ({'t': 1},), 't': 1}
         """
 
-        return apply(self, func, *args, **kwargs) or self
+        apply_(self, func, *args, **kwargs)
+        return self
 
     def get(self, name: Any, default: Any = Null) -> Any:
         r"""
@@ -590,7 +592,11 @@ class NestedDict(DefaultDict):
             {'i': {'d': tensor(1013)}}
         """
 
-        return self.apply(super().to, cls)
+        def to(obj):
+            if hasattr(obj, "to"):
+                return obj.to(cls)
+
+        return self.apply(to)
 
     def dropnull(self) -> NestedDict:
         r"""

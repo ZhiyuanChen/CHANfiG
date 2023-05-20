@@ -14,12 +14,72 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from argparse import _StoreAction
+from inspect import ismethod
 from json import JSONEncoder
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
+from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 
 from .variable import Variable
+
+
+def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
+    r"""
+    Apply `func` to all children of `obj`.
+
+    Note that this function is meant for non-in-place modification of `obj` and should return the original object.
+
+    Args:
+        obj: Object to apply function.
+        func: Function to be applied.
+        *args: Positional arguments to be passed to `func`.
+        **kwargs: Keyword arguments to be passed to `func`.
+
+    Returns:
+        (Any): Return value of `func`.
+
+    See Also:
+        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
+    """
+
+    if isinstance(obj, Mapping):
+        return type(obj)({k: apply(v, func, *args, **kwargs) for k, v in obj.items()})  # type: ignore
+    if isinstance(obj, (list, tuple)):
+        return type(obj)(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
+    if isinstance(obj, set):
+        try:
+            return type(obj)(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
+        except TypeError:
+            tuple(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
+    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
+
+
+def apply_(obj: Any, func: Callable, *args, **kwargs) -> Any:
+    r"""
+    Apply `func` to all children of `obj`.
+
+    Note that this function is meant for non-in-place modification of `obj` and should return a new object.
+
+    Args:
+        obj: Object to apply function.
+        func: Function to be applied.
+        *args: Positional arguments to be passed to `func`.
+        **kwargs: Keyword arguments to be passed to `func`.
+
+    Returns:
+        (Any): Return value of `func`.
+
+    See Also:
+        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
+    """
+
+    if isinstance(obj, Mapping):
+        [apply_(v, func, *args, **kwargs) for v in obj.values()]  # type: ignore
+    if isinstance(obj, (list, tuple, set)):
+        [apply_(v, func, *args, **kwargs) for v in obj]  # type: ignore
+    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
 class Singleton(type):
@@ -102,3 +162,39 @@ class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
 
 
 Null = NULL()
+
+
+class StoreAction(_StoreAction):  # pylint: disable=R0903
+    def __init__(  # pylint: disable=R0913
+        self,
+        option_strings,
+        dest,
+        nargs=None,
+        const=None,
+        default=Null,
+        type=None,  # pylint: disable=W0622
+        choices=None,
+        required=False,
+        help=None,  # pylint: disable=W0622
+        metavar=None,
+    ):
+        if dest is not None and type is not None:
+            warn(f"type of argument {dest} is set to {type}, but CHANfiG will ignore it.")
+            type = None
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            nargs=nargs,
+            const=const,
+            default=default,
+            type=type,
+            choices=choices,
+            required=required,
+            help=help,
+            metavar=metavar,
+        )
+        if self.default is not Null:
+            warn(
+                f"Default value for argument {self.dest} is set to {self.default}, "
+                "Default value defined in argument will be overwritten by default value defined in Config",
+            )
