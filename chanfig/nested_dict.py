@@ -183,6 +183,7 @@ class NestedDict(DefaultDict):
 
         See Also:
             [`apply_`][chanfig.NestedDict.apply_]: Apply a in-place operation.
+
             [`apply`][chanfig.utils.apply]: implementation of `apply` method.
 
         Examples:
@@ -212,6 +213,7 @@ class NestedDict(DefaultDict):
 
         See Also:
             [`apply`][chanfig.NestedDict.apply]: Apply a non-in-place operation.
+
             [`apply_`][chanfig.utils.apply_]: implementation of `apply_` method.
 
         Examples:

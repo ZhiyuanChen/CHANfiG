@@ -12,6 +12,18 @@ date: 2022-05-04
     options:
         heading_level: 0
 
+## chanfig.utils.apply
+
+::: chanfig.utils.apply
+    options:
+        heading_level: 0
+
+## chanfig.utils.apply_
+
+::: chanfig.utils.apply_
+    options:
+        heading_level: 0
+
 ## chanfig.utils.Singleton
 
 ::: chanfig.utils.Singleton
