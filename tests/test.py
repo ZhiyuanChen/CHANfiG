@@ -1,7 +1,8 @@
 from functools import partial
 
-from chanfig import Config, Variable
 from torch import nn
+
+from chanfig import Config, Variable
 
 
 class Model:
