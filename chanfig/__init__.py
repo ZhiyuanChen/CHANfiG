@@ -23,7 +23,7 @@ from .config import Config, ConfigParser
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, to_dict
 from .nested_dict import NestedDict
-from .registry import Registry
+from .registry import GlobalRegistry, Registry
 from .variable import Variable
 
 __all__ = [
@@ -32,6 +32,7 @@ __all__ = [
     "NestedDict",
     "FlatDict",
     "Registry",
+    "GlobalRegistry",
     "DefaultDict",
     "ConfigParser",
     "to_dict",
