@@ -65,6 +65,8 @@ class Variable:
         >>> v += ', world!'
         >>> v
         'hello, world!'
+        >>> "hello" in v
+        True
     """
 
     wrap_type: bool = True
@@ -381,3 +383,6 @@ class Variable:
 
     def __str__(self):
         return self.value if isinstance(self, str) else str(self.value)
+
+    def __contains__(self, name):
+        return name in self.value
