@@ -19,6 +19,7 @@ from __future__ import annotations
 from functools import wraps
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
+from warnings import warn
 
 from .default_dict import DefaultDict
 from .flat_dict import PathStr
@@ -82,22 +83,7 @@ class NestedDict(DefaultDict):
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs) -> None:
         super().__init__(default_factory)
-        self._init(*args, **kwargs)
-
-    def _init(self, *args, **kwargs) -> None:
-        if len(args) == 1:
-            args = args[0]
-            if isinstance(args, Mapping):
-                for key, value in args.items():
-                    self.set(key, value, convert_mapping=True)
-            elif isinstance(args, Iterable):
-                for key, value in args:
-                    self.set(key, value, convert_mapping=True)
-        else:
-            for key, value in args:
-                self.set(key, value, convert_mapping=True)
-        for key, value in kwargs.items():
-            self.set(key, value, convert_mapping=True)
+        self.merge(*args, **kwargs)
 
     def all_keys(self) -> Iterator:
         r"""
@@ -452,38 +438,59 @@ class NestedDict(DefaultDict):
             raise KeyError(name)
         return super().pop(name)
 
-    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> NestedDict:
+    def merge(self, *args, **kwargs) -> NestedDict:
         r"""
-        Merge `other` into `NestedDict`.
+        Merge another container into `NestedDict`.
 
         Args:
-            other:
+            *args: `Mapping` or `Iterable` to merge.
+            convert_mapping: Whether to convert `Mapping` to `NestedDict`.
+            **kwargs: `Mapping` to merge.
 
         Returns:
             self:
 
         **Alias**:
 
-        + `merge_from_file`
         + `union`
 
         Examples:
-            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3, 'c.d.e': 4, 'c.d.f': 5, 'c.e': 6})
+            >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.merge(n).dict()
-            {'a': 1, 'b': {'c': 3, 'd': 3}, 'e': 4}
+            {'a': 1, 'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}, 'e': 6}, 'd': 0}
             >>> NestedDict(a=1, b=1, c=1).merge_from_file("example.yaml").dict()  # alias
             {'a': 1, 'b': 2, 'c': 3}
             >>> NestedDict(a=1, b=1, c=1).union(NestedDict(b='b', c='c', d='d')).dict()  # alias
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         """
 
-        if isinstance(other, (PathLike, str, bytes)):
-            other = self.load(other)
-        if not isinstance(other, NestedDict):
-            other = NestedDict(other)
-        for name, value in other.all_items():
-            self.set(name, value)
+        @wraps(self.merge)
+        def merge(this: NestedDict, that: Iterable) -> Mapping:
+            if isinstance(that, Mapping):
+                that = that.items()
+            for key, value in that:
+                if key in this and isinstance(this[key], Mapping):
+                    if isinstance(value, Mapping):
+                        merge(this[key], value)
+                    else:
+                        this.set(key, value, convert_mapping=True)
+                else:
+                    this.set(key, value, convert_mapping=True)
+            return this
+
+        if len(args) == 1:
+            args = args[0]
+            if isinstance(args, (PathLike, str, bytes)):
+                args = self.load(args)  # type: ignore
+                warn(
+                    "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
+                    PendingDeprecationWarning,
+                )
+            merge(self, args)
+        else:
+            merge(self, args)
+        merge(self, kwargs.items())
         return self
 
     def intersect(  # pylint: disable=W0221
@@ -497,14 +504,14 @@ class NestedDict(DefaultDict):
             recursive (bool):
 
         Examples:
-            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3, 'c.d.e': 4, 'c.d.f': 5, 'c.e': 6})
+            >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.intersect(n).dict()
-            {'a': 1, 'b': {'d': 3}}
+            {'c': {'d': {'e': 4, 'f': 5}}}
             >>> d.intersect("example.yaml").dict()
             {'a': 1}
             >>> d.intersect(n, recursive=False).dict()
-            {'a': 1}
+            {}
             >>> l = [('a', 1), ('d', 4)]
             >>> d.intersect(l).dict()
             {'a': 1}
@@ -526,7 +533,9 @@ class NestedDict(DefaultDict):
             for key, value in that:
                 if key in this:
                     if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                        ret[key] = this[key].intersect(value)
+                        intersects = this[key].intersect(value)
+                        if intersects:
+                            ret[key] = intersects
                     elif this[key] == value:
                         ret[key] = value
             return ret
@@ -544,14 +553,14 @@ class NestedDict(DefaultDict):
             recursive (bool):
 
         Examples:
-            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3})
-            >>> n = {'a': 1, 'b.c': 3, 'b.d': 3, 'e': 4}
+            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3, 'c.d.e': 4, 'c.d.f': 5, 'c.e': 6})
+            >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.difference(n).dict()
-            {'b': {'c': 3}, 'e': 4}
+            {'b': {'c': 3, 'd': 5}, 'd': 0}
             >>> d.difference("example.yaml").dict()
             {'b': 2, 'c': 3}
             >>> d.difference(n, recursive=False).dict()
-            {'b': {'c': 3, 'd': 3}, 'e': 4}
+            {'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}}, 'd': 0}
             >>> l = [('a', 1), ('d', 4)]
             >>> d.difference(l).dict()
             {'d': 4}
@@ -574,9 +583,9 @@ class NestedDict(DefaultDict):
                 if key not in this:
                     ret[key] = value
                 elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                    diff = this[key].difference(value)
-                    if diff:
-                        ret[key] = diff
+                    differences = this[key].difference(value)
+                    if differences:
+                        ret[key] = differences
                 elif this[key] != value:
                     ret[key] = value
             return ret

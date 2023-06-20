@@ -21,6 +21,7 @@ from __future__ import annotations
 from ast import literal_eval
 from contextlib import contextmanager
 from copy import copy, deepcopy
+from functools import wraps
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -154,27 +155,6 @@ class FlatDict(dict):
     # pylint: disable=R0904
 
     indent: int = 2
-
-    def _init(self, *args, **kwargs) -> None:
-        r"""
-        Initialise values from arguments for `FlatDict`.
-
-        This method is called in `__init__`.
-        """
-
-        if len(args) == 1:
-            args = args[0]
-            if isinstance(args, Mapping):
-                for key, value in args.items():
-                    self.set(key, value)
-            elif isinstance(args, Iterable):
-                for key, value in args:
-                    self.set(key, value)
-        else:
-            for key, value in args:
-                self.set(key, value)
-        for key, value in kwargs.items():
-            self.set(key, value)
 
     def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
@@ -455,7 +435,7 @@ class FlatDict(dict):
 
         return cls(to_dict(self))
 
-    def merge(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def merge(self, *args, **kwargs) -> FlatDict:
         r"""
         Merge `other` into `FlatDict`.
 
@@ -467,7 +447,6 @@ class FlatDict(dict):
 
         **Alias**:
 
-        + `merge_from_file`
         + `union`
 
         Examples:
@@ -478,33 +457,63 @@ class FlatDict(dict):
             >>> l = [('c', 3), ('d', 4)]
             >>> d.merge(l).dict()
             {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
-            >>> d.merge("example.yaml").dict()
-            {'a': 1, 'b': 2, 'c': 3, 'd': 4}
-            >>> FlatDict(a=1, b=1, c=1).merge_from_file("example.yaml").dict()  # alias
-            {'a': 1, 'b': 2, 'c': 3}
             >>> FlatDict(a=1, b=1, c=1).union(FlatDict(b='b', c='c', d='d')).dict()  # alias
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         """
 
-        if isinstance(other, (PathLike, str, bytes)):
-            other = self.load(other)
-        if not isinstance(other, FlatDict):
-            other = FlatDict(other)
-        for name, value in other.items():
-            self.set(name, value)
+        @wraps(self.merge)
+        def merge(this: FlatDict, that: Iterable) -> Mapping:
+            if isinstance(that, Mapping):
+                that = that.items()
+            for key, value in that:
+                if key in this and isinstance(this[key], Mapping):
+                    if isinstance(value, Mapping):
+                        merge(this[key], value)
+                    else:
+                        this.set(key, value)
+                else:
+                    this.set(key, value)
+            return this
+
+        if len(args) == 1:
+            args = args[0]
+            if isinstance(args, (PathLike, str, bytes)):
+                args = self.load(args)  # type: ignore
+                warn(
+                    "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
+                    PendingDeprecationWarning,
+                )
+            merge(self, args)
+        else:
+            merge(self, args)
+        merge(self, kwargs.items())
         return self
 
-    def merge_from_file(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def union(self, *args, **kwargs) -> FlatDict:
         r"""
         Alias of [`merge`][chanfig.FlatDict.merge].
         """
-        return self.merge(other)
+        return self.merge(*args, **kwargs)
 
-    def union(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def merge_from_file(self, file: File, *args, **kwargs) -> FlatDict:
         r"""
-        Alias of [`merge`][chanfig.FlatDict.merge].
+        Merge content of `file` into `FlatDict`.
+
+        Args:
+            file (File):
+            *args: Passed to [`load`][chanfig.FlatDict.load].
+            **kwargs: Passed to [`load`][chanfig.FlatDict.load].
+
+        Returns:
+            self:
+
+        Examples:
+            >>> d = FlatDict(a=1, b=1)
+            >>> d.merge_from_file("example.yaml").dict()
+            {'a': 1, 'b': 2, 'c': 3}
         """
-        return self.merge(other)
+
+        return self.merge(self.load(file, *args, **kwargs))
 
     def intersect(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
@@ -547,11 +556,11 @@ class FlatDict(dict):
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
 
-    def inter(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def inter(self, other: Union[Mapping, Iterable, PathStr], *args, **kwargs) -> FlatDict:
         r"""
         Alias of [`intersect`][chanfig.FlatDict.intersect].
         """
-        return self.intersect(other)
+        return self.intersect(other, *args, **kwargs)
 
     def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
         r"""
@@ -594,11 +603,11 @@ class FlatDict(dict):
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
-    def diff(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def diff(self, other: Union[Mapping, Iterable, PathStr], *args, **kwargs) -> FlatDict:
         r"""
         Alias of [`difference`][chanfig.FlatDict.difference].
         """
-        return self.difference(other)
+        return self.difference(other, *args, **kwargs)
 
     def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
         r"""
@@ -910,9 +919,7 @@ class FlatDict(dict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        config = cls()
-        config._init(json_loads(string, *args, **kwargs))  # pylint: disable=W0212
-        return config
+        return cls().merge(json_loads(string, *args, **kwargs))  # pylint: disable=W0212
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -985,9 +992,7 @@ class FlatDict(dict):
         if "Loader" not in kwargs:
             kwargs["Loader"] = YamlLoader
 
-        config = cls()
-        config._init(yaml_load(string, *args, **kwargs))  # pylint: disable=W0212
-        return config
+        return cls().merge(yaml_load(string, *args, **kwargs))  # pylint: disable=W0212
 
     @staticmethod
     @contextmanager
@@ -1058,7 +1063,7 @@ class FlatDict(dict):
         """
 
         empty = cls.__new__(cls)
-        empty._init(*args, **kwargs)  # pylint: disable=W0212
+        empty.merge(*args, **kwargs)  # pylint: disable=W0212
         return empty
 
     def empty_like(self, *args, **kwargs) -> FlatDict:
