@@ -81,7 +81,8 @@ class NestedDict(DefaultDict):
     delimiter: str = "."
 
     def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs) -> None:
-        super().__init__(default_factory, *args, **kwargs)
+        super().__init__(default_factory)
+        self._init(*args, **kwargs)
 
     def _init(self, *args, **kwargs) -> None:
         if len(args) == 1:
@@ -376,27 +377,29 @@ class NestedDict(DefaultDict):
             name:
 
         Examples:
-            >>> d = NestedDict({"i.d": 1013, "f.n": "chang"}, default_factory=NestedDict)
+            >>> d = NestedDict({"i.d": 1013, "f.n": "chang"})
             >>> d.i.d
             1013
             >>> d.f.n
             'chang'
             >>> d.delete('i.d')
-            >>> "i.d" in d
-            False
+            >>> d.dict()
+            {'i': {}, 'f': {'n': 'chang'}}
             >>> d.i.d
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'd'
             >>> del d.f.n
+            >>> d.dict()
+            {'i': {}, 'f': {}}
             >>> d.f.n
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'n'
             >>> del d.e
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'e'
-            >>> del d['e.f']
+            >>> del d['f.n']
             Traceback (most recent call last):
-            KeyError: 'f'
+            KeyError: 'n'
         """
 
         delimiter = self.getattr("delimiter", ".")

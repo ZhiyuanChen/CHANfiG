@@ -155,10 +155,6 @@ class FlatDict(dict):
 
     indent: int = 2
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
-        self._init(*args, **kwargs)
-
     def _init(self, *args, **kwargs) -> None:
         r"""
         Initialise values from arguments for `FlatDict`.
