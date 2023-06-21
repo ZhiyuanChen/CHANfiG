@@ -1,13 +1,20 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+  "setuptools-scm",
+]
 
 [project]
 name = "chanfig"
 description = "Easier Configuration"
 readme = "README.md"
+keywords = [
+  "Config",
+  "Dict",
+  "Machine Learning",
+]
 license = {file = "LICENSE"}
-keywords = ["Machine Learning", "Config", "Dict"]
 maintainers = [
     {name = "Zhiyuan Chen", email = "this@zyc.ai"},
 ]
@@ -15,27 +22,46 @@ authors = [
     {name = "Zhiyuan Chen", email = "this@zyc.ai"},
     {name = "Evian C. Liu", email = "evian.liu@outlook.com"},
 ]
+requires-python = ">=3.7"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Education",
-    "Intended Audience :: Science/Research",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-requires-python = ">=3"
+dynamic = [
+  "version",
+]
 dependencies = [
-    "pyyaml",
+  "pyyaml",
 ]
-dynamic = ["version"]
-
 [project.urls]
+documentation = "https://chanfig.danling.org"
 homepage = "https://chanfig.danling.org"
 repository = "https://github.com/ZhiyuanChen/CHANfiG"
-documentation = "https://chanfig.danling.org"
 
 [tool.setuptools]
 packages = ["chanfig"]
 
 [tool.setuptools_scm]
 write_to = "chanfig/_version.py"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+line_length = 120
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+max-line-length = 120

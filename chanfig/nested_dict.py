@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from functools import wraps
 from os import PathLike
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
 from warnings import warn
 
 from .default_dict import DefaultDict
@@ -81,7 +81,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     convert_mapping: bool = False
     delimiter: str = "."
 
-    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs) -> None:
+    def __init__(self, *args, default_factory: Callable | None = None, **kwargs) -> None:
         super().__init__(default_factory)
         self.merge(*args, **kwargs)
 
@@ -131,7 +131,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             else:
                 yield value
 
-    def all_items(self) -> Iterator[Tuple]:
+    def all_items(self) -> Iterator[tuple]:
         r"""
         Get all items of `NestedDict`.
 
@@ -279,7 +279,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         self,
         name: Any,
         value: Any,
-        convert_mapping: Optional[bool] = None,
+        convert_mapping: bool | None = None,
     ) -> None:
         r"""
         Set value of `NestedDict`.
@@ -494,7 +494,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         return self
 
     def intersect(  # pylint: disable=W0221
-        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
+        self, other: Mapping | Iterable | PathStr, recursive: bool = True
     ) -> NestedDict:
         r"""
         Intersection of `NestedDict` and `other`.
@@ -543,7 +543,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         return self.empty_like(intersect(self, other))  # type: ignore
 
     def difference(  # pylint: disable=W0221, C0103
-        self, other: Union[Mapping, Iterable, PathStr], recursive: bool = True
+        self, other: Mapping | Iterable | PathStr, recursive: bool = True
     ) -> NestedDict:
         r"""
         Difference between `NestedDict` and `other`.
@@ -592,7 +592,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         return self.empty_like(difference(self, other))  # type: ignore
 
-    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> Any:
+    def to(self, cls: str | TorchDevice | TorchDtype) -> Any:
         r"""
         Convert values of `NestedDict` to target `cls`.
 

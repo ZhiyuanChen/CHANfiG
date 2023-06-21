@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from ast import literal_eval
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
 from functools import wraps
 from io import IOBase
@@ -27,7 +27,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import Any, Callable, Iterable, Mapping, Optional, Union
+from typing import Any, Callable, Iterable, Mapping
 from warnings import warn
 
 from yaml import dump as yaml_dump
@@ -84,7 +84,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
         return tuple(to_dict(v) for v in obj)  # type: ignore
     if isinstance(obj, set):
         try:
-            return set(to_dict(v) for v in obj)  # type: ignore
+            return {to_dict(v) for v in obj}  # type: ignore
         except TypeError:
             return tuple(to_dict(v) for v in obj)  # type: ignore
     if isinstance(obj, Variable):
@@ -223,10 +223,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         if isinstance(value, str):
-            try:
+            with suppress(TypeError, ValueError, SyntaxError):
                 value = literal_eval(value)
-            except (TypeError, ValueError, SyntaxError):
-                pass
         if name in self and isinstance(self.get(name), Variable):
             self.get(name).set(value)
         else:
@@ -508,7 +506,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return self.merge(self.load(file, *args, **kwargs))
 
-    def intersect(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def intersect(self, other: Mapping | Iterable | PathStr) -> FlatDict:
         r"""
         Intersection of `FlatDict` and `other`.
 
@@ -549,13 +547,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
 
-    def inter(self, other: Union[Mapping, Iterable, PathStr], *args, **kwargs) -> FlatDict:
+    def inter(self, other: Mapping | Iterable | PathStr, *args, **kwargs) -> FlatDict:
         r"""
         Alias of [`intersect`][chanfig.FlatDict.intersect].
         """
         return self.intersect(other, *args, **kwargs)
 
-    def difference(self, other: Union[Mapping, Iterable, PathStr]) -> FlatDict:
+    def difference(self, other: Mapping | Iterable | PathStr) -> FlatDict:
         r"""
         Difference between `FlatDict` and `other`.
 
@@ -596,13 +594,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
-    def diff(self, other: Union[Mapping, Iterable, PathStr], *args, **kwargs) -> FlatDict:
+    def diff(self, other: Mapping | Iterable | PathStr, *args, **kwargs) -> FlatDict:
         r"""
         Alias of [`difference`][chanfig.FlatDict.difference].
         """
         return self.difference(other, *args, **kwargs)
 
-    def to(self, cls: Union[str, TorchDevice, TorchDtype]) -> FlatDict:
+    def to(self, cls: str | TorchDevice | TorchDtype) -> FlatDict:
         r"""
         Convert values of `FlatDict` to target `cls`.
 
@@ -621,9 +619,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         # pylint: disable=C0103
 
-        if isinstance(cls, str):
-            if cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
-                return getattr(self, cls)()
+        if isinstance(cls, str) and cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
+            return getattr(self, cls)()
         if isinstance(cls, (TorchDevice, TorchDtype)):
             for k, v in self.items():
                 if hasattr(v, "to"):
@@ -726,7 +723,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return copy(self)
 
-    def __deepcopy__(self, memo: Optional[Mapping] = None) -> FlatDict:
+    def __deepcopy__(self, memo: Mapping | None = None) -> FlatDict:
         # pylint: disable=C0103
 
         if memo is not None and id(self) in memo:
@@ -739,7 +736,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 ret[k] = deepcopy(v)
         return ret
 
-    def deepcopy(self, memo: Optional[Mapping] = None) -> FlatDict:  # pylint: disable=W0613
+    def deepcopy(self, memo: Mapping | None = None) -> FlatDict:  # pylint: disable=W0613
         r"""
         Create a deep copy of `FlatDict`.
 
@@ -767,13 +764,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return deepcopy(self)
 
-    def clone(self, memo: Optional[Mapping] = None) -> FlatDict:
+    def clone(self, memo: Mapping | None = None) -> FlatDict:
         r"""
         Alias of [`deepcopy`][chanfig.FlatDict.deepcopy].
         """
         return self.deepcopy(memo=memo)
 
-    def dump(self, file: File, method: Optional[str] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
+    def dump(self, file: File, method: str | None = None, *args, **kwargs) -> None:  # pylint: disable=W1113
         r"""
         Dump `FlatDict` to file.
 
@@ -805,7 +802,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
 
     @classmethod
-    def load(cls, file: File, method: Optional[str] = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
+    def load(cls, file: File, method: str | None = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
         """
         Load `FlatDict` from file.
 
@@ -1023,7 +1020,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         if isinstance(file, (PathLike, str)):
-            file = open(file, *args, **kwargs)  # pylint: disable=W1514
+            file = open(file, *args, **kwargs)  # pylint: disable=W1514 # noqa: SIM115
             try:
                 yield file
             finally:

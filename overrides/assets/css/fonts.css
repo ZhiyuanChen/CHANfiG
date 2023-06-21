@@ -19,8 +19,6 @@
 }
 
 :root {
-  --md-text-font: "HYQiHei", "HelveticaNowDisplay", "HelveticaWorld"; 
+  --md-text-font: "HYQiHei", "HelveticaNowDisplay", "HelveticaWorld";
   --md-code-font: "CascadiaCode";
 }
-
-

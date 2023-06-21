@@ -20,7 +20,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional, Sequence
+from typing import Any, Callable, Iterable, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
@@ -51,9 +51,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
     def parse(  # pylint: disable=R0912
         self,
-        args: Optional[Sequence[str]] = None,
-        config: Optional[Config] = None,
-        default_config: Optional[str] = None,
+        args: Sequence[str] | None = None,
+        config: Config | None = None,
+        default_config: str | None = None,
         no_default_config_action: str = "raise",
     ) -> Config:
         r"""
@@ -254,7 +254,7 @@ class Config(NestedDict[_K, _V]):
     parser: ConfigParser
     frozen: bool = False
 
-    def __init__(self, *args, default_factory: Optional[Callable] = None, **kwargs):
+    def __init__(self, *args, default_factory: Callable | None = None, **kwargs):
         if default_factory is None:
             default_factory = Config
         super().__init__(*args, default_factory=default_factory, **kwargs)
@@ -345,8 +345,8 @@ class Config(NestedDict[_K, _V]):
 
     def parse(
         self,
-        args: Optional[Iterable[str]] = None,
-        default_config: Optional[str] = None,
+        args: Iterable[str] | None = None,
+        default_config: str | None = None,
         no_default_config_action: str = "raise",
     ) -> Config:
         r"""
@@ -586,7 +586,7 @@ class Config(NestedDict[_K, _V]):
         self,
         name: Any,
         value: Any,
-        convert_mapping: Optional[bool] = None,
+        convert_mapping: bool | None = None,
     ) -> None:
         r"""
         Set value of `Config`.
