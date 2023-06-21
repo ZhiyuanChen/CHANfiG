@@ -27,13 +27,13 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Iterable, Mapping, Optional, Union
+from typing import Any, Callable, Iterable, Mapping, Optional, Union
 from warnings import warn
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import JsonEncoder, Null, YamlDumper, YamlLoader
+from .utils import _K, _V, JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
@@ -43,13 +43,6 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-
-PathStr = Union[PathLike, str, bytes]
-File = Union[PathStr, IO]
-
-YAML = ("yml", "yaml")
-JSON = ("json",)
-PYTHON = ("py",)
 
 
 def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
@@ -99,7 +92,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     return obj
 
 
-class FlatDict(dict):
+class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
     r"""
     `FlatDict` with attribute-style access.
 
@@ -1174,5 +1167,5 @@ class FlatDict(dict):
     def _ipython_display_(self):
         return repr(self)
 
-    def _ipython_canary_method_should_not_exist_(self):
+    def _ipython_canary_method_should_not_exist_(self):  # pylint: disable=R0201
         return None

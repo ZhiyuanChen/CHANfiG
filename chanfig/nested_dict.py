@@ -23,14 +23,14 @@ from warnings import warn
 
 from .default_dict import DefaultDict
 from .flat_dict import PathStr
-from .utils import Null, apply, apply_
+from .utils import _K, _V, Null, apply, apply_
 
 if TYPE_CHECKING:
     from torch import device as TorchDevice
     from torch import dtype as TorchDtype
 
 
-class NestedDict(DefaultDict):
+class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     r"""
     `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.
     By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
@@ -606,9 +606,10 @@ class NestedDict(DefaultDict):
             {'i': {'d': tensor(1013)}}
         """
 
-        def to(obj):
+        def to(obj: Any) -> Any:  # pylint: disable=C0103
             if hasattr(obj, "to"):
                 return obj.to(cls)
+            return obj
 
         return self.apply(to)
 

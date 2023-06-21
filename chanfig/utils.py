@@ -17,12 +17,23 @@
 from argparse import _StoreAction
 from inspect import ismethod
 from json import JSONEncoder
-from typing import Any, Callable, Mapping
+from os import PathLike
+from typing import IO, Any, Callable, Mapping, TypeVar, Union
 from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 
 from .variable import Variable
+
+PathStr = Union[PathLike, str, bytes]
+File = Union[PathStr, IO]
+
+YAML = ("yml", "yaml")
+JSON = ("json",)
+PYTHON = ("py",)
+
+_K = TypeVar("_K")
+_V = TypeVar("_V")
 
 
 def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
@@ -123,7 +134,7 @@ class NULL(metaclass=Singleton):
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def __next__(self):  # pylint: disable=R0201
         raise StopIteration
 
     def __getattr__(self, name):

@@ -17,10 +17,10 @@
 from typing import Any, Callable, Optional
 
 from .flat_dict import FlatDict
-from .utils import Null
+from .utils import _K, _V, Null
 
 
-class DefaultDict(FlatDict):
+class DefaultDict(FlatDict[_K, _V]):
     r"""
     `DefaultDict` inherits from `FlatDict` and incorporates support of `default_factory`
     in the same manner as `collections.defaultdict`.
