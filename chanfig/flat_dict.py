@@ -1166,3 +1166,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     def _ipython_canary_method_should_not_exist_(self):  # pylint: disable=R0201
         return None
+
+    def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):  # pylint: disable=R0201
+        return None
+
+    def __rich__(self):  # pylint: disable=R0201
+        return self.__repr__()
