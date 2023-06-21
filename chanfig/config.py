@@ -24,7 +24,7 @@ from typing import Any, Callable, Iterable, Optional, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
-from .utils import Null, StoreAction
+from .utils import _K, _V, Null, StoreAction
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
@@ -197,7 +197,7 @@ def frozen_check(func: Callable):
     return decorator
 
 
-class Config(NestedDict):
+class Config(NestedDict[_K, _V]):
     r"""
     `Config` is an extension of `NestedDict`.
 
