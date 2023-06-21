@@ -117,7 +117,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Although it is possible to override other internal methods, it is not recommended to do so.
 
-        `__class__`, `__dict__`, and `getattr` are reserved and cannot be overrided in any manner.
+        `__class__`, `__dict__`, and `getattr` are reserved and cannot be overrode in any manner.
 
     Examples:
         >>> d = FlatDict()
@@ -1193,11 +1193,11 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
     def _ipython_display_(self):
         return repr(self)
 
-    def _ipython_canary_method_should_not_exist_(self):  # pylint: disable=R0201
+    def _ipython_canary_method_should_not_exist_(self):
         return None
 
-    def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):  # pylint: disable=R0201
+    def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):
         return None
 
-    def __rich__(self):  # pylint: disable=R0201
+    def __rich__(self):
         return self.__repr__()
