@@ -59,9 +59,47 @@ line-length = 120
 
 [tool.isort]
 line_length = 120
+profile = "black"
 
 [tool.flake8]
 max-line-length = 120
 
-[tool.pylint.messages_control]
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --cov"
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*", "setup.py"]
+
+[tool.coverage.paths]
+source = ["chanfig"]
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
+
+[tool.mypy.overrides]
+ignore_missing_imports = true
+
+[tool.pylint.format]
 max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = """
+  E0012,
+  E0401,
+  R0201,
+  R0801,
+"""
+
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.main]
+fail-under = 9.8

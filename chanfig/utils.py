@@ -132,7 +132,7 @@ class NULL(metaclass=Singleton):
     def __iter__(self):
         return self
 
-    def __next__(self):  # pylint: disable=R0201
+    def __next__(self):
         raise StopIteration
 
     def __getattr__(self, name):

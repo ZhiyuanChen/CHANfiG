@@ -2,22 +2,15 @@ name: push
 on: [push, pull_request]
 jobs:
   lint:
-    environment: analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ricardochaves/python-lint@v1.4.0
+      - uses: actions/setup-python@v4
         with:
-          use-pycodestyle: false
-          python-root-list: "chanfig"
-          extra-pylint-options: "--max-line-length 120 --disable E0012,E0401 --fail-under 9.8 --output-format=colorized"
-          extra-pycodestyle-options: "--max-line-length 120"
-          extra-flake8-options: "--max-line-length 120"
-          extra-black-options: "--line-length 120"
-          extra-mypy-options: "--ignore-missing-imports"
-          extra-isort-options: "--line-length 120"
+          python-version: 3.x
+          cache: "pip"
+      - uses: pre-commit/action@v3.0.0
   test:
-    environment: analysis
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -67,6 +60,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
