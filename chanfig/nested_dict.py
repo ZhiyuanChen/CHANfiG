@@ -24,6 +24,7 @@ from warnings import warn
 from .default_dict import DefaultDict
 from .flat_dict import PathStr
 from .utils import _K, _V, Null, apply, apply_
+from .variable import Variable
 
 if TYPE_CHECKING:
     from torch import device as TorchDevice
@@ -252,13 +253,19 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> d.f
             NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
             >>> del d.f
-            >>> d = NestedDict()
+            >>> d = NestedDict({"i.d": 1013})
             >>> d.e
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'e'
+            >>> d.e = {}
+            >>> d.get('e.f')
+            Traceback (most recent call last):
+            KeyError: 'f'
+            >>> d.get('e.f', 1)
+            1
             >>> d.e.f
             Traceback (most recent call last):
-            AttributeError: 'NestedDict' object has no attribute 'e'
+            AttributeError: 'dict' object has no attribute 'f'
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -272,7 +279,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if not isinstance(self, NestedDict):
             if name not in self and default is not Null:
                 return default
-            return dict.get(self, name)
+            return self[name]
         return super().get(name, default)
 
     def set(  # pylint: disable=W0221
@@ -397,6 +404,36 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             raise KeyError(name) from None
         super().delete(name)
 
+    def validate(self) -> None:
+        r"""
+        Validate if all `Variable` in `NestedDict` are valid.
+
+        Raises:
+            TypeError: If `Variable` has invalid type.
+            ValueError: If `Variable` has invalid value.
+
+        Examples:
+            >>> d = NestedDict({"i.d": Variable(1016, type=int, validator=lambda x: x > 0)})
+            >>> d.validate()
+            >>> d = NestedDict({"i.d": Variable(1016, type=str, validator=lambda x: x > 0)})
+            >>> d.validate()
+            Traceback (most recent call last):
+            TypeError: 'i.d' has invalid type. Value 1016 is not of type <class 'str'>.
+            >>> d = NestedDict({"i.d": Variable(-1, type=int, validator=lambda x: x > 0)})
+            >>> d.validate()
+            Traceback (most recent call last):
+            ValueError: 'i.d' has invalid value. Value -1 is not valid.
+        """
+
+        for name, value in self.all_items():
+            if isinstance(value, Variable):
+                try:
+                    value.validate()
+                except TypeError as exc:
+                    raise TypeError(f"'{name}' has invalid type. {exc}") from None
+                except ValueError as exc:
+                    raise ValueError(f"'{name}' has invalid value. {exc}") from None
+
     def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
         Pop value from `NestedDict`.
@@ -459,8 +496,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.merge(n).dict()
             {'a': 1, 'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}, 'e': 6}, 'd': 0}
-            >>> NestedDict(a=1, b=1, c=1).merge_from_file("example.yaml").dict()  # alias
-            {'a': 1, 'b': 2, 'c': 3}
             >>> NestedDict(a=1, b=1, c=1).union(NestedDict(b='b', c='c', d='d')).dict()  # alias
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
         """
@@ -601,9 +636,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         Examples:
             >>> import torch
-            >>> d = NestedDict({'i.d': torch.tensor(1013)})
+            >>> d = NestedDict({'i.d': torch.tensor(1013), 'f.n': 'chang'})
             >>> d.cpu().dict()
-            {'i': {'d': tensor(1013)}}
+            {'i': {'d': tensor(1013)}, 'f': {'n': 'chang'}}
         """
 
         def to(obj: Any) -> Any:  # pylint: disable=C0103

@@ -94,6 +94,8 @@ CHANfiG 的范式是：
 
 只要将值以`Variable`包装，然后每处更改都会在处处体现。
 
+`Variable`同时支持`type`、`choices`、`validator`、`required`来确保值的正确性。
+
 ## 使用
 
 CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 yaml 和 json 的配置文件。

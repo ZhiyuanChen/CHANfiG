@@ -97,6 +97,8 @@ Have one value for multiple names at multiple places? We got you covered.
 
 Just wrap the value with `Variable`, and one alteration will be reflected everywhere.
 
+`Variable` also supports `type`, `choices`, `validator`, and `required` to ensure the correctness of the value.
+
 ## Usage
 
 CHANfiG has great backward compatibility with previous configs.

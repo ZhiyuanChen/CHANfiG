@@ -16,12 +16,32 @@
 
 from contextlib import contextmanager
 from copy import copy
-from typing import Any, Callable, List, Mapping, Optional
+from typing import Any, Callable, Generic, List, Mapping, Optional
+
+from .utils import _V, Null
 
 
-class Variable:
+class Variable(Generic[_V]):
     r"""
     Mutable wrapper for immutable objects.
+
+    Args:
+        value: The value to wrap.
+        type: Desired type of the value.
+        choices: Possible values of the value.
+        validator: `Callable` that validates the value.
+        required: Whether the value is required.
+
+    Raises:
+        RuntimeError: If `required` is `True` and `value` is `Null`.
+        TypeError: If `type` is specified and `value` is not an instance of `type`.
+        ValueError:
+            If `choices` is specified and `value` is not in `choices`.
+            If `validator` is specified and `validator` returns `False`.
+
+    Attributes:
+        value: The wrapped value.
+        dtype: The type of the wrapped value.
 
     Notes:
         `Variable` by default wrap the instance type to type of the wrapped object.
@@ -70,10 +90,25 @@ class Variable:
     """
 
     wrap_type: bool = True
-    storage: List[Any]
+    _storage: List[Any]
+    _type: Optional[type] = None
+    _choices: Optional[List] = None
+    _validator: Optional[Callable] = None
+    _required: Optional[bool] = False
 
-    def __init__(self, value) -> None:
-        self.storage = [value]
+    def __init__(  # pylint: disable=R0913
+        self,
+        value: Optional[Any] = Null,
+        type: Optional[type] = None,  # pylint: disable=W0622
+        choices: Optional[List] = None,
+        validator: Optional[Callable] = None,
+        required: Optional[bool] = False,
+    ) -> None:
+        self._storage = [value]
+        self._type = type
+        self._choices = choices
+        self._validator = validator
+        self._required = required
 
     @property  # type: ignore
     def __class__(self) -> type:
@@ -85,7 +120,7 @@ class Variable:
         Fetch the object wrapped in `Variable`.
         """
 
-        return self.storage[0]
+        return self._storage[0]
 
     @value.setter
     def value(self, value) -> None:
@@ -93,7 +128,40 @@ class Variable:
         Assign value to the object wrapped in `Variable`.
         """
 
-        self.storage[0] = self._get_value(value)
+        self.validate(value)
+        self._storage[0] = self._get_value(value)
+
+    @property
+    def storage(self) -> List[Any]:
+        r"""
+        Storage of `Variable`.
+        """
+
+        return self._storage
+
+    @storage.setter
+    def storage(self, *args, **kwargs) -> None:
+        raise AttributeError("Cannot set storage.")
+
+    def validate(self, *args) -> None:
+        r"""
+        Validate if the value is valid.
+        """
+
+        if len(args) == 0:
+            value = self.value
+        elif len(args) == 1:
+            value = args[0]
+        else:
+            raise ValueError("Too many arguments.")
+        if self._required and value is Null:
+            raise RuntimeError("Value is required.")
+        if self._type is not None and not isinstance(value, self._type):
+            raise TypeError(f"Value {value} is not of type {self._type}.")
+        if self._choices is not None and value not in self._choices:
+            raise ValueError(f"Value {value} is not in choices {self._choices}.")
+        if self._validator is not None and not self._validator(value):
+            raise ValueError(f"Value {value} is not valid.")
 
     @property
     def dtype(self) -> type:
@@ -383,6 +451,9 @@ class Variable:
 
     def __str__(self):
         return self.value if isinstance(self, str) else str(self.value)
+
+    def __json__(self):
+        return self.value
 
     def __contains__(self, name):
         return name in self.value

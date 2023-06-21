@@ -38,7 +38,7 @@ from .variable import Variable
 
 try:
     from torch import device as TorchDevice
-    from torch import dtype as TorchDtype
+    from torch import dtype as TorchDType
 
     TORCH_AVAILABLE = True
 except ImportError:
@@ -234,10 +234,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         self.set(name, value)
 
     def __setattr__(self, name: Any, value: Any) -> None:
-        try:
-            self.set(name, value)
-        except KeyError:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+        self.set(name, value)
 
     def delete(self, name: Any) -> None:
         r"""
@@ -278,6 +275,36 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
         raise KeyError(name)
+
+    def validate(self) -> None:
+        r"""
+        Validate if all `Variable` in `FlatDict` are valid.
+
+        Raises:
+            TypeError: If `Variable` has invalid type.
+            ValueError: If `Variable` has invalid value.
+
+        Examples:
+            >>> d = FlatDict(d=Variable(1016, type=int), n=Variable('chang', validator=lambda x: x.islower()))
+            >>> d.validate()
+            >>> d = FlatDict(d=Variable(1016, type=str), n=Variable('chang', validator=lambda x: x.islower()))
+            >>> d.validate()
+            Traceback (most recent call last):
+            TypeError: 'd' has invalid type. Value 1016 is not of type <class 'str'>.
+            >>> d = FlatDict(d=Variable(1016, type=int), n=Variable('chang', validator=lambda x: x.isupper()))
+            >>> d.validate()
+            Traceback (most recent call last):
+            ValueError: 'n' has invalid value. Value chang is not valid.
+        """
+
+        for name, value in self.items():
+            if isinstance(value, Variable):
+                try:
+                    value.validate()
+                except TypeError as exc:
+                    raise TypeError(f"'{name}' has invalid type. {exc}") from None
+                except ValueError as exc:
+                    raise ValueError(f"'{name}' has invalid value. {exc}") from None
 
     def getattr(self, name: str, default: Any = Null) -> Any:
         r"""
@@ -600,7 +627,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
         return self.difference(other, *args, **kwargs)
 
-    def to(self, cls: str | TorchDevice | TorchDtype) -> FlatDict:
+    def to(self, cls: str | TorchDevice | TorchDType) -> FlatDict:
         r"""
         Convert values of `FlatDict` to target `cls`.
 
@@ -619,9 +646,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         # pylint: disable=C0103
 
-        if isinstance(cls, str) and cls in ("cpu", "gpu", "cuda", "tpu", "xla"):
-            return getattr(self, cls)()
-        if isinstance(cls, (TorchDevice, TorchDtype)):
+        if isinstance(cls, (str, TorchDevice, TorchDType)):
             for k, v in self.items():
                 if hasattr(v, "to"):
                     self[k] = v.to(cls)
@@ -1017,6 +1042,10 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             b: 2
             c: 3
             <BLANKLINE>
+            >>> with FlatDict.open(123, mode="w") as fp:
+            ...     print(fp.read())
+            Traceback (most recent call last):
+            TypeError: 'file=123' should be of type (str, os.PathLike) or (io.IOBase), but got <class 'int'>.
         """
 
         if isinstance(file, (PathLike, str)):
@@ -1029,7 +1058,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             yield file
         else:
             raise TypeError(
-                f"`file={file!r}` should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}."
+                f"'file={file!r}' should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}."
             )
 
     @classmethod
