@@ -23,8 +23,6 @@ from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 
-from .variable import Variable
-
 PathStr = Union[PathLike, str, bytes]
 File = Union[PathStr, IO]
 
@@ -150,8 +148,6 @@ class JsonEncoder(JSONEncoder):
     """
 
     def default(self, o: Any) -> Any:
-        if isinstance(o, Variable):
-            return o.value
         if hasattr(o, "__json__"):
             return o.__json__()
         return super().default(o)
