@@ -311,39 +311,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             name = delimiter.join(full_name.split(delimiter)[:depth])
             raise TypeError(f"Unable to set `{full_name}` to `{value}`, as `{name}={self}` is not a Mapping.")
 
-    def delete(self, name: Any) -> None:
-        r"""
-        Delete value from `NestedDict`.
-
-        Args:
-            name:
-
-        Examples:
-            >>> d = NestedDict({"i.d": 1013, "f.n": "chang"})
-            >>> d.i.d
-            1013
-            >>> d.f.n
-            'chang'
-            >>> d.delete('i.d')
-            >>> d.dict()
-            {'i': {}, 'f': {'n': 'chang'}}
-            >>> d.i.d
-            Traceback (most recent call last):
-            AttributeError: 'NestedDict' object has no attribute 'd'
-            >>> del d.f.n
-            >>> d.dict()
-            {'i': {}, 'f': {}}
-            >>> d.f.n
-            Traceback (most recent call last):
-            AttributeError: 'NestedDict' object has no attribute 'n'
-            >>> del d.e
-            Traceback (most recent call last):
-            AttributeError: 'NestedDict' object has no attribute 'e'
-            >>> del d['f.n']
-            Traceback (most recent call last):
-            KeyError: 'n'
-        """
-
+    def __delitem__(self, name: Any) -> None:
         delimiter = self.getattr("delimiter", ".")
         try:
             while isinstance(name, str) and delimiter in name:
@@ -351,7 +319,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
-        super().delete(name)
+        super().__delitem__(name)
 
     def validate(self) -> None:
         r"""

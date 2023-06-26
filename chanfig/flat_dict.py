@@ -197,6 +197,12 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         self[name] = literal_eval(value) if eval_str and isinstance(value, str) else value
 
+    def __delattr__(self, name: Any) -> None:
+        try:
+            del self[name]
+        except KeyError:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+
     def delete(self, name: Any) -> None:
         r"""
         Delete value from `FlatDict`.
@@ -223,16 +229,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             AttributeError: 'FlatDict' object has no attribute 'f'
         """
 
-        dict.__delitem__(self, name)
-
-    def __delitem__(self, name: Any) -> None:
-        return self.delete(name)
-
-    def __delattr__(self, name: Any) -> None:
-        try:
-            self.delete(name)
-        except KeyError:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+        del self[name]
 
     def validate(self) -> None:
         r"""
