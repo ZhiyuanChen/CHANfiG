@@ -12,15 +12,15 @@ date: 2022-05-04
 options:
 heading_level: 0
 
-## chanfig.utils.apply
+## chanfig.apply
 
-::: chanfig.utils.apply
+::: chanfig.apply
 options:
 heading_level: 0
 
-## chanfig.utils.apply_
+## chanfig.apply_
 
-::: chanfig.utils.apply_
+::: chanfig.apply_
 options:
 heading_level: 0
 
