@@ -22,8 +22,7 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
 from warnings import warn
 
 from .default_dict import DefaultDict
-from .flat_dict import PathStr
-from .utils import _K, _V, Null, apply, apply_
+from .utils import _K, _V, Null, PathStr, apply, apply_
 from .variable import Variable
 
 if TYPE_CHECKING:
