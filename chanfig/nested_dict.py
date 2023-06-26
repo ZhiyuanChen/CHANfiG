@@ -219,54 +219,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         apply_(self, func, *args, **kwargs)
         return self
 
-    def get(self, name: Any, default: Any = Null) -> Any:
-        r"""
-        Get value from `NestedDict`.
-
-        Note that `default` has higher priority than `default_factory`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `NestedDict` does not contain `name`, return `default`.
-                If `default` is not specified, return `default_factory()`.
-
-        Raises:
-            KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
-
-        Examples:
-            >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
-            >>> d.get('i.d')
-            1013
-            >>> d['i.d']
-            1013
-            >>> d.i.d
-            1013
-            >>> d.get('i.d', None)
-            1013
-            >>> d.get('f', 2)
-            2
-            >>> d.f
-            NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
-            >>> del d.f
-            >>> d = NestedDict({"i.d": 1013})
-            >>> d.e
-            Traceback (most recent call last):
-            AttributeError: 'NestedDict' object has no attribute 'e'
-            >>> d.e = {}
-            >>> d.get('e.f')
-            Traceback (most recent call last):
-            KeyError: 'f'
-            >>> d.get('e.f', 1)
-            1
-            >>> d.e.f
-            Traceback (most recent call last):
-            AttributeError: 'dict' object has no attribute 'f'
-        """
-
+    def __getitem__(self, name: Any) -> Any:
         delimiter = self.getattr("delimiter", ".")
         try:
             while isinstance(name, str) and delimiter in name:
@@ -274,12 +227,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
-        # if value is a python dict
         if not isinstance(self, NestedDict):
-            if name not in self and default is not Null:
-                return default
             return self[name]
-        return super().get(name, default)
+        return super().__getitem__(name)
 
     def set(  # pylint: disable=W0221
         self,

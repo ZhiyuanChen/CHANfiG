@@ -154,52 +154,16 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             return self.get(name)
         return super().__getattribute__(name)
 
-    def get(self, name: Any, default: Any = Null) -> Any:
-        r"""
-        Get value from `FlatDict`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `FlatDict` does not contain `name`, return `default`.
-
-        Raises:
-            KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
-
-        Examples:
-            >>> d = FlatDict(d=1013)
-            >>> d.get('d')
-            1013
-            >>> d['d']
-            1013
-            >>> d.d
-            1013
-            >>> d.get('d', None)
-            1013
-            >>> d.get('f', 2)
-            2
-            >>> d.get('f')
-            Traceback (most recent call last):
-            KeyError: 'f'
-        """
-
-        if name in self:
-            return dict.__getitem__(self, name)
-        if default is not Null:
-            return default
-        return self.__missing__(name)
-
-    def __getitem__(self, name: Any) -> Any:
-        return self.get(name)
-
     def __getattr__(self, name: Any) -> Any:
         try:
-            return self.get(name)
+            return self[name]
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+
+    def get(self, name: Any, default: Any = None) -> Any:
+        if name in self:
+            return self[name]
+        return default
 
     def set(self, name: Any, value: Any) -> None:
         r"""
