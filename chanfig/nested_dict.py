@@ -17,17 +17,53 @@
 from __future__ import annotations
 
 from functools import wraps
+from inspect import ismethod
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
 from warnings import warn
 
 from .default_dict import DefaultDict
-from .utils import _K, _V, Null, PathStr, apply, apply_
+from .utils import _K, _V, Null, PathStr, apply_
 from .variable import Variable
 
 if TYPE_CHECKING:
     from torch import device as TorchDevice
     from torch import dtype as TorchDtype
+
+
+def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
+    r"""
+    Apply `func` to all children of `obj`.
+
+    Note that this function is meant for non-in-place modification of `obj` and should return the original object.
+
+    Args:
+        obj: Object to apply function.
+        func: Function to be applied.
+        *args: Positional arguments to be passed to `func`.
+        **kwargs: Keyword arguments to be passed to `func`.
+
+    Returns:
+        (Any): Return value of `func`.
+
+    See Also:
+        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
+    """
+
+    if isinstance(obj, NestedDict):
+        return obj.empty_like(**{k: apply(v, func, *args, **kwargs) for k, v in obj.items()})
+    elif isinstance(obj, Mapping):
+        return {k: apply(v, func, *args, **kwargs) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [apply(v, func, *args, **kwargs) for v in obj]
+    if isinstance(obj, tuple):
+        return tuple(apply(v, func, *args, **kwargs) for v in obj)
+    if isinstance(obj, set):
+        try:
+            return {apply(v, func, *args, **kwargs) for v in obj}
+        except TypeError:
+            tuple(apply(v, func, *args, **kwargs) for v in obj)
+    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
 class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
@@ -50,14 +86,14 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
     Attributes:
         convert_mapping: bool = False
-            If `True`, all new values with a type of `Mapping` will be converted to `default_factory`.
-                If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
+            If `True`, all new values with type of `Mapping` will be converted to `default_factory`.
+            If `default_factory` is `Null`, will create an empty instance via `self.empty_like` as `default_factory`.
         delimiter: str = "."
             Delimiter for nested structure.
 
     Notes:
         When `convert_mapping` specified, all new values with type of `Mapping` will be converted to `default_factory`.
-            If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
+        If `default_factory` is `Null`, will create an empty instance via `self.empty_like` as `default_factory`.
 
         `convert_mapping` is automatically applied to arguments during initialisation.
 
@@ -81,7 +117,8 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     convert_mapping: bool = False
     delimiter: str = "."
 
-    def __init__(self, *args, default_factory: Callable | None = None, **kwargs) -> None:
+    def __init__(self, *args, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs) -> None:
+        self.setattr("convert_mapping", convert_mapping)
         super().__init__(default_factory)
         self.merge(*args, **kwargs)
 
@@ -336,11 +373,11 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
         delimiter = self.getattr("delimiter", ".")
-        default_factory = self.getattr("default_factory", self.empty)
+        default_factory = self.getattr("default_factory", self.empty_like)
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
-                default_factory = self.getattr("default_factory", self.empty)
+                default_factory = self.getattr("default_factory", self.empty_like)
                 if name in dir(self) and isinstance(getattr(self.__class__, name), property):
                     self, name = getattr(self, name), rest
                 elif name not in self:
@@ -351,11 +388,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
             value = default_factory(value)
-        if isinstance(self, Mapping):
-            if not isinstance(self, NestedDict):
-                dict.__setitem__(self, name, value)
-            else:
-                super().set(name, value)
+        if isinstance(self, NestedDict):
+            super().set(name, value)
+        elif isinstance(self, Mapping):
+            dict.__setitem__(self, name, value)
         else:
             raise ValueError(
                 f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."

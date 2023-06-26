@@ -34,37 +34,6 @@ _K = TypeVar("_K")
 _V = TypeVar("_V")
 
 
-def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
-    r"""
-    Apply `func` to all children of `obj`.
-
-    Note that this function is meant for non-in-place modification of `obj` and should return the original object.
-
-    Args:
-        obj: Object to apply function.
-        func: Function to be applied.
-        *args: Positional arguments to be passed to `func`.
-        **kwargs: Keyword arguments to be passed to `func`.
-
-    Returns:
-        (Any): Return value of `func`.
-
-    See Also:
-        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
-    """
-
-    if isinstance(obj, Mapping):
-        return type(obj)({k: apply(v, func, *args, **kwargs) for k, v in obj.items()})  # type: ignore
-    if isinstance(obj, (list, tuple)):
-        return type(obj)(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-    if isinstance(obj, set):
-        try:
-            return type(obj)(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-        except TypeError:
-            tuple(apply(v, func, *args, **kwargs) for v in obj)  # type: ignore
-    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
-
-
 def apply_(obj: Any, func: Callable, *args, **kwargs) -> Any:
     r"""
     Apply `func` to all children of `obj`.
@@ -85,9 +54,11 @@ def apply_(obj: Any, func: Callable, *args, **kwargs) -> Any:
     """
 
     if isinstance(obj, Mapping):
-        [apply_(v, func, *args, **kwargs) for v in obj.values()]  # type: ignore
+        for v in obj.values():
+            apply_(v, func, *args, **kwargs)
     if isinstance(obj, (list, tuple, set)):
-        [apply_(v, func, *args, **kwargs) for v in obj]  # type: ignore
+        for v in obj:
+            apply_(v, func, *args, **kwargs)
     return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
