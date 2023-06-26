@@ -67,7 +67,7 @@ class DefaultDict(FlatDict[_K, _V]):
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
             default.__dict__.update(self.__dict__)
-        super().set(name, default)
+        super().__setitem__(name, default)
         return default
 
     def __repr__(self) -> str:

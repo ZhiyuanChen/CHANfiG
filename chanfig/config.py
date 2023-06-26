@@ -24,7 +24,7 @@ from typing import Any, Callable, Iterable, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
-from .utils import _K, _V, Null, StoreAction
+from .utils import _K, _V, Null, StoreAction, literal_eval
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
@@ -150,6 +150,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         parsed: dict = self.parse_args(args)  # type: ignore
         if isinstance(parsed, Namespace):
             parsed = vars(parsed)
+        parsed = {k: literal_eval(v) if isinstance(v, str) else v for k, v in parsed.items()}
         if not isinstance(parsed, NestedDict):
             parsed = NestedDict(parsed)
         parsed = parsed.dropnull()
@@ -531,50 +532,6 @@ class Config(NestedDict[_K, _V]):
                 self.freeze()
 
     def __getitem__(self, name: Any) -> Any:
-        r"""
-        Get value from `Config`.
-
-        Note that `default` has higher priority than `default_factory`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `Config` does not contain `name`, return `default`.
-                If `default` is not specified, return `default_factory()`.
-
-        Raises:
-            KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
-
-        Examples:
-            >>> d = Config(**{"i.d": 1013})
-            >>> d.get('i.d')
-            1013
-            >>> d['i.d']
-            1013
-            >>> d.i.d
-            1013
-            >>> d.get('f', 2)
-            2
-            >>> d.f
-            Config(<class 'chanfig.config.Config'>, )
-            >>> del d.f
-            >>> d.freeze()
-            Config(<class 'chanfig.config.Config'>,
-              ('i'): Config(<class 'chanfig.config.Config'>,
-                ('d'): 1013
-              )
-            )
-            >>> d.f
-            Traceback (most recent call last):
-            AttributeError: 'Config' object has no attribute 'f'
-            >>> d["f.n"]
-            Traceback (most recent call last):
-            KeyError: 'f.n'
-        """
-
         if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
@@ -582,101 +539,17 @@ class Config(NestedDict[_K, _V]):
         raise KeyError(name)
 
     @frozen_check
-    def set(
+    def __setitem__(
         self,
         name: Any,
         value: Any,
-        convert_mapping: bool | None = None,
     ) -> None:
-        r"""
-        Set value of `Config`.
-
-        Args:
-            name:
-            value:
-
-        Raises:
-            ValueError: If `Config` is frozen.
-
-        Examples:
-            >>> c = Config()
-            >>> c['i.d'] = 1013
-            >>> c.i.d
-            1013
-            >>> c.freeze().dict()
-            {'i': {'d': 1013}}
-            >>> c['i.d'] = 1013
-            Traceback (most recent call last):
-            ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-            >>> c.defrost().dict()
-            {'i': {'d': 1013}}
-            >>> c['i.d'] = 1013
-            >>> c.i.d
-            1013
-        """
-
-        return super().set(name, value, convert_mapping)
+        return super().__setitem__(name, value)
 
     @frozen_check
-    def delete(self, name: Any) -> None:
-        r"""
-        Delete value from `Config`.
-
-        Args:
-            name:
-
-        Examples:
-            >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
-            >>> d.i.d
-            1013
-            >>> d.f.n
-            'chang'
-            >>> d.delete('i.d')
-            >>> "i.d" in d
-            False
-            >>> d.i.d
-            Config(<class 'chanfig.config.Config'>, )
-            >>> "i.d" in d
-            True
-            >>> del d.f.n
-            >>> d.f.n
-            Config(<class 'chanfig.config.Config'>, )
-            >>> del d.c
-            Traceback (most recent call last):
-            AttributeError: 'Config' object has no attribute 'c'
-        """
-
-        super().delete(name)
+    def __delitem__(self, name: Any) -> None:
+        super().__delitem__(name)
 
     @frozen_check
     def pop(self, name: Any, default: Any = Null) -> Any:
-        r"""
-        Pop value from `Config`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value: If `Config` does not contain `name`, return `default`.
-
-        Examples:
-            >>> c = Config()
-            >>> c['i.d'] = 1013
-            >>> c.pop('i.d')
-            1013
-            >>> c.pop('i.d', True)
-            True
-            >>> c.freeze().dict()
-            {'i': {}}
-            >>> c['i.d'] = 1013
-            Traceback (most recent call last):
-            ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-            >>> c.defrost().dict()
-            {'i': {}}
-            >>> c['i.d'] = 1013
-            >>> c.pop('i.d')
-            1013
-        """
-
         return super().pop(name, default)

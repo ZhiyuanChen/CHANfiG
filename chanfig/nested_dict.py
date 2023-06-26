@@ -78,10 +78,12 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         {'f': {'n': 'chang'}, 'i': {'d': 1013}}
     """
 
-    convert_mapping: bool = False
-    delimiter: str = "."
+    convert_mapping: bool
+    delimiter: str
 
-    def __init__(self, *args, default_factory: Callable | None = None, **kwargs) -> None:
+    def __init__(self, *args, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs) -> None:
+        self.setattr("convert_mapping", convert_mapping)
+        self.setattr("delimiter", ".")
         super().__init__(default_factory)
         self.merge(*args, **kwargs)
 
@@ -231,11 +233,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             return self[name]
         return super().__getitem__(name)
 
-    def set(  # pylint: disable=W0221
+    def __setitem__(  # pylint: disable=W0221
         self,
         name: Any,
         value: Any,
-        convert_mapping: bool | None = None,
     ) -> None:
         r"""
         Set value of `NestedDict`.
@@ -261,7 +262,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             'liu'
             >>> d['f.n.e'] = "error"
             Traceback (most recent call last):
-            ValueError: Cannot set `f.n.e` to `error`, as `f.n=chang`.
+            TypeError: Unable to set `f.n.e` to `error`, as `f.n=chang` is not a Mapping.
             >>> d['f.n.e.a'] = "error"
             Traceback (most recent call last):
             KeyError: 'e'
@@ -270,46 +271,45 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             AttributeError: 'str' object has no attribute 'e'
             >>> d.setattr('convert_mapping', True)
             >>> d.a.b = {'c': {'d': 1}, 'e.f' : 2}
-            >>> d.a.b.c.d
+            >>> d['a.b'].c.d
             1
             >>> d['c.d'] = {'c': {'d': 1}, 'e.f' : 2}
             >>> d.c.d['e.f']
             2
-            >>> d.setattr('convert_mapping', False)
-            >>> d.set('e.f', {'c': {'d': 1}, 'e.f' : 2}, convert_mapping=True)
-            >>> d['e.f']['c.d']
+            >>> d.e = {'f': {'c.d': 1}}
+            >>> d.e['f.c'].d
             1
         """
         # pylint: disable=W0642
 
         full_name = name
-        if convert_mapping is None:
-            convert_mapping = self.convert_mapping
+        depth = 0
+        convert_mapping = self.getattr("convert_mapping", False)
         delimiter = self.getattr("delimiter", ".")
         default_factory = self.getattr("default_factory", self.empty)
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
-                default_factory = self.getattr("default_factory", self.empty)
                 if name in dir(self) and isinstance(getattr(self.__class__, name), property):
                     self, name = getattr(self, name), rest
-                elif name not in self:
+                if name not in self:
                     self, name = self.__missing__(name, default_factory()), rest
                 else:
                     self, name = self[name], rest
+                depth += 1
+                if isinstance(self, NestedDict):
+                    default_factory = self.getattr("default_factory", self.empty)
         except (AttributeError, TypeError):
             raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
             value = default_factory(value)
-        if isinstance(self, Mapping):
-            if not isinstance(self, NestedDict):
-                dict.__setitem__(self, name, value)
-            else:
-                super().set(name, value)
+        if isinstance(self, NestedDict):
+            super().__setitem__(name, value)
+        elif isinstance(self, Mapping):
+            self[name] = value
         else:
-            raise ValueError(
-                f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
-            )
+            name = delimiter.join(full_name.split(delimiter)[:depth])
+            raise TypeError(f"Unable to set `{full_name}` to `{value}`, as `{name}={self}` is not a Mapping.")
 
     def delete(self, name: Any) -> None:
         r"""
@@ -430,7 +430,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         Args:
             *args: `Mapping` or `Iterable` to merge.
-            convert_mapping: Whether to convert `Mapping` to `NestedDict`.
             **kwargs: `Mapping` to merge.
 
         Returns:
@@ -458,9 +457,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                     if isinstance(value, Mapping):
                         merge(this[key], value)
                     else:
-                        this.set(key, value, convert_mapping=True)
+                        this[key] = self.empty(value) if isinstance(value, Mapping) else value
                 else:
-                    this.set(key, value, convert_mapping=True)
+                    this[key] = self.empty(value) if isinstance(value, Mapping) else value
             return this
 
         if len(args) == 1:

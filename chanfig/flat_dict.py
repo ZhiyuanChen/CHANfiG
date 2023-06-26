@@ -18,8 +18,7 @@
 
 from __future__ import annotations
 
-from ast import literal_eval
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from copy import copy, deepcopy
 from functools import wraps
 from io import IOBase
@@ -33,7 +32,7 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import _K, _V, JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
+from .utils import _K, _V, JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader, literal_eval
 from .variable import Variable
 
 try:
@@ -147,7 +146,11 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     # pylint: disable=R0904
 
-    indent: int = 2
+    indent: int
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.setattr("indent", 2)
+        super().__init__(*args, **kwargs)
 
     def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
@@ -165,7 +168,16 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             return self[name]
         return default
 
-    def set(self, name: Any, value: Any) -> None:
+    def __setitem__(self, name: Any, value: Any) -> None:
+        if name in self and isinstance(self.get(name), Variable):
+            self[name].set(value)
+        else:
+            super().__setitem__(name, value)
+
+    def __setattr__(self, name: Any, value: Any) -> None:
+        self[name] = value
+
+    def set(self, name: Any, value: Any, eval_str: bool = True) -> None:
         r"""
         Set value of `FlatDict`.
 
@@ -175,30 +187,15 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Examples:
             >>> d = FlatDict()
-            >>> d.set('d', 1013)
-            >>> d.get('d')
+            >>> d.set('d', "1013")
+            >>> d.d
             1013
-            >>> d['n'] = 'chang'
-            >>> d.n
-            'chang'
-            >>> d.n = 'liu'
-            >>> d['n']
-            'liu'
+            >>> d.set('d', '10.13')
+            >>> d['d']
+            10.13
         """
 
-        if isinstance(value, str):
-            with suppress(TypeError, ValueError, SyntaxError):
-                value = literal_eval(value)
-        if name in self and isinstance(self.get(name), Variable):
-            self.get(name).set(value)
-        else:
-            dict.__setitem__(self, name, value)
-
-    def __setitem__(self, name: Any, value: Any) -> None:
-        self.set(name, value)
-
-    def __setattr__(self, name: Any, value: Any) -> None:
-        self.set(name, value)
+        self[name] = literal_eval(value) if eval_str and isinstance(value, str) else value
 
     def delete(self, name: Any) -> None:
         r"""
@@ -236,9 +233,6 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             self.delete(name)
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
-
-    def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
-        raise KeyError(name)
 
     def validate(self) -> None:
         r"""
@@ -452,9 +446,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                     if isinstance(value, Mapping):
                         merge(this[key], value)
                     else:
-                        this.set(key, value)
+                        this[key] = value
                 else:
-                    this.set(key, value)
+                    this[key] = value
             return this
 
         if len(args) == 1:

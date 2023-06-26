@@ -15,6 +15,7 @@
 # See the LICENSE file for more details.
 
 from argparse import _StoreAction
+from ast import literal_eval as literal_eval_
 from inspect import ismethod
 from json import JSONEncoder
 from os import PathLike
@@ -32,6 +33,13 @@ PYTHON = ("py",)
 
 _K = TypeVar("_K")
 _V = TypeVar("_V")
+
+
+def literal_eval(obj: str) -> Any:
+    try:
+        return literal_eval_(obj)
+    except (TypeError, ValueError, SyntaxError):
+        return obj
 
 
 def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
