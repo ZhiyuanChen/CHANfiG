@@ -25,6 +25,7 @@ from warnings import warn
 
 from .nested_dict import NestedDict
 from .utils import _K, _V, Null, StoreAction
+from .variable import Variable
 
 
 class ConfigParser(ArgumentParser):  # pylint: disable=C0115
@@ -48,6 +49,14 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         super().__init__(*args, **kwargs)
         self._registries["action"][None] = StoreAction
         self._registries["action"]["store"] = StoreAction
+
+    def parse_args(self, *args, **kwargs) -> NestedDict:  # type: ignore
+        parsed = super().parse_args(*args, **kwargs)
+        if isinstance(parsed, Namespace):
+            parsed = vars(parsed)
+        if not isinstance(parsed, NestedDict):
+            parsed = NestedDict(parsed)
+        return parsed.dropnull()
 
     def parse(  # pylint: disable=R0912
         self,
@@ -104,7 +113,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config').dict()
             Traceback (most recent call last):
-            ValueError: default_config is set to config, but not found in args.
+            RuntimeError: default_config is set to config, but not found in args.
 
             ValueError will be suppressed when `default_config` is specified bug not presented in command line,
             and `no_default_config_action` is set to `ignore` or `warn`.
@@ -119,13 +128,20 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got suppress
         """
 
+        if args is None:
+            args = sys.argv[1:]
+
+        if config is None:
+            config = Config()
+        else:
+            self.add_config_arguments(config)
+
         if no_default_config_action not in ("warn", "ignore", "raise"):
             raise ValueError(
                 f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
             )
 
-        if args is None:
-            args = sys.argv[1:]
+        # add the command-line arguments
         key_value_args = []
         for arg in args:
             if args == "--":
@@ -137,42 +153,117 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                     continue
                 key_value_args[-1].append(arg)
         for key_value in key_value_args:
-            if key_value[0] not in self._option_string_actions:
+            if key_value[0] not in self:
                 if len(key_value) > 2:
                     self.add_argument(key_value[0], nargs="+")
                 else:
                     self.add_argument(key_value[0])
-        if config is None:
-            config = Config()
-        namespace = config.clone()
-        if "help" not in namespace:
-            namespace.help = Null
-        parsed: dict = self.parse_args(args)  # type: ignore
-        if isinstance(parsed, Namespace):
-            parsed = vars(parsed)
-        if not isinstance(parsed, NestedDict):
-            parsed = NestedDict(parsed)
-        parsed = parsed.dropnull()
 
-        # parse the config file
+        parsed = self.parse_args(args)
+
+        # parse the default config file
         if default_config is not None:
-            if default_config in parsed:
-                path = parsed[default_config]
-                warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
-                # create a temp config to avoid issues when users inherit from Config
-                config = config.merge(Config.load(path))  # type: ignore
-            elif no_default_config_action == "ignore":
-                pass
-            elif no_default_config_action == "warn":
-                warn(f"default_config is set to {default_config}, but not found in args.")
-            else:
-                raise ValueError(f"default_config is set to {default_config}, but not found in args.")
+            parsed = self.merge_default_config(parsed, default_config, no_default_config_action)
 
         # parse the command-line arguments
-        config = config.merge(parsed)  # type: ignore
-        return config  # type: ignore
+        return config.merge(parsed)  # type: ignore
 
-    parse_config = parse
+    def parse_config(  # pylint: disable=R0912
+        self,
+        args: Sequence[str] | None = None,
+        config: Config | None = None,
+        default_config: str | None = None,
+        no_default_config_action: str = "raise",
+    ) -> Config:
+        r"""
+        Parse the arguments for `Config`.
+
+        You may optionally specify a name for `default_config`,
+        and CHANfiG will read the file under this name.
+
+        There are three levels of config:
+
+        1. The base `Config` parsed into the function,
+        2. The base config file located at the path of `default_config` (if specified),
+        3. The config specified in arguments.
+
+        Higher levels override lower levels (i.e. 3 > 2 > 1).
+
+        Args:
+            args: The arguments to parse.
+                Defaults to sys.argv[1:].
+            config: The base `Config`.
+            default_config: Path to the base config file.
+            no_default_config_action: What to do when `default_config` is specified but not found in args.
+
+        Returns:
+            config: The parsed `Config`.
+
+        Raises:
+            ValueError: If `default_config` is specified but not found in args,
+                and `no_default_config_action` is neither `warn` nor `igonre`.
+            ValueError: If `no_default_config_action` is not in `raise`, `warn` and `igonre`.
+
+        Examples:
+            >>> p = ConfigParser()
+            >>> p.parse_config(['--a', '1'], config=Config(a=2)).dict()
+            {'a': 1}
+
+            You can only parse argument that is defined in `Config`.
+            error: unrecognized arguments: --b 1
+            >>> p = ConfigParser()
+            >>> p.parse_config(['--b', '1'], config=Config(a=2)).dict()  # doctest: +SKIP
+            Traceback (most recent call last):
+            SystemExit: 2
+        """
+
+        if args is None:
+            args = sys.argv[1:]
+
+        if config is None:
+            raise ValueError("config must be specified")
+        self.add_config_arguments(config)
+
+        if no_default_config_action not in ("warn", "ignore", "raise"):
+            raise ValueError(
+                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
+            )
+
+        parsed = self.parse_args(args)
+
+        # parse the default config file
+        if default_config is not None:
+            parsed = self.merge_default_config(parsed, default_config, no_default_config_action)
+
+        # parse the command-line arguments
+        return config.merge(parsed)  # type: ignore
+
+    def add_config_arguments(self, config):
+        for key, value in config.all_items():
+            if isinstance(value, Variable):
+                dtype = value._type or value.dtype
+            else:
+                dtype = type(value)
+            name = "--" + key
+            if name not in self:
+                if isinstance(value, (list, tuple, dict, set)):
+                    self.add_argument(name, type=dtype, nargs="+")
+                else:
+                    self.add_argument(name, type=dtype)
+
+    def merge_default_config(self, parsed, default_config: str, no_default_config_action: str = "raise") -> NestedDict:
+        message = f"default_config is set to {default_config}, but not found in args."
+        if default_config in parsed:
+            path = parsed[default_config]
+            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
+            return NestedDict.load(path).merge(parsed)  # type: ignore
+        elif no_default_config_action == "ignore":
+            pass
+        elif no_default_config_action == "warn":
+            warn(message, category=RuntimeWarning, stacklevel=2)
+        else:
+            raise RuntimeError(message)
+        return parsed
 
     @staticmethod
     def identity(string):
@@ -181,6 +272,11 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         """
 
         return string
+
+    def __contains__(self, name: str):
+        if name in self._option_string_actions:
+            return True
+        return False
 
 
 def frozen_check(func: Callable):
@@ -353,9 +449,16 @@ class Config(NestedDict[_K, _V]):
 
         Parse command-line arguments with `ConfigParser`.
 
+        `parse` will try to parse all command-line arguments,
+        you don't need to pre-define them but typos may cause trouble.
+
+        To
+
         This function internally calls `Config.post`.
 
-        See Also: [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
+        See Also:
+            [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
+            [`chanfig.Config.parse_config`][chanfig.Config.parse_config]
 
         Examples:
             >>> c = Config(a=0)
@@ -371,7 +474,35 @@ class Config(NestedDict[_K, _V]):
         self.boot()
         return self
 
-    parse_config = parse
+    def parse_config(
+        self,
+        args: Iterable[str] | None = None,
+        default_config: str | None = None,
+        no_default_config_action: str = "raise",
+    ) -> Config:
+        r"""
+
+        Parse command-line arguments with `ConfigParser`.
+
+        This function internally calls `Config.post`.
+
+        See Also:
+            [`chanfig.ConfigParser.parse_config`][chanfig.ConfigParser.parse_config]
+            [`chanfig.Config.parse`][chanfig.Config.parse]
+
+        Examples:
+            >>> c = Config(a=0, b=0, c=0)
+            >>> c.dict()
+            {'a': 0, 'b': 0, 'c': 0}
+            >>> c.parse_config(['--a', '1', '--b', '2', '--c', '3']).dict()
+            {'a': 1, 'b': 2, 'c': 3}
+        """
+
+        if not self.hasattr("parser"):
+            self.setattr("parser", ConfigParser())
+        self.getattr("parser").parse_config(args, self, default_config, no_default_config_action)
+        self.boot()
+        return self
 
     def add_argument(self, *args, **kwargs) -> None:
         r"""
