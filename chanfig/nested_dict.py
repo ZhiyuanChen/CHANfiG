@@ -405,13 +405,17 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
-                default_factory = self.getattr("default_factory", self.empty_like)
                 if name in dir(self) and isinstance(getattr(self.__class__, name), property):
                     self, name = getattr(self, name), rest
-                elif name not in self:
-                    self, name = self.__missing__(name, default_factory()), rest
+                elif name not in self and isinstance(self, Mapping):
+                    default = (
+                        self.__missing__(name, default_factory()) if hasattr(self, "__missing__") else default_factory()
+                    )
+                    self, name = default, rest
                 else:
                     self, name = self[name], rest
+                if isinstance(self, NestedDict):
+                    default_factory = self.getattr("default_factory", self.empty_like)
         except (AttributeError, TypeError):
             raise KeyError(name) from None
         if convert_mapping and isinstance(value, Mapping):
@@ -555,12 +559,20 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         + `union`
 
         Examples:
+            >>> d = NestedDict()
+            >>> d["a.b.c"] = {"d": 3, "e": {"f": 4}}
+            >>> d.merge(NestedDict({"a.b.c.d": 3, "a.b.c.e.f": 4})).dict()
+            {'a': {'b': {'c': {'d': 3, 'e': {'f': 4}}}}}
             >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3, 'c.d.e': 4, 'c.d.f': 5, 'c.e': 6})
             >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.merge(n).dict()
             {'a': 1, 'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}, 'e': 6}, 'd': 0}
             >>> NestedDict(a=1, b=1, c=1).union(NestedDict(b='b', c='c', d='d')).dict()  # alias
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d = NestedDict()
+            >>> d.c = {"b": {"d": 3, "e": {"f": 4}}}
+            >>> d.merge(n).dict()
+            {'c': {'b': {'d': 3, 'e': {'f': 4}}, 'd': {'f': 5}}, 'b': {'c': 3, 'd': 5}, 'd': 0}
         """
 
         @wraps(self.merge)
@@ -571,10 +583,14 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 if key in this and isinstance(this[key], Mapping):
                     if isinstance(value, Mapping):
                         merge(this[key], value)
-                    else:
+                    elif isinstance(this, NestedDict):
                         this.set(key, value, convert_mapping=True)
-                else:
+                    else:
+                        this[key] = value
+                elif isinstance(this, NestedDict):
                     this.set(key, value, convert_mapping=True)
+                else:
+                    this[key] = value
             return this
 
         if len(args) == 1:
