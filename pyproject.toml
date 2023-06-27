@@ -84,7 +84,7 @@ output = "coverage.json"
 show_missing = true
 fail_under = 80
 
-[tool.mypy.overrides]
+[tool.mypy]
 ignore_missing_imports = true
 
 [tool.pylint.format]
