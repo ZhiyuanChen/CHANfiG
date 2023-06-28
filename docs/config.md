@@ -6,4 +6,4 @@ date: 2022-05-04
 
 # Config
 
-::: chanfig.Config
+::: chanfig.config
