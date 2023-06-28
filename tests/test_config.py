@@ -25,6 +25,7 @@ class TestConfig(Config):
         self.seed = Variable(1013)
         data_factory = partial(DataConfig, name="CIFAR10")
         self.datasets = Config(default_factory=data_factory)
+        self.datas = Config(default_factory=data_factory)
         self.datasets.a.num_classes = num_classes
         self.datasets.b.num_classes = num_classes
         self.network.name = "ResNet18"
@@ -33,6 +34,10 @@ class TestConfig(Config):
     def post(self):
         self.name = self.name.lower()
         self.id = f"{self.name}_{self.seed}"
+
+    @property
+    def data(self):
+        return next(iter(self.datas.values())) if self.datas else self.datas["default"]
 
 
 class Test:
@@ -48,9 +53,10 @@ class Test:
         assert self.config.datasets.a.name == "cifar10"
 
     def test_parse(self):
-        self.config.parse(["--name", "Test", "--seed", "1014"])
+        self.config.parse(["--name", "Test", "--seed", "1014", "--data.root", "datasets"])
         assert self.config.name == "test"
         assert self.config.id == "test_1014"
+        assert self.config.data.name == "cifar10"
 
     def test_nested(self):
         assert self.config.network.name == "ResNet18"
