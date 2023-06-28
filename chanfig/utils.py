@@ -14,11 +14,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from argparse import _StoreAction
 from json import JSONEncoder
 from os import PathLike
 from typing import IO, Any, Mapping, TypeVar, Union
-from warnings import warn
 
 from yaml import SafeDumper, SafeLoader
 
@@ -111,39 +109,3 @@ class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
 
 
 Null = NULL()
-
-
-class StoreAction(_StoreAction):  # pylint: disable=R0903
-    def __init__(  # pylint: disable=R0913
-        self,
-        option_strings,
-        dest,
-        nargs=None,
-        const=None,
-        default=Null,
-        type=None,  # pylint: disable=W0622
-        choices=None,
-        required=False,
-        help=None,  # pylint: disable=W0622
-        metavar=None,
-    ):
-        if dest is not None and type is not None:
-            warn(f"type of argument {dest} is set to {type}, but CHANfiG will ignore it.")
-            type = None
-        super().__init__(
-            option_strings=option_strings,
-            dest=dest,
-            nargs=nargs,
-            const=const,
-            default=default,
-            type=type,
-            choices=choices,
-            required=required,
-            help=help,
-            metavar=metavar,
-        )
-        if self.default is not Null:
-            warn(
-                f"Default value for argument {self.dest} is set to {self.default}, "
-                "Default value defined in argument will be overwritten by default value defined in Config",
-            )
