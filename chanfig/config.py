@@ -18,7 +18,8 @@ from __future__ import annotations
 
 import sys
 from argparse import ArgumentParser, Namespace
-from contextlib import contextmanager
+from ast import literal_eval
+from contextlib import contextmanager, suppress
 from functools import wraps
 from typing import Any, Callable, Iterable, Sequence
 from warnings import warn
@@ -50,12 +51,18 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         self._registries["action"][None] = StoreAction
         self._registries["action"]["store"] = StoreAction
 
-    def parse_args(self, *args, **kwargs) -> NestedDict:  # type: ignore
-        parsed = super().parse_args(*args, **kwargs)
+    def parse_args(  # type: ignore
+        self, args: Sequence[str] | None = None, namespace: Namespace | None = None
+    ) -> NestedDict:
+        parsed = super().parse_args(args, namespace)
         if isinstance(parsed, Namespace):
-            parsed = vars(parsed)
+            parsed = vars(parsed)  # type: ignore
         if not isinstance(parsed, NestedDict):
-            parsed = NestedDict(parsed)
+            parsed = NestedDict(parsed)  # type: ignore
+        for key, value in parsed.all_items():
+            with suppress(TypeError, ValueError, SyntaxError):
+                value = literal_eval(value)
+            parsed[key] = value
         return parsed.dropnull()
 
     def parse(  # pylint: disable=R0912
@@ -725,6 +732,8 @@ class Config(NestedDict[_K, _V]):
         Args:
             name:
             value:
+            convert_mapping: Whether to convert `Mapping` to `NestedDict`.
+                Defaults to self.convert_mapping.
 
         Raises:
             ValueError: If `Config` is frozen.

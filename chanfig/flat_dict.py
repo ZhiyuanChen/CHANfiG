@@ -18,8 +18,7 @@
 
 from __future__ import annotations
 
-from ast import literal_eval
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from copy import copy, deepcopy
 from functools import wraps
 from io import IOBase
@@ -222,9 +221,6 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             'liu'
         """
 
-        if isinstance(value, str):
-            with suppress(TypeError, ValueError, SyntaxError):
-                value = literal_eval(value)
         if name in self and isinstance(self.get(name), Variable):
             self.get(name).set(value)
         else:
