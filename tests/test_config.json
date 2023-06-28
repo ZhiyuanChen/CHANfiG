@@ -11,6 +11,12 @@
       "num_classes": 12
     }
   },
+  "datas": {
+    "default": {
+      "name": "cifar10",
+      "root": "datasets"
+    }
+  },
   "network": {
     "name": "ResNet18",
     "num_classes": 12,
