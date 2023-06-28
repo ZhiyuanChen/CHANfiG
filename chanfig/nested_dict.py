@@ -358,7 +358,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         Args:
             name:
             value:
-            convert_mapping: Whether convert mapping to NestedDict.
+            convert_mapping: Whether to convert `Mapping` to `NestedDict`.
                 Defaults to self.convert_mapping.
 
         Examples:
