@@ -749,7 +749,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
-                self, name = self[name], rest  # pylint: disable=W0642
+                if super().__contains__(name):
+                    self, name = self[name], rest  # pylint: disable=W0642
+                else:
+                    return False
             return super().__contains__(name)
         except (TypeError, KeyError):  # TypeError when name is not in self
             return False
