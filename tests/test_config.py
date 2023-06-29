@@ -62,6 +62,12 @@ class Test:
         assert self.config.network.name == "ResNet18"
         self.config.network.nested.value = 1
 
+    def test_contains(self):
+        assert "name" in self.config
+        assert "seed" in self.config
+        assert "a.b.c" not in self.config
+        assert "a.b" not in self.config
+
     def test_variable(self):
         assert self.config.network.num_classes == 10
         self.config.network.num_classes += 1
