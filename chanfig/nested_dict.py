@@ -148,7 +148,8 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     def __init__(self, *args, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs) -> None:
         self.setattr("convert_mapping", convert_mapping)
         super().__init__(default_factory)
-        self.merge(*args, **kwargs)
+        if args or kwargs:
+            self.merge(*args, **kwargs)
 
     def all_keys(self) -> Iterator:
         r"""
@@ -575,6 +576,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> d.merge(n).dict()
             {'c': {'b': {'d': 3, 'e': {'f': 4}}, 'd': {'f': 5}}, 'b': {'c': 3, 'd': 5}, 'd': 0}
         """
+
+        if not args and not kwargs:
+            return self
 
         @wraps(self.merge)
         def merge(this: NestedDict, that: Iterable) -> Mapping:
