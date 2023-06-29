@@ -21,7 +21,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from functools import wraps
-from io import IOBase
+from io import BytesIO, IOBase, StringIO
 from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
@@ -895,6 +895,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
+            if isinstance(fp, (StringIO, BytesIO)):
+                return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
     def jsons(self, *args, **kwargs) -> str:
@@ -965,6 +967,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
+            if isinstance(fp, (StringIO, BytesIO)):
+                return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_yamls(fp.read(), *args, **kwargs)
 
     def yamls(self, *args, **kwargs) -> str:

@@ -418,6 +418,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                     default_factory = self.getattr("default_factory", self.empty_like)
         except (AttributeError, TypeError):
             raise KeyError(name) from None
+
         if convert_mapping and isinstance(value, Mapping):
             value = default_factory(value)
         if isinstance(self, NestedDict):
@@ -577,7 +578,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         @wraps(self.merge)
         def merge(this: NestedDict, that: Iterable) -> Mapping:
-            if isinstance(that, Mapping):
+            if isinstance(that, NestedDict):
+                that = that.all_items()
+            elif isinstance(that, Mapping):
                 that = that.items()
             for key, value in that:
                 if key in this and isinstance(this[key], Mapping):
