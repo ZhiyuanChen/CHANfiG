@@ -1,5 +1,6 @@
 from copy import copy, deepcopy
 from functools import partial
+from io import StringIO
 
 from chanfig import Config, Variable
 
@@ -79,8 +80,9 @@ class Test:
     def test_load(self):
         self.config.name = "Test"
         self.config.datasets.a.num_classes = 12
-        self.config.dump("tests/test_config.json")
-        self.config = self.config.load("tests/test_config.json")
+        buffer = StringIO()
+        self.config.dump(buffer, method="json")
+        assert self.config == Config.load(buffer, method="json")
         assert self.config.name == "Test"
         assert self.config.network.name == "ResNet18"
         assert self.config.network.num_classes == 12
