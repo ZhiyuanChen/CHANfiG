@@ -129,7 +129,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             args = sys.argv[1:]
 
         if config is None:
-            config = NestedDict()
+            from .config import Config  # pylint: disable=C0415
+
+            config = Config()
         else:
             self.add_config_arguments(config)
 
