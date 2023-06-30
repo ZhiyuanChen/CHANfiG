@@ -296,9 +296,6 @@ class StoreAction(_StoreAction):  # pylint: disable=R0903
         help=None,  # pylint: disable=W0622
         metavar=None,
     ):
-        if dest is not None and type is not None:
-            warn(f"type of argument {dest} is set to {type}, but CHANfiG will ignore it.")
-            type = None
         super().__init__(
             option_strings=option_strings,
             dest=dest,
