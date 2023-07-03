@@ -462,6 +462,8 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> del d['f.n']
             Traceback (most recent call last):
             KeyError: 'n'
+            >>> d.e = {'a': {'b': 1}}
+            >>> del d['e.a.b']
         """
 
         delimiter = self.getattr("delimiter", ".")
@@ -471,6 +473,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
+        # if value is a python dict
+        if not isinstance(self, NestedDict):
+            del self[name]
+            return
         super().delete(name)
 
     def validate(self) -> None:
