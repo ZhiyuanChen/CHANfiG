@@ -153,7 +153,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             return self.get(name)
         return super().__getattribute__(name)
 
-    def get(self, name: Any, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = None) -> Any:
         r"""
         Get value from `FlatDict`.
 
@@ -181,6 +181,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             >>> d.get('f', 2)
             2
             >>> d.get('f')
+            >>> d.get('f', Null)
             Traceback (most recent call last):
             KeyError: 'f'
         """
@@ -192,11 +193,11 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return self.__missing__(name)
 
     def __getitem__(self, name: Any) -> Any:
-        return self.get(name)
+        return self.get(name, default=Null)
 
     def __getattr__(self, name: Any) -> Any:
         try:
-            return self.get(name)
+            return self.get(name, default=Null)
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
