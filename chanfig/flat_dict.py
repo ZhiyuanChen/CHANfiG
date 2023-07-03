@@ -913,10 +913,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             '{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}'
         """
 
-        if "cls" not in kwargs:
-            kwargs["cls"] = JsonEncoder
-        if "indent" not in kwargs:
-            kwargs["indent"] = self.getattr("indent", 2)
+        kwargs.setdefault("cls", JsonEncoder)
+        kwargs.setdefault("indent", self.getattr("indent", 2))
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
@@ -985,10 +983,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             'a: 1\nb: 2\nc: 3\n'
         """
 
-        if "Dumper" not in kwargs:
-            kwargs["Dumper"] = YamlDumper
-        if "indent" not in kwargs:
-            kwargs["indent"] = self.getattr("indent", 2)
+        kwargs.setdefault("Dumper", YamlDumper)
+        kwargs.setdefault("indent", self.getattr("indent", 2))
         return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
 
     @classmethod
@@ -1005,9 +1001,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        if "Loader" not in kwargs:
-            kwargs["Loader"] = YamlLoader
-
+        kwargs.setdefault("Loader", YamlLoader)
         return cls().merge(yaml_load(string, *args, **kwargs))  # pylint: disable=W0212
 
     @staticmethod
