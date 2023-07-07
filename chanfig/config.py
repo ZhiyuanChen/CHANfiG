@@ -100,7 +100,6 @@ class Config(NestedDict[_K, _V]):
         if default_factory is None:
             default_factory = Config
         super().__init__(*args, default_factory=default_factory, **kwargs)
-        self.setattr("parser", ConfigParser())
 
     def post(self) -> Config:
         r"""
