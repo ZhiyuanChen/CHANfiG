@@ -25,6 +25,27 @@ class Registry(NestedDict):
     """
     `Registry` for components.
 
+    Registry provides 3 core functionalities:
+
+    - Register a new component.
+    - Lookup for a component.
+    - Build a component.
+
+    To facilitate the usage scenario, `registry` is designed to be a decorator.
+    You could register a component by simply calling `registry.register`, and it will be registered with its name.
+    You may also specify the name of the component by calling `registry.register(name="ComponentName")`.
+
+    `build` makes it easy to construct a component from a configuration.
+    `build` automatically determines the component to construct by the `name` field in the configuration.
+    So you could either call `registry.build(config)` or `registry.build(**config)`.
+    Beyond this, `build` is just a syntax sugar for `registry.init(registry.lookup(name), *args, **kwargs)`.
+
+    `lookup` is used to lookup for a component by its name.
+    By default, `lookup` internally calls `NestedDict.get`, but you may override it to provide more functionalities.
+
+    `init` is used to construct a component.
+    By default, `init` internally calls `cls(*args, **kwargs)`, but you may override it to provide more functionalities.
+
     Notes:
         `Registry` inherits from `NestedDict`.
 
@@ -153,6 +174,36 @@ class Registry(NestedDict):
 
         return self.get(name)
 
+    @staticmethod
+    def init(cls: Callable, *args, **kwargs) -> Any:  # type: ignore
+        r"""
+        Constructor of component.
+
+        Args:
+            cls: The component to construct.
+            *args: The arguments to pass to the component.
+            **kwargs: The keyword arguments to pass to the component.
+
+        Returns:
+            (Any):
+
+        Examples:
+            >>> class Module:
+            ...     def __init__(self, a, b):
+            ...         self.a = a
+            ...         self.b = b
+            >>> kwargs = {"a": 1, "b": 2}
+            >>> module = Registry.init(Module, **kwargs)
+            >>> type(module)
+            <class 'chanfig.registry.Module'>
+            >>> module.a
+            1
+            >>> module.b
+            2
+        """
+
+        return cls(*args, **kwargs)
+
     def build(self, name: Union[str, Mapping], *args, **kwargs) -> Any:
         r"""
         Build a component.
@@ -194,7 +245,7 @@ class Registry(NestedDict):
         if isinstance(name, Mapping):
             name = deepcopy(name)
             name, kwargs = name.pop("name"), dict(name, **kwargs)  # type: ignore
-        return self.get(name)(*args, **kwargs)  # type: ignore
+        return self.init(self.lookup(name), *args, **kwargs)  # type: ignore
 
     def __wrapped__(self, *args, **kwargs):
         pass
