@@ -44,12 +44,12 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         if isinstance(parsed, Namespace):
             parsed = vars(parsed)  # type: ignore
         if not isinstance(parsed, NestedDict):
-            parsed = NestedDict(parsed)  # type: ignore
+            parsed = NestedDict({key: value for key, value in parsed.items() if value is not Null})  # type: ignore
         for key, value in parsed.all_items():
             with suppress(TypeError, ValueError, SyntaxError):
                 value = literal_eval(value)
             parsed[key] = value
-        return parsed.dropnull()
+        return parsed  # type: ignore
 
     def parse(  # pylint: disable=R0912
         self,
