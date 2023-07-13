@@ -197,8 +197,6 @@ class Config(NestedDict[_K, _V]):
         `parse` will try to parse all command-line arguments,
         you don't need to pre-define them but typos may cause trouble.
 
-        To
-
         This function internally calls `Config.post`.
 
         See Also:
