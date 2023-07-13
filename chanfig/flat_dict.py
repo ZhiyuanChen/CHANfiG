@@ -26,7 +26,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping, Sequence
 from warnings import warn
 
 from yaml import dump as yaml_dump
@@ -449,6 +449,37 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         return cls(to_dict(self))
+
+    @classmethod
+    def from_dict(cls, obj: Mapping | Sequence) -> Any:  # pylint: disable=R0911
+        r"""
+        Convert `Mapping` or `Sequence` to `FlatDict`.
+
+        Examples:
+            >>> FlatDict.from_dict({'a': 1, 'b': 2, 'c': 3})
+            FlatDict(
+              ('a'): 1
+              ('b'): 2
+              ('c'): 3
+            )
+            >>> FlatDict.from_dict([('a', 1), ('b', 2), ('c', 3)])
+            FlatDict(
+              ('a'): 1
+              ('b'): 2
+              ('c'): 3
+            )
+            >>> FlatDict.from_dict([{'a': 1}, {'b': 2}, {'c': 3}])
+            [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
+        """
+
+        if isinstance(obj, Mapping):
+            return cls(obj)
+        elif isinstance(obj, Sequence):
+            try:
+                return cls(obj)
+            except ValueError:
+                return [cls(json) for json in obj]
+        raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
 
     def merge(self, *args, **kwargs) -> FlatDict:
         r"""
@@ -926,12 +957,15 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FlatDict):
 
         Examples:
-            >>> d = FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}')
-            >>> d.dict()
+            >>> FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}').dict()
             {'a': 1, 'b': 2, 'c': 3}
+            >>> FlatDict.from_jsons('[["a", 1], ["b", 2], ["c", 3]]').dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> FlatDict.from_jsons('[{"a": 1}, {"b": 2}, {"c": 3}]')
+            [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
         """
 
-        return cls().merge(json_loads(string, *args, **kwargs))  # pylint: disable=W0212
+        return cls.from_dict(json_loads(string, *args, **kwargs))
 
     def yaml(self, file: File, *args, **kwargs) -> None:
         r"""
@@ -960,8 +994,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FlatDict):
 
         Examples:
-            >>> d = FlatDict.from_yaml('example.yaml')
-            >>> d.dict()
+            >>> FlatDict.from_yaml('example.yaml').dict()
             {'a': 1, 'b': 2, 'c': 3}
         """
 
@@ -978,8 +1011,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (str):
 
         Examples:
-            >>> d = FlatDict(a=1, b=2, c=3)
-            >>> d.yamls()
+            >>> FlatDict(a=1, b=2, c=3).yamls()
             'a: 1\nb: 2\nc: 3\n'
         """
 
@@ -996,13 +1028,16 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FlatDict):
 
         Examples:
-            >>> d = FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n')
-            >>> d.dict()
+            >>> FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n').dict()
             {'a': 1, 'b': 2, 'c': 3}
+            >>> FlatDict.from_yamls('- - a\n  - 1\n- - b\n  - 2\n- - c\n  - 3\n').dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> FlatDict.from_yamls('- a: 1\n- b: 2\n- c: 3\n')
+            [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
         """
 
         kwargs.setdefault("Loader", YamlLoader)
-        return cls().merge(yaml_load(string, *args, **kwargs))  # pylint: disable=W0212
+        return cls.from_dict(yaml_load(string, *args, **kwargs))
 
     @staticmethod
     @contextmanager
@@ -1147,7 +1182,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             key_repr = repr(key)
             value_repr = repr(value)
             value_repr = self._add_indent(value_repr)
-            child_lines.append("(" + key_repr + "): " + value_repr)
+            child_lines.append(f"({key_repr}): {value_repr}")
+            # child_lines.append(f"{key_repr}: {value_repr}")
         lines = extra_lines + child_lines
 
         main_repr = self.__class__.__name__ + "("
@@ -1155,6 +1191,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             # simple one-liner info, which most builtin Modules will use
             if len(extra_lines) == 1 and not child_lines:
                 main_repr += extra_lines[0]
+            elif len(child_lines) == 1 and not extra_lines and len(child_lines[0]) < 10:
+                main_repr += child_lines[0]
             else:
                 main_repr += "\n  " + "\n  ".join(lines) + "\n"
 
