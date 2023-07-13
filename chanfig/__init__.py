@@ -22,6 +22,7 @@ from ._version import __version__, __version_tuple__, version
 from .config import Config
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, to_dict
+from .functional import load
 from .nested_dict import NestedDict, apply, apply_
 from .parser import ConfigParser
 from .registry import GlobalRegistry, Registry
@@ -36,6 +37,7 @@ __all__ = [
     "GlobalRegistry",
     "DefaultDict",
     "ConfigParser",
+    "load",
     "to_dict",
     "apply",
     "apply_",
