@@ -581,6 +581,11 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> d.c = {"b": {"d": 3, "e": {"f": 4}}}
             >>> d.merge(n).dict()
             {'c': {'b': {'d': 3, 'e': {'f': 4}}, 'd': {'f': 5}}, 'b': {'c': 3, 'd': 5}, 'd': 0}
+            >>> d = NestedDict()
+            >>> d.merge(a={1:1}, b={2:2},c={3:3}).dict()
+            {'a': {1: 1}, 'b': {2: 2}, 'c': {3: 3}}
+            >>> d.merge(d.clone()).dict()
+            {'a': {1: 1}, 'b': {2: 2}, 'c': {3: 3}}
         """
 
         if not args and not kwargs:
@@ -588,9 +593,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         @wraps(self.merge)
         def merge(this: NestedDict, that: Iterable) -> Mapping:
-            if isinstance(that, NestedDict):
-                that = that.all_items()
-            elif isinstance(that, Mapping):
+            if isinstance(that, Mapping):
                 that = that.items()
             for key, value in that:
                 if key in this and isinstance(this[key], Mapping):
@@ -600,6 +603,8 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                         this.set(key, value, convert_mapping=True)
                     else:
                         this[key] = value
+                elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
+                    getattr(this, key).merge(value)
                 elif isinstance(this, NestedDict):
                     this.set(key, value, convert_mapping=True)
                 else:

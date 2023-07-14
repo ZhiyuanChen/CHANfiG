@@ -505,6 +505,11 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {'a': 1, 'b': 'b', 'c': 3, 'd': 4}
             >>> FlatDict(a=1, b=1, c=1).union(FlatDict(b='b', c='c', d='d')).dict()  # alias
             {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
+            >>> d = FlatDict()
+            >>> d.merge({1: 1, 2: 2, 3:3}).dict()
+            {1: 1, 2: 2, 3: 3}
+            >>> d.merge(d.clone()).dict()
+            {1: 1, 2: 2, 3: 3}
         """
 
         @wraps(self.merge)
