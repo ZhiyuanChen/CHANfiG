@@ -20,7 +20,6 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from copy import copy, deepcopy
-from functools import wraps
 from io import BytesIO, IOBase, StringIO
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -512,19 +511,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {1: 1, 2: 2, 3: 3}
         """
 
-        @wraps(self.merge)
-        def merge(this: FlatDict, that: Iterable) -> Mapping:
-            if isinstance(that, Mapping):
-                that = that.items()
-            for key, value in that:
-                if key in this and isinstance(this[key], Mapping):
-                    if isinstance(value, Mapping):
-                        merge(this[key], value)
-                    else:
-                        this.set(key, value)
-                else:
-                    this.set(key, value)
-            return this
+        if not args and not kwargs:
+            return self
 
         if len(args) == 1:
             args = args[0]
@@ -534,11 +522,25 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                     "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
                     PendingDeprecationWarning,
                 )
-            merge(self, args)
+            self._merge(self, args)
         else:
-            merge(self, args)
-        merge(self, kwargs.items())
+            self._merge(self, args)
+        self._merge(self, kwargs.items())
         return self
+
+    @staticmethod
+    def _merge(this: FlatDict, that: Iterable) -> Mapping:
+        if isinstance(that, Mapping):
+            that = that.items()
+        for key, value in that:
+            if key in this and isinstance(this[key], Mapping):
+                if isinstance(value, Mapping):
+                    FlatDict._merge(this[key], value)
+                else:
+                    this.set(key, value)
+            else:
+                this.set(key, value)
+        return this
 
     def union(self, *args, **kwargs) -> FlatDict:
         r"""

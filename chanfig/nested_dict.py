@@ -20,9 +20,9 @@ from functools import wraps
 from inspect import ismethod
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
-from warnings import warn
 
 from .default_dict import DefaultDict
+from .flat_dict import FlatDict
 from .utils import _K, _V, Null, PathStr
 from .variable import Variable
 
@@ -550,80 +550,25 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             raise KeyError(name)
         return super().pop(name)
 
-    def merge(self, *args, **kwargs) -> NestedDict:
-        r"""
-        Merge another container into `NestedDict`.
-
-        Args:
-            *args: `Mapping` or `Iterable` to merge.
-            convert_mapping: Whether to convert `Mapping` to `NestedDict`.
-            **kwargs: `Mapping` to merge.
-
-        Returns:
-            self:
-
-        **Alias**:
-
-        + `union`
-
-        Examples:
-            >>> d = NestedDict()
-            >>> d["a.b.c"] = {"d": 3, "e": {"f": 4}}
-            >>> d.merge(NestedDict({"a.b.c.d": 3, "a.b.c.e.f": 4})).dict()
-            {'a': {'b': {'c': {'d': 3, 'e': {'f': 4}}}}}
-            >>> d = NestedDict({'a': 1, 'b.c': 2, 'b.d': 3, 'c.d.e': 4, 'c.d.f': 5, 'c.e': 6})
-            >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
-            >>> d.merge(n).dict()
-            {'a': 1, 'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}, 'e': 6}, 'd': 0}
-            >>> NestedDict(a=1, b=1, c=1).union(NestedDict(b='b', c='c', d='d')).dict()  # alias
-            {'a': 1, 'b': 'b', 'c': 'c', 'd': 'd'}
-            >>> d = NestedDict()
-            >>> d.c = {"b": {"d": 3, "e": {"f": 4}}}
-            >>> d.merge(n).dict()
-            {'c': {'b': {'d': 3, 'e': {'f': 4}}, 'd': {'f': 5}}, 'b': {'c': 3, 'd': 5}, 'd': 0}
-            >>> d = NestedDict()
-            >>> d.merge(a={1:1}, b={2:2},c={3:3}).dict()
-            {'a': {1: 1}, 'b': {2: 2}, 'c': {3: 3}}
-            >>> d.merge(d.clone()).dict()
-            {'a': {1: 1}, 'b': {2: 2}, 'c': {3: 3}}
-        """
-
-        if not args and not kwargs:
-            return self
-
-        @wraps(self.merge)
-        def merge(this: NestedDict, that: Iterable) -> Mapping:
-            if isinstance(that, Mapping):
-                that = that.items()
-            for key, value in that:
-                if key in this and isinstance(this[key], Mapping):
-                    if isinstance(value, Mapping):
-                        merge(this[key], value)
-                    elif isinstance(this, NestedDict):
-                        this.set(key, value, convert_mapping=True)
-                    else:
-                        this[key] = value
-                elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
-                    getattr(this, key).merge(value)
+    @staticmethod
+    def _merge(this: FlatDict, that: Iterable) -> Mapping:
+        if isinstance(that, Mapping):
+            that = that.items()
+        for key, value in that:
+            if key in this and isinstance(this[key], Mapping):
+                if isinstance(value, Mapping):
+                    NestedDict._merge(this[key], value)
                 elif isinstance(this, NestedDict):
                     this.set(key, value, convert_mapping=True)
                 else:
                     this[key] = value
-            return this
-
-        if len(args) == 1:
-            args = args[0]
-            if isinstance(args, (PathLike, str, bytes)):
-                args = self.load(args)  # type: ignore
-                warn(
-                    "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
-                    PendingDeprecationWarning,
-                )
-            merge(self, args)
-        else:
-            merge(self, args)
-        merge(self, kwargs.items())
-        return self
+            elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
+                getattr(this, key).merge(value)
+            elif isinstance(this, NestedDict):
+                this.set(key, value, convert_mapping=True)
+            else:
+                this[key] = value
+        return this
 
     def intersect(  # pylint: disable=W0221
         self, other: Mapping | Iterable | PathStr, recursive: bool = True
@@ -659,20 +604,20 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
-        @wraps(self.intersect)
-        def intersect(this: NestedDict, that: Iterable) -> Mapping:
-            ret = {}
-            for key, value in that:
-                if key in this:
-                    if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                        intersects = this[key].intersect(value)
-                        if intersects:
-                            ret[key] = intersects
-                    elif this[key] == value:
-                        ret[key] = value
-            return ret
+        return self.empty_like(self._intersect(self, other, recursive))  # type: ignore
 
-        return self.empty_like(intersect(self, other))  # type: ignore
+    @staticmethod
+    def _intersect(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
+        ret: NestedDict = NestedDict()
+        for key, value in that:
+            if key in this:
+                if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
+                    intersects = this[key].intersect(value)
+                    if intersects:
+                        ret[key] = intersects
+                elif this[key] == value:
+                    ret[key] = value
+        return ret
 
     def difference(  # pylint: disable=W0221, C0103
         self, other: Mapping | Iterable | PathStr, recursive: bool = True
@@ -708,21 +653,21 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
 
-        @wraps(self.difference)
-        def difference(this: NestedDict, that: Iterable) -> Mapping:
-            ret = {}
-            for key, value in that:
-                if key not in this:
-                    ret[key] = value
-                elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
-                    differences = this[key].difference(value)
-                    if differences:
-                        ret[key] = differences
-                elif this[key] != value:
-                    ret[key] = value
-            return ret
+        return self.empty_like(self._difference(self, other, recursive))  # type: ignore
 
-        return self.empty_like(difference(self, other))  # type: ignore
+    @staticmethod
+    def _difference(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
+        ret: NestedDict = NestedDict()
+        for key, value in that:
+            if key not in this:
+                ret[key] = value
+            elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
+                differences = this[key].difference(value)
+                if differences:
+                    ret[key] = differences
+            elif this[key] != value:
+                ret[key] = value
+        return ret
 
     def to(self, cls: str | TorchDevice | TorchDtype) -> Any:
         r"""
