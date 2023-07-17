@@ -603,7 +603,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-
         return self.empty_like(self._intersect(self, other, recursive))  # type: ignore
 
     @staticmethod
@@ -652,7 +651,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-
         return self.empty_like(self._difference(self, other, recursive))  # type: ignore
 
     @staticmethod

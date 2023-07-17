@@ -602,7 +602,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = other.items()
+            other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty_like(
@@ -649,7 +649,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = other.items()
+            other = self.empty_like(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty_like(
