@@ -21,6 +21,14 @@ from inspect import ismethod
 from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
 
+try:
+    from functools import cached_property
+except ImportError:
+    try:
+        from backports.cached_property import cached_property  # type: ignore
+    except ImportError:
+        cached_property = property  # type: ignore
+
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
 from .utils import _K, _V, Null, PathStr
@@ -406,7 +414,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
-                if name in dir(self) and isinstance(getattr(self.__class__, name), property):
+                if name in dir(self) and isinstance(getattr(self.__class__, name), (property, cached_property)):
                     self, name = getattr(self, name), rest
                 elif name not in self and isinstance(self, Mapping):
                     default = (
@@ -562,7 +570,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                     this.set(key, value, convert_mapping=True)
                 elif overwrite:
                     this[key] = value
-            elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
+            elif key in dir(this) and isinstance(getattr(this.__class__, key), (property, cached_property)):
                 getattr(this, key).merge(value, overwrite=overwrite)
             elif overwrite or key not in this:
                 if isinstance(this, NestedDict):
