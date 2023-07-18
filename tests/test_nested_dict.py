@@ -44,3 +44,8 @@ class Test:
         d = NestedDict()
         assert d.merge(a={1: 1}, b={2: 2}, c={3: 3}).dict() == {"a": {1: 1}, "b": {2: 2}, "c": {3: 3}}
         assert d.merge(d.clone()).dict() == {"a": {1: 1}, "b": {2: 2}, "c": {3: 3}}
+        d = NestedDict()
+        d["a.b.c"] = {"d": 3, "e": {"f": 4}}
+        assert d.merge(NestedDict({"a.b.c.d": 5, "a.b.c.h": 6}), overwrite=False).dict() == {
+            "a": {"b": {"c": {"d": 3, "e": {"f": 4}, "h": 6}}}
+        }

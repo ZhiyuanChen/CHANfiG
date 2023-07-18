@@ -551,23 +551,24 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         return super().pop(name)
 
     @staticmethod
-    def _merge(this: FlatDict, that: Iterable) -> Mapping:
+    def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
                 if isinstance(value, Mapping):
-                    NestedDict._merge(this[key], value)
+                    NestedDict._merge(this[key], value, overwrite)
                 elif isinstance(this, NestedDict):
+                    this.set(key, value, convert_mapping=True)
+                elif overwrite:
+                    this[key] = value
+            elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
+                getattr(this, key).merge(value, overwrite=overwrite)
+            elif overwrite or key not in this:
+                if isinstance(this, NestedDict):
                     this.set(key, value, convert_mapping=True)
                 else:
                     this[key] = value
-            elif key in dir(this) and isinstance(getattr(this.__class__, key), property):
-                getattr(this, key).merge(value)
-            elif isinstance(this, NestedDict):
-                this.set(key, value, convert_mapping=True)
-            else:
-                this[key] = value
         return this
 
     def intersect(  # pylint: disable=W0221
