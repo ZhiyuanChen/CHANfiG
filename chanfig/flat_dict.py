@@ -480,7 +480,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 return [cls(json) for json in obj]
         raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
 
-    def merge(self, *args, **kwargs) -> FlatDict:
+    def merge(self, *args, overwrite: bool = True, **kwargs) -> FlatDict:
         r"""
         Merge `other` into `FlatDict`.
 
@@ -509,6 +509,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {1: 1, 2: 2, 3: 3}
             >>> d.merge(d.clone()).dict()
             {1: 1, 2: 2, 3: 3}
+            >>> d.merge({1:3, 2:1, 3: 2, 4: 4, 5: 5}, overwrite=False).dict()
+            {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         """
 
         if not args and not kwargs:
@@ -522,23 +524,26 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                     "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
                     PendingDeprecationWarning,
                 )
-            self._merge(self, args)
+            self._merge(self, args, overwrite=overwrite)
         else:
-            self._merge(self, args)
-        self._merge(self, kwargs.items())
+            self._merge(self, args, overwrite=overwrite)
+        self._merge(self, kwargs, overwrite=overwrite)
         return self
 
     @staticmethod
-    def _merge(this: FlatDict, that: Iterable) -> Mapping:
+    def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
                 if isinstance(value, Mapping):
                     FlatDict._merge(this[key], value)
-                else:
-                    this.set(key, value)
-            else:
+                elif overwrite:
+                    if isinstance(value, FlatDict):
+                        this.set(key, value)
+                    else:
+                        this[key] = value
+            elif overwrite or key not in this:
                 this.set(key, value)
         return this
 
