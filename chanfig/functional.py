@@ -14,11 +14,13 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from typing import Type
+
 from .nested_dict import NestedDict
 from .utils import PathStr
 
 
-def load(file: PathStr, *args, **kwargs) -> NestedDict:
+def load(file: PathStr, cls: Type = NestedDict, *args, **kwargs) -> NestedDict:
     r"""
     Load a file into a `NestedDict`.
 
@@ -30,7 +32,7 @@ def load(file: PathStr, *args, **kwargs) -> NestedDict:
         **kwargs: The keyword arguments to pass to `NestedDict.load`.
 
     See Also:
-        [`chanfig.NestedDict.load`][chanfig.NestedDict.load]
+        [`load`][chanfig.FlatDict.load]
 
     Examples:
         >>> from chanfig import load
@@ -43,4 +45,4 @@ def load(file: PathStr, *args, **kwargs) -> NestedDict:
         )
     """
 
-    return NestedDict.load(file, *args, **kwargs)  # type: ignore
+    return cls.load(file, *args, **kwargs)  # type: ignore
