@@ -265,10 +265,11 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 dtype = type(value)
             name = "--" + key
             if name not in self:
+                help = value._help if isinstance(value, Variable) else None
                 if isinstance(value, (list, tuple, dict, set)):
-                    self.add_argument(name, type=dtype, nargs="+")
+                    self.add_argument(name, type=dtype, nargs="+", help=help)
                 else:
-                    self.add_argument(name, type=dtype)
+                    self.add_argument(name, type=dtype, help=help)
 
     def merge_default_config(self, parsed, default_config: str, no_default_config_action: str = "raise") -> NestedDict:
         message = f"default_config is set to {default_config}, but not found in args."
