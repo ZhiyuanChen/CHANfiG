@@ -43,6 +43,7 @@ Their Config objects either use a separate dict to store information from attrib
 or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
 To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry` objects.
+We also introduce `Variable` to allow sharing a value across multiple places, and `ConfigParser` to parse command line arguments.
 
 ### FlatDict
 
@@ -98,6 +99,12 @@ Have one value for multiple names at multiple places? We got you covered.
 Just wrap the value with `Variable`, and one alteration will be reflected everywhere.
 
 `Variable` also supports `type`, `choices`, `validator`, and `required` to ensure the correctness of the value.
+
+To make it even easier, `Variable` also supports `help` to provide a description when using `ConfigParser`.
+
+### ConfigParser
+
+`ConfigParser` extends `ArgumentParser` and provides `parse` and `parse_config` to parse command line arguments.
 
 ## Usage
 

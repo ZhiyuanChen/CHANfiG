@@ -36,7 +36,7 @@ class Variable(Generic[_V]):
     Raises:
         RuntimeError: If `required` is `True` and `value` is `Null`.
         TypeError: If `type` is specified and `value` is not an instance of `type`.
-        ValueError:
+        ValueError: |
             If `choices` is specified and `value` is not in `choices`.
             If `validator` is specified and `validator` returns `False`.
 

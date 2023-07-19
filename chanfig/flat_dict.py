@@ -439,7 +439,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (Mapping):
 
         See Also:
-            [`to_dict`][chanfig.flat_dict.to_dict]: implementation of `dict` method.
+            [`to_dict`][chanfig.flat_dict.to_dict]: Implementation of `dict`.
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
@@ -485,7 +485,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         Merge `other` into `FlatDict`.
 
         Args:
-            other:
+            *args: `Mapping` or `Sequence` to be merged.
+            overwrite: Whether to overwrite existing values.
+            **kwargs: `Mapping` to be merged.
 
         Returns:
             self:
