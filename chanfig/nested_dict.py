@@ -55,7 +55,7 @@ def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
         (Any): Return value of `func`.
 
     See Also:
-        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
+        [`apply_`][chanfig.nested_dict.apply_]: Apply an in-place operation.
     """
 
     if isinstance(obj, NestedDict):
@@ -90,7 +90,7 @@ def apply_(obj: Any, func: Callable, *args, **kwargs) -> Any:
         (Any): Return value of `func`.
 
     See Also:
-        [`apply_`][chanfig.utils.apply_]: Apply a in-place operation.
+        [`apply_`][chanfig.nested_dict.apply]: Apply a non-in-place operation.
     """
 
     if isinstance(obj, Mapping):
@@ -240,14 +240,13 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             This method is meant for non-in-place modification of `obj`, for example, [`to`][chanfig.NestedDict.to].
 
         Args:
-            func(Callable):
+            func (Callable):
 
         See Also:
-            [`apply_`][chanfig.NestedDict.apply_]: Apply a in-place operation.
+            [`apply_`][chanfig.NestedDict.apply_]: Apply an in-place operation.
+            [`apply`][chanfig.nested_dict.apply]: Implementation of `apply`.
 
-            [`apply`][chanfig.utils.apply]: implementation of `apply` method.
-
-        Examples:
+        tionples:
             >>> def func(d):
             ...     if isinstance(d, NestedDict):
             ...         d.t = 1
@@ -270,12 +269,11 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             This method is meant for in-place modification of `obj`, for example, [`freeze`][chanfig.Config.freeze].
 
         Args:
-            func(Callable):
+            func (Callable):
 
         See Also:
             [`apply`][chanfig.NestedDict.apply]: Apply a non-in-place operation.
-
-            [`apply_`][chanfig.utils.apply_]: implementation of `apply_` method.
+            [`apply_`][chanfig.nested_dict.apply_]: Implementation of `apply_` method.
 
         Examples:
             >>> def func(d):

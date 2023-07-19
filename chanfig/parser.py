@@ -106,6 +106,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 and `no_default_config_action` is neither `warn` nor `ignore`.
             ValueError: If `no_default_config_action` is not in `raise`, `warn` and `ignore`.
 
+        See Also:
+            [`parse_config`][chanfig.ConfigParser.parse_config]: Only parse valid config arguments.
+
         Examples:
             Note that all examples uses NestedDict instead of Config for avoiding circular import.
             >>> p = ConfigParser()
@@ -221,6 +224,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             ValueError: If `default_config` is specified but not found in args,
                 and `no_default_config_action` is neither `warn` nor `ignore`.
             ValueError: If `no_default_config_action` is not in `raise`, `warn` and `ignore`.
+
+        See Also:
+            [`parse`][chanfig.ConfigParser.parse]: Parse all command-line arguments.
 
         Examples:
             Note that all examples uses NestedDict instead of Config for avoiding circular import.

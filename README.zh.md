@@ -38,6 +38,7 @@ CHANfiG 的范式是：
 尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。
 
 为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`DefaultDict`、`NestedDict`、`Config`和`Registry`对象。
+我们同时介绍了`Variable`来在多个位置共享值，和`ConfigParser`来解析命令行参数。
 
 ### FlatDict
 
@@ -95,6 +96,12 @@ CHANfiG 的范式是：
 只要将值以`Variable`包装，然后每处更改都会在处处体现。
 
 `Variable`同时支持`type`、`choices`、`validator`、`required`来确保值的正确性。
+
+为了更加简单，`Variable`还支持`help`来在使用`ConfigParser`时提供描述。
+
+### ConfigParser
+
+`ConfigParser`在`ArgumentParser`的基础之上，提供了`parse`和`parse_config`来解析命令行参数并创建/更新`Config`。
 
 ## 使用
 

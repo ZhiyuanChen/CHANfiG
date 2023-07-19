@@ -113,7 +113,7 @@ class Config(NestedDict[_K, _V]):
         Note that you should always call `boot` to apply `post` rather than calling `post` directly,
         as `boot` recursively call `post` on sub-configs.
 
-        See Also: [`chanfig.Config.boot`][chanfig.Config.boot]
+        See Also: [`boot`][chanfig.Config.boot]
 
         Returns:
             self:
@@ -146,7 +146,7 @@ class Config(NestedDict[_K, _V]):
         By default, `boot` is called after `Config` is parsed.
         If you don't need to parse command-line arguments, you should call `boot` manually.
 
-        See Also: [`chanfig.Config.post`][chanfig.Config.post]
+        See Also: [`post`][chanfig.Config.post]
 
         Returns:
             self:
@@ -197,11 +197,11 @@ class Config(NestedDict[_K, _V]):
         `parse` will try to parse all command-line arguments,
         you don't need to pre-define them but typos may cause trouble.
 
-        This function internally calls `Config.post`.
+        This function internally calls `Config.boot()`.
 
         See Also:
-            [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]
-            [`chanfig.Config.parse_config`][chanfig.Config.parse_config]
+            [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]: Implementation of `parse`.
+            [`parse_config`][chanfig.Config.parse_config]: Only parse valid config arguments.
 
         Examples:
             >>> c = Config(a=0)
@@ -227,11 +227,13 @@ class Config(NestedDict[_K, _V]):
 
         Parse command-line arguments with `ConfigParser`.
 
-        This function internally calls `Config.post`.
+        `parse_config` only parse command-line arguments that is in defined in `Config`.
+
+        This function internally calls `Config.boot()`.
 
         See Also:
-            [`chanfig.ConfigParser.parse_config`][chanfig.ConfigParser.parse_config]
-            [`chanfig.Config.parse`][chanfig.Config.parse]
+            [`chanfig.ConfigParser.parse_config`][chanfig.ConfigParser.parse_config]: Implementation of `parse_config`.
+            [`parse`][chanfig.Config.parse]: Parse all command-line arguments.
 
         Examples:
             >>> c = Config(a=0, b=0, c=0)
