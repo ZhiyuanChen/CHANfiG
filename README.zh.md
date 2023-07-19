@@ -48,12 +48,12 @@ CHANfiG 的范式是：
 `FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`对象。
 与`update`方法不同，`merge`方法是赋值而不是替换，这使得他能更好的与`DefaultDict`对象配合使用。
 
-更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的对比`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
+更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
 #### 机器学习操作
 
 `FlatDict`支持与 Pytorch Tensor 类似的`to`方法。
-你可以很简单的通过相同的方式将所有`FlatDict`的成员值转换为某种类型或者转一道某个设备上。
+你可以很简单的通过相同的方式将所有`FlatDict`的成员值转换为某种类型或者转移到某个设备上。
 
 `FlatDict`同时集成了`cpu`、`gpu` (`cuda`)、`tpu` (`xla`)方法来提供更便捷的访问。
 
