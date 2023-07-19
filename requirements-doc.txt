@@ -1,6 +1,9 @@
 jieba
+markdown-callouts
 markdown-exec
 mkdocs
+mkdocs-callouts
+mkdocs-coverage
 mkdocs-git-committers-plugin
 mkdocs-git-revision-date-localized-plugin
 mkdocs-material

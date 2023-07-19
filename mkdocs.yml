@@ -19,11 +19,13 @@ nav:
   - Utilities: utils.md
   # - package: package.md
   # - Blog: blog/index.md
+  - Development:
+    - Coverage: coverage.md
 
 theme:
   name: material
   custom_dir: overrides
-  language: "zh"
+  language: en
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
@@ -43,13 +45,17 @@ theme:
   favicon: "assets/images/logo.ico"
   features:
     - announce.dismiss
+    - content.action.edit
+    - content.action.view
     - content.code.annotate
+    - content.code.copy
     - content.tabs.link
     - content.tooltips
     - header.autohide
     - navigation.expand
+    - navigation.footer
     - navigation.indexes
-    - navigation.instant
+    # - navigation.instant
     - navigation.prune
     - navigation.sections
     - navigation.tabs
@@ -94,9 +100,15 @@ extra:
   #     link: https://instagram.com/zyc.ai
   #   - icon: fontawesome/brands/linkedin
   #     link: 'https://www.linkedin.com/in/%E9%99%9F%E5%8E%9F-%E9%99%88-0b473aa9/'
-
   # version:
   #   method: mike
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: 汉语
+      link: /zh/
+      lang: zh
 
 extra_css:
   - assets/css/fonts.css
@@ -112,6 +124,8 @@ markdown_extensions:
   - abbr
   - admonition
   - attr_list
+  - callouts:
+      strip_period: no
   - def_list
   - footnotes
   - md_in_html
@@ -150,30 +164,43 @@ markdown_extensions:
   - smarty
   - tables
   - toc:
-      permalink: true
+      permalink: "¤"
 
 plugins:
   - autorefs
   # - blog:
   #     post_date_format: full
   #     post_url_format: "{slug}"
-  - git-committers
+  - coverage
+  - git-committers:
+      enabled: !ENV [DEPLOY, false]
+      repository: ZhiyuanChen/CHANfiG
   - mkdocstrings:
       handlers:
         python:
+          # import:
+          #   - https://docs.python.org/3/objects.inv
+          load_external_modules: true
           rendering:
             members_order: source
+          options:
+            docstring_options:
+              trim_doctest_flags: true
   - i18n:
       default_language: en
       languages:
         en:
           name: English
-          build: true
+          build: false
         zh:
           name: 汉语
           build: true
   - git-revision-date-localized:
       type: iso_datetime
+      enable_creation_date: true
+      fallback_to_build_date: true
+      exclude:
+          - coverage.md
   - rss:
       match_path: .*
       date_from_meta:

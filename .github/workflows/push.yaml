@@ -26,7 +26,48 @@ jobs:
       - name: Install dependencies for testing
         run: pip install pytest pytest-cov torch
       - name: pytest
-        run: pytest .
+        run: pytest --cov=materialx --cov-report=xml --cov-report=html .
+      - name: Upload coverage report for documentation
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: htmlcov
+          retention-days: 5
+  pages:
+    needs: [test]
+    environment: mkdocs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "::set-output name=dir::$(pip cache dir)"
+      - uses: actions/cache@v3
+        with:
+          key: ${{ github.ref }}
+          path: .cache
+      - run: pip install -r requirements-doc.txt
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: htmlcov
+      - run: mkdocs build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
   release:
     if: startsWith(github.event.ref, 'refs/tags/v')
     needs: [lint, test]
