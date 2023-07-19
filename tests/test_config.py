@@ -23,7 +23,7 @@ class TestConfig(Config):
         super().__init__(*args, **kwargs)
         num_classes = Variable(10)
         self.name = "CHANfiG"
-        self.seed = Variable(1013)
+        self.seed = Variable(1013, help="random seed")
         data_factory = partial(DataConfig, name="CIFAR10")
         self.datasets = Config(default_factory=data_factory)
         self.datas = Config(default_factory=data_factory)

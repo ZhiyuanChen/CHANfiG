@@ -16,7 +16,7 @@
 
 from contextlib import contextmanager
 from copy import copy
-from typing import Any, Callable, Generic, List, Mapping, Optional
+from typing import Any, Callable, Generic, List, Mapping, Optional, Type
 
 from .utils import _V, Null
 
@@ -31,6 +31,7 @@ class Variable(Generic[_V]):
         choices: Possible values of the value.
         validator: `Callable` that validates the value.
         required: Whether the value is required.
+        help: Help message of the value.
 
     Raises:
         RuntimeError: If `required` is `True` and `value` is `Null`.
@@ -94,21 +95,24 @@ class Variable(Generic[_V]):
     _type: Optional[type] = None
     _choices: Optional[List] = None
     _validator: Optional[Callable] = None
-    _required: Optional[bool] = False
+    _required: bool = False
+    _help: Optional[str] = None
 
     def __init__(  # pylint: disable=R0913
         self,
-        value: Optional[Any] = Null,
+        value: Any = Null,
         type: Optional[type] = None,  # pylint: disable=W0622
         choices: Optional[List] = None,
         validator: Optional[Callable] = None,
-        required: Optional[bool] = False,
+        required: bool = False,
+        help: Optional[str] = None,
     ) -> None:
         self._storage = [value]
         self._type = type
         self._choices = choices
         self._validator = validator
         self._required = required
+        self._help = help
 
     @property  # type: ignore
     def __class__(self) -> type:
@@ -132,6 +136,23 @@ class Variable(Generic[_V]):
         self._storage[0] = self._get_value(value)
 
     @property
+    def dtype(self) -> Type:
+        r"""
+        Data type of the object wrapped in `Variable`.
+
+        Examples:
+            >>> id = Variable(1013)
+            >>> type(id)
+            <class 'chanfig.variable.Variable'>
+            >>> id.dtype
+            <class 'int'>
+            >>> issubclass(id.dtype, int)
+            True
+        """
+
+        return self.value.__class__
+
+    @property
     def storage(self) -> List[Any]:
         r"""
         Storage of `Variable`.
@@ -139,9 +160,25 @@ class Variable(Generic[_V]):
 
         return self._storage
 
-    @storage.setter
-    def storage(self, *args, **kwargs) -> None:
-        raise AttributeError("Cannot set storage.")
+    @property
+    def type(self) -> Optional[type]:
+        return self._type
+
+    @property
+    def choices(self) -> Optional[List]:
+        return self._choices
+
+    @property
+    def validator(self) -> Optional[Callable]:
+        return self._validator
+
+    @property
+    def required(self) -> bool:
+        return self._required
+
+    @property
+    def help(self) -> str:
+        return self._help or ""
 
     def validate(self, *args) -> None:
         r"""
@@ -162,23 +199,6 @@ class Variable(Generic[_V]):
             raise ValueError(f"Value {value} is not in choices {self._choices}.")
         if self._validator is not None and not self._validator(value):
             raise ValueError(f"Value {value} is not valid.")
-
-    @property
-    def dtype(self) -> type:
-        r"""
-        Data type of the object wrapped in `Variable`.
-
-        Examples:
-            >>> id = Variable(1013)
-            >>> type(id)
-            <class 'chanfig.variable.Variable'>
-            >>> id.dtype
-            <class 'int'>
-            >>> issubclass(id.dtype, int)
-            True
-        """
-
-        return self.value.__class__
 
     def get(self) -> Any:
         r"""
