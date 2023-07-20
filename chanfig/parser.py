@@ -117,13 +117,13 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
             Values in command line overrides values in `default_config` file.
             >>> p = ConfigParser()
-            >>> p.parse(['--a', '2', '--config', 'example.yaml'], default_config='config').dict()
-            {'a': 2, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+            >>> p.parse(['--a', '2', '--config', 'tests/test.yaml'], default_config='config').dict()
+            {'a': 2, 'b': 2, 'c': 3, 'config': 'tests/test.yaml'}
 
             Values in `default_config` file overrides values in `Config` object.
             >>> p = ConfigParser()
-            >>> p.parse(['--config', 'example.yaml'], config=NestedDict(a=2), default_config='config').dict()
-            {'a': 1, 'b': 2, 'c': 3, 'config': 'example.yaml'}
+            >>> p.parse(['--config', 'tests/test.yaml'], config=NestedDict(a=2), default_config='config').dict()
+            {'a': 1, 'b': 2, 'c': 3, 'config': 'tests/test.yaml'}
 
             ValueError will be raised when `default_config` is specified but not presented in command line.
             >>> p = ConfigParser()
