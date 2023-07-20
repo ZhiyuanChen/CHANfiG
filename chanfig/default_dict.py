@@ -50,7 +50,9 @@ class DefaultDict(FlatDict[_K, _V]):
 
     default_factory: Optional[Callable] = None
 
-    def __init__(self, default_factory: Optional[Callable] = None, *args, **kwargs) -> None:  # pylint: disable=W1113
+    def __init__(
+        self, default_factory: Optional[Callable] = None, *args: Any, **kwargs: Any
+    ) -> None:  # pylint: disable=W1113
         super().__init__(*args, **kwargs)
         if default_factory is not None:
             if callable(default_factory):

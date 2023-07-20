@@ -480,7 +480,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 return [cls(json) for json in obj]
         raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
 
-    def merge(self, *args, overwrite: bool = True, **kwargs) -> FlatDict:
+    def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> FlatDict:
         r"""
         Merge `other` into `FlatDict`.
 
@@ -549,13 +549,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 this.set(key, value)
         return this
 
-    def union(self, *args, **kwargs) -> FlatDict:
+    def union(self, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Alias of [`merge`][chanfig.FlatDict.merge].
         """
         return self.merge(*args, **kwargs)
 
-    def merge_from_file(self, file: File, *args, **kwargs) -> FlatDict:
+    def merge_from_file(self, file: File, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Merge content of `file` into `FlatDict`.
 
@@ -616,7 +616,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
         )
 
-    def inter(self, other: Mapping | Iterable | PathStr, *args, **kwargs) -> FlatDict:
+    def inter(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Alias of [`intersect`][chanfig.FlatDict.intersect].
         """
@@ -663,7 +663,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
-    def diff(self, other: Mapping | Iterable | PathStr, *args, **kwargs) -> FlatDict:
+    def diff(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Alias of [`difference`][chanfig.FlatDict.difference].
         """
@@ -837,7 +837,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
         return self.deepcopy(memo=memo)
 
-    def dump(self, file: File, method: str | None = None, *args, **kwargs) -> None:  # pylint: disable=W1113
+    def dump(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
         r"""
         Dump `FlatDict` to file.
 
@@ -869,7 +869,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
 
     @classmethod
-    def load(cls, file: File, method: str | None = None, *args, **kwargs) -> FlatDict:  # pylint: disable=W1113
+    def load(
+        cls, file: File, method: str | None = None, *args: Any, **kwargs: Any
+    ) -> FlatDict:  # pylint: disable=W1113
         """
         Load `FlatDict` from file.
 
@@ -908,7 +910,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             return cls.from_yaml(file, *args, **kwargs)
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
-    def json(self, file: File, *args, **kwargs) -> None:
+    def json(self, file: File, *args: Any, **kwargs: Any) -> None:
         r"""
         Dump `FlatDict` to json file.
 
@@ -924,7 +926,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             fp.write(self.jsons(*args, **kwargs))
 
     @classmethod
-    def from_json(cls, file: File, *args, **kwargs) -> FlatDict:
+    def from_json(cls, file: File, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Construct `FlatDict` from json file.
 
@@ -945,7 +947,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
-    def jsons(self, *args, **kwargs) -> str:
+    def jsons(self, *args: Any, **kwargs: Any) -> str:
         r"""
         Dump `FlatDict` to json string.
 
@@ -963,7 +965,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
-    def from_jsons(cls, string: str, *args, **kwargs) -> FlatDict:
+    def from_jsons(cls, string: str, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Construct `FlatDict` from json string.
 
@@ -981,7 +983,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return cls.from_dict(json_loads(string, *args, **kwargs))
 
-    def yaml(self, file: File, *args, **kwargs) -> None:
+    def yaml(self, file: File, *args: Any, **kwargs: Any) -> None:
         r"""
         Dump `FlatDict` to yaml file.
 
@@ -997,7 +999,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, file: File, *args, **kwargs) -> FlatDict:
+    def from_yaml(cls, file: File, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Construct `FlatDict` from yaml file.
 
@@ -1017,7 +1019,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_yamls(fp.read(), *args, **kwargs)
 
-    def yamls(self, *args, **kwargs) -> str:
+    def yamls(self, *args: Any, **kwargs: Any) -> str:
         r"""
         Dump `FlatDict` to yaml string.
 
@@ -1034,7 +1036,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
 
     @classmethod
-    def from_yamls(cls, string: str, *args, **kwargs) -> FlatDict:
+    def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Construct `FlatDict` from yaml string.
 
@@ -1055,7 +1057,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     @staticmethod
     @contextmanager
-    def open(file: File, *args, **kwargs):
+    def open(file: File, *args: Any, **kwargs: Any):
         r"""
         Open file IO from file path or IO.
 
@@ -1106,7 +1108,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             )
 
     @classmethod
-    def empty(cls, *args, **kwargs) -> FlatDict:
+    def empty(cls, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Initialise an empty `FlatDict`.
 
@@ -1129,7 +1131,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         empty.merge(*args, **kwargs)  # pylint: disable=W0212
         return empty
 
-    def empty_like(self, *args, **kwargs) -> FlatDict:
+    def empty_like(self, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
         Initialise an empty copy of `FlatDict`.
 
@@ -1227,14 +1229,14 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
     def __hash__(self):
         return hash(frozenset(self.items()))
 
-    def __getstate__(self, *args, **kwargs):
+    def __getstate__(self, *args: Any, **kwargs: Any):
         return self.__dict__
 
-    def __setstate__(self, states, *args, **kwargs):
+    def __setstate__(self, states, *args: Any, **kwargs: Any):
         for name, value in states.items():
             self.setattr(name, value)
 
-    def __wrapped__(self, *args, **kwargs):
+    def __wrapped__(self, *args: Any, **kwargs: Any):
         pass
 
     def _ipython_display_(self):

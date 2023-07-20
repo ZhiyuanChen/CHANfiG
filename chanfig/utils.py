@@ -38,9 +38,9 @@ class Singleton(type):
 
     __instances__: Mapping[type, object] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any):
         if cls not in cls.__instances__:
-            cls.__instances__[cls] = super().__call__(*args, **kwargs)
+            cls.__instances__[cls] = super().__call__(*args, **kwargs)  # type: ignore
         return cls.__instances__[cls]
 
 
@@ -63,7 +63,7 @@ class NULL(metaclass=Singleton):
     def __len__(self):
         return 0
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any):
         return self
 
     def __contains__(self, name):
