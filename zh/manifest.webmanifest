@@ -1,0 +1,16 @@
+{
+  "short_name": "CHANfiG",
+  "name": "CHANfiG",
+  "description": "Easier Configuration",
+  "icons": [
+    {
+      "src": "assets/site/logo.png",
+      "type": "image/png",
+      "sizes": "2000x2000"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "scope": "/",
+  "shortcuts": []
+}
