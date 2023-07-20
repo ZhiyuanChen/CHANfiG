@@ -569,7 +569,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Examples:
             >>> d = FlatDict(a=1, b=1)
-            >>> d.merge_from_file("example.yaml").dict()
+            >>> d.merge_from_file("tests/test.yaml").dict()
             {'a': 1, 'b': 2, 'c': 3}
         """
 
@@ -597,7 +597,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             >>> l = [('c', 3), ('d', 4)]
             >>> d.intersect(l).dict()
             {'c': 3}
-            >>> d.merge(l).intersect("example.yaml").dict()
+            >>> d.merge(l).intersect("tests/test.yaml").dict()
             {'a': 1, 'b': 2, 'c': 3}
             >>> d.intersect(1)
             Traceback (most recent call last):
@@ -644,7 +644,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             >>> l = [('c', 3), ('d', 4)]
             >>> d.difference(l).dict()
             {'d': 4}
-            >>> d.merge(l).difference("example.yaml").dict()
+            >>> d.merge(l).difference("tests/test.yaml").dict()
             {}
             >>> d.difference(1)
             Traceback (most recent call last):
@@ -847,7 +847,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
-            >>> d.dump("example.yaml")
+            >>> d.dump("tests/test.yaml")
             >>> d.dump("example.conf")
             Traceback (most recent call last):
             TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
@@ -887,7 +887,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             TypeError: If dump to unsupported extension.
 
         Examples:
-            >>> d = FlatDict.load("example.yaml")
+            >>> d = FlatDict.load("tests/test.yaml")
             >>> d.dict()
             {'a': 1, 'b': 2, 'c': 3}
             >>> d.load("example.conf")
@@ -919,7 +919,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
-            >>> d.json("example.json")
+            >>> d.json("tests/test.json")
         """
 
         with self.open(file, mode="w") as fp:  # pylint: disable=C0103
@@ -937,7 +937,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FlatDict):
 
         Examples:
-            >>> d = FlatDict.from_json('example.json')
+            >>> d = FlatDict.from_json('tests/test.json')
             >>> d.dict()
             {'a': 1, 'b': 2, 'c': 3}
         """
@@ -992,7 +992,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
-            >>> d.yaml("example.yaml")
+            >>> d.yaml("tests/test.yaml")
         """
 
         with self.open(file, mode="w") as fp:  # pylint: disable=C0103
@@ -1010,7 +1010,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FlatDict):
 
         Examples:
-            >>> FlatDict.from_yaml('example.yaml').dict()
+            >>> FlatDict.from_yaml('tests/test.yaml').dict()
             {'a': 1, 'b': 2, 'c': 3}
         """
 
@@ -1075,13 +1075,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             (FileIO):
 
         Examples:
-            >>> with FlatDict.open("example.yaml") as fp:
+            >>> with FlatDict.open("tests/test.yaml") as fp:
             ...     print(fp.read())
             a: 1
             b: 2
             c: 3
             <BLANKLINE>
-            >>> io = open("example.yaml")
+            >>> io = open("tests/test.yaml")
             >>> with FlatDict.open(io) as fp:
             ...     print(fp.read())
             a: 1

@@ -36,7 +36,7 @@ def load(file: PathStr, cls: Type = NestedDict, *args: Any, **kwargs: Any) -> Ne
 
     Examples:
         >>> from chanfig import load
-        >>> config = load("example.yaml")
+        >>> config = load("tests/test.yaml")
         >>> config
         NestedDict(
           ('a'): 1

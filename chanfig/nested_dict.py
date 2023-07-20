@@ -594,7 +594,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.intersect(n).dict()
             {'c': {'d': {'e': 4, 'f': 5}}}
-            >>> d.intersect("example.yaml").dict()
+            >>> d.intersect("tests/test.yaml").dict()
             {'a': 1}
             >>> d.intersect(n, recursive=False).dict()
             {}
@@ -642,7 +642,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             >>> n = {'b': {'c': 3, 'd': 5}, 'c.d.e': 4, 'c.d': {'f': 5}, 'd': 0}
             >>> d.difference(n).dict()
             {'b': {'c': 3, 'd': 5}, 'd': 0}
-            >>> d.difference("example.yaml").dict()
+            >>> d.difference("tests/test.yaml").dict()
             {'b': 2, 'c': 3}
             >>> d.difference(n, recursive=False).dict()
             {'b': {'c': 3, 'd': 5}, 'c': {'d': {'e': 4, 'f': 5}}, 'd': 0}

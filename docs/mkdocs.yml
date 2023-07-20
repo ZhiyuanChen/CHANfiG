@@ -43,13 +43,17 @@ theme:
   favicon: "assets/images/logo.ico"
   features:
     - announce.dismiss
+    # - content.action.edit
+    # - content.action.view
     - content.code.annotate
+    - content.code.copy
     - content.tabs.link
     - content.tooltips
     - header.autohide
     - navigation.expand
+    - navigation.footer
     - navigation.indexes
-    - navigation.instant
+    # - navigation.instant
     - navigation.prune
     - navigation.sections
     - navigation.tabs
@@ -157,7 +161,10 @@ plugins:
   # - blog:
   #     post_date_format: full
   #     post_url_format: "{slug}"
-  - git-committers
+  # - coverage
+  - git-committers:
+      repository: ZhiyuanChen/CHANfiG
+      token: !!python/object/apply:os.getenv ["MKDOCS_GIT_COMMITTERS_APIKEY"]
   - mkdocstrings:
       handlers:
         python:
@@ -187,4 +194,4 @@ plugins:
   - markdown-exec
 
 watch:
-  - chanfig/
+  - ../chanfig/
