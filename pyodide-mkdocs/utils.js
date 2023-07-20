@@ -8,12 +8,12 @@ let stress = (content) => richTextFormat(content, "b");
 let info = (content) => richTextFormat(content, "", "grey");
 let italic = (content) => richTextFormat(content, "i");
 let errorMessage = (errorType, lineNumber, log) => {
-  return ` Python a renvoyé une ${error(
+  return ` Python returned ${error(
     errorType
-  )} à la ligne ${lineNumber} :\n\n ${italic(log)}`;
+  )} at line ${lineNumber} :\n\n ${italic(log)}`;
 };
 
-let runScriptPrompt = info("%Script exécuté");
+let runScriptPrompt = info("%Script execute");
 let ps1 = ">>> ";
 let ps2 = "... ";
 
@@ -88,7 +88,7 @@ function generateErrorLog(
     if (errorTypeLog.includes(errorType)) {
       if (errorType != "AssertionError") {
         return errorMessage(
-          conversionTable[errorType],
+          errorType,
           errorLineInLog,
           errorTypeLog
         );
