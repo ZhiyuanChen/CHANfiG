@@ -181,6 +181,7 @@ plugins:
           build: true
   - git-revision-date-localized:
       type: iso_datetime
+  - macros
   - rss:
       match_path: .*
       date_from_meta:
@@ -191,7 +192,7 @@ plugins:
   - search:
       separator: '[\s\u200b\-]'
   - tags
-  - markdown-exec
+  # - markdown-exec
 
 watch:
   - ../chanfig/

@@ -66,6 +66,9 @@ max-line-length = 120
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules --cov"
+pythonpath = [
+  "chanfig"
+]
 
 [tool.coverage.run]
 branch = true

@@ -1,3 +1,5 @@
+exclude: docs
+
 default_language_version:
   python: python3
 repos:
@@ -44,7 +46,7 @@ repos:
     rev: v3.0.0
     hooks:
       - id: prettier
-        files: chanfig
+        exclude: tests
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -58,15 +60,14 @@ repos:
       - id: check-vcs-permalinks
       - id: check-symlinks
       - id: pretty-format-json
-        files: chanfig
+        exclude: tests
       - id: check-json
       - id: check-xml
       - id: check-toml
       - id: check-yaml
-        files: chanfig
       - id: debug-statements
       - id: end-of-file-fixer
-        files: chanfig
+        exclude: tests
       - id: fix-byte-order-marker
       - id: fix-encoding-pragma
         args: ["--remove"]

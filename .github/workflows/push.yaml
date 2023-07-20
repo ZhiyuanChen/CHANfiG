@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies for testing
         run: pip install pytest pytest-cov torch
       - name: pytest
-        run: pytest --cov=materialx --cov-report=xml --cov-report=html .
+        run: pytest --cov=materialx --cov-report=xml --cov-report=html chanfig
       - name: Upload coverage report for documentation
         uses: actions/upload-artifact@v3
         with:
@@ -67,7 +67,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          publish_dir: ./docs/site
   release:
     if: startsWith(github.event.ref, 'refs/tags/v')
     needs: [lint, test]
