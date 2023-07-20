@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from torch import dtype as TorchDtype
 
 
-def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
+def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     r"""
     Apply `func` to all children of `obj`.
 
@@ -74,7 +74,7 @@ def apply(obj: Any, func: Callable, *args, **kwargs) -> Any:
     return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
-def apply_(obj: Any, func: Callable, *args, **kwargs) -> Any:
+def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     r"""
     Apply `func` to all children of `obj`.
 
@@ -153,7 +153,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     convert_mapping: bool = False
     delimiter: str = "."
 
-    def __init__(self, *args, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs) -> None:
+    def __init__(
+        self, *args: Any, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs: Any
+    ) -> None:
         self.setattr("convert_mapping", convert_mapping)
         super().__init__(default_factory)
         if args or kwargs:
@@ -232,7 +234,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         return all_items(self)
 
-    def apply(self, func: Callable, *args, **kwargs) -> NestedDict:
+    def apply(self, func: Callable, *args: Any, **kwargs: Any) -> NestedDict:
         r"""
         Recursively apply a function to `NestedDict` and its children.
 
@@ -261,7 +263,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         return apply(self, func, *args, **kwargs)
 
-    def apply_(self, func: Callable, *args, **kwargs) -> NestedDict:
+    def apply_(self, func: Callable, *args: Any, **kwargs: Any) -> NestedDict:
         r"""
         Recursively apply a function to `NestedDict` and its children.
 

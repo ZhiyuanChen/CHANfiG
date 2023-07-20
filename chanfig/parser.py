@@ -20,7 +20,7 @@ import sys
 from argparse import ArgumentParser, Namespace, _StoreAction
 from ast import literal_eval
 from contextlib import suppress
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 from warnings import warn
 
 from .nested_dict import NestedDict
@@ -48,7 +48,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     which has strict checking on command-line arguments.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._registries["action"][None] = StoreAction
         self._registries["action"]["store"] = StoreAction

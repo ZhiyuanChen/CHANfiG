@@ -14,13 +14,13 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from typing import Type
+from typing import Any, Type
 
 from .nested_dict import NestedDict
 from .utils import PathStr
 
 
-def load(file: PathStr, cls: Type = NestedDict, *args, **kwargs) -> NestedDict:
+def load(file: PathStr, cls: Type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:
     r"""
     Load a file into a `NestedDict`.
 

@@ -175,7 +175,7 @@ class Registry(NestedDict):
         return self.get(name)
 
     @staticmethod
-    def init(cls: Callable, *args, **kwargs) -> Any:  # type: ignore
+    def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # type: ignore
         r"""
         Constructor of component.
 
@@ -204,7 +204,7 @@ class Registry(NestedDict):
 
         return cls(*args, **kwargs)
 
-    def build(self, name: Union[str, Mapping], *args, **kwargs) -> Any:
+    def build(self, name: Union[str, Mapping], *args: Any, **kwargs: Any) -> Any:
         r"""
         Build a component.
 
@@ -247,7 +247,7 @@ class Registry(NestedDict):
             name, kwargs = name.pop("name"), dict(name, **kwargs)  # type: ignore
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore
 
-    def __wrapped__(self, *args, **kwargs):
+    def __wrapped__(self, *args: Any, **kwargs: Any):
         pass
 
 

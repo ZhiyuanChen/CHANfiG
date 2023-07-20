@@ -31,7 +31,7 @@ def frozen_check(func: Callable):
     """
 
     @wraps(func)
-    def decorator(self, *args, **kwargs):
+    def decorator(self, *args: Any, **kwargs: Any):
         if self.getattr("frozen", False):
             raise ValueError("Attempting to alter a frozen config. Run config.defrost() to defrost first.")
         return func(self, *args, **kwargs)
@@ -96,7 +96,7 @@ class Config(NestedDict[_K, _V]):
     parser: ConfigParser
     frozen: bool = False
 
-    def __init__(self, *args, default_factory: Callable | None = None, **kwargs):
+    def __init__(self, *args: Any, default_factory: Callable | None = None, **kwargs: Any):
         if default_factory is None:
             default_factory = Config
         super().__init__(*args, default_factory=default_factory, **kwargs)
@@ -249,7 +249,7 @@ class Config(NestedDict[_K, _V]):
         self.boot()
         return self
 
-    def add_argument(self, *args, **kwargs) -> None:
+    def add_argument(self, *args: Any, **kwargs: Any) -> None:
         r"""
         Add an argument to `ConfigParser`.
 
