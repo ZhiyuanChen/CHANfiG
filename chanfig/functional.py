@@ -14,13 +14,63 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from typing import Any, Type
+from io import IOBase
+from json import dumps as json_dumps
+from os.path import splitext
+from typing import Any, Optional, Type
 
+from yaml import dump as yaml_dump
+
+from .flat_dict import FlatDict, to_dict
 from .nested_dict import NestedDict
-from .utils import PathStr
+from .utils import JSON, YAML, File, PathStr
 
 
-def load(file: PathStr, cls: Type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:
+def save(obj, file: File, method: Optional[str] = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+    r"""
+    Save `FlatDict` to file.
+
+    Raises:
+        ValueError: If save to `IO` and `method` is not specified.
+        TypeError: If save to unsupported extension.
+
+    **Alias**:
+
+    + `save`
+
+    Examples:
+        >>> obj = {"a": 1, "b": 2, "c": 3}
+        >>> save(obj, "test.yaml")
+        >>> save(obj, "test.conf")
+        Traceback (most recent call last):
+        TypeError: `file='test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+        >>> with open("test.yaml", "w") as f:
+        ...     save(obj, f)
+        Traceback (most recent call last):
+        ValueError: `method` must be specified when saving to IO.
+    """
+
+    if isinstance(obj, FlatDict):
+        return obj.save(file, method, *args, **kwargs)
+
+    data = to_dict(obj)
+    if method is None:
+        if isinstance(file, IOBase):
+            raise ValueError("`method` must be specified when saving to IO.")
+        method = splitext(file)[-1][1:]  # type: ignore
+    extension = method.lower()  # type: ignore
+    if extension in YAML:
+        with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
+            yaml_dump(data, fp, *args, **kwargs)
+        return
+    if extension in JSON:
+        with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
+            fp.write(json_dumps(data, *args, **kwargs))
+        return
+    raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
+
+
+def load(file: PathStr, cls: Type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:  # pylint: disable=W1113
     r"""
     Load a file into a `NestedDict`.
 

@@ -25,7 +25,7 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import Any, Callable, Iterable, Mapping, Sequence
+from typing import IO, Any, Callable, Generator, Iterable, Mapping, Sequence
 from warnings import warn
 
 from yaml import dump as yaml_dump
@@ -837,29 +837,33 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
         return self.deepcopy(memo=memo)
 
-    def dump(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+    def save(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
         r"""
-        Dump `FlatDict` to file.
+        Save `FlatDict` to file.
 
         Raises:
-            ValueError: If dump to `IO` and `method` is not specified.
-            TypeError: If dump to unsupported extension.
+            ValueError: If save to `IO` and `method` is not specified.
+            TypeError: If save to unsupported extension.
+
+        **Alias**:
+
+        + `save`
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
-            >>> d.dump("tests/test.yaml")
-            >>> d.dump("example.conf")
+            >>> d.save("tests/test.yaml")
+            >>> d.save("test.conf")
             Traceback (most recent call last):
-            TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            TypeError: `file='test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
             >>> with open("test.yaml", "w") as f:
-            ...     d.dump(f)
+            ...     d.save(f)
             Traceback (most recent call last):
-            ValueError: `method` must be specified when dumping to IO.
+            ValueError: `method` must be specified when saving to IO.
         """
 
         if method is None:
             if isinstance(file, IOBase):
-                raise ValueError("`method` must be specified when dumping to IO.")
+                raise ValueError("`method` must be specified when saving to IO.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
         if extension in YAML:
@@ -867,6 +871,12 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         if extension in JSON:
             return self.json(file=file, *args, **kwargs)  # type: ignore
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
+
+    def dump(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+        r"""
+        Alias of [`save`][chanfig.FlatDict.save].
+        """
+        return self.save(file, method, *args, **kwargs)
 
     @classmethod
     def load(
@@ -890,10 +900,10 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             >>> d = FlatDict.load("tests/test.yaml")
             >>> d.dict()
             {'a': 1, 'b': 2, 'c': 3}
-            >>> d.load("example.conf")
+            >>> d.load("tests/test.conf")
             Traceback (most recent call last):
-            TypeError: `file='example.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
-            >>> with open("test.yaml") as f:
+            TypeError: `file='tests/test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            >>> with open("tests/test.yaml") as f:
             ...     d.load(f)
             Traceback (most recent call last):
             ValueError: `method` must be specified when loading from IO.
@@ -1057,7 +1067,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     @staticmethod
     @contextmanager
-    def open(file: File, *args: Any, **kwargs: Any):
+    def open(file: File, *args: Any, encoding: str = "utf-8", **kwargs: Any) -> Generator[IOBase | IO, Any, Any]:
         r"""
         Open file IO from file path or IO.
 
@@ -1094,14 +1104,14 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             TypeError: 'file=123' should be of type (str, os.PathLike) or (io.IOBase), but got <class 'int'>.
         """
 
-        if isinstance(file, (PathLike, str)):
-            file = open(file, *args, **kwargs)  # pylint: disable=W1514 # noqa: SIM115
+        if isinstance(file, (IOBase,)):
+            yield file
+        elif isinstance(file, (PathLike, str, bytes)):
             try:
-                yield file
+                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore # noqa: SIM115
+                yield file  # type: ignore
             finally:
                 file.close()  # type: ignore
-        elif isinstance(file, (IOBase,)):
-            yield file
         else:
             raise TypeError(
                 f"'file={file!r}' should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}."
