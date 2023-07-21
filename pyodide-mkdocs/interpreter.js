@@ -1,4 +1,4 @@
-var debug_mode = false;
+var debug_mode = true;
 var dict = {}; // Global dictionnary tracking the number of clicks
 var hdrPlaceholderRe = /#\s*-[\s|-]*HDR\s*-[\s|-]*#/i;
 var CURRENT_REVISION = "0.9.1";
@@ -32,6 +32,13 @@ function inputWithPrompt(text) {
 
 let pyodideReadyPromise = main();
 
+async function importCHANfiG() {
+  await pyodide.loadPackage("micropip");
+  const micropip = pyodide.pyimport("micropip");
+  await micropip.install("chanfig");
+  await pyodide.pyimport("chanfig");
+}
+
 async function tryImportFromPyPi(promptLine) {
   let hasImports = promptLine.startsWith("import");
   if (hasImports) {
@@ -46,6 +53,7 @@ async function tryImportFromPyPi(promptLine) {
 async function pyterm(id, height) {
   await pyodideReadyPromise;
   let namespace = pyodide.globals.get("dict")();
+  importCHANfiG();
 
   // creates the console
   // the variable pyconsole is created here.

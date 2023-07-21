@@ -1,13 +1,12 @@
 /* https://pustelto.com/blog/optimizing-css-for-faster-page-loads/ */
-:root{
-  --main-color : 87, 147, 240;
-  --main-theme : rgb(var(--main-color));
-  --gutter-theme : transparent;
-  --background-theme : transparent; 
+:root {
+  --main-color: 87, 147, 240;
+  --main-theme: rgb(var(--main-color));
+  --gutter-theme: transparent;
+  --background-theme: transparent;
 }
 
-
-/* Extra CSS for mkdocs-enumerate-headings-plugin */ 
+/* Extra CSS for mkdocs-enumerate-headings-plugin */
 .enumerate-headings-plugin {
   filter: opacity(35%);
 }
@@ -24,60 +23,60 @@ div.py_mk_ide .wrapper {
 } */
 
 div.py_mk_ide .wrapper_v {
-border: solid 1px;
-border-radius: 6px;
-border-color: var(--main-theme);
-position: relative;
-display: flex;
-flex-wrap: wrap;
-flex: 1 1 auto;
+  border: solid 1px;
+  border-radius: 6px;
+  border-color: var(--main-theme);
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
 }
 
 div.py_mk_ide .wrapper_v > * {
-flex: 1 1 300px;
+  flex: 1 1 300px;
 }
 
 div.py_mk_ide .interior_wrapper {
-border-right: 1px solid var(--main-theme);
-width:50%;
+  border-right: 1px solid var(--main-theme);
+  width: 50%;
 }
 
 div.py_mk_ide .line_v {
   border-right: 1px solid var(--main-theme);
-  width:50%;
-}  
+  width: 50%;
+}
 
-div.py_mk_ide .line{
-border-bottom : 1px solid var(--main-theme);
+div.py_mk_ide .line {
+  border-bottom: 1px solid var(--main-theme);
 }
 
 div.py_mk_ide .ace_editor {
-font-size:1em;
-margin: 4px 4px;
-height: 200px;
-background: var(--background-theme);
-}
-
-div[id*='solution'] .ace_editor {
-  font-size:1em;
+  font-size: 1em;
   margin: 4px 4px;
   height: 200px;
   background: var(--background-theme);
-  }
+}
+
+div[id*="solution"] .ace_editor {
+  font-size: 1em;
+  margin: 4px 4px;
+  height: 200px;
+  background: var(--background-theme);
+}
 
 div.py_mk_ide .term_editor {
---color:var(--main-theme);
---background: var(--gutter-theme);
---size : 1.4;
-height: 205px;
+  --color: var(--main-theme);
+  --background: var(--gutter-theme);
+  --size: 1.4;
+  height: 205px;
 }
 
 div.py_mk_ide .term_editor_v {
-  --color:var(--main-theme);
+  --color: var(--main-theme);
   --background: var(--gutter-theme);
-  --size : 1.4;
+  --size: 1.4;
   height: 205px;
-  }  
+}
 
 /* First apply terminal CSS */
 div.py_mk_terminal_f .terminal {
@@ -86,40 +85,40 @@ div.py_mk_terminal_f .terminal {
 
 /* Then change width to 100% */
 .py_mk_terminal_f {
-  --color:var(--main-theme);
+  --color: var(--main-theme);
   --background: var(--gutter-theme);
-  --size : 1.4;
+  --size: 1.4;
   border: solid 1px;
   border-radius: 6px;
   border-color: var(--main-theme);
-  height: 205px; 
+  height: 205px;
   width: 100%;
 }
 
-div[id*='fake_id'] {
+div[id*="fake_id"] {
   padding: 10px 10px 0px 10px;
 }
 
 /* Test to decide which REPL is best */
 .py_mk_terminal_f_h {
---color:var(--main-theme);
---background: var(--gutter-theme);
---size : 1.4;
-height: 150px; 
-width: 100%;
+  --color: var(--main-theme);
+  --background: var(--gutter-theme);
+  --size: 1.4;
+  height: 150px;
+  width: 100%;
 }
 
 .term_editor {
-  --color:var(--main-theme);
+  --color: var(--main-theme);
   --background: var(--gutter-theme);
-  --size : 1.4;
-  height: 150px; 
+  --size: 1.4;
+  height: 150px;
   width: 100%;
 }
 
 div.py_mk_ide textarea {
-width: 100%;
-resize: vertical;
+  width: 100%;
+  resize: vertical;
 }
 
 div.py_mk_ide textarea:focus {
@@ -127,59 +126,59 @@ div.py_mk_ide textarea:focus {
 }
 
 .py_mk_hide {
-display:none;
+  display: none;
 }
 
 /* overloading ace gutters to hide them behind navbar */
-.ace_gutter {  
-z-index: 1; /* might be a bit drastic */
+.ace_gutter {
+  z-index: 1; /* might be a bit drastic */
 }
 
 .ace_gutter > .ace_layer {
-color: var(--main-theme);
-background-color: var(--gutter-theme);
-border-right: solid 1px var(--main-theme); 
+  color: var(--main-theme);
+  background-color: var(--gutter-theme);
+  border-right: solid 1px var(--main-theme);
 }
 
 /* global modification of gutters for ace theme */
-div[class*='ace-'] .ace_gutter {
+div[class*="ace-"] .ace_gutter {
   background-color: var(--gutter-theme);
-  color: #DEDEDE;
+  color: #dedede;
 }
 
 div.py_mk_ide .compteur {
-float: right;
-color: var(--main-theme);
-font-size : 1.2em
+  float: right;
+  color: var(--main-theme);
+  font-size: 1.2em;
 }
 
 div.py_mk_ide .compteur::before {
-content: "Evaluations restantes : ";
-color: var(--main-theme);
-font-size : 0.8em
+  content: "Evaluations restantes : ";
+  color: var(--main-theme);
+  font-size: 0.8em;
 }
 
-.if>rect {
-/*fill: var(--main-theme) !important;*/
-stroke: #ff3838 !important;
-stroke-width: 1.5px !important;
+.if > rect {
+  /*fill: var(--main-theme) !important;*/
+  stroke: #ff3838 !important;
+  stroke-width: 1.5px !important;
 }
 
 .admonition.hint.inline.end {
-min-width: 30em;
-height: auto;
+  min-width: 30em;
+  height: auto;
 }
 
 .py_mk_gui_wrapper {
-position: relative;
-width: 100%;
-height: 400px;
+  position: relative;
+  width: 100%;
+  height: 400px;
 }
 
 .py_mk_gui_wrapper canvas {
-position: absolute;
-top: 0;
-left: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 div.py_mk_ide .tooltip {
@@ -206,7 +205,7 @@ div.py_mk_ide .tooltip .tooltiptext {
 div.py_mk_ide .tooltip .tooltiptext::after {
   content: " ";
   position: absolute;
-  bottom: 100%;  /* At the top of the tooltip */
+  bottom: 100%; /* At the top of the tooltip */
   left: 50%;
   margin-left: -5px;
   border-width: 5px;
@@ -217,24 +216,29 @@ div.py_mk_ide .tooltip .tooltiptext::after {
 div.py_mk_ide .tooltip:hover .tooltiptext {
   visibility: visible;
 }
-  
+
 div.py_mk_ide .tooltip > img {
   width: 32px;
-  border: 1px solid rgba(85,119,196);
+  border: 1px solid rgba(85, 119, 196);
   padding: 3px;
   border-radius: 9px;
   box-shadow: 2px 2px var(--main-theme);
-  background-image: linear-gradient(to bottom, rgb(191, 255, 255), 15%, rgba(var(--main-color),0.8));
+  background-image: linear-gradient(
+    to bottom,
+    rgb(191, 255, 255),
+    15%,
+    rgba(var(--main-color), 0.8)
+  );
 }
 
 div.py_mk_ide .tooltip:hover > img {
-  text-shadow: 0px 0px rgba(87,147,240,0);
-  position:relative; 
-  left: 1px; 
+  text-shadow: 0px 0px rgba(87, 147, 240, 0);
+  position: relative;
+  left: 1px;
   top: 1px;
   cursor: pointer;
-  font-size : 2em;
-  box-shadow: 0px 0px rgba(87,147,240,0);
+  font-size: 2em;
+  box-shadow: 0px 0px rgba(87, 147, 240, 0);
 }
 
 div.py_mk_ide .comment {
@@ -242,9 +246,9 @@ div.py_mk_ide .comment {
   font-size: 1em;
   margin-top: 2px;
   margin-right: 8px;
-  position:absolute;
-  top:0px;
-  right:0px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
   z-index: 9;
 }
 div.py_mk_ide .comment:hover {
@@ -253,8 +257,8 @@ div.py_mk_ide .comment:hover {
   font-size: 1em;
   margin-top: 2px;
   margin-right: 8px;
-  position:absolute;
-  top:1px;
-  right:-1px;
+  position: absolute;
+  top: 1px;
+  right: -1px;
   z-index: 9;
 }
