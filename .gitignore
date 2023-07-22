@@ -415,4 +415,5 @@ example*
 **/_version.py
 
 # pytest
+test.json
 test.yaml

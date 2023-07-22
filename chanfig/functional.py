@@ -41,6 +41,7 @@ def save(obj, file: File, method: Optional[str] = None, *args: Any, **kwargs: An
     Examples:
         >>> obj = {"a": 1, "b": 2, "c": 3}
         >>> save(obj, "test.yaml")
+        >>> save(obj, "test.json")
         >>> save(obj, "test.conf")
         Traceback (most recent call last):
         TypeError: `file='test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.

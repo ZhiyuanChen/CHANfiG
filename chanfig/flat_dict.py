@@ -469,11 +469,14 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             )
             >>> FlatDict.from_dict([{'a': 1}, {'b': 2}, {'c': 3}])
             [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
+            >>> FlatDict.from_dict({1, 2, 3})
+            Traceback (most recent call last):
+            TypeError: Expected Mapping or Sequence, but got <class 'set'>.
         """
 
         if isinstance(obj, Mapping):
             return cls(obj)
-        elif isinstance(obj, Sequence):
+        if isinstance(obj, Sequence):
             try:
                 return cls(obj)
             except ValueError:
@@ -669,7 +672,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
         return self.difference(other, *args, **kwargs)
 
-    def to(self, cls: str | TorchDevice | TorchDType) -> FlatDict:
+    def to(self, cls: str | TorchDevice | TorchDType) -> FlatDict:  # pragma: no cover
         r"""
         Convert values of `FlatDict` to target `cls`.
 
@@ -696,7 +699,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
 
-    def cpu(self) -> FlatDict:  # pylint: disable=C0103
+    def cpu(self) -> FlatDict:  # pragma: no cover
         r"""
         Move all tensors to cpu.
 
@@ -712,7 +715,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return self.to(TorchDevice("cpu"))
 
-    def gpu(self) -> FlatDict:  # pylint: disable=C0103
+    def gpu(self) -> FlatDict:  # pragma: no cover
         r"""
         Move all tensors to gpu.
 
@@ -734,13 +737,13 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return self.to(TorchDevice("cuda"))
 
-    def cuda(self) -> FlatDict:
+    def cuda(self) -> FlatDict:  # pragma: no cover
         r"""
         Alias of [`gpu`][chanfig.FlatDict.gpu].
         """
         return self.gpu()
 
-    def tpu(self) -> FlatDict:
+    def tpu(self) -> FlatDict:  # pragma: no cover
         r"""
         Move all tensors to tpu.
 
@@ -762,7 +765,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         return self.to(TorchDevice("xla"))
 
-    def xla(self) -> FlatDict:
+    def xla(self) -> FlatDict:  # pragma: no cover
         r"""
         Alias of [`tpu`][chanfig.FlatDict.tpu].
         """
@@ -879,9 +882,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return self.save(file, method, *args, **kwargs)
 
     @classmethod
-    def load(
+    def load(  # pylint: disable=W1113
         cls, file: File, method: str | None = None, *args: Any, **kwargs: Any
-    ) -> FlatDict:  # pylint: disable=W1113
+    ) -> FlatDict:
         """
         Load `FlatDict` from file.
 
@@ -1246,17 +1249,17 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         for name, value in states.items():
             self.setattr(name, value)
 
-    def __wrapped__(self, *args: Any, **kwargs: Any):
+    def __wrapped__(self, *args: Any, **kwargs: Any):  # pragma: no cover
         pass
 
-    def _ipython_display_(self):
+    def _ipython_display_(self):  # pragma: no cover
         return repr(self)
 
-    def _ipython_canary_method_should_not_exist_(self):
+    def _ipython_canary_method_should_not_exist_(self):  # pragma: no cover
         return None
 
-    def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):
+    def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):  # pragma: no cover
         return None
 
-    def __rich__(self):
+    def __rich__(self):  # pragma: no cover
         return self.__repr__()
