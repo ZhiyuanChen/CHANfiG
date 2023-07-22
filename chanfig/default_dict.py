@@ -64,7 +64,7 @@ class DefaultDict(FlatDict[_K, _V]):
 
     def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
-            if not self.hasattr("default_factory"):
+            if not self.hasattr("default_factory") or self.getattr("default_factory") in (None, Null):
                 raise KeyError(name) from None
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
@@ -102,6 +102,10 @@ class DefaultDict(FlatDict[_K, _V]):
             >>> d.n = 'liu'
             >>> d['n']
             'liu'
+            >>> d = DefaultDict()
+            >>> d.add('a')
+            Traceback (most recent call last):
+            ValueError: Cannot add to a DefaultDict with no default_factory
         """
         if self.default_factory is None:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")
