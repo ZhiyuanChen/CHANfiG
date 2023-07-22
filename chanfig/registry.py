@@ -175,7 +175,7 @@ class Registry(NestedDict):
         return self.get(name)
 
     @staticmethod
-    def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # type: ignore
+    def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # type: ignore # pylint: disable=W0211
         r"""
         Constructor of component.
 

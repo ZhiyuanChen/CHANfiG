@@ -21,7 +21,7 @@ from typing import Any, Callable, Generic, List, Mapping, Optional, Type
 from .utils import _V, Null
 
 
-class Variable(Generic[_V]):
+class Variable(Generic[_V]):  # pylint: disable=R0902
     r"""
     Mutable wrapper for immutable objects.
 
@@ -105,7 +105,7 @@ class Variable(Generic[_V]):
         choices: Optional[List] = None,
         validator: Optional[Callable] = None,
         required: bool = False,
-        help: Optional[str] = None,
+        help: Optional[str] = None,  # pylint: disable=W0622
     ) -> None:
         self._storage = [value]
         self._type = type

@@ -266,12 +266,12 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     def add_config_arguments(self, config):
         for key, value in config.all_items():
             if isinstance(value, Variable):
-                dtype = value._type or value.dtype
+                dtype = value._type or value.dtype  # pylint: disable=W0212
             else:
                 dtype = type(value)
             name = "--" + key
             if name not in self:
-                help = value._help if isinstance(value, Variable) else None
+                help = value._help if isinstance(value, Variable) else None  # pylint: disable=W0212,W0622
                 if isinstance(value, (list, tuple, dict, set)):
                     self.add_argument(name, type=dtype, nargs="+", help=help)
                 else:
@@ -283,7 +283,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             path = parsed[default_config]
             warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
             return NestedDict.load(path).merge(parsed)  # type: ignore
-        elif no_default_config_action == "ignore":
+        if no_default_config_action == "ignore":
             pass
         elif no_default_config_action == "warn":
             warn(message, category=RuntimeWarning, stacklevel=2)

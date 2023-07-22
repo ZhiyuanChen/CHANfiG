@@ -22,12 +22,12 @@ from os import PathLike
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
 
 try:
-    from functools import cached_property
+    from functools import cached_property  # pylint: disable=C0412
 except ImportError:
     try:
         from backports.cached_property import cached_property  # type: ignore
     except ImportError:
-        cached_property = property  # type: ignore
+        cached_property = property  # type: ignore # pylint: disable=C0103
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
@@ -60,7 +60,7 @@ def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
 
     if isinstance(obj, NestedDict):
         return obj.empty_like(**{k: apply(v, func, *args, **kwargs) for k, v in obj.items()})
-    elif isinstance(obj, Mapping):
+    if isinstance(obj, Mapping):
         return {k: apply(v, func, *args, **kwargs) for k, v in obj.items()}
     if isinstance(obj, list):
         return [apply(v, func, *args, **kwargs) for v in obj]
