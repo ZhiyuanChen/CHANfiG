@@ -726,3 +726,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             return super().__contains__(name)
         except (TypeError, KeyError):  # TypeError when name is not in self
             return False
+
+    def __format__(self, format_spec: str) -> str:
+        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.all_items()}))

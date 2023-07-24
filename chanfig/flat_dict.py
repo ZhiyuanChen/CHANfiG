@@ -1237,6 +1237,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         text = first + "\n" + text
         return text
 
+    def __format__(self, format_spec: str) -> str:
+        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.items()}))
+
     def __hash__(self):
         return hash(frozenset(self.items()))
 
