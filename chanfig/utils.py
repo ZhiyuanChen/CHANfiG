@@ -14,6 +14,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from io import IOBase
 from json import JSONEncoder
 from os import PathLike
 from typing import IO, Any, Mapping, TypeVar, Union
@@ -21,7 +22,7 @@ from typing import IO, Any, Mapping, TypeVar, Union
 from yaml import SafeDumper, SafeLoader
 
 PathStr = Union[PathLike, str, bytes]
-File = Union[PathStr, IO]
+File = Union[PathStr, IO, IOBase]
 
 YAML = ("yml", "yaml")
 JSON = ("json",)

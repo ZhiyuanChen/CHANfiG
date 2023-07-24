@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from copy import copy, deepcopy
-from io import BytesIO, IOBase, StringIO
+from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
@@ -865,7 +865,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         if method is None:
-            if isinstance(file, IOBase):
+            if isinstance(file, (IOBase, IO)):
                 raise ValueError("`method` must be specified when saving to IO.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
@@ -913,7 +913,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         if method is None:
-            if isinstance(file, IOBase):
+            if isinstance(file, (IOBase, IO)):
                 raise ValueError("`method` must be specified when loading from IO.")
             method = splitext(file)[-1][1:]  # type: ignore
         extension = method.lower()  # type: ignore
@@ -956,7 +956,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
-            if isinstance(fp, (StringIO, BytesIO)):
+            if isinstance(file, (IOBase, IO)):
                 return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
@@ -1028,7 +1028,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         """
 
         with cls.open(file) as fp:  # pylint: disable=C0103
-            if isinstance(fp, (StringIO, BytesIO)):
+            if isinstance(file, (IOBase, IO)):
                 return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore
             return cls.from_yamls(fp.read(), *args, **kwargs)
 
@@ -1085,7 +1085,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 Defaults to {}.
 
         Yields:
-            (FileIO):
+            (Generator[IOBase | IO, Any, Any]):
 
         Examples:
             >>> with FlatDict.open("tests/test.yaml") as fp:
@@ -1104,10 +1104,10 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             >>> with FlatDict.open(123, mode="w") as fp:
             ...     print(fp.read())
             Traceback (most recent call last):
-            TypeError: 'file=123' should be of type (str, os.PathLike) or (io.IOBase), but got <class 'int'>.
+            TypeError: expected str, bytes, os.PathLike, IO or IOBase, not int
         """
 
-        if isinstance(file, (IOBase,)):
+        if isinstance(file, (IOBase, IO)):
             yield file
         elif isinstance(file, (PathLike, str, bytes)):
             try:
@@ -1116,9 +1116,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             finally:
                 file.close()  # type: ignore
         else:
-            raise TypeError(
-                f"'file={file!r}' should be of type (str, os.PathLike) or (io.IOBase), but got {type(file)}."
-            )
+            raise TypeError(f"expected str, bytes, os.PathLike, IO or IOBase, not {type(file).__name__}")
 
     @classmethod
     def empty(cls, *args: Any, **kwargs: Any) -> FlatDict:
