@@ -197,7 +197,7 @@ class Config(NestedDict[_K, _V]):
         `parse` will try to parse all command-line arguments,
         you don't need to pre-define them but typos may cause trouble.
 
-        This function internally calls `Config.boot()`.
+        This method internally calls `Config.boot()`.
 
         See Also:
             [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]: Implementation of `parse`.
@@ -229,7 +229,7 @@ class Config(NestedDict[_K, _V]):
 
         `parse_config` only parse command-line arguments that is in defined in `Config`.
 
-        This function internally calls `Config.boot()`.
+        This method internally calls `Config.boot()`.
 
         See Also:
             [`chanfig.ConfigParser.parse_config`][chanfig.ConfigParser.parse_config]: Implementation of `parse_config`.
