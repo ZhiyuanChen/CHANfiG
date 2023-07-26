@@ -712,7 +712,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             {'h': {'j': 1}}
         """
 
-        return NestedDict({k: v for k, v in self.all_items() if v is not Null})
+        return self.empty_like({k: v for k, v in self.all_items() if v is not Null})  # type: ignore
 
     def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
