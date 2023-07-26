@@ -82,7 +82,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         There are three levels of config:
 
-        1. The base `Config` parsed into the function,
+        1. The base `Config` parsed into this method,
         2. The base config file located at the path of `default_config` (if specified),
         3. The config specified in arguments.
 
@@ -201,7 +201,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         There are three levels of config:
 
-        1. The base `Config` parsed into the function,
+        1. The base `Config` parsed into this method,
         2. The base config file located at the path of `default_config` (if specified),
         3. The config specified in arguments.
 

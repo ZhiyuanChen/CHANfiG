@@ -61,13 +61,13 @@ jobs:
         with:
           name: coverage
           path: htmlcov
-      - run: mkdocs build -f docs/mkdocs.yml
+      - run: mkdocs build -v -f docs/mkdocs.yml
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/master' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          publish_dir: ./docs/site
   release:
     if: startsWith(github.event.ref, 'refs/tags/v')
     needs: [lint, test]

@@ -16,6 +16,7 @@ nav:
   - FlatDict: flat_dict.md
   - Registry: registry.md
   - ConfigParser: parser.md
+  - Functional: functional.md
   - Utilities: utils.md
   # - package: package.md
   # - Blog: blog/index.md

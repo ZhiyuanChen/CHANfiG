@@ -96,7 +96,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     `FlatDict` inherits from built-in `dict`.
 
-    It comes with many easy to use helper function, such as `difference`, `intersect`.
+    It comes with many easy to use helper methods, such as `difference`, `intersect`.
 
     It also has full support for IO operations, such as `json` and `yaml`.
 
@@ -927,7 +927,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         r"""
         Dump `FlatDict` to json file.
 
-        This function calls `self.jsons()` to generate json string.
+        This method internally calls `self.jsons()` to generate json string.
         You may overwrite `jsons` in case something is not json serializable.
 
         Examples:
@@ -943,7 +943,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         r"""
         Construct `FlatDict` from json file.
 
-        This function calls `self.from_jsons()` to construct object from json string.
+        This method internally calls `self.from_jsons()` to construct object from json string.
         You may overwrite `from_jsons` in case something is not json serializable.
 
         Returns:
@@ -1000,7 +1000,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         r"""
         Dump `FlatDict` to yaml file.
 
-        This function calls `self.yamls()` to generate yaml string.
+        This method internally calls `self.yamls()` to generate yaml string.
         You may overwrite `yamls` in case something is not yaml serializable.
 
         Examples:
@@ -1016,7 +1016,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         r"""
         Construct `FlatDict` from yaml file.
 
-        This function calls `self.from_yamls()` to construct object from yaml string.
+        This method internally calls `self.from_yamls()` to construct object from yaml string.
         You may overwrite `from_yamls` in case something is not yaml serializable.
 
         Returns:
