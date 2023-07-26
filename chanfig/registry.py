@@ -172,7 +172,7 @@ class Registry(NestedDict):
             <class 'chanfig.registry.Module'>
         """
 
-        return self.get(name)
+        return self[name]
 
     @staticmethod
     def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # type: ignore # pylint: disable=W0211
