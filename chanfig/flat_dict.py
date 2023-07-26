@@ -293,7 +293,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             ValueError: 'n' has invalid value. Value chang is not valid.
         """
 
-        for name, value in self.items():
+        for name, value in self.all_items():
             if isinstance(value, Variable):
                 try:
                     value.validate()
@@ -692,7 +692,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         # pylint: disable=C0103
 
         if isinstance(cls, (str, TorchDevice, TorchDType)):
-            for k, v in self.items():
+            for k, v in self.all_items():
                 if hasattr(v, "to"):
                     self[k] = v.to(cls)
             return self
@@ -1165,6 +1165,39 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         empty.__dict__.update(self.__dict__)
         return empty
 
+    def all_keys(self) -> Generator:
+        r"""
+        Equivalent to `keys`.
+
+        This method is provided solely to make methods work on both `FlatDict` and `NestedDict`.
+
+        See Also:
+            [`all_keys`][chanfig.NestedDict.all_keys]
+        """
+        yield from self.keys()
+
+    def all_values(self) -> Generator:
+        r"""
+        Equivalent to `keys`.
+
+        This method is provided solely to make methods work on both `FlatDict` and `NestedDict`.
+
+        See Also:
+            [`all_values`][chanfig.NestedDict.all_values]
+        """
+        yield from self.values()
+
+    def all_items(self) -> Generator:
+        r"""
+        Equivalent to `keys`.
+
+        This method is provided solely to make methods work on both `FlatDict` and `NestedDict`.
+
+        See Also:
+            [`all_items`][chanfig.NestedDict.all_items]
+        """
+        yield from self.items()
+
     def dropnull(self) -> FlatDict:
         r"""
         Drop key-value pairs with `Null` value.
@@ -1186,7 +1219,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {'c': 3}
         """
 
-        return self.empty_like({k: v for k, v in self.items() if v is not Null})
+        return self.empty_like({k: v for k, v in self.all_items() if v is not Null})
 
     def dropna(self) -> FlatDict:
         r"""
@@ -1238,7 +1271,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return text
 
     def __format__(self, format_spec: str) -> str:
-        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.items()}))
+        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.all_items()}))
 
     def __hash__(self):
         return hash(frozenset(self.items()))
