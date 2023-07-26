@@ -19,7 +19,7 @@ from __future__ import annotations
 from functools import wraps
 from inspect import ismethod
 from os import PathLike
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping
+from typing import Any, Callable, Generator, Iterable, Mapping
 
 try:
     from functools import cached_property  # pylint: disable=C0412
@@ -32,11 +32,6 @@ except ImportError:
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
 from .utils import _K, _V, Null, PathStr
-from .variable import Variable
-
-if TYPE_CHECKING:
-    from torch import device as TorchDevice
-    from torch import dtype as TorchDtype
 
 
 def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
@@ -161,12 +156,12 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if args or kwargs:
             self.merge(*args, **kwargs)
 
-    def all_keys(self) -> Iterator:
+    def all_keys(self) -> Generator:
         r"""
         Get all keys of `NestedDict`.
 
         Returns:
-            (Iterator):
+            (Generator):
 
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
@@ -188,12 +183,12 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         return all_keys(self)
 
-    def all_values(self) -> Iterator:
+    def all_values(self) -> Generator:
         r"""
         Get all values of `NestedDict`.
 
         Returns:
-            (Iterator):
+            (Generator):
 
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
@@ -207,12 +202,12 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             else:
                 yield value
 
-    def all_items(self) -> Iterator[tuple]:
+    def all_items(self) -> Generator:
         r"""
         Get all items of `NestedDict`.
 
         Returns:
-            (Iterator):
+            (Generator):
 
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
@@ -487,36 +482,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             return
         super().delete(name)
 
-    def validate(self) -> None:
-        r"""
-        Validate if all `Variable` in `NestedDict` are valid.
-
-        Raises:
-            TypeError: If `Variable` has invalid type.
-            ValueError: If `Variable` has invalid value.
-
-        Examples:
-            >>> d = NestedDict({"i.d": Variable(1016, type=int, validator=lambda x: x > 0)})
-            >>> d.validate()
-            >>> d = NestedDict({"i.d": Variable(1016, type=str, validator=lambda x: x > 0)})
-            >>> d.validate()
-            Traceback (most recent call last):
-            TypeError: 'i.d' has invalid type. Value 1016 is not of type <class 'str'>.
-            >>> d = NestedDict({"i.d": Variable(-1, type=int, validator=lambda x: x > 0)})
-            >>> d.validate()
-            Traceback (most recent call last):
-            ValueError: 'i.d' has invalid value. Value -1 is not valid.
-        """
-
-        for name, value in self.all_items():
-            if isinstance(value, Variable):
-                try:
-                    value.validate()
-                except TypeError as exc:
-                    raise TypeError(f"'{name}' has invalid type. {exc}") from None
-                except ValueError as exc:
-                    raise ValueError(f"'{name}' has invalid value. {exc}") from None
-
     def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
         Pop value from `NestedDict`.
@@ -676,44 +641,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 ret[key] = value
         return ret
 
-    def to(self, cls: str | TorchDevice | TorchDtype) -> Any:
-        r"""
-        Convert values of `NestedDict` to target `cls`.
-
-        Args:
-            cls (str | torch.device | torch.dtype):
-
-        Examples:
-            >>> import torch
-            >>> d = NestedDict({'i.d': torch.tensor(1013), 'f.n': 'chang'})
-            >>> d.cpu().dict()
-            {'i': {'d': tensor(1013)}, 'f': {'n': 'chang'}}
-        """
-
-        def to(obj: Any) -> Any:  # pylint: disable=C0103
-            if hasattr(obj, "to"):
-                return obj.to(cls)
-            return obj
-
-        return self.apply(to)
-
-    def dropnull(self) -> NestedDict:
-        r"""
-        Drop key-value pairs with `Null` value.
-
-        Returns:
-            (NestedDict):
-
-        Examples:
-            >>> d = NestedDict({"a.b": Null, "b.c.d": Null, "b.c.e.f": Null, "c.d.e.f": Null, "h.j": 1})
-            >>> d.dict()
-            {'a': {'b': Null}, 'b': {'c': {'d': Null, 'e': {'f': Null}}}, 'c': {'d': {'e': {'f': Null}}}, 'h': {'j': 1}}
-            >>> d.dropnull().dict()
-            {'h': {'j': 1}}
-        """
-
-        return self.empty_like({k: v for k, v in self.all_items() if v is not Null})  # type: ignore
-
     def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
         try:
@@ -726,6 +653,3 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             return super().__contains__(name)
         except (TypeError, KeyError):  # TypeError when name is not in self
             return False
-
-    def __format__(self, format_spec: str) -> str:
-        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.all_items()}))

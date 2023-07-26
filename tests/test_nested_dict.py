@@ -1,4 +1,6 @@
-from chanfig import NestedDict
+from pytest import raises
+
+from chanfig import NestedDict, Variable
 
 
 class Test:
@@ -49,3 +51,22 @@ class Test:
         assert d.merge(NestedDict({"a.b.c.d": 5, "a.b.c.h": 6}), overwrite=False).dict() == {
             "a": {"b": {"c": {"d": 3, "e": {"f": 4}, "h": 6}}}
         }
+
+    def test_validate(self):
+        assert NestedDict({"i.d": Variable(1016, type=int, validator=lambda x: x > 0)}).validate() is None
+        with raises(TypeError):
+            NestedDict({"i.d": Variable(1016, type=str, validator=lambda x: x > 0)}).validate()
+        with raises(ValueError):
+            NestedDict({"i.d": Variable(-1, type=int, validator=lambda x: x > 0)}).validate()
+
+    def test_dropnull(self):
+        from chanfig.utils import Null
+
+        d = NestedDict({"a.b": Null, "b.c.d": Null, "b.c.e.f": Null, "c.d.e.f": Null, "h.j": 1})
+        assert d.dict() == {
+            "a": {"b": Null},
+            "b": {"c": {"d": Null, "e": {"f": Null}}},
+            "c": {"d": {"e": {"f": Null}}},
+            "h": {"j": 1},
+        }
+        assert d.dropnull().dict() == {"h": {"j": 1}}
