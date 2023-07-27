@@ -46,10 +46,14 @@ CHANfiG 的范式是：
 
 #### 字典操作
 
+`FlatDict`支持变量插值。
+将一个成员的值设置为`${}`包裹的另一个成员名，然后调用`interpolate`方法。
+这个成员的值将会自动替换为另一个成员的值。
+
 `FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`对象。
 与`update`方法不同，`merge`方法是赋值而不是替换，这使得他能更好的与`DefaultDict`对象配合使用。
 
-更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
+此外，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
 #### 机器学习操作
 

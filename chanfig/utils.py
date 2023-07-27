@@ -14,9 +14,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
 from io import IOBase
 from json import JSONEncoder
 from os import PathLike
+from re import compile, findall
 from typing import IO, Any, Mapping, TypeVar, Union
 
 from yaml import SafeDumper, SafeLoader
@@ -110,3 +113,31 @@ class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
 
 
 Null = NULL()
+
+INTERPOLATEE_PATTERN = compile(r"\${([^}]*)}")
+
+
+def find_interpolatees(text: str) -> list[str]:
+    if not isinstance(text, str):
+        return []
+    return findall(INTERPOLATEE_PATTERN, str(text))
+
+
+def find_circular_reference(graph: Mapping) -> list[str] | None:
+    def dfs(node, visited, path):
+        path.append(node)
+        if node in visited:
+            return path
+        visited.add(node)
+        for child in graph.get(node, []):
+            result = dfs(child, visited, path)
+            if result is not None:
+                return result
+        visited.remove(node)
+
+    for key in graph:
+        result = dfs(key, set(), [])
+        if result is not None:
+            return result
+
+    return None

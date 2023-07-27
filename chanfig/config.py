@@ -101,14 +101,14 @@ class Config(NestedDict[_K, _V]):
             default_factory = Config
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
-    def post(self) -> Config:
+    def post(self) -> Config | None:
         r"""
         Post process of `Config`.
 
         Some `Config` may need to do some post process after `Config` is initialised.
         `post` is provided for this lazy-initialisation purpose.
 
-        By default, `post` does nothing and returns `self`.
+        By default, `post` calls `interpolate` to perform variable interpolation.
 
         Note that you should always call `boot` to apply `post` rather than calling `post` directly,
         as `boot` recursively call `post` on sub-configs.
@@ -134,6 +134,7 @@ class Config(NestedDict[_K, _V]):
             )
         """
 
+        self.interpolate()
         return self
 
     def boot(self) -> Config:
