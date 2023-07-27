@@ -51,10 +51,14 @@ We also introduce `Variable` to allow sharing a value across multiple places, an
 
 #### Dict Operations
 
+`FlatDict` supports variable interpolation.
+Set the value of a member to a string with `${}` and another member name inside, and call `interpolate` method.
+The value will be automatically replaced with the value of another member.
+
 `FlatDict` incorporates a `merge` method which allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict` object.
 Different to `update` method, `merge` assign value instead of replace values, which makes it work better with `DefaultDict` object.
 
-Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+Besides, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 

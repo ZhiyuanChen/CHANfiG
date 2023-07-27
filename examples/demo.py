@@ -32,7 +32,7 @@ class ModelConfig(Config):
         self.decoder.num_layers = 6
         self.dropout = dropout
         self.encoder.dropout = dropout
-        self.decoder.dropout = dropout
+        self.decoder.dropout = "${.dropout}"
         self.activation = "GELU"
 
 

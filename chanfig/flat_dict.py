@@ -25,13 +25,26 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Generator, Iterable, Mapping, Sequence
+from typing import IO, Any, Callable, Generator, Iterable, Mapping, MutableMapping, Sequence
 from warnings import warn
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import _K, _V, JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
+from .utils import (
+    _K,
+    _V,
+    JSON,
+    YAML,
+    File,
+    JsonEncoder,
+    Null,
+    PathStr,
+    YamlDumper,
+    YamlLoader,
+    find_circular_reference,
+    find_placeholders,
+)
 from .variable import Variable
 
 try:
@@ -96,22 +109,25 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
     `FlatDict` inherits from built-in `dict`.
 
-    It comes with many easy to use helper methods, such as `difference`, `intersect`.
-
-    It also has full support for IO operations, such as `json` and `yaml`.
-
-    Even better, `FlatDict` has pytorch support built-in.
-    You can directly call `FlatDict.cpu()` or `FlatDict.to("cpu")` to move all `torch.Tensor` objects across devices.
-
     `FlatDict` works best with `Variable` objects.
-    Just simply call ``FlatDict.a = Variable(1); FlatDict.b = FlatDict.a``, and their values will be synced.
+    Simply call `flat_dict.a = Variable(1); flat_dict.b = flat_dict.a`, and their values will be synced.
+
+    Even better, `FlatDict` support variable interpolation.
+    Just set the value of one key to another key (surrounded by braces with $ at the begin, like ${xxx}),
+    and calls `flat_dict.interpolate()`, `FlatDict` will interpolate their values and create `Variable` automatically.
+
+    `FlatDict` has many other easy to use helper methods, such as `difference`, `intersect`.
+    And has full support for IO operations, such as `json` and `yaml`.
+
+    `FlatDict` also has pytorch support built-in.
+    You can directly call `flat_dict.cpu()` or `flat_dict.to("cpu")` to move all `torch.Tensor` objects across devices.
 
     Attributes:
         indent: Indentation level in printing and dumping to json or yaml.
 
     Notes:
         `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
-        Therefore, all internal attributes should be set and get through `FlatDict.setattr` and `FlatDict.getattr`.
+        Therefore, all internal attributes should be set and get through `flat_dict.setattr` and `flat_dict.getattr`.
 
         Although it is possible to override other internal methods, it is not recommended to do so.
 
@@ -482,6 +498,98 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             except ValueError:
                 return [cls(json) for json in obj]
         raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
+
+    def interpolate(self, use_variable: bool = True, interpolators: MutableMapping | None = None) -> FlatDict:
+        r"""
+        Perform Variable interpolation.
+
+        Variable interpolation allows you to set the value of one key to be the value of another key easily.
+
+        Args:
+            use_variable: Whether to convert values to `Variable` objects.
+            interpolators: Mapping contains values for interpolation. Defaults to `self`.
+
+        Raises:
+            ValueError: If value is not interpolatable.
+            ValueError: If reference to itself.
+            ValueError: If has circular reference.
+
+        See Also:
+            [Variable][`chanfig.Variable`]: Mutable wrapper of immutable objects.
+
+        Examples:
+            >>> d = FlatDict(a=1, b="${a}", c="${a}.${b}")
+            >>> d.dict()
+            {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
+            >>> d.interpolate().dict()
+            {'a': 1, 'b': 1, 'c': '1.1'}
+            >>> isinstance(d.a, Variable)
+            True
+            >>> d.a += 1
+            >>> d.dict()
+            {'a': 2, 'b': 2, 'c': '1.1'}
+            >>> d.a is d.b
+            True
+            >>> d.b is d.c
+            False
+            >>> d = FlatDict(a=1, b="${a}", c="${b}")
+            >>> d.dict()
+            {'a': 1, 'b': '${a}', 'c': '${b}'}
+            >>> d.interpolate(False).dict()
+            {'a': 1, 'b': 1, 'c': 1}
+            >>> isinstance(d.a, Variable)
+            False
+            >>> d.a += 1
+            >>> d.dict()
+            {'a': 2, 'b': 1, 'c': 1}
+            >>> d = FlatDict(a=1, b="${b}", c="${b}")
+            >>> d.interpolate().dict()
+            Traceback (most recent call last):
+            ValueError: Cannot interpolate b to itself.
+            >>> d = FlatDict(a="${b}", b="${c}", c="${d}", d="${a}")
+            >>> d.interpolate().dict()
+            Traceback (most recent call last):
+            ValueError: Circular reference found: a->b->c->d->a.
+            >>> d = FlatDict(a=1, b="${a}", c="${d}")
+            >>> d.interpolate().dict()
+            Traceback (most recent call last):
+            ValueError: d is not found in FlatDict(
+              ('a'): '1'
+              ('b'): '${a}'
+              ('c'): '${d}'
+            ).
+        """
+
+        interpolators = interpolators or self
+        placeholders, placeholder_names = {}, set()
+        for key, value in self.all_items():
+            placeholder = find_placeholders(value)
+            if placeholder:
+                for index, name in enumerate(placeholder):
+                    if name.startswith("."):
+                        placeholder[index] = key.rsplit(".", 1)[0] + name
+                    if key == name:
+                        raise ValueError(f"Cannot interpolate {key} to itself.")
+                placeholders[key] = placeholder
+                placeholder_names.update(placeholder)
+        circular_references = find_circular_reference(placeholders)
+        if circular_references:
+            raise ValueError(f"Circular reference found: {'->'.join(circular_references)}.")
+        if use_variable:
+            for name in list(placeholder_names.difference(placeholders.keys())):
+                if name not in interpolators:
+                    raise ValueError(f"{name} is not found in {interpolators}.")
+                if not isinstance(interpolators[name], Variable):
+                    interpolators[name] = Variable(interpolators[name])
+        for key, value in placeholders.items():
+            try:
+                if len(value) == 1 and self[key].startswith("${") and self[key].endswith("}"):
+                    self[key] = interpolators[value[0]]
+                else:
+                    self[key] = self[key].replace("$", "").format(**interpolators)
+            except KeyError as exc:
+                raise ValueError(f"{exc} is not found in {interpolators}.") from None
+        return self
 
     def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> FlatDict:
         r"""
@@ -873,7 +981,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             return self.yaml(file=file, *args, **kwargs)  # type: ignore
         if extension in JSON:
             return self.json(file=file, *args, **kwargs)  # type: ignore
-        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
+        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
     def dump(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
         r"""

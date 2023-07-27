@@ -25,6 +25,11 @@ class Test:
         self.dict["n.l"] = "liu"
         assert self.dict["n.l"] == "liu"
 
+    def test_interpolate(self):
+        d = NestedDict({"i.d": 1013, "i.i.d": "${i.d}"})
+        d.interpolate()
+        assert d.i.d is d.i.i.d
+
     def test_merge(self):
         d = NestedDict()
         d["a.b.c"] = {"d": 3, "e": {"f": 4}}
