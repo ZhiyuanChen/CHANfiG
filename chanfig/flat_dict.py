@@ -18,7 +18,7 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
 from io import IOBase
 from json import dumps as json_dumps
@@ -1114,7 +1114,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                 file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore # noqa: SIM115
                 yield file  # type: ignore
             finally:
-                file.close()  # type: ignore
+                with suppress(Exception):
+                    file.close()  # type: ignore
         else:
             raise TypeError(f"expected str, bytes, os.PathLike, IO or IOBase, not {type(file).__name__}")
 
