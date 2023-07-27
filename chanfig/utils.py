@@ -35,6 +35,8 @@ try:  # python 3.10+
     from types import UnionType  # pylint: disable=C0412
 except ImportError:
     UnionType = Union  # type: ignore
+from re import compile, findall
+from typing import IO, Any, Union
 
 GLOBAL_NS = {k: v for k, v in typing.__dict__.items() if not k.startswith("_")}
 PY310_PLUS = sys.version_info >= (3, 10)
@@ -303,3 +305,31 @@ except ImportError:
 
 
 Null = NULL()
+
+PLACEHOLDER_PATTERN = compile(r"\${([^}]*)}")
+
+
+def find_placeholders(text: str) -> list[str]:
+    if not isinstance(text, str):
+        return []
+    return findall(PLACEHOLDER_PATTERN, str(text))
+
+
+def find_circular_reference(graph: Mapping) -> list[str] | None:
+    def dfs(node, visited, path):
+        path.append(node)
+        if node in visited:
+            return path
+        visited.add(node)
+        for child in graph.get(node, []):
+            result = dfs(child, visited, path)
+            if result is not None:
+                return result
+        visited.remove(node)
+
+    for key in graph:
+        result = dfs(key, set(), [])
+        if result is not None:
+            return result
+
+    return None
