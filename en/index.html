@@ -759,12 +759,9 @@ We also introduce <code>Variable</code> to allow sharing a value across multiple
 <h3 id="flatdict">FlatDict<a class="headerlink" href="#flatdict" title="Permanent link">&para;</a></h3>
 <p><code>FlatDict</code> improves the default <code>dict</code> in 3 aspects.</p>
 <h4 id="dict-operations">Dict Operations<a class="headerlink" href="#dict-operations" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code> supports variable interpolation.
-Set the value of a member to a string with <code>${}</code> and another member name inside, and call <code>interpolate</code> method.
-The value will be automatically replaced with the value of another member.</p>
 <p><code>FlatDict</code> incorporates a <code>merge</code> method which allows you to merge a <code>Mapping</code>, an <code>Iterable</code>, or a path to the <code>FlatDict</code> object.
 Different to <code>update</code> method, <code>merge</code> assign value instead of replace values, which makes it work better with <code>DefaultDict</code> object.</p>
-<p>Besides, <code>FlatDict</code> comes with <code>difference</code> and <code>intersect</code>, which makes it very easy to compare a <code>FlatDict</code> with other <code>Mapping</code>, <code>Iterable</code>, or a path.</p>
+<p>Moreover, <code>FlatDict</code> comes with <code>difference</code> and <code>intersect</code>, which makes it very easy to compare a <code>FlatDict</code> with other <code>Mapping</code>, <code>Iterable</code>, or a path.</p>
 <h4 id="ml-operations">ML Operations<a class="headerlink" href="#ml-operations" title="Permanent link">&para;</a></h4>
 <p><code>FlatDict</code> supports the <code>to</code> method similar to PyTorch Tensors.
 You can simply convert all member values of <code>FlatDict</code> to a certain type or pass to a device in the same way.</p>

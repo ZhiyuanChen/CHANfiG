@@ -754,12 +754,9 @@ CHANfiG 的范式是：</p>
 <h3 id="flatdict">FlatDict<a class="headerlink" href="#flatdict" title="Permanent link">&para;</a></h3>
 <p><code>FlatDict</code>在三个方面对默认的<code>dict</code>做出改进。</p>
 <h4 id="_3">字典操作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code>支持变量插值。
-将一个成员的值设置为<code>${}</code>包裹的另一个成员名，然后调用<code>interpolate</code>方法。
-这个成员的值将会自动替换为另一个成员的值。</p>
 <p><code>FlatDict</code>包括了一个<code>merge</code>方法，他使你能将一个<code>Mapping</code>、<code>Iterable</code>或者一个路径合并进入一个<code>FlatDict</code>对象。
 与<code>update</code>方法不同，<code>merge</code>方法是赋值而不是替换，这使得他能更好的与<code>DefaultDict</code>对象配合使用。</p>
-<p>此外，<code>FlatDict</code>引入了<code>difference</code>和<code>intersect</code>，这些使其可以非常简单的将<code>FlatDict</code>和其他<code>Mapping</code>、<code>Iterable</code>或者一个路径进行对比。</p>
+<p>更进一步的，<code>FlatDict</code>引入了<code>difference</code>和<code>intersect</code>，这些使其可以非常简单的将<code>FlatDict</code>和其他<code>Mapping</code>、<code>Iterable</code>或者一个路径进行对比。</p>
 <h4 id="_4">机器学习操作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
 <p><code>FlatDict</code>支持与 Pytorch Tensor 类似的<code>to</code>方法。
 你可以很简单的通过相同的方式将所有<code>FlatDict</code>的成员值转换为某种类型或者转移到某个设备上。</p>
