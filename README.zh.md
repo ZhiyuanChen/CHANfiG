@@ -57,12 +57,16 @@ CHANfiG 的范式是：
 
 #### 字典操作
 
-`FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`。
-与内置的`update`不同，`merge`是赋值而不是替换，这使得他能更好的与`DefaultDict`配合使用。
+`FlatDict`支持变量插值。
+将一个成员的值设置为`${}`包裹的另一个成员名，然后调用`interpolate`方法。
+这个成员的值将会自动替换为另一个成员的值。
 
 Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内置的方法来帮助你对一个`dict`进行排序。`FlatDict`支持`sort`来帮助你管理你的字典。
 
-更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
+`FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`。
+与`update`方法不同，`merge`方法是赋值而不是替换，这使得他能更好的与`DefaultDict`配合使用。
+
+此外，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
 #### 机器学习操作
 
