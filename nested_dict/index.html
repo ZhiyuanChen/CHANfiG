@@ -712,7 +712,7 @@
 By default, <code>delimiter</code> is <code>.</code>, but it could be modified in subclass or by calling <code>dict.setattr('delimiter', D)</code>.</p>
 <p><code>d = NestedDict({"a.b.c": 1})</code> is equivalent to <code>d = NestedDict({"a": {"b": {"c": 1}}})</code>,
 and you can access members either by <code>d["a.b.c"]</code> or more simply by <code>d.a.b.c</code>.</p>
-<p>This behavior allows you to pass keyword arguments to other functions as easy as <code>func1(**d.func1)</code>.</p>
+<p>This behaviour allows you to pass keyword arguments to other functions as easy as <code>func1(**d.func1)</code>.</p>
 <p>Since <code>NestedDict</code> inherits from <code>DefaultDict</code>, it also supports <code>default_factory</code>.
 With <code>default_factory</code>, you can assign <code>d.a.b.c = 1</code> without assign <code>d.a = NestedDict()</code> in the first place.
 Note that the constructor of <code>NestedDict</code> is different from <code>DefaultDict</code>, <code>default_factory</code> is not a positional
@@ -1350,7 +1350,7 @@ If <code>default_factory</code> is <code>Null</code>, will create an empty insta
 <a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    `d = NestedDict({&quot;a.b.c&quot;: 1})` is equivalent to `d = NestedDict({&quot;a&quot;: {&quot;b&quot;: {&quot;c&quot;: 1}}})`,</span>
 <a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">    and you can access members either by `d[&quot;a.b.c&quot;]` or more simply by `d.a.b.c`.</span>
 <a id="__codelineno-0-107" name="__codelineno-0-107"></a>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">    This behavior allows you to pass keyword arguments to other functions as easy as `func1(**d.func1)`.</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">    This behaviour allows you to pass keyword arguments to other functions as easy as `func1(**d.func1)`.</span>
 <a id="__codelineno-0-109" name="__codelineno-0-109"></a>
 <a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">    Since `NestedDict` inherits from `DefaultDict`, it also supports `default_factory`.</span>
 <a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">    With `default_factory`, you can assign `d.a.b.c = 1` without assign `d.a = NestedDict()` in the first place.</span>
