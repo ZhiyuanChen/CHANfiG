@@ -123,21 +123,34 @@ def find_interpolatees(text: str) -> list[str]:
     return findall(INTERPOLATEE_PATTERN, str(text))
 
 
-def find_circular_reference(graph: Mapping) -> list[str] | None:
-    def dfs(node, visited, path):
-        path.append(node)
-        if node in visited:
-            return path
-        visited.add(node)
-        for child in graph.get(node, []):
-            result = dfs(child, visited, path)
+try:
+    from networkx import DiGraph, find_cycle, strongly_connected_components
+
+    def find_circular_reference(mapping: Mapping) -> list[str] | None:
+        graph = DiGraph(mapping)
+        for scc in strongly_connected_components(graph):
+            if len(scc) > 1:
+                circular_path = find_cycle(graph.subgraph(scc))
+                if circular_path:
+                    return [node for node, _ in circular_path] + [circular_path[0][0]]
+        return None
+
+except ImportError:
+
+    def find_circular_reference(mapping: Mapping) -> list[str] | None:
+        def dfs(node, visited, path):
+            path.append(node)
+            if node in visited:
+                return path
+            visited.add(node)
+            for child in mapping.get(node, []):
+                result = dfs(child, visited, path)
+                if result is not None:
+                    return result
+            visited.remove(node)
+
+        for key in mapping:
+            result = dfs(key, set(), [])
             if result is not None:
                 return result
-        visited.remove(node)
-
-    for key in graph:
-        result = dfs(key, set(), [])
-        if result is not None:
-            return result
-
-    return None
+        return None
