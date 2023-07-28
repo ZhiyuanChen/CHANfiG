@@ -518,9 +518,6 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         """
 
-        if not args and not kwargs:
-            return self
-
         if len(args) == 1:
             args = args[0]
             if isinstance(args, (PathLike, str, bytes)):
@@ -530,14 +527,17 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
                     PendingDeprecationWarning,
                 )
             self._merge(self, args, overwrite=overwrite)
-        else:
+        elif len(args) > 1:
             self._merge(self, args, overwrite=overwrite)
-        self._merge(self, kwargs, overwrite=overwrite)
+        if kwargs:
+            self._merge(self, kwargs, overwrite=overwrite)
         return self
 
     @staticmethod
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
-        if isinstance(that, Mapping):
+        if not that:
+            return this
+        elif isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
