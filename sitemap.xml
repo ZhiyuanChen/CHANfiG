@@ -33,6 +33,14 @@
          
     </url>
     <url>
+         <loc>https://chanfig.danling.org/functional/</loc>
+         <lastmod>2023-07-28</lastmod>
+         <changefreq>daily</changefreq>
+         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/en/functional/"/>
+         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/functional/"/>
+         
+    </url>
+    <url>
          <loc>https://chanfig.danling.org/nested_dict/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
