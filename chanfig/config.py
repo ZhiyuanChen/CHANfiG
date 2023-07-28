@@ -63,10 +63,10 @@ class Config(NestedDict[_K, _V]):
         Since `Config` has `default_factory` set to `Config`,
         accessing anything that does not exist will create a new empty Config sub-attribute.
 
-        A **frozen** `Config` does not have this behavior and
+        A **frozen** `Config` does not have this behaviour and
         will raises `KeyError` when accessing anything that does not exist.
 
-        It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behavior.
+        It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behaviour.
 
     Attributes:
         parser (ConfigParser): Parser for command-line arguments.
@@ -189,6 +189,7 @@ class Config(NestedDict[_K, _V]):
         args: Iterable[str] | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
+        boot: bool = True,
     ) -> Config:
         r"""
 
@@ -197,7 +198,15 @@ class Config(NestedDict[_K, _V]):
         `parse` will try to parse all command-line arguments,
         you don't need to pre-define them but typos may cause trouble.
 
-        This method internally calls `Config.boot()`.
+        By default, this method internally calls `Config.boot()`.
+        To disable this behaviour, set `boot` to `False`.
+
+        Args:
+            args (Iterable[str] | None, optional): Command-line arguments. Defaults to `None`.
+            default_config (str | None, optional): Path to default config file. Defaults to `None`.
+            no_default_config_action (str, optional): Action when `default_config` is not found.
+                Can be one of `["raise", "warn", "ignore"]`. Defaults to `"raise"`.
+            boot (bool, optional): If `True`, call `Config.boot()` after parsing. Defaults to `True`.
 
         See Also:
             [`chanfig.ConfigParser.parse`][chanfig.ConfigParser.parse]: Implementation of `parse`.
@@ -214,7 +223,8 @@ class Config(NestedDict[_K, _V]):
         if not self.hasattr("parser"):
             self.setattr("parser", ConfigParser())
         self.getattr("parser").parse(args, self, default_config, no_default_config_action)
-        self.boot()
+        if boot:
+            self.boot()
         return self
 
     def parse_config(
@@ -222,6 +232,7 @@ class Config(NestedDict[_K, _V]):
         args: Iterable[str] | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
+        boot: bool = True,
     ) -> Config:
         r"""
 
@@ -229,7 +240,15 @@ class Config(NestedDict[_K, _V]):
 
         `parse_config` only parse command-line arguments that is in defined in `Config`.
 
-        This method internally calls `Config.boot()`.
+        By default, this method internally calls `Config.boot()`.
+        To disable this behaviour, set `boot` to `False`.
+
+        Args:
+            args (Iterable[str] | None, optional): Command-line arguments. Defaults to `None`.
+            default_config (str | None, optional): Path to default config file. Defaults to `None`.
+            no_default_config_action (str, optional): Action when `default_config` is not found.
+                Can be one of `["raise", "warn", "ignore"]`. Defaults to `"raise"`.
+            boot (bool, optional): If `True`, call `Config.boot()` after parsing. Defaults to `True`.
 
         See Also:
             [`chanfig.ConfigParser.parse_config`][chanfig.ConfigParser.parse_config]: Implementation of `parse_config`.
@@ -246,7 +265,8 @@ class Config(NestedDict[_K, _V]):
         if not self.hasattr("parser"):
             self.setattr("parser", ConfigParser())
         self.getattr("parser").parse_config(args, self, default_config, no_default_config_action)
-        self.boot()
+        if boot:
+            self.boot()
         return self
 
     def add_argument(self, *args: Any, **kwargs: Any) -> None:
