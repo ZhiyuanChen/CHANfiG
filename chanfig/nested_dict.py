@@ -153,8 +153,17 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     ) -> None:
         self.setattr("convert_mapping", convert_mapping)
         super().__init__(default_factory)
-        if args or kwargs:
-            self.merge(*args, **kwargs)
+        if len(args) == 1 and isinstance(args[0], Mapping):
+            for key, value in args[0].items():
+                self.set(key, value, convert_mapping=True)
+        elif len(args) == 1 and isinstance(args[0], Iterable):
+            for key, value in args[0]:
+                self.set(key, value, convert_mapping=True)
+        elif len(args) > 0:
+            for key, value in args:
+                self.set(key, value, convert_mapping=True)
+        for key, value in kwargs.items():
+            self.set(key, value, convert_mapping=True)
 
     def all_keys(self) -> Generator:
         r"""
@@ -423,8 +432,15 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         except (AttributeError, TypeError):
             raise KeyError(name) from None
 
-        if convert_mapping and isinstance(value, Mapping):
-            value = default_factory(value)
+        if (
+            convert_mapping
+            and isinstance(value, Mapping)
+            and (not isinstance(value, NestedDict) or default_factory is not self.empty_like)
+        ):
+            try:
+                value = default_factory(**value)
+            except TypeError:
+                value = default_factory(value)
         if isinstance(self, NestedDict):
             super().set(name, value)
         elif isinstance(self, Mapping):
@@ -525,7 +541,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
     @staticmethod
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
-        if isinstance(that, Mapping):
+        if not that:
+            return this
+        elif isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):

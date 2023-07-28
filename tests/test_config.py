@@ -8,9 +8,11 @@ from chanfig import Config, Variable
 class DataConfig(Config):
     __test__ = False
 
-    def __init__(self, name):
+    def __init__(self, name, *args, **kwargs):
         super().__init__()
         self.name = name
+        self.max_length = 1024
+        self.merge(*args, **kwargs)
 
     def post(self):
         self.name = self.name.lower()
@@ -54,10 +56,32 @@ class Test:
         assert self.config.datasets.a.name == "cifar10"
 
     def test_parse(self):
-        self.config.parse(["--name", "Test", "--seed", "1014", "--data.root", "datasets"])
+        self.config.parse(
+            [
+                "--name",
+                "Test",
+                "--seed",
+                "1014",
+                "--datas.a.root",
+                "dataset/a",
+                "--datas.a.feature_cols",
+                "a",
+                "b",
+                "c",
+                "--datas.b.root",
+                "dataset/b",
+                "--datas.b.label_cols",
+                "d",
+                "e",
+                "f",
+            ]
+        )
         assert self.config.name == "test"
         assert self.config.id == "test_1014"
         assert self.config.data.name == "cifar10"
+        assert self.config.datas.a.feature_cols == ["a", "b", "c"]
+        assert self.config.datas.b.label_cols == ["d", "e", "f"]
+        assert self.config.data.max_length == 1024
 
     def test_nested(self):
         assert self.config.network.name == "ResNet18"
