@@ -33,7 +33,7 @@ class DefaultDict(FlatDict[_K, _V]):
     Note that just like `collections.defaultdict`, `default_factory()` is called without any arguments.
 
     Attributes:
-        default_factory: Default factory for defaultdict behavior.
+        default_factory: Default factory for defaultdict behaviour.
 
     Raises:
         TypeError: If `default_factory` is not callable.

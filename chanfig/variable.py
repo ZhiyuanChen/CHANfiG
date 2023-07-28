@@ -48,9 +48,9 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
         `Variable` by default wrap the instance type to type of the wrapped object.
         Therefore, `isinstance(Variable(1), int)` will return `True`.
 
-        To temporarily disable this behavior, you can call context manager `with Variable.unwrapped()`.
+        To temporarily disable this behaviour, you can call context manager `with Variable.unwrapped()`.
 
-        To permanently disable this behavior, you can call `Variable.unwrap()`.
+        To permanently disable this behaviour, you can call `Variable.unwrap()`.
 
     Examples:
         >>> v = Variable(1)

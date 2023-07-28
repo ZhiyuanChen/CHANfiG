@@ -105,7 +105,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     `d = NestedDict({"a.b.c": 1})` is equivalent to `d = NestedDict({"a": {"b": {"c": 1}}})`,
     and you can access members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
 
-    This behavior allows you to pass keyword arguments to other functions as easy as `func1(**d.func1)`.
+    This behaviour allows you to pass keyword arguments to other functions as easy as `func1(**d.func1)`.
 
     Since `NestedDict` inherits from `DefaultDict`, it also supports `default_factory`.
     With `default_factory`, you can assign `d.a.b.c = 1` without assign `d.a = NestedDict()` in the first place.

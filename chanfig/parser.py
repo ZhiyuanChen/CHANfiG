@@ -89,14 +89,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
         Args:
-            args: The arguments to parse.
-                Defaults to sys.argv[1:].
-            config: The base `Config`.
-                Defaults to `NestedDict`.
-            default_config: Path to the base config file. If specified, CHANfiG will read the file.
-                Defaults to `None`.
-            no_default_config_action: What to do when `default_config` is specified but not found in args.
-                Can be `raise`, `warn` or `ignore`. Defaults to `raise`.
+            args (Iterable[str] | None, optional): Command-line arguments. Defaults to `None`.
+            default_config (str | None, optional): Path to default config file. Defaults to `Config`.
+            no_default_config_action (str, optional): Action when `default_config` is not found.
+                Can be one of `["raise", "warn", "ignore"]`. Defaults to `"raise"`.
 
         Returns:
             config: The parsed `Config`.
@@ -208,14 +204,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Higher levels override lower levels (i.e. 3 > 2 > 1).
 
         Args:
-            args: The arguments to parse.
-                Defaults to sys.argv[1:].
-            config: The base `Config`.
-                Mandatory.
-            default_config: Path to the base config file. If specified, CHANfiG will read the file.
-                Defaults to `None`.
-            no_default_config_action: What to do when `default_config` is specified but not found in args.
-                Can be `raise`, `warn` or `ignore`. Defaults to `raise`.
+            args (Iterable[str] | None, optional): Command-line arguments. Defaults to `None`.
+            default_config (str | None, optional): Path to default config file. Defaults to `Config`.
+            no_default_config_action (str, optional): Action when `default_config` is not found.
+                Can be one of `["raise", "warn", "ignore"]`. Defaults to `"raise"`.
 
         Returns:
             config: The parsed `Config`.
