@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+from dataclasses import is_dataclass
 from functools import wraps
 from inspect import ismethod
 from os import PathLike
@@ -536,7 +537,9 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
-        elif isinstance(that, Mapping):
+        if is_dataclass(that):
+            that = that.__dict__
+        if isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):

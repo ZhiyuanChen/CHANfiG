@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
+from dataclasses import is_dataclass
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -162,6 +163,16 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
     # pylint: disable=R0904
 
     indent: int = 2
+
+    def __init__(self, *args, **kwargs) -> None:
+        args = list(args)  # type: ignore
+        for index, item in enumerate(args):
+            if is_dataclass(item):
+                args[index] = item.__dict__  # type: ignore
+        for key, value in kwargs.items():
+            if is_dataclass(value):
+                kwargs[key] = value.__dict__
+        super().__init__(*args, **kwargs)
 
     def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
@@ -645,7 +656,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
-        elif isinstance(that, Mapping):
+        if is_dataclass(that):
+            that = that.__dict__
+        if isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
