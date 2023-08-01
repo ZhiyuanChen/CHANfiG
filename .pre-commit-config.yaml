@@ -12,7 +12,7 @@ repos:
       - id: isort
         name: isort
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
       - id: flake8
         additional_dependencies:
@@ -20,7 +20,7 @@ repos:
           - flake8-comprehensions
           - flake8-simplify
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.9.0
+    rev: v3.10.1
     hooks:
       - id: pyupgrade
         args: [--py37-plus]
