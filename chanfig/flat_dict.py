@@ -1027,10 +1027,11 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {'a': 1, 'b': 2, 'c': 3}
         """
 
+        kwargs.setdefault("Loader", YamlLoader)
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
                 return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore
-            return cls.from_yamls(fp.read(), *args, **kwargs)
+            return cls.from_dict(yaml_load(fp, *args, **kwargs))
 
     def yamls(self, *args: Any, **kwargs: Any) -> str:
         r"""

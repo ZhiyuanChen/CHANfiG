@@ -109,4 +109,12 @@ class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
     """
 
 
+try:
+    from yamlinclude import YamlIncludeConstructor
+
+    YamlIncludeConstructor.add_to_loader_class(loader_class=YamlLoader, relative=True)
+except ImportError:
+    pass
+
+
 Null = NULL()
