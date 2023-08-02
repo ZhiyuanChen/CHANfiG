@@ -43,6 +43,10 @@ dynamic = [
 dependencies = [
   "pyyaml",
 ]
+[project.optional-dependencies]
+include = [
+  "pyyaml-include",
+]
 [project.urls]
 documentation = "https://chanfig.danling.org"
 homepage = "https://chanfig.danling.org"
