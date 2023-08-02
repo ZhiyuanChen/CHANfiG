@@ -36,7 +36,7 @@
         <link rel="next" href="../default_dict/">
       
       <link rel="icon" href="../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -1380,7 +1380,14 @@ If <code>default_factory</code> is <code>Null</code>, will create an empty insta
 <span class="normal"><a href="#__codelineno-0-663">663</a></span>
 <span class="normal"><a href="#__codelineno-0-664">664</a></span>
 <span class="normal"><a href="#__codelineno-0-665">665</a></span>
-<span class="normal"><a href="#__codelineno-0-666">666</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="k">class</span> <span class="nc">NestedDict</span><span class="p">(</span><span class="n">DefaultDict</span><span class="p">[</span><span class="n">_K</span><span class="p">,</span> <span class="n">_V</span><span class="p">]):</span>  <span class="c1"># pylint: disable=E1136</span>
+<span class="normal"><a href="#__codelineno-0-666">666</a></span>
+<span class="normal"><a href="#__codelineno-0-667">667</a></span>
+<span class="normal"><a href="#__codelineno-0-668">668</a></span>
+<span class="normal"><a href="#__codelineno-0-669">669</a></span>
+<span class="normal"><a href="#__codelineno-0-670">670</a></span>
+<span class="normal"><a href="#__codelineno-0-671">671</a></span>
+<span class="normal"><a href="#__codelineno-0-672">672</a></span>
+<span class="normal"><a href="#__codelineno-0-673">673</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="k">class</span> <span class="nc">NestedDict</span><span class="p">(</span><span class="n">DefaultDict</span><span class="p">[</span><span class="n">_K</span><span class="p">,</span> <span class="n">_V</span><span class="p">]):</span>  <span class="c1"># pylint: disable=E1136</span>
 <a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">    `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.</span>
 <a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr(&#39;delimiter&#39;, D)`.</span>
@@ -1715,238 +1722,245 @@ If <code>default_factory</code> is <code>Null</code>, will create an empty insta
 <a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
 <a id="__codelineno-0-434" name="__codelineno-0-434"></a>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="k">if</span> <span class="n">convert_mapping</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>        <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>                <span class="sa">f</span><span class="s2">&quot;Cannot set `</span><span class="si">{</span><span class="n">full_name</span><span class="si">}</span><span class="s2">` to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`, as `</span><span class="si">{</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">`.&quot;</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>            <span class="p">)</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        Delete value from `NestedDict`.</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">            name:</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">convert_mapping</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>            <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">)</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>        <span class="p">):</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>                <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="o">**</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>                <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>                <span class="sa">f</span><span class="s2">&quot;Cannot set `</span><span class="si">{</span><span class="n">full_name</span><span class="si">}</span><span class="s2">` to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`, as `</span><span class="si">{</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">`.&quot;</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>            <span class="p">)</span>
 <a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        Examples:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;})</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">            &gt;&gt;&gt; d.i.d</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            1013</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">            &gt;&gt;&gt; d.f.n</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">            &#39;chang&#39;</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">            &gt;&gt;&gt; d.delete(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">            &gt;&gt;&gt; d.dict()</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">            {&#39;i&#39;: {}, &#39;f&#39;: {&#39;n&#39;: &#39;chang&#39;}}</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        Delete value from `NestedDict`.</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">            name:</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">        Examples:</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;})</span>
 <a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">            &gt;&gt;&gt; d.i.d</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;d&#39;</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">            &gt;&gt;&gt; del d.f.n</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">            &gt;&gt;&gt; d.dict()</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">            {&#39;i&#39;: {}, &#39;f&#39;: {}}</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">            &gt;&gt;&gt; d.f.n</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;n&#39;</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">            &gt;&gt;&gt; del d.e</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;e&#39;</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">            &gt;&gt;&gt; del d[&#39;f.n&#39;]</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">            KeyError: &#39;n&#39;</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">            &gt;&gt;&gt; d.e = {&#39;a&#39;: {&#39;b&#39;: 1}}</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">            &gt;&gt;&gt; del d[&#39;e.a.b&#39;]</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>                <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="c1"># if value is a python dict</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="k">return</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Null</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        Pop value from `NestedDict`.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">            name:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">            default:</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">            value: If `NestedDict` does not contain `name`, return `default`.</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">            1013</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">            &gt;&gt;&gt; d.f.n</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">            &#39;chang&#39;</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">            &gt;&gt;&gt; d.delete(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">            &gt;&gt;&gt; d.dict()</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">            {&#39;i&#39;: {}, &#39;f&#39;: {&#39;n&#39;: &#39;chang&#39;}}</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">            &gt;&gt;&gt; d.i.d</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;d&#39;</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">            &gt;&gt;&gt; del d.f.n</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">            &gt;&gt;&gt; d.dict()</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">            {&#39;i&#39;: {}, &#39;f&#39;: {}}</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">            &gt;&gt;&gt; d.f.n</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;n&#39;</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">            &gt;&gt;&gt; del d.e</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">            AttributeError: &#39;NestedDict&#39; object has no attribute &#39;e&#39;</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">            &gt;&gt;&gt; del d[&#39;f.n&#39;]</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">            KeyError: &#39;n&#39;</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">            &gt;&gt;&gt; d.e = {&#39;a&#39;: {&#39;b&#39;: 1}}</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">            &gt;&gt;&gt; del d[&#39;e.a.b&#39;]</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>                <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>        <span class="c1"># if value is a python dict</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>            <span class="k">return</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Null</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        Pop value from `NestedDict`.</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        Examples:</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;, &quot;n.a.b.c&quot;: 1}, default_factory=NestedDict)</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">            1013</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;, True)</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">            True</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">            KeyError: &#39;d&#39;</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;e&#39;)</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">            KeyError: &#39;e&#39;</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;e.f&#39;)</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">            KeyError: &#39;f&#39;</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>                <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Null</span><span class="p">:</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>                <span class="k">return</span> <span class="n">default</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="k">def</span> <span class="nf">_merge</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">FlatDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">that</span><span class="p">:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>            <span class="k">return</span> <span class="n">this</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">that</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a>            <span class="n">that</span> <span class="o">=</span> <span class="n">that</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">this</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a>                    <span class="n">NestedDict</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">value</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">)</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a>                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a>                    <span class="n">this</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">convert_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>                <span class="k">elif</span> <span class="n">overwrite</span><span class="p">:</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>                    <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a>            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">cached_property</span><span class="p">)):</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a>                <span class="nb">getattr</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>            <span class="k">elif</span> <span class="n">overwrite</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">            name:</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">            default:</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">            value: If `NestedDict` does not contain `name`, return `default`.</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">        Examples:</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;, &quot;n.a.b.c&quot;: 1}, default_factory=NestedDict)</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">            1013</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;, True)</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">            True</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">            KeyError: &#39;d&#39;</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;e&#39;)</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">            KeyError: &#39;e&#39;</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            &gt;&gt;&gt; d.pop(&#39;e.f&#39;)</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">            KeyError: &#39;f&#39;</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a>                <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>            <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Null</span><span class="p">:</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>                <span class="k">return</span> <span class="n">default</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a>    <span class="k">def</span> <span class="nf">_merge</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">FlatDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">that</span><span class="p">:</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a>            <span class="k">return</span> <span class="n">this</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">that</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a>            <span class="n">that</span> <span class="o">=</span> <span class="n">that</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">this</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>                    <span class="n">NestedDict</span><span class="o">.</span><span class="n">_merge</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">value</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">)</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a>                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
 <a id="__codelineno-0-553" name="__codelineno-0-553"></a>                    <span class="n">this</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">convert_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a>                <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a>                <span class="k">elif</span> <span class="n">overwrite</span><span class="p">:</span>
 <a id="__codelineno-0-555" name="__codelineno-0-555"></a>                    <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a>        <span class="k">return</span> <span class="n">this</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        Intersection of `NestedDict` and `other`.</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">            other (Mapping | Iterable | PathStr):</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">            recursive (bool):</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">        Examples:</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="sd">            &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">            &gt;&gt;&gt; d.intersect(n).dict()</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">            {&#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}}</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">            &gt;&gt;&gt; d.intersect(&quot;tests/test.yaml&quot;).dict()</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">            {&#39;a&#39;: 1}</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">            &gt;&gt;&gt; d.intersect(n, recursive=False).dict()</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">            {}</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">            &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">            &gt;&gt;&gt; d.intersect(l).dict()</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">            {&#39;a&#39;: 1}</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">            &gt;&gt;&gt; d.intersect(1)</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>    <span class="k">def</span> <span class="nf">_intersect</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a>        <span class="n">ret</span><span class="p">:</span> <span class="n">NestedDict</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">()</span>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="n">recursive</span><span class="p">:</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>                    <span class="n">intersects</span> <span class="o">=</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>                    <span class="k">if</span> <span class="n">intersects</span><span class="p">:</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>                        <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">intersects</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>                <span class="k">elif</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>                    <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>        <span class="k">return</span> <span class="n">ret</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221, C0103</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a><span class="sd">        Difference between `NestedDict` and `other`.</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="sd">            other (Mapping | Iterable | PathStr):</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="sd">            recursive (bool):</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">        Examples:</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">            &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">            &gt;&gt;&gt; d.difference(n).dict()</span>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">            {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">            &gt;&gt;&gt; d.difference(&quot;tests/test.yaml&quot;).dict()</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">            {&#39;b&#39;: 2, &#39;c&#39;: 3}</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">            &gt;&gt;&gt; d.difference(n, recursive=False).dict()</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">            {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">            &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">            &gt;&gt;&gt; d.difference(l).dict()</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">            {&#39;d&#39;: 4}</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">            &gt;&gt;&gt; d.difference(1)</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-640" name="__codelineno-0-640"></a>
-<a id="__codelineno-0-641" name="__codelineno-0-641"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="k">def</span> <span class="nf">_difference</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
-<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="n">ret</span><span class="p">:</span> <span class="n">NestedDict</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">()</span>
-<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
-<a id="__codelineno-0-645" name="__codelineno-0-645"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
-<a id="__codelineno-0-646" name="__codelineno-0-646"></a>                <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-647" name="__codelineno-0-647"></a>            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="n">recursive</span><span class="p">:</span>
-<a id="__codelineno-0-648" name="__codelineno-0-648"></a>                <span class="n">differences</span> <span class="o">=</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-649" name="__codelineno-0-649"></a>                <span class="k">if</span> <span class="n">differences</span><span class="p">:</span>
-<a id="__codelineno-0-650" name="__codelineno-0-650"></a>                    <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences</span>
-<a id="__codelineno-0-651" name="__codelineno-0-651"></a>            <span class="k">elif</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
-<a id="__codelineno-0-652" name="__codelineno-0-652"></a>                <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-<a id="__codelineno-0-653" name="__codelineno-0-653"></a>        <span class="k">return</span> <span class="n">ret</span>
-<a id="__codelineno-0-654" name="__codelineno-0-654"></a>
-<a id="__codelineno-0-655" name="__codelineno-0-655"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-656" name="__codelineno-0-656"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-657" name="__codelineno-0-657"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-658" name="__codelineno-0-658"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-659" name="__codelineno-0-659"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-660" name="__codelineno-0-660"></a>                <span class="k">if</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-<a id="__codelineno-0-661" name="__codelineno-0-661"></a>                    <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
-<a id="__codelineno-0-662" name="__codelineno-0-662"></a>                <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-663" name="__codelineno-0-663"></a>                    <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-664" name="__codelineno-0-664"></a>            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-665" name="__codelineno-0-665"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>  <span class="c1"># TypeError when name is not in self</span>
-<a id="__codelineno-0-666" name="__codelineno-0-666"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a>            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">this</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">this</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">cached_property</span><span class="p">)):</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>                <span class="nb">getattr</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a>            <span class="k">elif</span> <span class="n">overwrite</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a>                    <span class="n">this</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">convert_mapping</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a>                <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a>                    <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>        <span class="k">return</span> <span class="n">this</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">        Intersection of `NestedDict` and `other`.</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">            other (Mapping | Iterable | PathStr):</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">            recursive (bool):</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">        Examples:</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">            &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">            &gt;&gt;&gt; d.intersect(n).dict()</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">            {&#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}}</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">            &gt;&gt;&gt; d.intersect(&quot;tests/test.yaml&quot;).dict()</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">            {&#39;a&#39;: 1}</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">            &gt;&gt;&gt; d.intersect(n, recursive=False).dict()</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">            {}</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">            &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">            &gt;&gt;&gt; d.intersect(l).dict()</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="sd">            {&#39;a&#39;: 1}</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">            &gt;&gt;&gt; d.intersect(1)</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>    <span class="k">def</span> <span class="nf">_intersect</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a>        <span class="n">ret</span><span class="p">:</span> <span class="n">NestedDict</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">()</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="n">recursive</span><span class="p">:</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a>                    <span class="n">intersects</span> <span class="o">=</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a>                    <span class="k">if</span> <span class="n">intersects</span><span class="p">:</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a>                        <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">intersects</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>                <span class="k">elif</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>                    <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="k">return</span> <span class="n">ret</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>    <span class="k">def</span> <span class="nf">difference</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221, C0103</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">        Difference between `NestedDict` and `other`.</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">            other (Mapping | Iterable | PathStr):</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">            recursive (bool):</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">        Examples:</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">            &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">            &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">            &gt;&gt;&gt; d.difference(n).dict()</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">            {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">            &gt;&gt;&gt; d.difference(&quot;tests/test.yaml&quot;).dict()</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">            {&#39;b&#39;: 2, &#39;c&#39;: 3}</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">            &gt;&gt;&gt; d.difference(n, recursive=False).dict()</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">            {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a><span class="sd">            &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a><span class="sd">            &gt;&gt;&gt; d.difference(l).dict()</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="sd">            {&#39;d&#39;: 4}</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="sd">            &gt;&gt;&gt; d.difference(1)</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="sd">            TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>            <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a>    <span class="k">def</span> <span class="nf">_difference</span><span class="p">(</span><span class="n">this</span><span class="p">:</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="n">that</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">:</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a>        <span class="n">ret</span><span class="p">:</span> <span class="n">NestedDict</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">()</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">that</span><span class="p">:</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a>            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">this</span><span class="p">:</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a>                <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a>            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="n">recursive</span><span class="p">:</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a>                <span class="n">differences</span> <span class="o">=</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>                <span class="k">if</span> <span class="n">differences</span><span class="p">:</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a>                    <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">differences</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>            <span class="k">elif</span> <span class="n">this</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a>                <span class="n">ret</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a>        <span class="k">return</span> <span class="n">ret</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a>        <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a>            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>                <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>                <span class="k">if</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>                    <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>                <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a>                    <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a>            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>  <span class="c1"># TypeError when name is not in self</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a>            <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
 
@@ -2999,7 +3013,14 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-441">441</a></span>
 <span class="normal"><a href="#__codelineno-0-442">442</a></span>
 <span class="normal"><a href="#__codelineno-0-443">443</a></span>
-<span class="normal"><a href="#__codelineno-0-444">444</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-362" name="__codelineno-0-362"></a><span class="k">def</span> <span class="nf">set</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
+<span class="normal"><a href="#__codelineno-0-444">444</a></span>
+<span class="normal"><a href="#__codelineno-0-445">445</a></span>
+<span class="normal"><a href="#__codelineno-0-446">446</a></span>
+<span class="normal"><a href="#__codelineno-0-447">447</a></span>
+<span class="normal"><a href="#__codelineno-0-448">448</a></span>
+<span class="normal"><a href="#__codelineno-0-449">449</a></span>
+<span class="normal"><a href="#__codelineno-0-450">450</a></span>
+<span class="normal"><a href="#__codelineno-0-451">451</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-362" name="__codelineno-0-362"></a><span class="k">def</span> <span class="nf">set</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
 <a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -3072,16 +3093,23 @@ Defaults to self.convert_mapping.</p>
 <a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
 <a id="__codelineno-0-434" name="__codelineno-0-434"></a>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="k">if</span> <span class="n">convert_mapping</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="sa">f</span><span class="s2">&quot;Cannot set `</span><span class="si">{</span><span class="n">full_name</span><span class="si">}</span><span class="s2">` to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`, as `</span><span class="si">{</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">`.&quot;</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="p">)</span>
+<a id="__codelineno-0-435" name="__codelineno-0-435"></a>    <span class="k">if</span> <span class="p">(</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="n">convert_mapping</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>        <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">)</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="p">):</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>            <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="o">**</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>            <span class="n">value</span> <span class="o">=</span> <span class="n">default_factory</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="nb">dict</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>            <span class="sa">f</span><span class="s2">&quot;Cannot set `</span><span class="si">{</span><span class="n">full_name</span><span class="si">}</span><span class="s2">` to `</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">`, as `</span><span class="si">{</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">`.&quot;</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3165,14 +3193,7 @@ Defaults to self.convert_mapping.</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/nested_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-446">446</a></span>
-<span class="normal"><a href="#__codelineno-0-447">447</a></span>
-<span class="normal"><a href="#__codelineno-0-448">448</a></span>
-<span class="normal"><a href="#__codelineno-0-449">449</a></span>
-<span class="normal"><a href="#__codelineno-0-450">450</a></span>
-<span class="normal"><a href="#__codelineno-0-451">451</a></span>
-<span class="normal"><a href="#__codelineno-0-452">452</a></span>
-<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-453">453</a></span>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
 <span class="normal"><a href="#__codelineno-0-455">455</a></span>
 <span class="normal"><a href="#__codelineno-0-456">456</a></span>
@@ -3211,53 +3232,60 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-489">489</a></span>
 <span class="normal"><a href="#__codelineno-0-490">490</a></span>
 <span class="normal"><a href="#__codelineno-0-491">491</a></span>
-<span class="normal"><a href="#__codelineno-0-492">492</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    Delete value from `NestedDict`.</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">        name:</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;})</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        &gt;&gt;&gt; d.i.d</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        1013</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        &gt;&gt;&gt; d.f.n</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">        &#39;chang&#39;</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        &gt;&gt;&gt; d.delete(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">        &gt;&gt;&gt; d.dict()</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        {&#39;i&#39;: {}, &#39;f&#39;: {&#39;n&#39;: &#39;chang&#39;}}</span>
+<span class="normal"><a href="#__codelineno-0-492">492</a></span>
+<span class="normal"><a href="#__codelineno-0-493">493</a></span>
+<span class="normal"><a href="#__codelineno-0-494">494</a></span>
+<span class="normal"><a href="#__codelineno-0-495">495</a></span>
+<span class="normal"><a href="#__codelineno-0-496">496</a></span>
+<span class="normal"><a href="#__codelineno-0-497">497</a></span>
+<span class="normal"><a href="#__codelineno-0-498">498</a></span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Delete value from `NestedDict`.</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">        name:</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;})</span>
 <a id="__codelineno-0-462" name="__codelineno-0-462"></a><span class="sd">        &gt;&gt;&gt; d.i.d</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;d&#39;</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        &gt;&gt;&gt; del d.f.n</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">        &gt;&gt;&gt; d.dict()</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">        {&#39;i&#39;: {}, &#39;f&#39;: {}}</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">        &gt;&gt;&gt; d.f.n</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;n&#39;</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">        &gt;&gt;&gt; del d.e</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;e&#39;</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">        &gt;&gt;&gt; del d[&#39;f.n&#39;]</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">        KeyError: &#39;n&#39;</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">        &gt;&gt;&gt; d.e = {&#39;a&#39;: {&#39;b&#39;: 1}}</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">        &gt;&gt;&gt; del d[&#39;e.a.b&#39;]</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>            <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="c1"># if value is a python dict</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="k">return</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        1013</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">        &gt;&gt;&gt; d.f.n</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        &#39;chang&#39;</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a><span class="sd">        &gt;&gt;&gt; d.delete(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a><span class="sd">        &gt;&gt;&gt; d.dict()</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a><span class="sd">        {&#39;i&#39;: {}, &#39;f&#39;: {&#39;n&#39;: &#39;chang&#39;}}</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a><span class="sd">        &gt;&gt;&gt; d.i.d</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;d&#39;</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">        &gt;&gt;&gt; del d.f.n</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">        &gt;&gt;&gt; d.dict()</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">        {&#39;i&#39;: {}, &#39;f&#39;: {}}</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="sd">        &gt;&gt;&gt; d.f.n</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;n&#39;</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a><span class="sd">        &gt;&gt;&gt; del d.e</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a><span class="sd">        AttributeError: &#39;NestedDict&#39; object has no attribute &#39;e&#39;</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a><span class="sd">        &gt;&gt;&gt; del d[&#39;f.n&#39;]</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a><span class="sd">        KeyError: &#39;n&#39;</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">        &gt;&gt;&gt; d.e = {&#39;a&#39;: {&#39;b&#39;: 1}}</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">        &gt;&gt;&gt; del d[&#39;e.a.b&#39;]</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>    <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>    <span class="c1"># if value is a python dict</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NestedDict</span><span class="p">):</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>        <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>        <span class="k">return</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3368,14 +3396,7 @@ Defaults to self.convert_mapping.</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/nested_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-494">494</a></span>
-<span class="normal"><a href="#__codelineno-0-495">495</a></span>
-<span class="normal"><a href="#__codelineno-0-496">496</a></span>
-<span class="normal"><a href="#__codelineno-0-497">497</a></span>
-<span class="normal"><a href="#__codelineno-0-498">498</a></span>
-<span class="normal"><a href="#__codelineno-0-499">499</a></span>
-<span class="normal"><a href="#__codelineno-0-500">500</a></span>
-<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-501">501</a></span>
 <span class="normal"><a href="#__codelineno-0-502">502</a></span>
 <span class="normal"><a href="#__codelineno-0-503">503</a></span>
 <span class="normal"><a href="#__codelineno-0-504">504</a></span>
@@ -3407,46 +3428,53 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-530">530</a></span>
 <span class="normal"><a href="#__codelineno-0-531">531</a></span>
 <span class="normal"><a href="#__codelineno-0-532">532</a></span>
-<span class="normal"><a href="#__codelineno-0-533">533</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Null</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">    Pop value from `NestedDict`.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        name:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        default:</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        value: If `NestedDict` does not contain `name`, return `default`.</span>
+<span class="normal"><a href="#__codelineno-0-533">533</a></span>
+<span class="normal"><a href="#__codelineno-0-534">534</a></span>
+<span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">Null</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    Pop value from `NestedDict`.</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;, &quot;n.a.b.c&quot;: 1}, default_factory=NestedDict)</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">        1013</span>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;, True)</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        True</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">        KeyError: &#39;d&#39;</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;e&#39;)</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">        KeyError: &#39;e&#39;</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;e.f&#39;)</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">        KeyError: &#39;f&#39;</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a>            <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a>        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Null</span><span class="p">:</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a>            <span class="k">return</span> <span class="n">default</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        name:</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        default:</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">        value: If `NestedDict` does not contain `name`, return `default`.</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&quot;i.d&quot;: 1013, &quot;f.n&quot;: &quot;chang&quot;, &quot;n.a.b.c&quot;: 1}, default_factory=NestedDict)</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">        1013</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;, True)</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">        True</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;i.d&#39;)</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        KeyError: &#39;d&#39;</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;e&#39;)</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        KeyError: &#39;e&#39;</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        &gt;&gt;&gt; d.pop(&#39;e.f&#39;)</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">        KeyError: &#39;f&#39;</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="n">delimiter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;delimiter&quot;</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>        <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>            <span class="n">name</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a>            <span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">rest</span>  <span class="c1"># pylint: disable=W0642</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Null</span><span class="p">:</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>            <span class="k">return</span> <span class="n">default</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a>        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a>    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3533,14 +3561,7 @@ Defaults to self.convert_mapping.</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/nested_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-558">558</a></span>
-<span class="normal"><a href="#__codelineno-0-559">559</a></span>
-<span class="normal"><a href="#__codelineno-0-560">560</a></span>
-<span class="normal"><a href="#__codelineno-0-561">561</a></span>
-<span class="normal"><a href="#__codelineno-0-562">562</a></span>
-<span class="normal"><a href="#__codelineno-0-563">563</a></span>
-<span class="normal"><a href="#__codelineno-0-564">564</a></span>
-<span class="normal"><a href="#__codelineno-0-565">565</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-565">565</a></span>
 <span class="normal"><a href="#__codelineno-0-566">566</a></span>
 <span class="normal"><a href="#__codelineno-0-567">567</a></span>
 <span class="normal"><a href="#__codelineno-0-568">568</a></span>
@@ -3566,40 +3587,47 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-588">588</a></span>
 <span class="normal"><a href="#__codelineno-0-589">589</a></span>
 <span class="normal"><a href="#__codelineno-0-590">590</a></span>
-<span class="normal"><a href="#__codelineno-0-591">591</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    Intersection of `NestedDict` and `other`.</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        other (Mapping | Iterable | PathStr):</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">        recursive (bool):</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="sd">        &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">        &gt;&gt;&gt; d.intersect(n).dict()</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">        {&#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}}</span>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">        &gt;&gt;&gt; d.intersect(&quot;tests/test.yaml&quot;).dict()</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">        {&#39;a&#39;: 1}</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">        &gt;&gt;&gt; d.intersect(n, recursive=False).dict()</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">        {}</span>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">        &gt;&gt;&gt; d.intersect(l).dict()</span>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">        {&#39;a&#39;: 1}</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">        &gt;&gt;&gt; d.intersect(1)</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+<span class="normal"><a href="#__codelineno-0-591">591</a></span>
+<span class="normal"><a href="#__codelineno-0-592">592</a></span>
+<span class="normal"><a href="#__codelineno-0-593">593</a></span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
+<span class="normal"><a href="#__codelineno-0-595">595</a></span>
+<span class="normal"><a href="#__codelineno-0-596">596</a></span>
+<span class="normal"><a href="#__codelineno-0-597">597</a></span>
+<span class="normal"><a href="#__codelineno-0-598">598</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">    Intersection of `NestedDict` and `other`.</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a><span class="sd">        other (Mapping | Iterable | PathStr):</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">        recursive (bool):</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a><span class="sd">        &gt;&gt;&gt; d.intersect(n).dict()</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">        {&#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}}</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">        &gt;&gt;&gt; d.intersect(&quot;tests/test.yaml&quot;).dict()</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">        {&#39;a&#39;: 1}</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="sd">        &gt;&gt;&gt; d.intersect(n, recursive=False).dict()</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a><span class="sd">        {}</span>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">        &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        &gt;&gt;&gt; d.intersect(l).dict()</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="sd">        {&#39;a&#39;: 1}</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a><span class="sd">        &gt;&gt;&gt; d.intersect(1)</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3686,14 +3714,7 @@ Defaults to self.convert_mapping.</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/nested_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-606">606</a></span>
-<span class="normal"><a href="#__codelineno-0-607">607</a></span>
-<span class="normal"><a href="#__codelineno-0-608">608</a></span>
-<span class="normal"><a href="#__codelineno-0-609">609</a></span>
-<span class="normal"><a href="#__codelineno-0-610">610</a></span>
-<span class="normal"><a href="#__codelineno-0-611">611</a></span>
-<span class="normal"><a href="#__codelineno-0-612">612</a></span>
-<span class="normal"><a href="#__codelineno-0-613">613</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-613">613</a></span>
 <span class="normal"><a href="#__codelineno-0-614">614</a></span>
 <span class="normal"><a href="#__codelineno-0-615">615</a></span>
 <span class="normal"><a href="#__codelineno-0-616">616</a></span>
@@ -3719,40 +3740,47 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-636">636</a></span>
 <span class="normal"><a href="#__codelineno-0-637">637</a></span>
 <span class="normal"><a href="#__codelineno-0-638">638</a></span>
-<span class="normal"><a href="#__codelineno-0-639">639</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-606" name="__codelineno-0-606"></a><span class="k">def</span> <span class="nf">difference</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221, C0103</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a><span class="sd">    Difference between `NestedDict` and `other`.</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="sd">        other (Mapping | Iterable | PathStr):</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="sd">        recursive (bool):</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>
-<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
-<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">        &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">        &gt;&gt;&gt; d.difference(n).dict()</span>
-<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">        {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">        &gt;&gt;&gt; d.difference(&quot;tests/test.yaml&quot;).dict()</span>
-<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">        {&#39;b&#39;: 2, &#39;c&#39;: 3}</span>
-<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">        &gt;&gt;&gt; d.difference(n, recursive=False).dict()</span>
-<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">        {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}, &#39;d&#39;: 0}</span>
-<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">        &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
-<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">        &gt;&gt;&gt; d.difference(l).dict()</span>
-<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">        {&#39;d&#39;: 4}</span>
-<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">        &gt;&gt;&gt; d.difference(1)</span>
-<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
-<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-632" name="__codelineno-0-632"></a>
-<a id="__codelineno-0-633" name="__codelineno-0-633"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
-<a id="__codelineno-0-634" name="__codelineno-0-634"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-<a id="__codelineno-0-635" name="__codelineno-0-635"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
-<a id="__codelineno-0-636" name="__codelineno-0-636"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-<a id="__codelineno-0-637" name="__codelineno-0-637"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
-<a id="__codelineno-0-638" name="__codelineno-0-638"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-639" name="__codelineno-0-639"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+<span class="normal"><a href="#__codelineno-0-639">639</a></span>
+<span class="normal"><a href="#__codelineno-0-640">640</a></span>
+<span class="normal"><a href="#__codelineno-0-641">641</a></span>
+<span class="normal"><a href="#__codelineno-0-642">642</a></span>
+<span class="normal"><a href="#__codelineno-0-643">643</a></span>
+<span class="normal"><a href="#__codelineno-0-644">644</a></span>
+<span class="normal"><a href="#__codelineno-0-645">645</a></span>
+<span class="normal"><a href="#__codelineno-0-646">646</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="k">def</span> <span class="nf">difference</span><span class="p">(</span>  <span class="c1"># pylint: disable=W0221, C0103</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a>    <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="n">PathStr</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">    Difference between `NestedDict` and `other`.</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">        other (Mapping | Iterable | PathStr):</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">        recursive (bool):</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">        &gt;&gt;&gt; d = NestedDict({&#39;a&#39;: 1, &#39;b.c&#39;: 2, &#39;b.d&#39;: 3, &#39;c.d.e&#39;: 4, &#39;c.d.f&#39;: 5, &#39;c.e&#39;: 6})</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">        &gt;&gt;&gt; n = {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c.d.e&#39;: 4, &#39;c.d&#39;: {&#39;f&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">        &gt;&gt;&gt; d.difference(n).dict()</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">        {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a><span class="sd">        &gt;&gt;&gt; d.difference(&quot;tests/test.yaml&quot;).dict()</span>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">        {&#39;b&#39;: 2, &#39;c&#39;: 3}</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">        &gt;&gt;&gt; d.difference(n, recursive=False).dict()</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">        {&#39;b&#39;: {&#39;c&#39;: 3, &#39;d&#39;: 5}, &#39;c&#39;: {&#39;d&#39;: {&#39;e&#39;: 4, &#39;f&#39;: 5}}, &#39;d&#39;: 0}</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a><span class="sd">        &gt;&gt;&gt; l = [(&#39;a&#39;, 1), (&#39;d&#39;, 4)]</span>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a><span class="sd">        &gt;&gt;&gt; d.difference(l).dict()</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="sd">        {&#39;d&#39;: 4}</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="sd">        &gt;&gt;&gt; d.difference(1)</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="sd">        TypeError: `other=1` should be of type Mapping, Iterable or PathStr, but got &lt;class &#39;int&#39;&gt;.</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">PathLike</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">Mapping</span><span class="p">,)):</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`other=</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2">` should be of type Mapping, Iterable or PathStr, but got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_difference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">recursive</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
