@@ -33,6 +33,7 @@ class TestConfig(Config):
         self.datasets.b.num_classes = num_classes
         self.network.name = "ResNet18"
         self.network.num_classes = num_classes
+        self.checkpoint = None
 
     def post(self):
         self.name = self.name.lower()
@@ -74,10 +75,13 @@ class Test:
                 "d",
                 "e",
                 "f",
+                "--checkpoint",
+                "path/to/checkpoint.pth",
             ]
         )
         assert self.config.name == "test"
         assert self.config.id == "test_1014"
+        assert self.config.checkpoint == "path/to/checkpoint.pth"
         assert self.config.data.name == "cifar10"
         assert self.config.datas.a.feature_cols == ["a", "b", "c"]
         assert self.config.datas.b.label_cols == ["d", "e", "f"]
