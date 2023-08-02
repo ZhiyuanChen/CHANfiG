@@ -953,7 +953,9 @@ which has strict checking on command-line arguments.</p>
 <span class="normal"><a href="#__codelineno-0-294">294</a></span>
 <span class="normal"><a href="#__codelineno-0-295">295</a></span>
 <span class="normal"><a href="#__codelineno-0-296">296</a></span>
-<span class="normal"><a href="#__codelineno-0-297">297</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">class</span> <span class="nc">ConfigParser</span><span class="p">(</span><span class="n">ArgumentParser</span><span class="p">):</span>  <span class="c1"># pylint: disable=C0115</span>
+<span class="normal"><a href="#__codelineno-0-297">297</a></span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span>
+<span class="normal"><a href="#__codelineno-0-299">299</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">class</span> <span class="nc">ConfigParser</span><span class="p">(</span><span class="n">ArgumentParser</span><span class="p">):</span>  <span class="c1"># pylint: disable=C0115</span>
 <a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    Parser to parse command-line arguments for CHANfiG.</span>
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a>
@@ -1181,42 +1183,44 @@ which has strict checking on command-line arguments.</p>
 <a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">all_items</span><span class="p">():</span>
 <a id="__codelineno-0-260" name="__codelineno-0-260"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Variable</span><span class="p">):</span>
 <a id="__codelineno-0-261" name="__codelineno-0-261"></a>                <span class="n">dtype</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_type</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span>  <span class="c1"># pylint: disable=W0212</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>            <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-263" name="__codelineno-0-263"></a>                <span class="n">dtype</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a>            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">key</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a>            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a>                <span class="n">help</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_help</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Variable</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># pylint: disable=W0212,W0622</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a>                <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a>    <span class="k">def</span> <span class="nf">merge_default_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parsed</span><span class="p">,</span> <span class="n">default_config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">no_default_config_action</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;raise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a>        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;default_config is set to </span><span class="si">{</span><span class="n">default_config</span><span class="si">}</span><span class="s2">, but not found in args.&quot;</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a>        <span class="k">if</span> <span class="n">default_config</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">:</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a>            <span class="n">path</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="n">default_config</span><span class="p">]</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a>            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config has &#39;default_config=</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; specified, its values will override values in Config&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a>            <span class="k">return</span> <span class="n">NestedDict</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>        <span class="k">if</span> <span class="n">no_default_config_action</span> <span class="o">==</span> <span class="s2">&quot;ignore&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>            <span class="k">pass</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="k">elif</span> <span class="n">no_default_config_action</span> <span class="o">==</span> <span class="s2">&quot;warn&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a>        <span class="k">return</span> <span class="n">parsed</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>    <span class="nd">@staticmethod</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">        https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>        <span class="k">return</span> <span class="n">string</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>                <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a>            <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">key</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a>            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>                <span class="n">help</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_help</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Variable</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># pylint: disable=W0212,W0622</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>                <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a>    <span class="k">def</span> <span class="nf">merge_default_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parsed</span><span class="p">,</span> <span class="n">default_config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">no_default_config_action</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;raise&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a>        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;default_config is set to </span><span class="si">{</span><span class="n">default_config</span><span class="si">}</span><span class="s2">, but not found in args.&quot;</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a>        <span class="k">if</span> <span class="n">default_config</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">:</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>            <span class="n">path</span> <span class="o">=</span> <span class="n">parsed</span><span class="p">[</span><span class="n">default_config</span><span class="p">]</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config has &#39;default_config=</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39; specified, its values will override values in Config&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a>            <span class="k">return</span> <span class="n">NestedDict</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="k">if</span> <span class="n">no_default_config_action</span> <span class="o">==</span> <span class="s2">&quot;ignore&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="k">pass</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="k">elif</span> <span class="n">no_default_config_action</span> <span class="o">==</span> <span class="s2">&quot;warn&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>            <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>        <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>        <span class="k">return</span> <span class="n">parsed</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">        https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-293" name="__codelineno-0-293"></a>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_string_actions</span><span class="p">:</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>        <span class="k">return</span> <span class="n">string</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>
+<a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_string_actions</span><span class="p">:</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a>        <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
 
@@ -1984,19 +1988,19 @@ error: unrecognized arguments: &ndash;b 1</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/parser.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-286">286</a></span>
-<span class="normal"><a href="#__codelineno-0-287">287</a></span>
-<span class="normal"><a href="#__codelineno-0-288">288</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-288">288</a></span>
 <span class="normal"><a href="#__codelineno-0-289">289</a></span>
 <span class="normal"><a href="#__codelineno-0-290">290</a></span>
 <span class="normal"><a href="#__codelineno-0-291">291</a></span>
-<span class="normal"><a href="#__codelineno-0-292">292</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="nd">@staticmethod</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="k">return</span> <span class="n">string</span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="nd">@staticmethod</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">return</span> <span class="n">string</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
