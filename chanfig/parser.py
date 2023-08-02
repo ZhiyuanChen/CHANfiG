@@ -259,8 +259,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         for key, value in config.all_items():
             if isinstance(value, Variable):
                 dtype = value._type or value.dtype  # pylint: disable=W0212
-            else:
+            elif value is not None:
                 dtype = type(value)
+            else:
+                dtype = None
             name = "--" + key
             if name not in self:
                 help = value._help if isinstance(value, Variable) else None  # pylint: disable=W0212,W0622
