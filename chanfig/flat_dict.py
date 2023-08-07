@@ -474,6 +474,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             TypeError: Expected Mapping or Sequence, but got <class 'set'>.
         """
 
+        if obj is None:
+            return cls()
         if isinstance(obj, Mapping):
             return cls(obj)
         if isinstance(obj, Sequence):
