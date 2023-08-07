@@ -297,7 +297,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         apply_(self, func, *args, **kwargs)
         return self
 
-    def get(self, name: Any, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = None) -> Any:
         r"""
         Get value from `NestedDict`.
 
@@ -335,9 +335,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'e'
             >>> d.e = {}
-            >>> d.get('e.f')
+            >>> d.get('e.f', Null)
             Traceback (most recent call last):
             KeyError: 'f'
+            >>> d.get('e.f')
             >>> d.get('e.f', 1)
             1
             >>> d.e.f

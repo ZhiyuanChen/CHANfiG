@@ -426,7 +426,7 @@ class Config(NestedDict[_K, _V]):
             if was_frozen:
                 self.freeze()
 
-    def get(self, name: Any, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = None) -> Any:
         r"""
         Get value from `Config`.
 
