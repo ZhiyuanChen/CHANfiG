@@ -297,7 +297,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         apply_(self, func, *args, **kwargs)
         return self
 
-    def get(self, name: Any, default: Any = Null) -> Any:
+    def get(self, name: Any, default: Any = None) -> Any:
         r"""
         Get value from `NestedDict`.
 
