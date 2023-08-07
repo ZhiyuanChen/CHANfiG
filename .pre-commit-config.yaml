@@ -23,7 +23,6 @@ repos:
     rev: v3.9.0
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: 0.13.0
     hooks:
