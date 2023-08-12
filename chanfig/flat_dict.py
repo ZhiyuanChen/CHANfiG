@@ -166,6 +166,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         Raises:
             KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
+            TypeError: If `name` is not hashable.
 
         Examples:
             >>> d = FlatDict(d=1013)
