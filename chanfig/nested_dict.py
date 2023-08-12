@@ -314,6 +314,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         Raises:
             KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
+            TypeError: If `name` is not hashable.
 
         Examples:
             >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
