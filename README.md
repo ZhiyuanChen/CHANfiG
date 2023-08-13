@@ -36,13 +36,13 @@ Even worse, if the dict is nested like a config, member access could be somethin
 Enough is enough, it is time to make a change.
 
 We need attribute-style access, and we need it now.
-`dict.name` and `dict.parent.children.name` are all you need.
+`dict.name` and `dict.parent.children.name` is all you need.
 
 Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
-Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
+Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry` objects.
+To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry`.
 We also introduce `Variable` to allow sharing a value across multiple places, and `ConfigParser` to parse command line arguments.
 
 ### FlatDict
@@ -51,28 +51,28 @@ We also introduce `Variable` to allow sharing a value across multiple places, an
 
 #### Dict Operations
 
-`FlatDict` incorporates a `merge` method which allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict` object.
-Different to `update` method, `merge` assign value instead of replace values, which makes it work better with `DefaultDict` object.
+`FlatDict` incorporates a `merge` method that allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict`.
+Different from built-in `update`, `merge` assign values instead of replace, which makes it works better with `DefaultDict`.
 
 Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 
-`FlatDict` supports the `to` method similar to PyTorch Tensors.
+`FlatDict` supports `to` method similar to PyTorch Tensors.
 You can simply convert all member values of `FlatDict` to a certain type or pass to a device in the same way.
 
 `FlatDict` also integrates `cpu`, `gpu` (`cuda`), and `tpu` (`xla`) methods for easier access.
 
 #### IO Operations
 
-`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump `FlatDict` object to a file or string.
-It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a `FlatDict` object from a string or file.
+`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump `FlatDict` to a file or string.
+It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a `FlatDict` from a string or file.
 
-`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` object to/from a file.
+`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` to/from a file.
 
 ### DefaultDict
 
-To facilities the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
+To facility the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
 
 ### NestedDict
 
@@ -84,7 +84,7 @@ Based on `DefaultDict`, `NestedDict` provides `all_keys`, `all_values`, and `all
 
 ### Config
 
-`Config` extends the functionality by supporting `freeze` and `defrost` the dict, and by adding a built-in `ConfigParser` to pare command line arguments.
+`Config` extends the functionality by supporting `freeze` and `defrost`, and by adding a built-in `ConfigParser` to pare command line arguments.
 
 Note that `Config` also has `default_factory=Config()` by default for convenience.
 
@@ -114,7 +114,7 @@ No matter if your old config is json or yaml, you could directly read from them.
 
 And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
-Moreover, if you find name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
+Moreover, if you find a name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
 ```python
 from chanfig import Config, Variable
