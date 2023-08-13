@@ -251,14 +251,13 @@ pip install git+https://github.com/ZhiyuanChen/CHANfiG
 
 CHANfiG 依据下列许可证进行多重授权：
 
-- Unlicense
-- GPL 2.0 (or any later version)
-- MIT
-- Apache 2.0
-- BSD 2-Clause
-- BSD 3-Clause
-- BSD 4-Clause
+- The Unlicense
+- GNU Affero General Public License v3.0 or later
+- GNU General Public License v2.0 or later
+- BSD 4-Clause "Original" or "Old" License
+- MIT License
+- Apache License 2.0
 
 如果你使用本工作，你可以从中任选（一个或者多个）许可证。
 
-`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR BSD-4-Clause`
+`SPDX-License-Identifier: Unlicense OR AGPL-3.0-or-later OR GPL-2.0-or-later OR BSD-4-Clause OR MIT OR Apache-2.0`

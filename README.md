@@ -256,16 +256,15 @@ It works the way it should have worked.
 
 CHANfiG is multi-licensed under the following licenses:
 
-- Unlicense
-- GNU GPL 2.0 (or any later version)
-- MIT
-- Apache 2.0
-- BSD 2-Clause
-- BSD 3-Clause
-- BSD 4-Clause
+- The Unlicense
+- GNU Affero General Public License v3.0 or later
+- GNU General Public License v2.0 or later
+- BSD 4-Clause "Original" or "Old" License
+- MIT License
+- Apache License 2.0
 
 You can choose any (one or more) of these license if you use this work.
 
-`SPDX-License-Identifier: Unlicense OR GPL-2.0-or-later OR MIT OR Apache-2.0 OR BSD-2-Clause OR BSD-3-Clause OR BSD-4-Clause`
+`SPDX-License-Identifier: Unlicense OR AGPL-3.0-or-later OR GPL-2.0-or-later OR BSD-4-Clause OR MIT OR Apache-2.0`
 
 [^uncountable]: fun fact: time is always uncountable.
