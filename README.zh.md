@@ -35,9 +35,9 @@ CHANfiG 的范式是：
 我们需要属性方式的访问，并且我们现在就需要。
 `dict.name`和`dict.parent.children.name`是所有你需要的。
 
-尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。
+尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们的 Config 对象要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的`__dict__`然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。
 
-为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`DefaultDict`、`NestedDict`、`Config`和`Registry`对象。
+为了解决上述限制，我们继承了 Python 内置的`dict`来创建`FlatDict`、`DefaultDict`、`NestedDict`、`Config`和`Registry`。
 我们同时介绍了`Variable`来在多个位置共享值，和`ConfigParser`来解析命令行参数。
 
 ### FlatDict
@@ -46,8 +46,8 @@ CHANfiG 的范式是：
 
 #### 字典操作
 
-`FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`对象。
-与`update`方法不同，`merge`方法是赋值而不是替换，这使得他能更好的与`DefaultDict`对象配合使用。
+`FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`。
+与内置的`update`不同，`merge`是赋值而不是替换，这使得他能更好的与`DefaultDict`配合使用。
 
 更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
@@ -60,10 +60,10 @@ CHANfiG 的范式是：
 
 #### IO 操作
 
-`FlatDict`支持`json`、`jsons`、`yaml`和`yamls`方法来将`FlatDict`对象存储到文件或者转换成字符串。
-它还提供了`from_json`、`from_jsons`、`from_yaml`和`from_yamls`来从一个字符串或者文件中构建`FlatDict`对象。
+`FlatDict`支持`json`、`jsons`、`yaml`和`yamls`方法来将`FlatDict`存储到文件或者转换成字符串。
+它还提供了`from_json`、`from_jsons`、`from_yaml`和`from_yamls`来从一个字符串或者文件中构建`FlatDict`。
 
-`FlatDict`也包括了`dump`和`load`方法，他们可以从文件扩展名中自动推断类型然后将`FlatDict`对象存储到文件中/从文件中加载`FlatDict`对象。
+`FlatDict`也包括了`dump`和`load`方法，他们可以从文件扩展名中自动推断类型然后将`FlatDict`存储到文件中/从文件中加载`FlatDict`。
 
 ### DefaultDict
 
