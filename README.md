@@ -2,48 +2,38 @@
 
 ## Introduction
 
-CHANfiG aims to make your configuration easier.
-
-There are tons of configurable parameters in training a Machine Learning model.
-To configure all these parameters, researchers usually need to write gigantic config files, sometimes even thousands of lines.
-Most of the configs are just replicates of the default arguments of certain functions, resulting in many unnecessary declarations.
-It is also very hard to alter the configurations.
-One needs to navigate and open the right configuration file, make changes, save and exit.
-These had wasted an uncountable[^uncountable] amount of precious time ~~and are no doubt a crime~~.
-Using `argparse` could relieve the burdens to some extent.
-However, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
+In the world of machine learning, configuring models involves dealing with a plethora of parameters.
+Researchers often face the daunting task of writing extensive config files, sometimes spanning thousands of lines.
+Much of this work is repetitive, copying default arguments and resulting in unnecessary declarations.
+Making even minor alterations becomes a challenge, requiring navigation through complex files, editing, saving, and exiting.
+This process has consumed an uncountable[^uncountable] amount of valuable time.
 
 CHANfiG would like to make a change.
 
-You just type the alternations in the command line, and leave everything else to CHANfiG.
+With CHANfiG, you can make changes directly from the command line, leaving the rest to the system.
 
-CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs).
-Different from the paradigm of YACS(
-`your code + a YACS config for experiment E (+ external dependencies + hardware + other nuisance terms ...) = reproducible experiment E`),
-The paradigm of CHANfiG is:
+CHANfiG is highly inspired by [YACS](https://github.com/rbgirshick/yacs), but adopts a different paradigm:
 
-`your code + command line arguments (+ optional CHANfiG config + external dependencies + hardware + other nuisance terms ...) = reproducible experiment E (+ optional CHANfiG config for experiment E)`
+`your code + command line arguments (+ optional CHANfiG config + external dependencies + hardware + other nuisance terms ...) = reproducible experiment E`
 
 ## Components
 
-A Config is basically a nested dict structure.
+A Config is basically a nested `dict` structure.
 
-However, the default Python dict is hard to manipulate.
+However, working with default Python dictionaries can be cumbersome and complex.
 
-The only way to access a dict member is through `dict['name']`, which is obviously extremely complex.
+The only way to access a `dict` member is through `dict['name']`, which is obviously extremely complex.
 Even worse, if the dict is nested like a config, member access could be something like `dict['parent']['children']['name']`.
+For example, accessing a nested member requires using expressions like `dict['parent']['children']['name']`, which can become unwieldy.
 
-Enough is enough, it is time to make a change.
+Enough is enough, we demand attribute-style access, and we demand it now.
 
-We need attribute-style access, and we need it now.
-`dict.name` and `dict.parent.children.name` is all you need.
+`dict.parent.children.name` is all you need.
 
-Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
-Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
-or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
+Although other solutions have aimed to provide attribute-style access, they often suffer from inconsistencies or conflicts between attribute and dictionary styles.
+CHANfiG's components are designed to overcome these issues.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry`.
-We also introduce `Variable` to allow sharing a value across multiple places, and `ConfigParser` to parse command line arguments.
+We extend the Python built-in dict to create specialized classes: `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry`. Additional components like `Variable` and `ConfigParser` enhance flexibility and ease of use.
 
 ### FlatDict
 
@@ -51,10 +41,14 @@ We also introduce `Variable` to allow sharing a value across multiple places, an
 
 #### Dict Operations
 
-`FlatDict` incorporates a `merge` method that allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict`.
-Different from built-in `update`, `merge` assign values instead of replace, which makes it works better with `DefaultDict`.
+`FlatDict` supports variable interpolation.
+Set the value of a member to a string with `${}` and another member name inside, and call `interpolate` method.
+The value will be automatically replaced with the value of another member.
 
-Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+`FlatDict` incorporates a `merge` method which allows you to merge a `Mapping`, an `Iterable`, or a path to a `FlatDict`.
+Different to `update` method, `merge` assign value instead of replace values, which makes it work better with `DefaultDict`.
+
+Besides, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 
@@ -70,9 +64,11 @@ It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods
 
 `FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` to/from a file.
 
+`FlatDict` also comes with `apply` and `apply_` method, which made it easier to manipulate the dict structure.
+
 ### DefaultDict
 
-To facility the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
+To facilities the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
 
 ### NestedDict
 
@@ -80,17 +76,15 @@ Since most Configs are in a nested structure, we further propose a `NestedDict`.
 
 Based on `DefaultDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
 
-`NestedDict` also comes with `apply` method, which made it easier to manipulate the nested structure.
-
 ### Config
 
 `Config` extends the functionality by supporting `freeze` and `defrost`, and by adding a built-in `ConfigParser` to pare command line arguments.
 
-Note that `Config` also has `default_factory=Config()` by default for convenience.
+Note that `Config` also has `default_factory=Config` by default for convenience.
 
 ### Registry
 
-`Registry` extends the `NestedDict` and supports `register`, `lookup`, and `build` to help you register constructors and build objects from a `Config`.
+`Registry` extends `NestedDict` and supports `register`, `lookup`, and `build` to help you register constructors and build objects from a `Config`.
 
 ### Variable
 
@@ -114,7 +108,7 @@ No matter if your old config is json or yaml, you could directly read from them.
 
 And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
 
-Moreover, if you find a name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
+Moreover, if you find name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
 ```python
 from chanfig import Config, Variable
@@ -162,7 +156,7 @@ if __name__ == '__main__':
     # config = Config(**existing_configs)  # in case you have some config in dict to load
     config = TestConfig()
     config = config.parse()
-    # config.merge('dataset.yaml')  # in case you want to merge a yaml
+    # config.merge('dataset.yaml')  # **in** case you want to merge a yaml
     # config.merge('dataset.json')  # in case you want to merge a json
     # note that the value of merge will override current values
     config.model.decoder.num_layers = 8
