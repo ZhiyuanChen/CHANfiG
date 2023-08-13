@@ -775,23 +775,23 @@ CHANfiG 的范式是：</p>
 <p>够了就是够了，是时候做出改变了。</p>
 <p>我们需要属性方式的访问，并且我们现在就需要。
 <code>dict.name</code>和<code>dict.parent.children.name</code>是所有你需要的。</p>
-<p>尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的<code>__dict__</code>然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。</p>
-<p>为了解决上述限制，我们继承了 Python 内置的<code>dict</code>来创建<code>FlatDict</code>、<code>DefaultDict</code>、<code>NestedDict</code>、<code>Config</code>和<code>Registry</code>对象。
+<p>尽管此前已经有工作来实现类似的对字典成员的属性方式访问。但是他们的 Config 对象要么使用一个独立的字典来存储属性方式访问的信息（EasyDict），而这可能导致属性方式访问和字典方式访问的不一致；要么重新使用既有的<code>__dict__</code>然后对字典方式访问进行重定向（ml_collections），而这可能导致属性和字典成员存在冲突。</p>
+<p>为了解决上述限制，我们继承了 Python 内置的<code>dict</code>来创建<code>FlatDict</code>、<code>DefaultDict</code>、<code>NestedDict</code>、<code>Config</code>和<code>Registry</code>。
 我们同时介绍了<code>Variable</code>来在多个位置共享值，和<code>ConfigParser</code>来解析命令行参数。</p>
 <h3 id="flatdict">FlatDict<a class="headerlink" href="#flatdict" title="Permanent link">&para;</a></h3>
 <p><code>FlatDict</code>在三个方面对默认的<code>dict</code>做出改进。</p>
 <h4 id="_3">字典操作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code>包括了一个<code>merge</code>方法，他使你能将一个<code>Mapping</code>、<code>Iterable</code>或者一个路径合并进入一个<code>FlatDict</code>对象。
-与<code>update</code>方法不同，<code>merge</code>方法是赋值而不是替换，这使得他能更好的与<code>DefaultDict</code>对象配合使用。</p>
+<p><code>FlatDict</code>包括了一个<code>merge</code>方法，他使你能将一个<code>Mapping</code>、<code>Iterable</code>或者一个路径合并进入一个<code>FlatDict</code>。
+与内置的<code>update</code>不同，<code>merge</code>是赋值而不是替换，这使得他能更好的与<code>DefaultDict</code>配合使用。</p>
 <p>更进一步的，<code>FlatDict</code>引入了<code>difference</code>和<code>intersect</code>，这些使其可以非常简单的将<code>FlatDict</code>和其他<code>Mapping</code>、<code>Iterable</code>或者一个路径进行对比。</p>
 <h4 id="_4">机器学习操作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
 <p><code>FlatDict</code>支持与 Pytorch Tensor 类似的<code>to</code>方法。
 你可以很简单的通过相同的方式将所有<code>FlatDict</code>的成员值转换为某种类型或者转移到某个设备上。</p>
 <p><code>FlatDict</code>同时集成了<code>cpu</code>、<code>gpu</code> (<code>cuda</code>)、<code>tpu</code> (<code>xla</code>)方法来提供更便捷的访问。</p>
 <h4 id="io">IO 操作<a class="headerlink" href="#io" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code>支持<code>json</code>、<code>jsons</code>、<code>yaml</code>和<code>yamls</code>方法来将<code>FlatDict</code>对象存储到文件或者转换成字符串。
-它还提供了<code>from_json</code>、<code>from_jsons</code>、<code>from_yaml</code>和<code>from_yamls</code>来从一个字符串或者文件中构建<code>FlatDict</code>对象。</p>
-<p><code>FlatDict</code>也包括了<code>dump</code>和<code>load</code>方法，他们可以从文件扩展名中自动推断类型然后将<code>FlatDict</code>对象存储到文件中/从文件中加载<code>FlatDict</code>对象。</p>
+<p><code>FlatDict</code>支持<code>json</code>、<code>jsons</code>、<code>yaml</code>和<code>yamls</code>方法来将<code>FlatDict</code>存储到文件或者转换成字符串。
+它还提供了<code>from_json</code>、<code>from_jsons</code>、<code>from_yaml</code>和<code>from_yamls</code>来从一个字符串或者文件中构建<code>FlatDict</code>。</p>
+<p><code>FlatDict</code>也包括了<code>dump</code>和<code>load</code>方法，他们可以从文件扩展名中自动推断类型然后将<code>FlatDict</code>存储到文件中/从文件中加载<code>FlatDict</code>。</p>
 <h3 id="defaultdict">DefaultDict<a class="headerlink" href="#defaultdict" title="Permanent link">&para;</a></h3>
 <p>为了满足默认值的需要，我们包括了一个<code>DefaultDict</code>，他接受<code>default_factory</code>参数，并和<code>collections.defaultdict</code>一样工作。</p>
 <h3 id="nesteddict">NestedDict<a class="headerlink" href="#nesteddict" title="Permanent link">&para;</a></h3>

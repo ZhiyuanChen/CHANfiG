@@ -779,34 +779,34 @@ The paradigm of CHANfiG is:</p>
 Even worse, if the dict is nested like a config, member access could be something like <code>dict['parent']['children']['name']</code>.</p>
 <p>Enough is enough, it is time to make a change.</p>
 <p>We need attribute-style access, and we need it now.
-<code>dict.name</code> and <code>dict.parent.children.name</code> are all you need.</p>
+<code>dict.name</code> and <code>dict.parent.children.name</code> is all you need.</p>
 <p>Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
-Their Config objects either use a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
+Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or re-use the existing <code>__dict__</code> and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.</p>
-<p>To overcome the aforementioned limitations, we inherit the Python built-in <code>dict</code> to create <code>FlatDict</code>, <code>DefaultDict</code>, <code>NestedDict</code>, <code>Config</code>, and <code>Registry</code> objects.
+<p>To overcome the aforementioned limitations, we inherit the Python built-in <code>dict</code> to create <code>FlatDict</code>, <code>DefaultDict</code>, <code>NestedDict</code>, <code>Config</code>, and <code>Registry</code>.
 We also introduce <code>Variable</code> to allow sharing a value across multiple places, and <code>ConfigParser</code> to parse command line arguments.</p>
 <h3 id="flatdict">FlatDict<a class="headerlink" href="#flatdict" title="Permanent link">&para;</a></h3>
 <p><code>FlatDict</code> improves the default <code>dict</code> in 3 aspects.</p>
 <h4 id="dict-operations">Dict Operations<a class="headerlink" href="#dict-operations" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code> incorporates a <code>merge</code> method which allows you to merge a <code>Mapping</code>, an <code>Iterable</code>, or a path to the <code>FlatDict</code> object.
-Different to <code>update</code> method, <code>merge</code> assign value instead of replace values, which makes it work better with <code>DefaultDict</code> object.</p>
+<p><code>FlatDict</code> incorporates a <code>merge</code> method that allows you to merge a <code>Mapping</code>, an <code>Iterable</code>, or a path to the <code>FlatDict</code>.
+Different from built-in <code>update</code>, <code>merge</code> assign values instead of replace, which makes it works better with <code>DefaultDict</code>.</p>
 <p>Moreover, <code>FlatDict</code> comes with <code>difference</code> and <code>intersect</code>, which makes it very easy to compare a <code>FlatDict</code> with other <code>Mapping</code>, <code>Iterable</code>, or a path.</p>
 <h4 id="ml-operations">ML Operations<a class="headerlink" href="#ml-operations" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code> supports the <code>to</code> method similar to PyTorch Tensors.
+<p><code>FlatDict</code> supports <code>to</code> method similar to PyTorch Tensors.
 You can simply convert all member values of <code>FlatDict</code> to a certain type or pass to a device in the same way.</p>
 <p><code>FlatDict</code> also integrates <code>cpu</code>, <code>gpu</code> (<code>cuda</code>), and <code>tpu</code> (<code>xla</code>) methods for easier access.</p>
 <h4 id="io-operations">IO Operations<a class="headerlink" href="#io-operations" title="Permanent link">&para;</a></h4>
-<p><code>FlatDict</code> provides <code>json</code>, <code>jsons</code>, <code>yaml</code> and <code>yamls</code> methods to dump <code>FlatDict</code> object to a file or string.
-It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yaml</code> and <code>from_yamls</code> methods to build a <code>FlatDict</code> object from a string or file.</p>
-<p><code>FlatDict</code> also includes <code>dump</code> and <code>load</code> methods which determines the type by its extension and dump/load <code>FlatDict</code> object to/from a file.</p>
+<p><code>FlatDict</code> provides <code>json</code>, <code>jsons</code>, <code>yaml</code> and <code>yamls</code> methods to dump <code>FlatDict</code> to a file or string.
+It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yaml</code> and <code>from_yamls</code> methods to build a <code>FlatDict</code> from a string or file.</p>
+<p><code>FlatDict</code> also includes <code>dump</code> and <code>load</code> methods which determines the type by its extension and dump/load <code>FlatDict</code> to/from a file.</p>
 <h3 id="defaultdict">DefaultDict<a class="headerlink" href="#defaultdict" title="Permanent link">&para;</a></h3>
-<p>To facilities the needs of default values, we incorporate <code>DefaultDict</code> which accepts <code>default_factory</code> and works just like a <code>collections.defaultdict</code>.</p>
+<p>To facility the needs of default values, we incorporate <code>DefaultDict</code> which accepts <code>default_factory</code> and works just like a <code>collections.defaultdict</code>.</p>
 <h3 id="nesteddict">NestedDict<a class="headerlink" href="#nesteddict" title="Permanent link">&para;</a></h3>
 <p>Since most Configs are in a nested structure, we further propose a <code>NestedDict</code>.</p>
 <p>Based on <code>DefaultDict</code>, <code>NestedDict</code> provides <code>all_keys</code>, <code>all_values</code>, and <code>all_items</code> methods to allow iterating over the whole nested structure at once.</p>
 <p><code>NestedDict</code> also comes with <code>apply</code> method, which made it easier to manipulate the nested structure.</p>
 <h3 id="config">Config<a class="headerlink" href="#config" title="Permanent link">&para;</a></h3>
-<p><code>Config</code> extends the functionality by supporting <code>freeze</code> and <code>defrost</code> the dict, and by adding a built-in <code>ConfigParser</code> to pare command line arguments.</p>
+<p><code>Config</code> extends the functionality by supporting <code>freeze</code> and <code>defrost</code>, and by adding a built-in <code>ConfigParser</code> to pare command line arguments.</p>
 <p>Note that <code>Config</code> also has <code>default_factory=Config()</code> by default for convenience.</p>
 <h3 id="registry">Registry<a class="headerlink" href="#registry" title="Permanent link">&para;</a></h3>
 <p><code>Registry</code> extends the <code>NestedDict</code> and supports <code>register</code>, <code>lookup</code>, and <code>build</code> to help you register constructors and build objects from a <code>Config</code>.</p>
@@ -821,7 +821,7 @@ It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yam
 <p>CHANfiG has great backward compatibility with previous configs.</p>
 <p>No matter if your old config is json or yaml, you could directly read from them.</p>
 <p>And if you are using yacs, just replace <code>CfgNode</code> with <code>Config</code> and enjoy all the additional benefits that CHANfiG provides.</p>
-<p>Moreover, if you find name in the config is too long for command-line, you could simply call <code>self.add_argument</code> with proper <code>dest</code> to use a shorter name in command-line, as you do with <code>argparse</code>.</p>
+<p>Moreover, if you find a name in the config is too long for command-line, you could simply call <code>self.add_argument</code> with proper <code>dest</code> to use a shorter name in command-line, as you do with <code>argparse</code>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
 <span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
 <span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
