@@ -1,0 +1,10 @@
+host: localhost
+data:
+  root: ${host}:${port}
+  type: any
+  imagenet:
+    data_dirs:
+      - ${data.root}/X-A
+      - ${data.root}/X-B
+      - ${data.root}/X-C
+port: 80
