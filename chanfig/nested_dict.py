@@ -32,6 +32,7 @@ except ImportError:
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
 from .utils import _K, _V, Null, PathStr
+from .variable import Variable
 
 
 def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
@@ -164,7 +165,6 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                     self.set(key, value)
             for key, value in kwargs.items():
                 self.set(key, value)
-        self.setattr("convert_mapping", convert_mapping)
 
     def all_keys(self) -> Generator:
         r"""
@@ -415,7 +415,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
 
         full_name = name
         if convert_mapping is None:
-            convert_mapping = self.convert_mapping
+            convert_mapping = self.getattr("convert_mapping", False)
         delimiter = self.getattr("delimiter", ".")
         default_factory = self.getattr("default_factory", self.empty)
         try:
@@ -438,7 +438,8 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if (
             convert_mapping
             and isinstance(value, Mapping)
-            and (not isinstance(value, NestedDict) or default_factory is not self.empty)
+            and not isinstance(value, default_factory if isinstance(default_factory, type) else type(self))
+            and not isinstance(value, Variable)
         ):
             try:
                 value = default_factory(**value)

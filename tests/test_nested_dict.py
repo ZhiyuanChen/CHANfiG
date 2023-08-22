@@ -85,3 +85,19 @@ class Test:
             "h": {"j": 1},
         }
         assert d.dropnull().dict() == {"h": {"j": 1}}
+
+
+class ConfigDict(NestedDict):
+    def __init__(self):
+        super().__init__()
+        self.a = NestedDict()
+        self.b = NestedDict({"a": self.a})
+        self.c = Variable(NestedDict({"a": self.a}))
+        self.d = NestedDict(a=self.a)
+
+
+class TestConfigDict:
+    dict = ConfigDict()
+
+    def test_affinty(self):
+        assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
