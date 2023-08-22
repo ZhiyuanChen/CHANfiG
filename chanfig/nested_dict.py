@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager, nullcontext
 from functools import wraps
 from inspect import ismethod
 from os import PathLike
@@ -150,19 +151,20 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     def __init__(
         self, *args: Any, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs: Any
     ) -> None:
+        with self.converting():
+            super().__init__(default_factory)
+            if len(args) == 1 and isinstance(args[0], Mapping):
+                for key, value in args[0].items():
+                    self.set(key, value)
+            elif len(args) == 1 and isinstance(args[0], Iterable):
+                for key, value in args[0]:
+                    self.set(key, value)
+            elif len(args) > 0:
+                for key, value in args:
+                    self.set(key, value)
+            for key, value in kwargs.items():
+                self.set(key, value)
         self.setattr("convert_mapping", convert_mapping)
-        super().__init__(default_factory)
-        if len(args) == 1 and isinstance(args[0], Mapping):
-            for key, value in args[0].items():
-                self.set(key, value, convert_mapping=True)
-        elif len(args) == 1 and isinstance(args[0], Iterable):
-            for key, value in args[0]:
-                self.set(key, value, convert_mapping=True)
-        elif len(args) > 0:
-            for key, value in args:
-                self.set(key, value, convert_mapping=True)
-        for key, value in kwargs.items():
-            self.set(key, value, convert_mapping=True)
 
     def all_keys(self) -> Generator:
         r"""
@@ -546,21 +548,23 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             return this
         elif isinstance(that, Mapping):
             that = that.items()
-        for key, value in that:
-            if key in this and isinstance(this[key], Mapping):
-                if isinstance(value, Mapping):
-                    NestedDict._merge(this[key], value, overwrite)
-                elif isinstance(this, NestedDict):
-                    this.set(key, value, convert_mapping=True)
-                elif overwrite:
-                    this[key] = value
-            elif key in dir(this) and isinstance(getattr(this.__class__, key), (property, cached_property)):
-                getattr(this, key).merge(value, overwrite=overwrite)
-            elif overwrite or key not in this:
-                if isinstance(this, NestedDict):
-                    this.set(key, value, convert_mapping=True)
-                else:
-                    this[key] = value
+        context = this.converting() if isinstance(this, NestedDict) else nullcontext()
+        with context:
+            for key, value in that:
+                if key in this and isinstance(this[key], Mapping):
+                    if isinstance(value, Mapping):
+                        NestedDict._merge(this[key], value, overwrite)
+                    elif isinstance(this, NestedDict):
+                        this.set(key, value)
+                    elif overwrite:
+                        this[key] = value
+                elif key in dir(this) and isinstance(getattr(this.__class__, key), (property, cached_property)):
+                    getattr(this, key).merge(value, overwrite=overwrite)
+                elif overwrite or key not in this:
+                    if isinstance(this, NestedDict):
+                        this.set(key, value)
+                    else:
+                        this[key] = value
         return this
 
     def intersect(  # pylint: disable=W0221
@@ -659,6 +663,15 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
             elif this[key] != value:
                 ret[key] = value
         return ret
+
+    @contextmanager
+    def converting(self):
+        convert_mapping = self.getattr("convert_mapping", False)
+        try:
+            self.setattr("convert_mapping", True)
+            yield
+        finally:
+            self.setattr("convert_mapping", convert_mapping)
 
     def __contains__(self, name: Any) -> bool:  # type: ignore
         delimiter = self.getattr("delimiter", ".")
