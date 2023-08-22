@@ -611,35 +611,56 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
         """
 
         interpolators = interpolators or self
-        placeholders, placeholder_names = {}, set()
+        placeholders: dict[str, list[str]] = {}
         for key, value in self.all_items():
-            placeholder = find_placeholders(value)
-            if placeholder:
-                for index, name in enumerate(placeholder):
-                    if name.startswith("."):
-                        placeholder[index] = key.rsplit(".", 1)[0] + name
-                    if key == name:
-                        raise ValueError(f"Cannot interpolate {key} to itself.")
-                placeholders[key] = placeholder
-                placeholder_names.update(placeholder)
+            if isinstance(value, list):
+                for v in value:
+                    self.find_placeholders(key, v, placeholders)
+            elif isinstance(value, Mapping):
+                for v in value.values():
+                    self.find_placeholders(key, v, placeholders)
+            else:
+                self.find_placeholders(key, value, placeholders)
         circular_references = find_circular_reference(placeholders)
         if circular_references:
             raise ValueError(f"Circular reference found: {'->'.join(circular_references)}.")
         if use_variable:
+            placeholder_names = {i for j in placeholders.values() for i in j}
             for name in list(placeholder_names.difference(placeholders.keys())):
                 if name not in interpolators:
                     raise ValueError(f"{name} is not found in {interpolators}.")
                 if not isinstance(interpolators[name], Variable):
                     interpolators[name] = Variable(interpolators[name])
         for key, value in placeholders.items():
-            try:
-                if len(value) == 1 and self[key].startswith("${") and self[key].endswith("}"):
-                    self[key] = interpolators[value[0]]
-                else:
-                    self[key] = self[key].replace("$", "").format(**interpolators)
-            except KeyError as exc:
-                raise ValueError(f"{exc} is not found in {interpolators}.") from None
+            if isinstance(self[key], list):
+                for index, v in enumerate(self[key]):
+                    self[key][index] = self.substitute(v, interpolators, value)
+            elif isinstance(self[key], Mapping):
+                for k, v in self[key].items():
+                    self[key][k] = self.substitute(v, interpolators, value)
+            else:
+                self[key] = self.substitute(self[key], interpolators, value)
         return self
+
+    @staticmethod
+    def find_placeholders(key, value, placeholders):
+        placeholder = find_placeholders(value)
+        if placeholder:
+            for index, name in enumerate(placeholder):
+                if name.startswith("."):
+                    placeholder[index] = key.rsplit(".", 1)[0] + name
+                if key == name:
+                    raise ValueError(f"Cannot interpolate {key} to itself.")
+            placeholders[key] = placeholder
+
+    @staticmethod
+    def substitute(placeholder, interpolators, value):
+        try:
+            if len(value) == 1 and placeholder.startswith("${") and placeholder.endswith("}"):
+                return interpolators[value[0]]
+            return placeholder.replace("$", "").format(**interpolators)
+        except KeyError as exc:
+            raise ValueError(f"{exc} is not found in {interpolators}.") from None
 
     def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> FlatDict:
         r"""
