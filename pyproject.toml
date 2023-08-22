@@ -73,7 +73,7 @@ addopts = "--doctest-modules --cov"
 
 [tool.coverage.run]
 branch = true
-omit = ["tests/*", "setup.py"]
+include = ["chanfig/**"]
 
 [tool.coverage.paths]
 source = ["chanfig"]
