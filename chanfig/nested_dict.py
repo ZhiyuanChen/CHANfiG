@@ -117,13 +117,13 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
     Attributes:
         convert_mapping: bool = False
             If `True`, all new values with type of `Mapping` will be converted to `default_factory`.
-            If `default_factory` is `Null`, will create an empty instance via `self.empty_like` as `default_factory`.
+            If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
         delimiter: str = "."
             Delimiter for nested structure.
 
     Notes:
         When `convert_mapping` specified, all new values with type of `Mapping` will be converted to `default_factory`.
-        If `default_factory` is `Null`, will create an empty instance via `self.empty_like` as `default_factory`.
+        If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
 
         `convert_mapping` is automatically applied to arguments during initialisation.
 
@@ -415,7 +415,7 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if convert_mapping is None:
             convert_mapping = self.convert_mapping
         delimiter = self.getattr("delimiter", ".")
-        default_factory = self.getattr("default_factory", self.empty_like)
+        default_factory = self.getattr("default_factory", self.empty)
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
@@ -429,14 +429,14 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
                 else:
                     self, name = self[name], rest
                 if isinstance(self, NestedDict):
-                    default_factory = self.getattr("default_factory", self.empty_like)
+                    default_factory = self.getattr("default_factory", self.empty)
         except (AttributeError, TypeError):
             raise KeyError(name) from None
 
         if (
             convert_mapping
             and isinstance(value, Mapping)
-            and (not isinstance(value, NestedDict) or default_factory is not self.empty_like)
+            and (not isinstance(value, NestedDict) or default_factory is not self.empty)
         ):
             try:
                 value = default_factory(**value)
@@ -593,10 +593,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(other).items()
+            other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty_like(self._intersect(self, other, recursive))  # type: ignore
+        return self.empty(self._intersect(self, other, recursive))  # type: ignore
 
     @staticmethod
     def _intersect(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
@@ -641,10 +641,10 @@ class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(other).items()
+            other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty_like(self._difference(self, other, recursive))  # type: ignore
+        return self.empty(self._difference(self, other, recursive))  # type: ignore
 
     @staticmethod
     def _difference(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
