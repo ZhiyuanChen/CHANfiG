@@ -1,5 +1,16 @@
 # [CHANfiG](https://chanfig.danling.org/zh)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/75f2ee4ba5a64458afb488615e36adcb)](https://app.codacy.com/gh/ZhiyuanChen/CHANfiG/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/75f2ee4ba5a64458afb488615e36adcb)](https://app.codacy.com/gh/ZhiyuanChen/CHANfiG/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![CodeCov](https://codecov.io/gh/ZhiyuanChen/CHANfiG/graph/badge.svg?token=G9WGWCOFQE)](https://codecov.io/gh/ZhiyuanChen/CHANfiG)
+
+[![PyPI - Version](https://img.shields.io/pypi/v/chanfig)](https://pypi.org/project/chanfig/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/chanfig)](https://pypi.org/project/chanfig/)
+[![Downloads](https://static.pepy.tech/badge/chanfig/month)](https://chanfig.danling.org)
+
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 ## 介绍
 
 CHANfiG 希望能让你的配置更加简单。
