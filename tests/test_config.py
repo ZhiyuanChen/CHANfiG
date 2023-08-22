@@ -134,3 +134,19 @@ class Test:
     def test_copy(self):
         assert self.config.copy() == copy(self.config)
         assert self.config.deepcopy() == deepcopy(self.config)
+
+
+class ConfigDict(Config):
+    def __init__(self):
+        super().__init__()
+        self.a = Config()
+        self.b = Config({"a": self.a})
+        self.c = Variable(Config({"a": self.a}))
+        self.d = Config(a=self.a)
+
+
+class TestConfigDict:
+    dict = ConfigDict()
+
+    def test_affinty(self):
+        assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
