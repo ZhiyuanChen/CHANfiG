@@ -614,12 +614,10 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(other).items()
+            other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty_like(
-            **{key: value for key, value in other if key in self and self[key] == value}  # type: ignore
-        )
+        return self.empty(**{key: value for key, value in other if key in self and self[key] == value})  # type: ignore
 
     def inter(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> FlatDict:
         r"""
@@ -661,10 +659,10 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty_like(other).items()
+            other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty_like(
+        return self.empty(
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
@@ -800,7 +798,8 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         if memo is not None and id(self) in memo:
             return memo[id(self)]
-        ret = self.empty_like()
+        ret = self.empty()
+        ret.__dict__.update(deepcopy(self.__dict__))
         for k, v in self.items():
             if isinstance(v, FlatDict):
                 ret[k] = v.deepcopy(memo=memo)
@@ -1232,7 +1231,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
             {'c': 3}
         """
 
-        return self.empty_like({k: v for k, v in self.all_items() if v is not Null})
+        return self.empty({k: v for k, v in self.all_items() if v is not Null})
 
     def dropna(self) -> FlatDict:
         r"""
@@ -1284,7 +1283,7 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         return text
 
     def __format__(self, format_spec: str) -> str:
-        return repr(self.empty_like({k: v.__format__(format_spec) for k, v in self.all_items()}))
+        return repr(self.empty({k: v.__format__(format_spec) for k, v in self.all_items()}))
 
     def __hash__(self):
         return hash(frozenset(self.items()))
