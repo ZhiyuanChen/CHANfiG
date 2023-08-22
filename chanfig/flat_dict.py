@@ -1135,6 +1135,9 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
         Returns:
             (FlatDict):
 
+        See Also:
+            [`empty_like`][chanfig.FlatDict.empty_like]
+
         Examples:
             >>> d = FlatDict(a=[])
             >>> c = d.empty()
@@ -1152,8 +1155,14 @@ class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
 
         This method will preserve everything in `FlatDict.__class__.__dict__` and `FlatDict.__dict__`.
 
+        For example, `property`s are saved in `__dict__`, they will keep their original reference after calling this
+        method.
+
         Returns:
             (FlatDict):
+
+        See Also:
+            [`empty`][chanfig.FlatDict.empty]
 
         Examples:
             >>> d = FlatDict(a=[])
