@@ -13,7 +13,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from pytest import raises
+from __future__ import annotations
 
 from chanfig import NestedDict, Variable
 
@@ -66,13 +66,6 @@ class Test:
         assert d.merge(NestedDict({"a.b.c.d": 5, "a.b.c.h": 6}), overwrite=False).dict() == {
             "a": {"b": {"c": {"d": 3, "e": {"f": 4}, "h": 6}}}
         }
-
-    def test_validate(self):
-        assert NestedDict({"i.d": Variable(1016, type=int, validator=lambda x: x > 0)}).validate() is None
-        with raises(TypeError):
-            NestedDict({"i.d": Variable(1016, type=str, validator=lambda x: x > 0)}).validate()
-        with raises(ValueError):
-            NestedDict({"i.d": Variable(-1, type=int, validator=lambda x: x > 0)}).validate()
 
     def test_dropnull(self):
         from chanfig.utils import Null

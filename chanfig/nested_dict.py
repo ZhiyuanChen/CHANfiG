@@ -544,6 +544,26 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
             raise KeyError(name)
         return super().pop(name)
 
+    def validate(self) -> None:
+        r"""
+        Validate `NestedDict`.
+
+        Raises:
+            TypeError: If `Variable` has invalid type.
+            ValueError: If `Variable` has invalid value.
+
+        Examples:
+            >>> d = NestedDict({"i.d": Variable(1016, type=int, validator=lambda x: x > 0)})
+            >>> d = NestedDict({"i.d": Variable(1016, type=str, validator=lambda x: x > 0)})
+            Traceback (most recent call last):
+            TypeError: 'd' has invalid type. Value 1016 is not of type <class 'str'>.
+            >>> d = NestedDict({"i.d": Variable(-1, type=int, validator=lambda x: x > 0)})
+            Traceback (most recent call last):
+            ValueError: 'd' has invalid value. Value -1 is not valid.
+        """
+
+        self.apply_(self._validate)
+
     @staticmethod
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:

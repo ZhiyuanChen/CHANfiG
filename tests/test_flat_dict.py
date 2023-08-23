@@ -13,7 +13,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
 from copy import copy, deepcopy
+from typing import Dict, List, Tuple
+
+from pytest import raises
 
 from chanfig import FlatDict, Variable
 
@@ -45,8 +50,15 @@ class Test:
 
 
 class ConfigDict(FlatDict):
-    def __init__(self):
-        super().__init__()
+    int_value: int
+    str_value: str
+    float_value: float
+    list_int: List[int]
+    tuple_str: Tuple[str]
+    dict_float: Dict[str, float]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.a = FlatDict()
         self.b = FlatDict({"a": self.a})
         self.c = Variable(FlatDict({"a": self.a}))
@@ -58,3 +70,20 @@ class TestConfigDict:
 
     def test_affinty(self):
         assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
+
+    def test_validate(self):
+        ConfigDict(int_value=1, str_value="1", float_value=1.0)
+        with raises(TypeError):
+            ConfigDict(int_value="1", str_value="1", float_value=1.0)
+        with raises(TypeError):
+            self.dict.int_value = "1"
+            self.dict.validate()
+        ConfigDict(list_int=[1, 2, 3])
+        with raises(TypeError):
+            ConfigDict(list_int=[1, "2", 3])
+        ConfigDict(tuple_str=("1", "2", "3"))
+        with raises(TypeError):
+            ConfigDict(tuple_str=["1", "2", 3])
+        ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": 3.0})
+        with raises(TypeError):
+            ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": "3.0"})

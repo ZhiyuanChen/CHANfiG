@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Optional
 
 from .flat_dict import FlatDict
 from .utils import Null
@@ -55,7 +55,7 @@ class DefaultDict(FlatDict):  # type: ignore
         TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
     """
 
-    default_factory: Callable | None = None
+    default_factory: Optional[Callable] = None
 
     def __init__(  # pylint: disable=W1113
         self, default_factory: Callable | None = None, *args: Any, **kwargs: Any

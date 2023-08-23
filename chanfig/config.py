@@ -93,7 +93,7 @@ class Config(NestedDict):  # type: ignore
         {'f': {'n': 'chang'}, 'i': {'d': 1013}}
     """
 
-    parser: ConfigParser
+    parser: None  # ConfigParser, Python 3.7 does not support forward reference
     frozen: bool = False
 
     def __init__(self, *args: Any, default_factory: Callable | None = None, **kwargs: Any):
@@ -134,6 +134,7 @@ class Config(NestedDict):  # type: ignore
             )
         """
 
+        self.validate()
         return self
 
     def boot(self) -> Config:

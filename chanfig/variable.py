@@ -18,7 +18,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from contextlib import contextmanager
 from copy import copy
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, List, Optional, TypeVar
 
 from .utils import Null
 
@@ -95,12 +95,12 @@ class Variable(Generic[V]):  # pylint: disable=R0902
     """
 
     wrap_type: bool = True
-    _storage: list[Any]
-    _type: type | None = None
-    _choices: list | None = None
-    _validator: Callable | None = None
+    _storage: List[Any]
+    _type: Optional[type] = None
+    _choices: Optional[list] = None
+    _validator: Optional[Callable] = None
     _required: bool = False
-    _help: str | None = None
+    _help: Optional[str] = None
 
     def __init__(  # pylint: disable=R0913
         self,
