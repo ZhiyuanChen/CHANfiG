@@ -1074,10 +1074,7 @@ and access through <code>registry.sub_registry.register()</code>.</p>
 <span class="normal"><a href="#__codelineno-0-247">247</a></span>
 <span class="normal"><a href="#__codelineno-0-248">248</a></span>
 <span class="normal"><a href="#__codelineno-0-249">249</a></span>
-<span class="normal"><a href="#__codelineno-0-250">250</a></span>
-<span class="normal"><a href="#__codelineno-0-251">251</a></span>
-<span class="normal"><a href="#__codelineno-0-252">252</a></span>
-<span class="normal"><a href="#__codelineno-0-253">253</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="n">NestedDict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<span class="normal"><a href="#__codelineno-0-250">250</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="k">class</span> <span class="nc">Registry</span><span class="p">(</span><span class="n">NestedDict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    `Registry` for components.</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a>
@@ -1302,9 +1299,6 @@ and access through <code>registry.sub_registry.register()</code>.</p>
 <a id="__codelineno-0-248" name="__codelineno-0-248"></a>            <span class="n">name</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 <a id="__codelineno-0-249" name="__codelineno-0-249"></a>            <span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 <a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>    <span class="k">def</span> <span class="nf">__wrapped__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
             </details>
 
