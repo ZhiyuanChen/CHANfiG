@@ -13,9 +13,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from functools import wraps
-from typing import Any, Callable, Mapping, Optional, Union
+from typing import Any
 
 from .nested_dict import NestedDict
 
@@ -89,7 +92,7 @@ class Registry(NestedDict):
         super().__init__()
         self.setattr("override", override)
 
-    def register(self, component: Any = None, name: Optional[Any] = None) -> Callable:
+    def register(self, component: Any = None, name: Any | None = None) -> Callable:
         r"""
         Register a new component.
 
@@ -134,7 +137,7 @@ class Registry(NestedDict):
             return component
 
         # @Registry.register()
-        def decorator(name: Optional[Any] = None):
+        def decorator(name: Any | None = None):
             @wraps(self.register)
             def wrapper(component):
                 if name is None:
@@ -203,7 +206,7 @@ class Registry(NestedDict):
 
         return cls(*args, **kwargs)
 
-    def build(self, name: Union[str, Mapping], *args: Any, **kwargs: Any) -> Any:
+    def build(self, name: str | Mapping, *args: Any, **kwargs: Any) -> Any:
         r"""
         Build a component.
 

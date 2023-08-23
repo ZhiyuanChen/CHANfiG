@@ -13,13 +13,16 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from typing import Any, Callable, Optional
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any
 
 from .flat_dict import FlatDict
-from .utils import _K, _V, Null
+from .utils import Null
 
 
-class DefaultDict(FlatDict[_K, _V]):
+class DefaultDict(FlatDict):
     r"""
     `DefaultDict` inherits from `FlatDict` and incorporates support of `default_factory`
     in the same manner as `collections.defaultdict`.
@@ -47,10 +50,10 @@ class DefaultDict(FlatDict[_K, _V]):
         TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
     """
 
-    default_factory: Optional[Callable] = None
+    default_factory: Callable | None = None
 
     def __init__(  # pylint: disable=W1113
-        self, default_factory: Optional[Callable] = None, *args: Any, **kwargs: Any
+        self, default_factory: Callable | None = None, *args: Any, **kwargs: Any
     ) -> None:
         super().__init__(*args, **kwargs)
         if default_factory is not None:

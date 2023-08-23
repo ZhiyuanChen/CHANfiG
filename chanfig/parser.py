@@ -18,8 +18,9 @@ from __future__ import annotations
 import sys
 from argparse import ArgumentParser, Namespace, _StoreAction
 from ast import literal_eval
+from collections.abc import Sequence
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 from .nested_dict import NestedDict

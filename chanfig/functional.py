@@ -13,10 +13,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
 from io import IOBase
 from json import dumps as json_dumps
 from os.path import splitext
-from typing import Any, Optional, Type
+from typing import Any
 
 from yaml import dump as yaml_dump
 
@@ -25,7 +27,7 @@ from .nested_dict import NestedDict
 from .utils import JSON, YAML, File, PathStr
 
 
-def save(obj, file: File, method: Optional[str] = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+def save(obj, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
     r"""
     Save `FlatDict` to file.
 
@@ -70,7 +72,7 @@ def save(obj, file: File, method: Optional[str] = None, *args: Any, **kwargs: An
     raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
 
 
-def load(file: PathStr, cls: Type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:  # pylint: disable=W1113
+def load(file: PathStr, cls: type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:  # pylint: disable=W1113
     r"""
     Load a file into a `NestedDict`.
 

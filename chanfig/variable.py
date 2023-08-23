@@ -13,14 +13,19 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
+from collections.abc import Callable, Mapping
 from contextlib import contextmanager
 from copy import copy
-from typing import Any, Callable, Generic, List, Mapping, Optional, Type
+from typing import Any, Generic, TypeVar
 
-from .utils import _V, Null
+from .utils import Null
+
+V = TypeVar("V")
 
 
-class Variable(Generic[_V]):  # pylint: disable=R0902
+class Variable(Generic[V]):  # pylint: disable=R0902
     r"""
     Mutable wrapper for immutable objects.
 
@@ -90,21 +95,21 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
     """
 
     wrap_type: bool = True
-    _storage: List[Any]
-    _type: Optional[type] = None
-    _choices: Optional[List] = None
-    _validator: Optional[Callable] = None
+    _storage: list[Any]
+    _type: type | None = None
+    _choices: list | None = None
+    _validator: Callable | None = None
     _required: bool = False
-    _help: Optional[str] = None
+    _help: str | None = None
 
     def __init__(  # pylint: disable=R0913
         self,
         value: Any = Null,
-        type: Optional[type] = None,  # pylint: disable=W0622
-        choices: Optional[List] = None,
-        validator: Optional[Callable] = None,
+        type: type | None = None,  # pylint: disable=W0622
+        choices: list | None = None,
+        validator: Callable | None = None,
         required: bool = False,
-        help: Optional[str] = None,  # pylint: disable=W0622
+        help: str | None = None,  # pylint: disable=W0622
     ) -> None:
         self._storage = [value]
         self._type = type
@@ -135,7 +140,7 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
         self._storage[0] = self._get_value(value)
 
     @property
-    def dtype(self) -> Type:
+    def dtype(self) -> type:
         r"""
         Data type of the object wrapped in `Variable`.
 
@@ -152,7 +157,7 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
         return self.value.__class__
 
     @property
-    def storage(self) -> List[Any]:
+    def storage(self) -> list[Any]:
         r"""
         Storage of `Variable`.
         """
@@ -160,15 +165,15 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
         return self._storage
 
     @property
-    def type(self) -> Optional[type]:
+    def type(self) -> type | None:
         return self._type
 
     @property
-    def choices(self) -> Optional[List]:
+    def choices(self) -> list | None:
         return self._choices
 
     @property
-    def validator(self) -> Optional[Callable]:
+    def validator(self) -> Callable | None:
         return self._validator
 
     @property
@@ -450,7 +455,7 @@ class Variable(Generic[_V]):  # pylint: disable=R0902
     def __copy__(self):
         return Variable(self.value)
 
-    def __deepcopy__(self, memo: Optional[Mapping] = None):
+    def __deepcopy__(self, memo: Mapping | None = None):
         return Variable(copy(self.value))
 
     def __format__(self, format_spec):
