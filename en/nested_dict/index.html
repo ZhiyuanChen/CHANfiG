@@ -1504,7 +1504,7 @@ If <code>default_factory</code> is <code>Null</code>, will create an empty insta
 <span class="normal"><a href="#__codelineno-0-687">687</a></span>
 <span class="normal"><a href="#__codelineno-0-688">688</a></span>
 <span class="normal"><a href="#__codelineno-0-689">689</a></span>
-<span class="normal"><a href="#__codelineno-0-690">690</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="k">class</span> <span class="nc">NestedDict</span><span class="p">(</span><span class="n">DefaultDict</span><span class="p">):</span>  <span class="c1"># pylint: disable=E1136</span>
+<span class="normal"><a href="#__codelineno-0-690">690</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="k">class</span> <span class="nc">NestedDict</span><span class="p">(</span><span class="n">DefaultDict</span><span class="p">):</span>  <span class="c1"># type: ignore # pylint: disable=E1136</span>
 <a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.</span>
 <a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">    By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr(&#39;delimiter&#39;, D)`.</span>

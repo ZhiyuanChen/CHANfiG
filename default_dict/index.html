@@ -932,7 +932,7 @@ by calling <code>dict.setattr('default_factory', FlatDict)</code> for existing <
 <span class="normal"><a href="#__codelineno-0-113">113</a></span>
 <span class="normal"><a href="#__codelineno-0-114">114</a></span>
 <span class="normal"><a href="#__codelineno-0-115">115</a></span>
-<span class="normal"><a href="#__codelineno-0-116">116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="k">class</span> <span class="nc">DefaultDict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-116">116</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="k">class</span> <span class="nc">DefaultDict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    `DefaultDict` inherits from `FlatDict` and incorporates support of `default_factory`</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    in the same manner as `collections.defaultdict`.</span>
