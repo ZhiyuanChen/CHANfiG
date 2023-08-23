@@ -23,7 +23,7 @@ from typing import Any
 from .nested_dict import NestedDict
 
 
-class Registry(NestedDict):
+class Registry(NestedDict):  # type: ignore
     """
     `Registry` for components.
 

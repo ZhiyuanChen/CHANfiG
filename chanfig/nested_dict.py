@@ -99,7 +99,7 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
-class NestedDict(DefaultDict):  # pylint: disable=E1136
+class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
     r"""
     `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.
     By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
