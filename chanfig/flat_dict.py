@@ -31,7 +31,7 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import JSON, YAML, Dict, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
+from .utils import JSON, YAML, Dict, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader, get_annotations, isvalid
 from .variable import Variable
 
 try:
@@ -278,15 +278,15 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
 
     def validate(self) -> None:
         r"""
-        Validate if all `Variable` in `FlatDict` are valid.
+        Validate `FlatDict`.
 
         Raises:
+            TypeError: If value is not of the type declared in class annotations.
             TypeError: If `Variable` has invalid type.
             ValueError: If `Variable` has invalid value.
 
         Examples:
             >>> d = FlatDict(d=Variable(1016, type=int), n=Variable('chang', validator=lambda x: x.islower()))
-            >>> d.validate()
             >>> d = FlatDict(d=Variable(1016, type=str), n=Variable('chang', validator=lambda x: x.islower()))
             Traceback (most recent call last):
             TypeError: 'd' has invalid type. Value 1016 is not of type <class 'str'>.
@@ -295,14 +295,22 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
             ValueError: 'n' has invalid value. Value chang is not valid.
         """
 
-        for name, value in self.all_items():
-            if isinstance(value, Variable):
-                try:
-                    value.validate()
-                except TypeError as exc:
-                    raise TypeError(f"'{name}' has invalid type. {exc}") from None
-                except ValueError as exc:
-                    raise ValueError(f"'{name}' has invalid value. {exc}") from None
+        self._validate(self)
+
+    @staticmethod
+    def _validate(obj) -> None:
+        if isinstance(obj, FlatDict):
+            annotations = get_annotations(obj)
+            for name, value in obj.items():
+                if annotations and name in annotations and not isvalid(value, annotations[name]):
+                    raise TypeError(f"'{name}' has invalid type. Value {value} is not of type {annotations[name]}.")
+                if isinstance(value, Variable):
+                    try:
+                        value.validate()
+                    except TypeError as exc:
+                        raise TypeError(f"'{name}' has invalid type. {exc}") from None
+                    except ValueError as exc:
+                        raise ValueError(f"'{name}' has invalid value. {exc}") from None
 
     def getattr(self, name: str, default: Any = Null) -> Any:
         r"""

@@ -23,6 +23,7 @@ repos:
     rev: v3.10.1
     hooks:
       - id: pyupgrade
+        args: [--keep-runtime-typing]
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: 0.13.1
     hooks:

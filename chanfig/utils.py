@@ -15,11 +15,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import sys
+from collections.abc import Callable, Mapping, Sequence
+from functools import partial
 from io import IOBase
 from json import JSONEncoder
 from os import PathLike
-from typing import IO, Any, Union
+from types import GetSetDescriptorType, ModuleType
+from typing import IO, Any, Union, no_type_check
+
+try:  # python 3.8+
+    from typing import get_args, get_origin  # pylint: disable=C0412
+except ImportError:
+    from typing_extensions import get_args, get_origin  # type: ignore
+
+try:  # python 3.10+
+    from types import UnionType  # pylint: disable=C0412
+except ImportError:
+    UnionType = Union  # type: ignore
 
 from yaml import SafeDumper, SafeLoader
 
@@ -29,6 +42,156 @@ File = Union[PathStr, IO, IOBase]
 YAML = ("yml", "yaml")
 JSON = ("json",)
 PYTHON = ("py",)
+
+
+# flake8: noqa
+@no_type_check
+def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | None = None, eval_str: bool = True):
+    """Compute the annotations dict for an object.
+
+    obj may be a callable, class, or module.
+    Passing in an object of any other type raises TypeError.
+
+    Returns a dict.  get_annotations() returns a new dict every time
+    it's called; calling it twice on the same object will return two
+    different but equivalent dicts.
+
+    This function handles several details for you:
+
+      * If eval_str is true, values of type str will
+        be un-stringized using eval().  This is intended
+        for use with stringized annotations
+        ("from __future__ import annotations").
+      * If obj doesn't have an annotations dict, returns an
+        empty dict.  (Functions and methods always have an
+        annotations dict; classes, modules, and other types of
+        callables may not.)
+      * Ignores inherited annotations on classes.  If a class
+        doesn't have its own annotations dict, returns an empty dict.
+      * All accesses to object members and dict values are done
+        using getattr() and dict.get() for safety.
+      * Always, always, always returns a freshly-created dict.
+
+    eval_str controls whether or not values of type str are replaced
+    with the result of calling eval() on those values:
+
+      * If eval_str is true, eval() is called on values of type str.
+      * If eval_str is false (the default), values of type str are unchanged.
+
+    globalns and localns are passed in to eval(); see the documentation
+    for eval() for more information.  If either globalns or localns is
+    None, this function may replace that value with a context-specific
+    default, contingent on type(obj):
+
+      * If obj is a module, globalns defaults to obj.__dict__.
+      * If obj is a class, globalns defaults to
+        sys.modules[obj.__module__].__dict__ and localns
+        defaults to the obj class namespace.
+      * If obj is a callable, globalns defaults to obj.__globals__,
+        although if obj is a wrapped function (using
+        functools.update_wrapper()) it is first unwrapped.
+      * If obj is an instance, globalns defaults to
+        sys.modules[obj.__module__].__dict__ and localns
+        defaults to the obj class namespace.
+    """
+    if isinstance(obj, type):
+        # class
+        ann = getattr(obj, "__annotations__", None)
+        obj_globalns = None
+        module_name = getattr(obj, "__module__", None)
+        if module_name:
+            module = sys.modules.get(module_name, None)
+            if module:
+                obj_globalns = getattr(module, "__dict__", None)
+        obj_localns = dict(vars(obj))
+        unwrap = obj
+    elif isinstance(obj, ModuleType):
+        # module
+        ann = getattr(obj, "__annotations__", None)
+        obj_globalns = getattr(obj, "__dict__")
+        obj_localns = None
+        unwrap = None
+    elif callable(obj):
+        # this includes types.Function, types.BuiltinFunctionType,
+        # types.BuiltinMethodType, functools.partial, functools.singledispatch,
+        # "class funclike" from Lib/test/test_inspect... on and on it goes.
+        ann = getattr(obj, "__annotations__", None)
+        obj_globalns = getattr(obj, "__globals__", None)
+        obj_localns = None
+        unwrap = obj
+    else:
+        # obj
+        ann = getattr(type(obj), "__annotations__", None)
+        obj_globalns = None
+        module_name = getattr(obj, "__module__", None)
+        if module_name:
+            module = sys.modules.get(module_name, None)
+            if module:
+                obj_globalns = getattr(module, "__dict__", None)
+        obj_localns = dict(vars(obj))
+        unwrap = obj
+
+    if ann is None or not ann:
+        return {}
+
+    if not isinstance(ann, dict):
+        raise ValueError(f"{obj!r}.__annotations__ is neither a dict nor None")
+
+    if unwrap is not None:
+        while True:
+            if hasattr(unwrap, "__wrapped__"):
+                unwrap = unwrap.__wrapped__
+                continue
+            if isinstance(unwrap, partial):
+                unwrap = unwrap.func
+                continue
+            break
+        if hasattr(unwrap, "__globals__"):
+            obj_globalns = unwrap.__globals__
+
+    if globalns is None:
+        globalns = obj_globalns
+    if localns is None:
+        localns = obj_localns
+
+    try:
+        return {
+            key: value if not isinstance(value, str) else eval(value, globalns, localns) for key, value in ann.items()
+        }
+    except NameError:
+        raise ValueError(
+            f"{obj!r}.__annotations__ contains an invalid type.\n"
+            "If you are running on an earlier version of Python, "
+            "please ensure annotations does not contain forward references."
+        ) from None
+    except TypeError:
+        raise ValueError(
+            f"{obj!r}.__annotations__ contains an invalid type.\n"
+            "If you are running on an earlier version of Python, "
+            "please ensure you are not using future features such as PEP604."
+        ) from None
+
+
+@no_type_check
+def isvalid(data: Any, expected_type: type) -> bool:
+    expected_origin = get_origin(expected_type)
+    if expected_origin not in (
+        Callable,
+        GetSetDescriptorType,
+        UnionType,
+        None,
+    ):
+        if issubclass(expected_origin, Sequence):
+            inner_type = get_args(expected_type)[0]
+            return isinstance(data, expected_origin) and all(isinstance(item, inner_type) for item in data)
+        elif issubclass(expected_origin, Mapping):
+            key_type, value_type = get_args(expected_type)
+            return isinstance(data, expected_origin) and all(
+                isinstance(key, key_type) and isinstance(value, value_type) for key, value in data.items()
+            )
+        else:
+            raise TypeError(f"Expected type {expected_type} is not supported.")
+    return isinstance(data, expected_type)
 
 
 class Dict(type):
