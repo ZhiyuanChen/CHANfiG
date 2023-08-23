@@ -13,7 +13,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-import copy
+from copy import copy, deepcopy
 
 from chanfig import FlatDict, Variable
 
@@ -40,8 +40,8 @@ class Test:
         assert dict["3"] == 4
 
     def test_copy(self):
-        assert copy.copy(self.dict) == self.dict.copy()
-        assert copy.deepcopy(self.dict) == self.dict.deepcopy()
+        assert copy(self.dict) == self.dict.copy()
+        assert deepcopy(self.dict) == self.dict.deepcopy()
 
 
 class ConfigDict(FlatDict):
