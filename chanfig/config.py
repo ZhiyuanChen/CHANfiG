@@ -15,13 +15,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Iterable
+from typing import Any
 
 from .nested_dict import NestedDict
 from .parser import ConfigParser
-from .utils import _K, _V, Null
+from .utils import Null
 
 
 def frozen_check(func: Callable):
@@ -38,7 +39,7 @@ def frozen_check(func: Callable):
     return decorator
 
 
-class Config(NestedDict[_K, _V]):
+class Config(NestedDict):
     r"""
     `Config` is an extension of `NestedDict`.
 

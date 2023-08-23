@@ -13,6 +13,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
 from yaml import add_representer
 from yaml.representer import SafeRepresenter
 

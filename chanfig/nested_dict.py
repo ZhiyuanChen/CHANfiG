@@ -15,11 +15,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager, nullcontext
 from functools import wraps
 from inspect import ismethod
 from os import PathLike
-from typing import Any, Callable, Generator, Iterable, Mapping
+from typing import Any
 
 try:
     from functools import cached_property  # pylint: disable=C0412
@@ -31,7 +32,7 @@ except ImportError:
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
-from .utils import _K, _V, Null, PathStr
+from .utils import Null, PathStr
 from .variable import Variable
 
 
@@ -98,7 +99,7 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
-class NestedDict(DefaultDict[_K, _V]):  # pylint: disable=E1136
+class NestedDict(DefaultDict):  # pylint: disable=E1136
     r"""
     `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.
     By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.

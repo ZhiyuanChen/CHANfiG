@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
 from io import IOBase
@@ -24,13 +25,13 @@ from json import dumps as json_dumps
 from json import loads as json_loads
 from os import PathLike
 from os.path import splitext
-from typing import IO, Any, Callable, Generator, Iterable, Mapping, Sequence
+from typing import IO, Any
 from warnings import warn
 
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import _K, _V, JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
+from .utils import JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
@@ -89,7 +90,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     return obj
 
 
-class FlatDict(dict, Mapping[_K, _V]):  # for python 3.7 compatible
+class FlatDict(dict):
     r"""
     `FlatDict` with attribute-style access.
 

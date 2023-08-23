@@ -13,10 +13,13 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from __future__ import annotations
+
+from collections.abc import Mapping
 from io import IOBase
 from json import JSONEncoder
 from os import PathLike
-from typing import IO, Any, Mapping, TypeVar, Union
+from typing import IO, Any, Union
 
 from yaml import SafeDumper, SafeLoader
 
@@ -26,9 +29,6 @@ File = Union[PathStr, IO, IOBase]
 YAML = ("yml", "yaml")
 JSON = ("json",)
 PYTHON = ("py",)
-
-_K = TypeVar("_K")
-_V = TypeVar("_V")
 
 
 class Singleton(type):
