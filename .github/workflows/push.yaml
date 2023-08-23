@@ -43,6 +43,7 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: coverage.xml
   pages:
+    if: startsWith(github.event.ref, 'refs/tags/v') || contains(fromJson('["refs/heads/master", "refs/heads/main"]'), github.ref)
     needs: [test]
     environment: github-pages
     runs-on: ubuntu-latest
