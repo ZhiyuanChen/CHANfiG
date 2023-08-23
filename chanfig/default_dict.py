@@ -40,6 +40,11 @@ class DefaultDict(FlatDict):  # type: ignore
     Raises:
         TypeError: If `default_factory` is not callable.
 
+    Notes:
+        Unlike `collections.defaultdict`, `DefaultDict` will not automatically create entries when name starts and ends
+        with `__`. This is to avoid conflicts with Python magic methods.
+        You can still creates them manually with `DefaultDict.fromkeys` or `DefaultDict.add`.
+
     Examples:
         >>> d = DefaultDict(list)
         >>> d.a.append(1)
@@ -66,7 +71,7 @@ class DefaultDict(FlatDict):  # type: ignore
 
     def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
-            if not self.hasattr("default_factory") or self.getattr("default_factory") in (None, Null):
+            if self.getattr("default_factory", None) in (None, Null) or (name.startswith("__") and name.endswith("__")):
                 raise KeyError(name) from None
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):

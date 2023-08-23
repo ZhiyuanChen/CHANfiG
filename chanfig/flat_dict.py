@@ -151,7 +151,7 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
         pass
 
     def __getattribute__(self, name: Any) -> Any:
-        if name not in ("__class__", "__dict__", "getattr") and name in self:
+        if (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__"))) and name in self:
             return self.get(name)
         return super().__getattribute__(name)
 
@@ -1289,16 +1289,6 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
 
     def __hash__(self):
         return hash(frozenset(self.items()))
-
-    def __getstate__(self, *args: Any, **kwargs: Any):
-        return self.__dict__
-
-    def __setstate__(self, states, *args: Any, **kwargs: Any):
-        for name, value in states.items():
-            self.setattr(name, value)
-
-    def __wrapped__(self, *args: Any, **kwargs: Any):  # pragma: no cover
-        pass
 
     def _ipython_display_(self):  # pragma: no cover
         return repr(self)
