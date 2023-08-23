@@ -249,8 +249,5 @@ class Registry(NestedDict):  # type: ignore
             name, kwargs = name.pop("name"), dict(name, **kwargs)  # type: ignore
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore
 
-    def __wrapped__(self, *args: Any, **kwargs: Any):
-        pass
-
 
 GlobalRegistry = Registry()
