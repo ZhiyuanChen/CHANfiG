@@ -31,7 +31,7 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import JSON, YAML, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
+from .utils import JSON, YAML, Dict, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader
 from .variable import Variable
 
 try:
@@ -90,7 +90,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     return obj
 
 
-class FlatDict(dict):
+class FlatDict(dict, metaclass=Dict):  # type: ignore
     r"""
     `FlatDict` with attribute-style access.
 
@@ -146,6 +146,9 @@ class FlatDict(dict):
     # pylint: disable=R0904
 
     indent: int = 2
+
+    def __post_init__(self, *args, **kwargs) -> None:
+        pass
 
     def __getattribute__(self, name: Any) -> Any:
         if name not in ("__class__", "__dict__", "getattr") and name in self:
@@ -285,11 +288,9 @@ class FlatDict(dict):
             >>> d = FlatDict(d=Variable(1016, type=int), n=Variable('chang', validator=lambda x: x.islower()))
             >>> d.validate()
             >>> d = FlatDict(d=Variable(1016, type=str), n=Variable('chang', validator=lambda x: x.islower()))
-            >>> d.validate()
             Traceback (most recent call last):
             TypeError: 'd' has invalid type. Value 1016 is not of type <class 'str'>.
             >>> d = FlatDict(d=Variable(1016, type=int), n=Variable('chang', validator=lambda x: x.isupper()))
-            >>> d.validate()
             Traceback (most recent call last):
             ValueError: 'n' has invalid value. Value chang is not valid.
         """

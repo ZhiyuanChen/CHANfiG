@@ -31,6 +31,14 @@ JSON = ("json",)
 PYTHON = ("py",)
 
 
+class Dict(type):
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+        instance = super().__call__(*args, **kwargs)
+        instance.__post_init__()
+        instance.validate()
+        return instance
+
+
 class Singleton(type):
     r"""
     Metaclass for Singleton Classes.
