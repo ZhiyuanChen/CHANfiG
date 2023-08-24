@@ -222,6 +222,12 @@ class Variable(Generic[V]):  # pylint: disable=R0902
 
         self.value = value
 
+    def __get__(self, obj, objtype=None):
+        return self
+
+    def __set__(self, obj, value):
+        self.value = value
+
     def to(self, cls: Callable) -> Any:  # pylint: disable=C0103
         r"""
         Convert the object wrapped in `Variable` to target `cls`.
