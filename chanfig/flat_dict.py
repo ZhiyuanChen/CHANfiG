@@ -486,6 +486,8 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
 
         if obj is None:
             return cls()
+        if issubclass(cls, FlatDict):
+            cls = cls.empty  # type: ignore # pylint: disable=W0642
         if isinstance(obj, Mapping):
             return cls(obj)
         if isinstance(obj, Sequence):
