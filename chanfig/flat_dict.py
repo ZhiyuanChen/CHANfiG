@@ -31,7 +31,20 @@ from warnings import warn
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
-from .utils import JSON, YAML, Dict, File, JsonEncoder, Null, PathStr, YamlDumper, YamlLoader, get_annotations, isvalid
+from .utils import (
+    JSON,
+    YAML,
+    Dict,
+    File,
+    JsonEncoder,
+    Null,
+    PathStr,
+    SafeLoader,
+    YamlDumper,
+    YamlLoader,
+    get_annotations,
+    isvalid,
+)
 from .variable import Variable
 
 try:
@@ -1079,7 +1092,7 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
             [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
         """
 
-        kwargs.setdefault("Loader", YamlLoader)
+        kwargs.setdefault("Loader", SafeLoader)
         return cls.from_dict(yaml_load(string, *args, **kwargs))
 
     @staticmethod
