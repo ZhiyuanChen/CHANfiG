@@ -40,7 +40,7 @@
         <link rel="alternate" type="application/rss+xml" title="已更新内容的 RSS 订阅" href="../../feed_rss_updated.xml">
       
       <link rel="icon" href="../../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.3">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.5">
     
     
       
@@ -642,7 +642,7 @@
       
         <li class="md-nav__item">
   <a href="#chanfig.FlatDict" class="md-nav__link">
-    chanfig.FlatDict
+    FlatDict
   </a>
   
 </li>
@@ -1068,6 +1068,7 @@
 
 
 <div class="doc doc-object doc-class">
+
 
 
 <a id="chanfig.FlatDict"></a>
@@ -2765,7 +2766,7 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="bp">cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">empty</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="bp">cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">empty</span>  <span class="c1"># type: ignore # pylint: disable=W0642</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
 <a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
@@ -3609,8 +3610,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.get" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.get" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -3831,8 +3833,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.set" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.set" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -3962,8 +3965,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.delete" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.delete" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4089,8 +4093,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.validate" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">validate</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">validate</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.validate" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4207,8 +4212,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.getattr" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">getattr</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Null</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">getattr</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">Null</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.getattr" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4418,8 +4424,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.setattr" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">setattr</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">setattr</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.setattr" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4596,8 +4603,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.delattr" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">delattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">delattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.delattr" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4704,8 +4712,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.hasattr" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">hasattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">hasattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.hasattr" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4844,8 +4853,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.dict" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">dict</span><span class="p">(</span><span class="bp">cls</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">dict</span><span class="p">(</span><span class="bp">cls</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.dict" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -4878,7 +4888,7 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
             </div>
           </td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="chanfig.flat_dict.FlatDict.dict" href="../../default_dict/#chanfig.DefaultDict.dict">dict</a></code>
+                <code><a class="autorefs autorefs-internal" title="chanfig.flat_dict.FlatDict.dict" href="../../flat_dict/#chanfig.FlatDict.dict">dict</a></code>
           </td>
         </tr>
     </tbody>
@@ -4972,8 +4982,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.from_dict" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">from_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -5074,7 +5085,7 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">()</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">empty</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="bp">cls</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">empty</span>  <span class="c1"># type: ignore # pylint: disable=W0642</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
 <a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
@@ -5094,8 +5105,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.merge" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">merge</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">merge</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.merge" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5321,8 +5333,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.union" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.union" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5353,8 +5366,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.merge_from_file" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">merge_from_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">merge_from_file</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.merge_from_file" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5503,8 +5517,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.intersect" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">intersect</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">intersect</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.intersect" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5678,8 +5693,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.inter" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">inter</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">inter</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.inter" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5710,8 +5726,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.difference" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">difference</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">difference</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.difference" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5889,8 +5906,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.diff" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">diff</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">diff</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.diff" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5921,8 +5939,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.to" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">to</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">to</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.to" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6058,8 +6077,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.cpu" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">cpu</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">cpu</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.cpu" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6143,8 +6163,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.gpu" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">gpu</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">gpu</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.gpu" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6246,8 +6267,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.cuda" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">cuda</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">cuda</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.cuda" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6278,8 +6300,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.tpu" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tpu</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">tpu</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.tpu" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6381,8 +6404,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.xla" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">xla</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">xla</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.xla" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6413,8 +6437,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.copy" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">copy</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">copy</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.copy" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6516,8 +6541,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.deepcopy" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">deepcopy</span><span class="p">(</span><span class="n">memo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">deepcopy</span><span class="p">(</span><span class="n">memo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.deepcopy" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6637,8 +6663,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.clone" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">clone</span><span class="p">(</span><span class="n">memo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">clone</span><span class="p">(</span><span class="n">memo</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.clone" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6669,8 +6696,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.save" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.save" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6811,8 +6839,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.dump" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">dump</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">dump</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.dump" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -6843,8 +6872,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.load" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -7068,8 +7098,9 @@ Therefore, all internal attributes should be set and get through <code>FlatDict.
 
 
 
+
 <h2 id="chanfig.FlatDict.json" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">json</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">json</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.json" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -7127,8 +7158,9 @@ You may overwrite <code>jsons</code> in case something is not json serializable.
 
 
 
+
 <h2 id="chanfig.FlatDict.from_json" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_json</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">from_json</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -7229,8 +7261,9 @@ You may overwrite <code>from_jsons</code> in case something is not json serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.jsons" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">jsons</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">jsons</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.jsons" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -7315,8 +7348,9 @@ You may overwrite <code>from_jsons</code> in case something is not json serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.from_jsons" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_jsons</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">from_jsons</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -7412,8 +7446,9 @@ You may overwrite <code>from_jsons</code> in case something is not json serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.yaml" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">yaml</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">yaml</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.yaml" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -7471,8 +7506,9 @@ You may overwrite <code>yamls</code> in case something is not yaml serializable.
 
 
 
+
 <h2 id="chanfig.FlatDict.from_yaml" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_yaml</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">from_yaml</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -7572,8 +7608,9 @@ You may overwrite <code>from_yamls</code> in case something is not yaml serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.yamls" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">yamls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">yamls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.yamls" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -7655,8 +7692,9 @@ You may overwrite <code>from_yamls</code> in case something is not yaml serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.from_yamls" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">from_yamls</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">from_yamls</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -7754,8 +7792,9 @@ You may overwrite <code>from_yamls</code> in case something is not yaml serializ
 
 
 
+
 <h2 id="chanfig.FlatDict.open" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
@@ -7988,8 +8027,9 @@ Defaults to {}.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.empty" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">empty</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">empty</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -8106,8 +8146,9 @@ As use <code>type(self)()</code> in this case would copy all the default values,
 
 
 
+
 <h2 id="chanfig.FlatDict.empty_like" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">empty_like</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">empty_like</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 <a href="#chanfig.FlatDict.empty_like" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -8227,8 +8268,9 @@ method.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.all_keys" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">all_keys</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">all_keys</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.all_keys" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -8274,8 +8316,9 @@ method.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.all_values" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">all_values</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">all_values</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.all_values" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -8321,8 +8364,9 @@ method.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.all_items" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">all_items</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">all_items</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.all_items" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -8368,8 +8412,9 @@ method.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.dropnull" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">dropnull</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">dropnull</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.dropnull" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -8474,8 +8519,9 @@ method.</p>
 
 
 
+
 <h2 id="chanfig.FlatDict.dropna" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">dropna</span><span class="p">()</span></code>
+          <code class="highlight language-python"><span class="n">dropna</span><span class="p">()</span></code>
 
 <a href="#chanfig.FlatDict.dropna" class="headerlink" title="Permanent link">&para;</a></h2>
 
