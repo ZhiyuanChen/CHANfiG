@@ -109,7 +109,7 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
 
     `FlatDict` inherits from built-in `dict`.
 
-    It comes with many easy to use helper methods, such as `difference`, `intersect`.
+    It comes with many easy to use helper methods, such as `merge`, `sort`, `difference`, `intersect`.
 
     It also has full support for IO operations, such as `json` and `yaml`.
 

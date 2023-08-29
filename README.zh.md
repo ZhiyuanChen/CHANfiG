@@ -60,6 +60,8 @@ CHANfiG 的范式是：
 `FlatDict`包括了一个`merge`方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个`FlatDict`。
 与内置的`update`不同，`merge`是赋值而不是替换，这使得他能更好的与`DefaultDict`配合使用。
 
+Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内置的方法来帮助你对一个`dict`进行排序。`FlatDict`支持`sort`来帮助你管理你的字典。
+
 更进一步的，`FlatDict`引入了`difference`和`intersect`，这些使其可以非常简单的将`FlatDict`和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
 #### 机器学习操作
@@ -86,7 +88,7 @@ CHANfiG 的范式是：
 
 基于`DefaultDict`，`NestedDict`提供了`all_keys`、`all_values`、`all_items`方法来允许一次性遍历整个嵌套结构。
 
-`NestedDict`同时提供了一个`apply`方法，它可以使操纵嵌套结构更加容易。
+`NestedDict`同时提供了`apply`和`apply_`方法，它可以使操纵嵌套结构更加容易。
 
 ### Config
 
