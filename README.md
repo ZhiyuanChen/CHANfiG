@@ -65,6 +65,8 @@ We also introduce `Variable` to allow sharing a value across multiple places, an
 `FlatDict` incorporates a `merge` method that allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict`.
 Different from built-in `update`, `merge` assign values instead of replace, which makes it works better with `DefaultDict`.
 
+`dict` in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a `dict`. `FlatDict`supports`sort` to help you manage your dict.
+
 Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
@@ -91,7 +93,7 @@ Since most Configs are in a nested structure, we further propose a `NestedDict`.
 
 Based on `DefaultDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
 
-`NestedDict` also comes with `apply` method, which made it easier to manipulate the nested structure.
+`NestedDict` also comes with `apply` and `apply_` methods, which made it easier to manipulate the nested structure.
 
 ### Config
 
