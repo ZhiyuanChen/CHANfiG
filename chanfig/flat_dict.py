@@ -510,6 +510,33 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
                 return [cls(json) for json in obj]
         raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
 
+    def sort(self, key: Callable | None = None, reverse: bool = False) -> FlatDict:
+        r"""
+        Sort `FlatDict`.
+
+        Returns:
+            (FlatDict):
+
+        Examples:
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.sort().dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> d = FlatDict(b=2, c=3, a=1)
+            >>> d.sort().dict()
+            {'a': 1, 'b': 2, 'c': 3}
+            >>> a = [1]
+            >>> d = FlatDict(z=0, a=a)
+            >>> a.append(2)
+            >>> d.sort().dict()
+            {'a': [1, 2], 'z': 0}
+        """
+
+        items = sorted(self.items(), key=key, reverse=reverse)
+        self.clear()
+        for k, v in items:
+            self[k] = v
+        return self
+
     def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> FlatDict:
         r"""
         Merge `other` into `FlatDict`.

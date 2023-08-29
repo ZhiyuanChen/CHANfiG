@@ -564,6 +564,38 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
 
         self.apply_(self._validate)
 
+    def sort(self, key: Callable | None = None, reverse: bool = False, recursive: bool = True) -> NestedDict:
+        r"""
+        Sort `NestedDict`.
+
+        Args:
+            recursive (bool): Whether to apply `sort` recursively.
+
+        Returns:
+            (NestedDict):
+
+        Examples:
+            >>> l = [1]
+            >>> d = NestedDict({"a": 1, "b": {"c": 2, "d": 3}, "b.e.f": l})
+            >>> d.sort().dict()
+            {'a': 1, 'b': {'c': 2, 'd': 3, 'e': {'f': [1]}}}
+            >>> d = NestedDict({"b.e.f": l, "b.d": 3, "a": 1, "b.c": 2})
+            >>> d.sort().dict()
+            {'a': 1, 'b': {'c': 2, 'd': 3, 'e': {'f': [1]}}}
+            >>> d = NestedDict({"b.e.f": l, "b.d": 3, "a": 1, "b.c": 2})
+            >>> d.sort(recursive=False).dict()
+            {'a': 1, 'b': {'e': {'f': [1]}, 'd': 3, 'c': 2}}
+            >>> l.append(2)
+            >>> d.b.e.f
+            [1, 2]
+        """
+
+        if recursive:
+            for value in self.values():
+                if isinstance(value, FlatDict):
+                    value.sort(key=key, reverse=reverse)
+        return super().sort(key=key, reverse=reverse)  # type: ignore
+
     @staticmethod
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
