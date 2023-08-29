@@ -10,9 +10,10 @@ name = "chanfig"
 description = "Easier Configuration"
 readme = "README.md"
 keywords = [
-  "Config",
-  "Dict",
-  "Machine Learning",
+  "config",
+  "deep-learning",
+  "dict",
+  "machine-learning",
 ]
 license = {file = "LICENSE"}
 maintainers = [
