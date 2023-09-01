@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from copy import copy, deepcopy
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 from pytest import raises
 
@@ -56,6 +56,8 @@ class ConfigDict(FlatDict):
     list_int: List[int]
     tuple_str: Tuple[str]
     dict_float: Dict[str, float]
+    int_float: Union[int, float]
+    optional_str: Optional[str]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -87,3 +89,11 @@ class TestConfigDict:
         ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": 3.0})
         with raises(TypeError):
             ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": "3.0"})
+        ConfigDict(int_float=1)
+        ConfigDict(int_float=0.5)
+        with raises(TypeError):
+            ConfigDict(int_float="inf")
+        ConfigDict(optional_str="1")
+        ConfigDict(optional_str=None)
+        with raises(TypeError):
+            ConfigDict(optional_str=1)

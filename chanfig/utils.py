@@ -24,6 +24,8 @@ from os import PathLike
 from types import GetSetDescriptorType, ModuleType
 from typing import IO, Any, Union, no_type_check
 
+from yaml import SafeDumper, SafeLoader
+
 try:  # python 3.8+
     from typing import get_args, get_origin  # pylint: disable=C0412
 except ImportError:
@@ -34,7 +36,7 @@ try:  # python 3.10+
 except ImportError:
     UnionType = Union  # type: ignore
 
-from yaml import SafeDumper, SafeLoader
+PY310_PLUS = sys.version_info >= (3, 10)
 
 PathStr = Union[PathLike, str, bytes]
 File = Union[PathStr, IO, IOBase]
@@ -179,18 +181,20 @@ def isvalid(data: Any, expected_type: type) -> bool:
         Callable,
         GetSetDescriptorType,
         UnionType,
+        Union,
         None,
     ):
         if issubclass(expected_origin, Sequence):
             inner_type = get_args(expected_type)[0]
             return isinstance(data, expected_origin) and all(isinstance(item, inner_type) for item in data)
-        elif issubclass(expected_origin, Mapping):
+        if issubclass(expected_origin, Mapping):
             key_type, value_type = get_args(expected_type)
             return isinstance(data, expected_origin) and all(
                 isinstance(key, key_type) and isinstance(value, value_type) for key, value in data.items()
             )
-        else:
-            raise TypeError(f"Expected type {expected_type} is not supported.")
+        raise TypeError(f"Expected type {expected_type} is not supported.")
+    if expected_origin is UnionType and not PY310_PLUS:
+        return any(isinstance(data, inner_type) for inner_type in get_args(expected_type))
     return isinstance(data, expected_type)
 
 
