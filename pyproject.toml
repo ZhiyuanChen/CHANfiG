@@ -43,6 +43,7 @@ dynamic = [
 ]
 dependencies = [
   "pyyaml",
+  'typing-extensions; python_version < "3.8"',
 ]
 [project.optional-dependencies]
 include = [
