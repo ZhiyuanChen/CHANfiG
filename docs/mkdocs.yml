@@ -172,14 +172,19 @@ plugins:
           rendering:
             members_order: source
   - i18n:
-      default_language: en
+      docs_structure: suffix
+      fallback_to_default: true
       languages:
-        en:
+        - locale: en
+          build: true
+          default: true
           name: English
+        - locale: zh
           build: true
-        zh:
+          default: false
           name: 汉语
-          build: true
+      reconfigure_material: true
+      reconfigure_search: true
   - git-revision-date-localized:
       type: iso_datetime
   - rss:
