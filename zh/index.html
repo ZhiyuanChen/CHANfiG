@@ -38,7 +38,7 @@
         <link rel="alternate" type="application/rss+xml" title="已更新内容的 RSS 订阅" href="../feed_rss_updated.xml">
       
       <link rel="icon" href="../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.5">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.7">
     
     
       
@@ -46,7 +46,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.0e669242.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.046329b4.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.85d0ee34.min.css">
@@ -61,6 +61,12 @@
     
       
     
+    
+      <link rel="stylesheet" href="../assets/_markdown_exec_ansi.css">
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../assets/_markdown_exec_ansi.css">
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
@@ -186,13 +192,13 @@
       <ul class="md-select__list">
         
           <li class="md-select__item">
-            <a href="../" hreflang="en" class="md-select__link">
+            <a href="/" hreflang="en" class="md-select__link">
               English
             </a>
           </li>
         
           <li class="md-select__item">
-            <a href="./" hreflang="zh" class="md-select__link">
+            <a href="/zh/" hreflang="zh" class="md-select__link">
               汉语
             </a>
           </li>
@@ -896,6 +902,7 @@ CHANfiG 的范式是：</p>
 <h4 id="_3">字典操作<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
 <p><code>FlatDict</code>包括了一个<code>merge</code>方法，他使你能将一个<code>Mapping</code>、<code>Iterable</code>或者一个路径合并进入一个<code>FlatDict</code>。
 与内置的<code>update</code>不同，<code>merge</code>是赋值而不是替换，这使得他能更好的与<code>DefaultDict</code>配合使用。</p>
+<p>Python 的<code>dict</code>自 Python 3.7 之后就是有序的，但是并没有一个内置的方法来帮助你对一个<code>dict</code>进行排序。<code>FlatDict</code>支持<code>sort</code>来帮助你管理你的字典。</p>
 <p>更进一步的，<code>FlatDict</code>引入了<code>difference</code>和<code>intersect</code>，这些使其可以非常简单的将<code>FlatDict</code>和其他<code>Mapping</code>、<code>Iterable</code>或者一个路径进行对比。</p>
 <h4 id="_4">机器学习操作<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
 <p><code>FlatDict</code>支持与 Pytorch Tensor 类似的<code>to</code>方法。
@@ -910,7 +917,7 @@ CHANfiG 的范式是：</p>
 <h3 id="nesteddict">NestedDict<a class="headerlink" href="#nesteddict" title="Permanent link">&para;</a></h3>
 <p>由于大多数配置都是一个嵌套的结构，我们进一步提出了<code>NestedDict</code>。</p>
 <p>基于<code>DefaultDict</code>，<code>NestedDict</code>提供了<code>all_keys</code>、<code>all_values</code>、<code>all_items</code>方法来允许一次性遍历整个嵌套结构。</p>
-<p><code>NestedDict</code>同时提供了一个<code>apply</code>方法，它可以使操纵嵌套结构更加容易。</p>
+<p><code>NestedDict</code>同时提供了<code>apply</code>和<code>apply_</code>方法，它可以使操纵嵌套结构更加容易。</p>
 <h3 id="config">Config<a class="headerlink" href="#config" title="Permanent link">&para;</a></h3>
 <p><code>Config</code>通过两个方面来进一步提升功能性：
 支持<code>freeze</code>来冻结和<code>defrost</code>解冻字典和
@@ -1350,7 +1357,7 @@ CHANfiG 的范式是：</p>
     <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.78eede0e.min.js"></script>
+      <script src="../assets/javascripts/bundle.dff1b7c8.min.js"></script>
       
         <script src="../javascripts/mathjax.js"></script>
       

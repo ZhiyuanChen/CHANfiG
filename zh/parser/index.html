@@ -40,7 +40,7 @@
         <link rel="alternate" type="application/rss+xml" title="已更新内容的 RSS 订阅" href="../../feed_rss_updated.xml">
       
       <link rel="icon" href="../../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.5">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.2.7">
     
     
       
@@ -48,7 +48,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.0e669242.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.046329b4.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.85d0ee34.min.css">
@@ -63,6 +63,12 @@
     
       
     
+    
+      <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../assets/_markdown_exec_ansi.css">
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
@@ -686,6 +692,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#chanfig.ConfigParser.identity" class="md-nav__link">
+    identity()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#chanfig.ConfigParser.parse" class="md-nav__link">
     parse()
   </a>
@@ -695,13 +708,6 @@
         <li class="md-nav__item">
   <a href="#chanfig.ConfigParser.parse_config" class="md-nav__link">
     parse_config()
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#chanfig.ConfigParser.identity" class="md-nav__link">
-    identity()
   </a>
   
 </li>
@@ -1341,6 +1347,47 @@ which has strict checking on command-line arguments.</p>
 
 
 
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="chanfig.ConfigParser.identity" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">identity</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+<a href="#chanfig.ConfigParser.identity" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents ">
+  
+      
+
+          <details class="quote">
+            <summary>Source code in <code>chanfig/parser.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-288">288</a></span>
+<span class="normal"><a href="#__codelineno-0-289">289</a></span>
+<span class="normal"><a href="#__codelineno-0-290">290</a></span>
+<span class="normal"><a href="#__codelineno-0-291">291</a></span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="nd">@staticmethod</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">return</span> <span class="n">string</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
 
 
 <div class="doc doc-object doc-function">
@@ -2076,47 +2123,6 @@ error: unrecognized arguments: &ndash;b 1</p>
 </div>
 
 
-<div class="doc doc-object doc-function">
-
-
-
-
-<h2 id="chanfig.ConfigParser.identity" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">identity</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
-  </span>
-
-<a href="#chanfig.ConfigParser.identity" class="headerlink" title="Permanent link">&para;</a></h2>
-
-
-  <div class="doc doc-contents ">
-  
-      
-
-          <details class="quote">
-            <summary>Source code in <code>chanfig/parser.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-288">288</a></span>
-<span class="normal"><a href="#__codelineno-0-289">289</a></span>
-<span class="normal"><a href="#__codelineno-0-290">290</a></span>
-<span class="normal"><a href="#__codelineno-0-291">291</a></span>
-<span class="normal"><a href="#__codelineno-0-292">292</a></span>
-<span class="normal"><a href="#__codelineno-0-293">293</a></span>
-<span class="normal"><a href="#__codelineno-0-294">294</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="nd">@staticmethod</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    https://stackoverflow.com/questions/69896931/cant-pickle-local-object-argumentparser-init-locals-identity</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>
-<a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="k">return</span> <span class="n">string</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
 
   </div>
 
@@ -2345,7 +2351,7 @@ error: unrecognized arguments: &ndash;b 1</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.78eede0e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.dff1b7c8.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
