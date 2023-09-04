@@ -27,15 +27,16 @@ from typing import IO, Any, Union, no_type_check
 from yaml import SafeDumper, SafeLoader
 
 try:  # python 3.8+
-    from typing import get_args, get_origin  # pylint: disable=C0412
+    import typing_extensions as typing
 except ImportError:
-    from typing_extensions import get_args, get_origin  # type: ignore
+    import typing  # type: ignore
 
 try:  # python 3.10+
     from types import UnionType  # pylint: disable=C0412
 except ImportError:
     UnionType = Union  # type: ignore
 
+GLOBAL_NS = {k: v for k, v in typing.__dict__.items() if not k.startswith("_")}
 PY310_PLUS = sys.version_info >= (3, 10)
 
 PathStr = Union[PathLike, str, bytes]
@@ -60,10 +61,11 @@ def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | 
 
     This function handles several details for you:
 
-      * If eval_str is true, values of type str will
-        be un-stringized using eval().  This is intended
+      * If `eval_str` is true, values of type str will
+        be un-stringized using `eval()`.  This is intended
         for use with stringized annotations
-        ("from __future__ import annotations").
+        (`from __future__ import annotations`).
+      * `globalns` fall back to public member of `typing`.
       * If obj doesn't have an annotations dict, returns an
         empty dict.  (Functions and methods always have an
         annotations dict; classes, modules, and other types of
@@ -71,29 +73,33 @@ def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | 
       * Ignores inherited annotations on classes.  If a class
         doesn't have its own annotations dict, returns an empty dict.
       * All accesses to object members and dict values are done
-        using getattr() and dict.get() for safety.
+        using `getattr()` and `dict.get()` for safety.
       * Always, always, always returns a freshly-created dict.
 
-    eval_str controls whether or not values of type str are replaced
+    `eval_str` controls whether or not values of type str are replaced
     with the result of calling eval() on those values:
 
-      * If eval_str is true, eval() is called on values of type str.
-      * If eval_str is false (the default), values of type str are unchanged.
+      * If `eval_str` is true, eval() is called on values of type str.
+      * If `eval_str` is false (the default), values of type str are unchanged.
 
-    globalns and localns are passed in to eval(); see the documentation
-    for eval() for more information.  If either globalns or localns is
+    `globalns` and `localns` are passed in to `eval()`; see the documentation
+    for `eval()` for more information.
+
+    `globalns` fall back to public member of `typing`.
+
+    If either `globalns` or `localns` is
     None, this function may replace that value with a context-specific
-    default, contingent on type(obj):
+    default, contingent on `type(obj)`:
 
-      * If obj is a module, globalns defaults to obj.__dict__.
-      * If obj is a class, globalns defaults to
-        sys.modules[obj.__module__].__dict__ and localns
+      * If `obj` is a module, globalns defaults to `obj.__dict__`.
+      * If `obj` is a class, globalns defaults to
+        `sys.modules[obj.__module__].__dict__` and `localns`
         defaults to the obj class namespace.
-      * If obj is a callable, globalns defaults to obj.__globals__,
+      * If `obj` is a callable, `globalns` defaults to `obj.__globals__`,
         although if obj is a wrapped function (using
         functools.update_wrapper()) it is first unwrapped.
-      * If obj is an instance, globalns defaults to
-        sys.modules[obj.__module__].__dict__ and localns
+      * If `obj` is an instance, `globalns` defaults to
+        `sys.modules[obj.__module__].__dict__` and localns
         defaults to the obj class namespace.
     """
     if isinstance(obj, type):
@@ -151,8 +157,10 @@ def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | 
         if hasattr(unwrap, "__globals__"):
             obj_globalns = unwrap.__globals__
 
+    # globalns = GLOBAL_NS | globalns if globalns is not None else obj_globalns
     if globalns is None:
         globalns = obj_globalns
+    globalns = {**GLOBAL_NS, **globalns}
     if localns is None:
         localns = obj_localns
 
@@ -179,7 +187,7 @@ def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | 
 
 @no_type_check
 def isvalid(data: Any, expected_type: type) -> bool:
-    expected_origin = get_origin(expected_type)
+    expected_origin = typing.get_origin(expected_type)
     if expected_origin not in (
         Callable,
         GetSetDescriptorType,
@@ -188,16 +196,16 @@ def isvalid(data: Any, expected_type: type) -> bool:
         None,
     ):
         if issubclass(expected_origin, Sequence):
-            inner_type = get_args(expected_type)[0]
+            inner_type = typing.get_args(expected_type)[0]
             return isinstance(data, expected_origin) and all(isinstance(item, inner_type) for item in data)
         if issubclass(expected_origin, Mapping):
-            key_type, value_type = get_args(expected_type)
+            key_type, value_type = typing.get_args(expected_type)
             return isinstance(data, expected_origin) and all(
                 isinstance(key, key_type) and isinstance(value, value_type) for key, value in data.items()
             )
         raise TypeError(f"Expected type {expected_type} is not supported.")
     if expected_origin is UnionType and not PY310_PLUS:
-        return any(isinstance(data, inner_type) for inner_type in get_args(expected_type))
+        return any(isinstance(data, inner_type) for inner_type in typing.get_args(expected_type))
     return isinstance(data, expected_type)
 
 
