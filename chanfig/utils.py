@@ -156,22 +156,25 @@ def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | 
     if localns is None:
         localns = obj_localns
 
-    try:
-        return {
-            key: value if not isinstance(value, str) else eval(value, globalns, localns) for key, value in ann.items()
-        }
-    except NameError:
-        raise ValueError(
-            f"{obj!r}.__annotations__ contains an invalid type.\n"
-            "If you are running on an earlier version of Python, "
-            "please ensure annotations does not contain forward references."
-        ) from None
-    except TypeError:
-        raise ValueError(
-            f"{obj!r}.__annotations__ contains an invalid type.\n"
-            "If you are running on an earlier version of Python, "
-            "please ensure you are not using future features such as PEP604."
-        ) from None
+    ret = {}
+    for key, value in ann.items():
+        if eval_str and isinstance(value, str):
+            try:
+                value = eval(value, globalns, localns)  # pylint: disable=W0123
+            except NameError:
+                raise ValueError(
+                    f"Type annotation '{key}: {value}' in {obj!r} is invalid.\n"
+                    "If you are running on an earlier version of Python, "
+                    "please ensure annotations does not contain forward references."
+                ) from None
+            except TypeError:
+                raise ValueError(
+                    f"Type annotation '{key}: {value}' in {obj!r} is invalid.\n"
+                    "If you are running on an earlier version of Python, "
+                    "please ensure you are not using future features such as PEP604."
+                ) from None
+        ret[key] = value
+    return ret
 
 
 @no_type_check
