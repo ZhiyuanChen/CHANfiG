@@ -155,14 +155,16 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         self,
         *args: Any,
         default_factory: Callable | None = None,
-        convert_mapping: bool = False,
-        fallback: bool = False,
+        convert_mapping: bool | None = None,
+        fallback: bool | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(default_factory)
         self.merge(*args, **kwargs)
-        self.setattr("convert_mapping", convert_mapping)
-        self.setattr("fallback", fallback)
+        if convert_mapping is not None:
+            self.setattr("convert_mapping", convert_mapping)
+        if fallback is not None:
+            self.setattr("fallback", fallback)
 
     def all_keys(self) -> Generator:
         r"""
