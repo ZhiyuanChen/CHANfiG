@@ -149,13 +149,20 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
 
     convert_mapping: bool = False
     delimiter: str = "."
+    fallback: bool = False
 
     def __init__(
-        self, *args: Any, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs: Any
+        self,
+        *args: Any,
+        default_factory: Callable | None = None,
+        convert_mapping: bool = False,
+        fallback: bool = False,
+        **kwargs: Any,
     ) -> None:
         super().__init__(default_factory)
         self.merge(*args, **kwargs)
         self.setattr("convert_mapping", convert_mapping)
+        self.setattr("fallback", fallback)
 
     def all_keys(self) -> Generator:
         r"""
@@ -289,7 +296,7 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         apply_(self, func, *args, **kwargs)
         return self
 
-    def get(self, name: Any, default: Any = None) -> Any:
+    def get(self, name: Any, default: Any = None, fallback: bool | None = None) -> Any:
         r"""
         Get value from `NestedDict`.
 
@@ -320,6 +327,7 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
             1013
             >>> d.get('f', 2)
             2
+            >>> d.get('a.b', None)
             >>> d.f
             NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
             >>> del d.f
@@ -340,12 +348,24 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         """
 
         delimiter = self.getattr("delimiter", ".")
+        if fallback is None:
+            fallback = self.getattr("fallback", False)
+        fallback_name = name.split(delimiter)[-1] if isinstance(name, str) else name
+        fallback_values = []
         try:
             while isinstance(name, str) and delimiter in name:
+                if fallback and fallback_name in self:
+                    fallback_values.append(self.get(fallback_name))
                 name, rest = name.split(delimiter, 1)
                 self, name = self[name], rest  # pylint: disable=W0642
-        except (AttributeError, TypeError):
+        except (KeyError, AttributeError, TypeError):
+            if fallback and fallback_values:
+                return fallback_values[-1]
+            if default is not Null:
+                return default
             raise KeyError(name) from None
+        if (fallback and fallback_values) and (not isinstance(self, Iterable) or name not in self):
+            return fallback_values[-1]
         # if value is a python dict
         if not isinstance(self, NestedDict):
             if name not in self and default is not Null:
@@ -405,9 +425,9 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         # pylint: disable=W0642
 
         full_name = name
+        delimiter = self.getattr("delimiter", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
-        delimiter = self.getattr("delimiter", ".")
         default_factory = self.getattr("default_factory", self.empty)
         try:
             while isinstance(name, str) and delimiter in name:
