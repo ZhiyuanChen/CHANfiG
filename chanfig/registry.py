@@ -88,8 +88,8 @@ class Registry(NestedDict):  # type: ignore
 
     override: bool = False
 
-    def __init__(self, override: bool = False):
-        super().__init__()
+    def __init__(self, override: bool = False, fallback: bool = False):
+        super().__init__(fallback=fallback)
         self.setattr("override", override)
 
     def register(self, component: Any = None, name: Any | None = None) -> Callable:

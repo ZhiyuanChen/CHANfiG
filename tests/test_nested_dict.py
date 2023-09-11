@@ -86,6 +86,11 @@ class Test:
         }
         assert d.dropnull().dict() == {"h": {"j": 1}}
 
+    def test_fallback(self):
+        d = NestedDict({"n.d": 0.5, "n.a.d": 0.1, "n.b.l": 6})
+        assert d.get("n.a.d", fallback=True) == 0.1
+        assert d.get("n.b.d", fallback=True) == 0.5
+
 
 class ConfigDict(NestedDict):
     def __init__(self):

@@ -428,7 +428,7 @@ class Config(NestedDict):  # type: ignore
             if was_frozen:
                 self.freeze()
 
-    def get(self, name: Any, default: Any = None) -> Any:
+    def get(self, name: Any, default: Any = None, fallback: bool | None = None) -> Any:
         r"""
         Get value from `Config`.
 
@@ -476,7 +476,7 @@ class Config(NestedDict):  # type: ignore
         if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
-            return super().get(name, default)
+            return super().get(name, default, fallback)
         raise KeyError(name)
 
     @frozen_check

@@ -716,7 +716,7 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
-        elif isinstance(that, Mapping):
+        if isinstance(that, Mapping):
             that = that.items()
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
