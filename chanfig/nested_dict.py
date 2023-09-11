@@ -153,19 +153,9 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
     def __init__(
         self, *args: Any, default_factory: Callable | None = None, convert_mapping: bool = False, **kwargs: Any
     ) -> None:
-        with self.converting():
-            super().__init__(default_factory)
-            if len(args) == 1 and isinstance(args[0], Mapping):
-                for key, value in args[0].items():
-                    self.set(key, value)
-            elif len(args) == 1 and isinstance(args[0], Iterable):
-                for key, value in args[0]:
-                    self.set(key, value)
-            elif len(args) > 0:
-                for key, value in args:
-                    self.set(key, value)
-            for key, value in kwargs.items():
-                self.set(key, value)
+        super().__init__(default_factory)
+        self.merge(*args, **kwargs)
+        self.setattr("convert_mapping", convert_mapping)
 
     def all_keys(self) -> Generator:
         r"""
@@ -608,10 +598,11 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
                 if key in this and isinstance(this[key], Mapping):
                     if isinstance(value, Mapping):
                         NestedDict._merge(this[key], value, overwrite)
-                    elif isinstance(this, NestedDict):
-                        this.set(key, value)
                     elif overwrite:
-                        this[key] = value
+                        if isinstance(this, NestedDict):
+                            this.set(key, value)
+                        else:
+                            this[key] = value
                 elif key in dir(this) and isinstance(getattr(this.__class__, key), (property, cached_property)):
                     getattr(this, key).merge(value, overwrite=overwrite)
                 elif overwrite or key not in this:
