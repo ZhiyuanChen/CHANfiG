@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import sys
+from argparse import ArgumentTypeError
 from collections.abc import Callable, Mapping, Sequence
 from functools import partial
 from io import IOBase
@@ -333,3 +334,13 @@ def find_circular_reference(graph: Mapping) -> list[str] | None:
             return result
 
     return None
+
+
+def parse_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    if value.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    raise ArgumentTypeError("Boolean value expected.")

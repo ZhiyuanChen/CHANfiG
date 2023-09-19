@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 from .nested_dict import NestedDict
-from .utils import Null
+from .utils import Null, parse_bool
 from .variable import Variable
 
 if TYPE_CHECKING:
@@ -62,9 +62,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         if not isinstance(parsed, NestedDict):
             parsed = NestedDict({key: value for key, value in parsed.items() if value is not Null})  # type: ignore
         for key, value in parsed.all_items():
-            with suppress(TypeError, ValueError, SyntaxError):
-                value = literal_eval(value)
-            parsed[key] = value
+            if isinstance(value, str):
+                with suppress(TypeError, ValueError, SyntaxError):
+                    value = literal_eval(value)
+                parsed[key] = value
         return parsed  # type: ignore
 
     def parse(  # pylint: disable=R0912
@@ -268,6 +269,8 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 help = value._help if isinstance(value, Variable) else None  # pylint: disable=W0212,W0622
                 if isinstance(value, (list, tuple, dict, set)):
                     self.add_argument(name, type=dtype, nargs="+", help=help, dest=key)
+                elif isinstance(value, bool):
+                    self.add_argument(name, type=parse_bool, help=help, dest=key)
                 else:
                     self.add_argument(name, type=dtype, help=help, dest=key)
 
