@@ -22,6 +22,7 @@ from functools import partial
 from io import IOBase
 from json import JSONEncoder
 from os import PathLike
+from re import compile, findall  # pylint: disable=W0622
 from types import GetSetDescriptorType, ModuleType
 from typing import IO, Any, Union, no_type_check
 
@@ -36,8 +37,6 @@ try:  # python 3.10+
     from types import UnionType  # pylint: disable=C0412
 except ImportError:
     UnionType = Union  # type: ignore
-from re import compile, findall
-from typing import IO, Any, Union
 
 GLOBAL_NS = {k: v for k, v in typing.__dict__.items() if not k.startswith("_")}
 PY310_PLUS = sys.version_info >= (3, 10)
@@ -52,7 +51,9 @@ PYTHON = ("py",)
 
 # flake8: noqa
 @no_type_check
-def get_annotations(obj, *, globalns: Mapping | None = None, localns: Mapping | None = None, eval_str: bool = True):
+def get_annotations(  # pylint: disable=all
+    obj, *, globalns: Mapping | None = None, localns: Mapping | None = None, eval_str: bool = True
+):
     """Compute the annotations dict for an object.
 
     obj may be a callable, class, or module.
@@ -317,7 +318,7 @@ def find_placeholders(text: str) -> list[str]:
 
 
 def find_circular_reference(graph: Mapping) -> list[str] | None:
-    def dfs(node, visited, path):
+    def dfs(node, visited, path):  # pylint: disable=R1710
         path.append(node)
         if node in visited:
             return path
@@ -343,4 +344,4 @@ def parse_bool(value):
         return True
     if value.lower() in ("no", "false", "f", "n", "0"):
         return False
-    raise ArgumentTypeError("Boolean value expected.")
+    raise ArgumentTypeError(f"Boolean value is expected, but got {value}.")
