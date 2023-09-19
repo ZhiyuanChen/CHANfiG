@@ -545,11 +545,13 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
 
         items = sorted(self.items(), key=key, reverse=reverse)
         self.clear()
-        for k, v in items:
+        for k, v in items:  # pylint: disable=C0103
             self[k] = v
         return self
 
-    def interpolate(self, use_variable: bool = True, interpolators: MutableMapping | None = None) -> FlatDict:
+    def interpolate(  # pylint: disable=R0912
+        self, use_variable: bool = True, interpolators: MutableMapping | None = None
+    ) -> FlatDict:
         r"""
         Perform Variable interpolation.
 
@@ -609,6 +611,7 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
               ('c'): '${d}'
             ).
         """
+        # pylint: disable=C0103
 
         interpolators = interpolators or self
         placeholders: dict[str, list[str]] = {}

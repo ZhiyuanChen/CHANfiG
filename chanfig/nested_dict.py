@@ -89,6 +89,7 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     See Also:
         [`apply_`][chanfig.nested_dict.apply]: Apply a non-in-place operation.
     """
+    # pylint: disable=C0103
 
     if isinstance(obj, Mapping):
         for v in obj.values():
@@ -612,7 +613,7 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
-        elif isinstance(that, Mapping):
+        if isinstance(that, Mapping):
             that = that.items()
         context = this.converting() if isinstance(this, NestedDict) else nullcontext()
         with context:

@@ -53,7 +53,8 @@ def save(obj, file: File, method: str | None = None, *args: Any, **kwargs: Any) 
     """
 
     if isinstance(obj, FlatDict):
-        return obj.save(file, method, *args, **kwargs)
+        obj.save(file, method, *args, **kwargs)
+        return
 
     data = to_dict(obj)
     if method is None:
