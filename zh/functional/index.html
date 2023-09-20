@@ -1078,7 +1078,8 @@ heading_level: 0</p>
 <span class="normal"><a href="#__codelineno-0-69">69</a></span>
 <span class="normal"><a href="#__codelineno-0-70">70</a></span>
 <span class="normal"><a href="#__codelineno-0-71">71</a></span>
-<span class="normal"><a href="#__codelineno-0-72">72</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pylint: disable=W1113</span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">File</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># pylint: disable=W1113</span>
 <a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    Save `FlatDict` to file.</span>
 <a id="__codelineno-0-33" name="__codelineno-0-33"></a>
@@ -1104,23 +1105,24 @@ heading_level: 0</p>
 <a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-54" name="__codelineno-0-54"></a>
 <a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">):</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`method` must be specified when saving to IO.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a>        <span class="n">method</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>    <span class="n">extension</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a>    <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">YAML</span><span class="p">:</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>        <span class="k">with</span> <span class="n">FlatDict</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a>            <span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>        <span class="k">return</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">JSON</span><span class="p">:</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>        <span class="k">with</span> <span class="n">FlatDict</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json_dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>        <span class="k">return</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`file=</span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">` should be in </span><span class="si">{</span><span class="n">JSON</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">YAML</span><span class="si">}</span><span class="s2">, but got </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="k">return</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">):</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`method` must be specified when saving to IO.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="n">method</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>    <span class="n">extension</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>    <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">YAML</span><span class="p">:</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>        <span class="k">with</span> <span class="n">FlatDict</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>            <span class="n">yaml_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>        <span class="k">return</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">JSON</span><span class="p">:</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>        <span class="k">with</span> <span class="n">FlatDict</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json_dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>        <span class="k">return</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`file=</span><span class="si">{</span><span class="n">file</span><span class="si">!r}</span><span class="s2">` should be in </span><span class="si">{</span><span class="n">JSON</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">YAML</span><span class="si">}</span><span class="s2">, but got </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1217,8 +1219,7 @@ heading_level: 0</p>
 
           <details class="quote">
             <summary>Source code in <code>chanfig/functional.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-75"> 75</a></span>
-<span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
 <span class="normal"><a href="#__codelineno-0-77"> 77</a></span>
 <span class="normal"><a href="#__codelineno-0-78"> 78</a></span>
 <span class="normal"><a href="#__codelineno-0-79"> 79</a></span>
@@ -1242,32 +1243,33 @@ heading_level: 0</p>
 <span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
 <span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
 <span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
-<span class="normal"><a href="#__codelineno-0-100">100</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">PathStr</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>  <span class="c1"># pylint: disable=W1113</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    Load a file into a `NestedDict`.</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    This function simply calls `NestedDict.load`.</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        file: The file to load.</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">        *args: The arguments to pass to `NestedDict.load`.</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        **kwargs: The keyword arguments to pass to `NestedDict.load`.</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    See Also:</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        [`load`][chanfig.FlatDict.load]</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        &gt;&gt;&gt; from chanfig import load</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        &gt;&gt;&gt; config = load(&quot;tests/test.yaml&quot;)</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">        &gt;&gt;&gt; config</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        NestedDict(</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">          (&#39;a&#39;): 1</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">          (&#39;b&#39;): 2</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">          (&#39;c&#39;): 3</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        )</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+<span class="normal"><a href="#__codelineno-0-100">100</a></span>
+<span class="normal"><a href="#__codelineno-0-101">101</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">PathStr</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">NestedDict</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedDict</span><span class="p">:</span>  <span class="c1"># pylint: disable=W1113</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Load a file into a `NestedDict`.</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">    This function simply calls `NestedDict.load`.</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">        file: The file to load.</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        *args: The arguments to pass to `NestedDict.load`.</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        **kwargs: The keyword arguments to pass to `NestedDict.load`.</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    See Also:</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        [`load`][chanfig.FlatDict.load]</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        &gt;&gt;&gt; from chanfig import load</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">        &gt;&gt;&gt; config = load(&quot;tests/test.yaml&quot;)</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        &gt;&gt;&gt; config</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">        NestedDict(</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">          (&#39;a&#39;): 1</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">          (&#39;b&#39;): 2</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">          (&#39;c&#39;): 3</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">        )</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -1575,32 +1577,33 @@ heading_level: 0</p>
 </details>
           <details class="quote">
             <summary>Source code in <code>chanfig/nested_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-74">74</a></span>
-<span class="normal"><a href="#__codelineno-0-75">75</a></span>
-<span class="normal"><a href="#__codelineno-0-76">76</a></span>
-<span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span>
-<span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span>
-<span class="normal"><a href="#__codelineno-0-85">85</a></span>
-<span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span>
-<span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span>
-<span class="normal"><a href="#__codelineno-0-92">92</a></span>
-<span class="normal"><a href="#__codelineno-0-93">93</a></span>
-<span class="normal"><a href="#__codelineno-0-94">94</a></span>
-<span class="normal"><a href="#__codelineno-0-95">95</a></span>
-<span class="normal"><a href="#__codelineno-0-96">96</a></span>
-<span class="normal"><a href="#__codelineno-0-97">97</a></span>
-<span class="normal"><a href="#__codelineno-0-98">98</a></span>
-<span class="normal"><a href="#__codelineno-0-99">99</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="k">def</span> <span class="nf">apply_</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-74"> 74</a></span>
+<span class="normal"><a href="#__codelineno-0-75"> 75</a></span>
+<span class="normal"><a href="#__codelineno-0-76"> 76</a></span>
+<span class="normal"><a href="#__codelineno-0-77"> 77</a></span>
+<span class="normal"><a href="#__codelineno-0-78"> 78</a></span>
+<span class="normal"><a href="#__codelineno-0-79"> 79</a></span>
+<span class="normal"><a href="#__codelineno-0-80"> 80</a></span>
+<span class="normal"><a href="#__codelineno-0-81"> 81</a></span>
+<span class="normal"><a href="#__codelineno-0-82"> 82</a></span>
+<span class="normal"><a href="#__codelineno-0-83"> 83</a></span>
+<span class="normal"><a href="#__codelineno-0-84"> 84</a></span>
+<span class="normal"><a href="#__codelineno-0-85"> 85</a></span>
+<span class="normal"><a href="#__codelineno-0-86"> 86</a></span>
+<span class="normal"><a href="#__codelineno-0-87"> 87</a></span>
+<span class="normal"><a href="#__codelineno-0-88"> 88</a></span>
+<span class="normal"><a href="#__codelineno-0-89"> 89</a></span>
+<span class="normal"><a href="#__codelineno-0-90"> 90</a></span>
+<span class="normal"><a href="#__codelineno-0-91"> 91</a></span>
+<span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
+<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
+<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
+<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
+<span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
+<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
+<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
+<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
+<span class="normal"><a href="#__codelineno-0-100">100</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="k">def</span> <span class="nf">apply_</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    Apply `func` to all children of `obj`.</span>
 <a id="__codelineno-0-77" name="__codelineno-0-77"></a>
@@ -1618,14 +1621,15 @@ heading_level: 0</p>
 <a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    See Also:</span>
 <a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        [`apply_`][chanfig.nested_dict.apply]: Apply a non-in-place operation.</span>
 <a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>            <span class="n">apply_</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>            <span class="n">apply_</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">if</span> <span class="n">ismethod</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">else</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="c1"># pylint: disable=C0103</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>            <span class="n">apply_</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>            <span class="n">apply_</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">if</span> <span class="n">ismethod</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">else</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
