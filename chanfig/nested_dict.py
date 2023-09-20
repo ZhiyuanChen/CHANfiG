@@ -183,9 +183,9 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         delimiter = self.getattr("delimiter", ".")
 
         @wraps(self.all_keys)
-        def all_keys(self, prefix=""):
+        def all_keys(self, prefix=Null):
             for key, value in self.items():
-                if prefix:
+                if prefix is not Null:
                     key = str(prefix) + str(delimiter) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
@@ -229,9 +229,9 @@ class NestedDict(DefaultDict):  # type: ignore # pylint: disable=E1136
         delimiter = self.getattr("delimiter", ".")
 
         @wraps(self.all_items)
-        def all_items(self, prefix=""):
+        def all_items(self, prefix=Null):
             for key, value in self.items():
-                if prefix:
+                if prefix is not Null:
                     key = str(prefix) + str(delimiter) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_items(value, key)
