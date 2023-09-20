@@ -250,6 +250,8 @@ class FlatDict(dict, metaclass=Dict):  # type: ignore
             'liu'
         """
 
+        if name is Null:
+            raise ValueError("name must not be null")
         if name in self and isinstance(self.get(name), Variable):
             self.get(name).set(value)
         else:
