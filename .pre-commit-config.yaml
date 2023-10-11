@@ -20,12 +20,12 @@ repos:
           - flake8-comprehensions
           - flake8-simplify
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.11.0
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         args: [--keep-runtime-typing]
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: 1.1.0
+    rev: 1.2.0
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -36,7 +36,7 @@ repos:
         additional_dependencies:
           - types-PyYaml
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.2.6
     hooks:
       - id: codespell
         args: [--ignore-words=.codespell-whitelist.txt]
@@ -46,7 +46,7 @@ repos:
       - id: prettier
         files: chanfig
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
