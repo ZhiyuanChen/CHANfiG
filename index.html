@@ -895,7 +895,7 @@ Even worse, if the dict is nested like a config, member access could be somethin
 <code>dict.name</code> and <code>dict.parent.children.name</code> is all you need.</p>
 <p>Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
 Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
-or re-use the existing <code>__dict__</code> and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.</p>
+or reuse the existing <code>__dict__</code> and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.</p>
 <p>To overcome the aforementioned limitations, we inherit the Python built-in <code>dict</code> to create <code>FlatDict</code>, <code>DefaultDict</code>, <code>NestedDict</code>, <code>Config</code>, and <code>Registry</code>.
 We also introduce <code>Variable</code> to allow sharing a value across multiple places, and <code>ConfigParser</code> to parse command line arguments.</p>
 <h3 id="flatdict">FlatDict<a class="headerlink" href="#flatdict" title="Permanent link">&para;</a></h3>
