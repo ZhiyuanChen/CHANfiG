@@ -51,7 +51,7 @@ We need attribute-style access, and we need it now.
 
 Although there have been some other works that achieve a similar functionality of attribute-style access to dict members.
 Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
-or re-use the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
+or reuse the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
 To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry`.
 We also introduce `Variable` to allow sharing a value across multiple places, and `ConfigParser` to parse command line arguments.
