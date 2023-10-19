@@ -1888,8 +1888,8 @@ Therefore, <code>isinstance(Variable(1), int)</code> will return <code>True</cod
 <a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <a id="__codelineno-0-360" name="__codelineno-0-360"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 <a id="__codelineno-0-361" name="__codelineno-0-361"></a>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="fm">__index__</span><span class="p">()</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="c1"># def __index__(self):</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="c1">#     return self.value.__index__()</span>
 <a id="__codelineno-0-364" name="__codelineno-0-364"></a>
 <a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <a id="__codelineno-0-366" name="__codelineno-0-366"></a>        <span class="k">return</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span>
