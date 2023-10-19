@@ -359,8 +359,8 @@ class Variable(Generic[V]):  # pylint: disable=R0902
     def __gt__(self, other) -> bool:
         return self.value > self._get_value(other)
 
-    def __index__(self):
-        return self.value.__index__()
+    # def __index__(self):
+    #     return self.value.__index__()
 
     def __invert__(self):
         return ~self.value
