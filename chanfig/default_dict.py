@@ -22,7 +22,7 @@ from .flat_dict import FlatDict
 from .utils import Null
 
 
-class DefaultDict(FlatDict):  # type: ignore
+class DefaultDict(FlatDict):
     r"""
     `DefaultDict` inherits from `FlatDict` and incorporates support of `default_factory`
     in the same manner as `collections.defaultdict`.

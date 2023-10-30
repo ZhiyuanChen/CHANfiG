@@ -39,7 +39,7 @@ def frozen_check(func: Callable):
     return decorator
 
 
-class Config(NestedDict):  # type: ignore
+class Config(NestedDict):
     r"""
     `Config` is an extension of `NestedDict`.
 
