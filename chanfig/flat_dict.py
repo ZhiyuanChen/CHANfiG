@@ -105,7 +105,7 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     return obj
 
 
-class FlatDict(dict, metaclass=Dict):  # type: ignore
+class FlatDict(dict, metaclass=Dict):
     r"""
     `FlatDict` with attribute-style access.
 

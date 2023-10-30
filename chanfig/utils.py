@@ -213,7 +213,7 @@ def isvalid(data: Any, expected_type: type) -> bool:
     return isinstance(data, expected_type)
 
 
-class Dict(type):
+class Dict(type(dict)):  # type: ignore
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         instance = super().__call__(*args, **kwargs)
         instance.__post_init__()
