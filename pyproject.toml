@@ -71,6 +71,23 @@ profile = "black"
 [tool.flake8]
 max-line-length = 120
 
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.messages_control]
+disable = """
+  E0012,
+  E0401,
+  R0201,
+  R0801,
+"""
+
+[tool.pylint.reports]
+output-format = "colorized"
+
+[tool.pylint.main]
+fail-under = 9.8
+
 [tool.pytest.ini_options]
 addopts = "--doctest-modules --cov"
 
@@ -93,20 +110,3 @@ fail_under = 80
 
 [tool.mypy]
 ignore_missing_imports = true
-
-[tool.pylint.format]
-max-line-length = 120
-
-[tool.pylint.messages_control]
-disable = """
-  E0012,
-  E0401,
-  R0201,
-  R0801,
-"""
-
-[tool.pylint.reports]
-output-format = "colorized"
-
-[tool.pylint.main]
-fail-under = 9.8
