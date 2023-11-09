@@ -27,7 +27,9 @@ from .nested_dict import NestedDict
 from .utils import JSON, YAML, File, PathStr
 
 
-def save(obj, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+def save(  # pylint: disable=W1113
+    obj, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+) -> None:
     r"""
     Save `FlatDict` to file.
 
@@ -61,7 +63,7 @@ def save(obj, file: File, method: str | None = None, *args: Any, **kwargs: Any) 
         if isinstance(file, IOBase):
             raise ValueError("`method` must be specified when saving to IO.")
         method = splitext(file)[-1][1:]  # type: ignore
-    extension = method.lower()  # type: ignore
+    extension = method.lower()
     if extension in YAML:
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
             yaml_dump(data, fp, *args, **kwargs)
@@ -70,17 +72,20 @@ def save(obj, file: File, method: str | None = None, *args: Any, **kwargs: Any) 
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
             fp.write(json_dumps(data, *args, **kwargs))
         return
-    raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")  # type: ignore
+    raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
 
-def load(file: PathStr, cls: type = NestedDict, *args: Any, **kwargs: Any) -> NestedDict:  # pylint: disable=W1113
+def load(  # pylint: disable=W1113
+    file: PathStr, cls: type[FlatDict] = NestedDict, *args: Any, **kwargs: Any
+) -> FlatDict:
     r"""
-    Load a file into a `NestedDict`.
+    Load a file into a `FlatDict`.
 
-    This function simply calls `NestedDict.load`.
+    This function simply calls `cls.load`, by default, `cls` is `NestedDict`.
 
     Args:
         file: The file to load.
+        cls: The class of the file to load. Defaults to `NestedDict`.
         *args: The arguments to pass to `NestedDict.load`.
         **kwargs: The keyword arguments to pass to `NestedDict.load`.
 
@@ -98,4 +103,4 @@ def load(file: PathStr, cls: type = NestedDict, *args: Any, **kwargs: Any) -> Ne
         )
     """
 
-    return cls.load(file, *args, **kwargs)  # type: ignore
+    return cls.load(file, *args, **kwargs)

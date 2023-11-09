@@ -562,7 +562,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             raise KeyError(name)
         return super().pop(name)
 
-    def setdefault(  # type: ignore  # pylint: disable=R0912,W0221
+    def setdefault(  # type: ignore[override]  # pylint: disable=R0912,W0221
         self,
         name: Any,
         value: Any,
@@ -690,7 +690,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             for value in self.values():
                 if isinstance(value, FlatDict):
                     value.sort(key=key, reverse=reverse)
-        return super().sort(key=key, reverse=reverse)  # type: ignore
+        return super().sort(key=key, reverse=reverse)
 
     @staticmethod
     def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
@@ -749,7 +749,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty(self._intersect(self, other, recursive))  # type: ignore
+        return self.empty(self._intersect(self, other, recursive))
 
     @staticmethod
     def _intersect(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
@@ -797,7 +797,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             other = self.empty(other).items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
-        return self.empty(self._difference(self, other, recursive))  # type: ignore
+        return self.empty(self._difference(self, other, recursive))
 
     @staticmethod
     def _difference(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
@@ -822,7 +822,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         finally:
             self.setattr("convert_mapping", convert_mapping)
 
-    def __contains__(self, name: Any) -> bool:  # type: ignore
+    def __contains__(self, name: Any) -> bool:
         delimiter = self.getattr("delimiter", ".")
         try:
             while isinstance(name, str) and delimiter in name:
