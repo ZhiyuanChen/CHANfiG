@@ -28,7 +28,12 @@ except ImportError:
     try:
         from backports.cached_property import cached_property  # type: ignore
     except ImportError:
-        cached_property = property  # type: ignore # pylint: disable=C0103
+        cached_property = property  # type: ignore  # pylint: disable=C0103
+
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
@@ -240,7 +245,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         return all_items(self)
 
-    def apply(self, func: Callable, *args: Any, **kwargs: Any) -> NestedDict:
+    def apply(self, func: Callable, *args: Any, **kwargs: Any) -> Self:
         r"""
         Recursively apply a function to `NestedDict` and its children.
 
@@ -269,7 +274,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         return apply(self, func, *args, **kwargs)
 
-    def apply_(self, func: Callable, *args: Any, **kwargs: Any) -> NestedDict:
+    def apply_(self, func: Callable, *args: Any, **kwargs: Any) -> Self:
         r"""
         Recursively apply a function to `NestedDict` and its children.
 
@@ -557,7 +562,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             raise KeyError(name)
         return super().pop(name)
 
-    def setdefault(  # type: ignore # pylint: disable=R0912,W0221
+    def setdefault(  # type: ignore  # pylint: disable=R0912,W0221
         self,
         name: Any,
         value: Any,
@@ -655,7 +660,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         self.apply_(self._validate)
 
-    def sort(self, key: Callable | None = None, reverse: bool = False, recursive: bool = True) -> NestedDict:
+    def sort(self, key: Callable | None = None, reverse: bool = False, recursive: bool = True) -> Self:
         r"""
         Sort `NestedDict`.
 
@@ -713,9 +718,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                         this[key] = value
         return this
 
-    def intersect(  # pylint: disable=W0221
-        self, other: Mapping | Iterable | PathStr, recursive: bool = True
-    ) -> NestedDict:
+    def intersect(self, other: Mapping | Iterable | PathStr, recursive: bool = True) -> Self:  # pylint: disable=W0221
         r"""
         Intersection of `NestedDict` and `other`.
 
@@ -763,7 +766,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
     def difference(  # pylint: disable=W0221, C0103
         self, other: Mapping | Iterable | PathStr, recursive: bool = True
-    ) -> NestedDict:
+    ) -> Self:
         r"""
         Difference between `NestedDict` and `other`.
 

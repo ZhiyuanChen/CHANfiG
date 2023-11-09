@@ -28,6 +28,11 @@ from os.path import splitext
 from typing import IO, Any
 from warnings import warn
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
@@ -514,7 +519,7 @@ class FlatDict(dict, metaclass=Dict):
         if obj is None:
             return cls()
         if issubclass(cls, FlatDict):
-            cls = cls.empty  # type: ignore # pylint: disable=W0642
+            cls = cls.empty  # type: ignore  # pylint: disable=W0642
         if isinstance(obj, Mapping):
             return cls(obj)
         if isinstance(obj, Sequence):
@@ -524,7 +529,7 @@ class FlatDict(dict, metaclass=Dict):
                 return [cls(json) for json in obj]
         raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
 
-    def sort(self, key: Callable | None = None, reverse: bool = False) -> FlatDict:
+    def sort(self, key: Callable | None = None, reverse: bool = False) -> Self:
         r"""
         Sort `FlatDict`.
 
@@ -553,7 +558,7 @@ class FlatDict(dict, metaclass=Dict):
 
     def interpolate(  # pylint: disable=R0912
         self, use_variable: bool = True, interpolators: MutableMapping | None = None
-    ) -> FlatDict:
+    ) -> Self:
         r"""
         Perform Variable interpolation.
 
@@ -667,7 +672,7 @@ class FlatDict(dict, metaclass=Dict):
         except KeyError as exc:
             raise ValueError(f"{exc} is not found in {interpolators}.") from None
 
-    def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> FlatDict:
+    def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> Self:
         r"""
         Merge `other` into `FlatDict`.
 
@@ -736,13 +741,13 @@ class FlatDict(dict, metaclass=Dict):
                 this.set(key, value)
         return this
 
-    def union(self, *args: Any, **kwargs: Any) -> FlatDict:
+    def union(self, *args: Any, **kwargs: Any) -> Self:
         r"""
         Alias of [`merge`][chanfig.FlatDict.merge].
         """
         return self.merge(*args, **kwargs)
 
-    def merge_from_file(self, file: File, *args: Any, **kwargs: Any) -> FlatDict:
+    def merge_from_file(self, file: File, *args: Any, **kwargs: Any) -> Self:
         r"""
         Merge content of `file` into `FlatDict`.
 
@@ -762,7 +767,7 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.merge(self.load(file, *args, **kwargs))
 
-    def intersect(self, other: Mapping | Iterable | PathStr) -> FlatDict:
+    def intersect(self, other: Mapping | Iterable | PathStr) -> Self:
         r"""
         Intersection of `FlatDict` and `other`.
 
@@ -801,13 +806,13 @@ class FlatDict(dict, metaclass=Dict):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty(**{key: value for key, value in other if key in self and self[key] == value})  # type: ignore
 
-    def inter(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> FlatDict:
+    def inter(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> Self:
         r"""
         Alias of [`intersect`][chanfig.FlatDict.intersect].
         """
         return self.intersect(other, *args, **kwargs)
 
-    def difference(self, other: Mapping | Iterable | PathStr) -> FlatDict:
+    def difference(self, other: Mapping | Iterable | PathStr) -> Self:
         r"""
         Difference between `FlatDict` and `other`.
 
@@ -848,13 +853,13 @@ class FlatDict(dict, metaclass=Dict):
             **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
         )
 
-    def diff(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> FlatDict:
+    def diff(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> Self:
         r"""
         Alias of [`difference`][chanfig.FlatDict.difference].
         """
         return self.difference(other, *args, **kwargs)
 
-    def to(self, cls: str | TorchDevice | TorchDType) -> FlatDict:  # pragma: no cover
+    def to(self, cls: str | TorchDevice | TorchDType) -> Self:  # pragma: no cover
         r"""
         Convert values of `FlatDict` to target `cls`.
 
@@ -881,7 +886,7 @@ class FlatDict(dict, metaclass=Dict):
 
         raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
 
-    def cpu(self) -> FlatDict:  # pragma: no cover
+    def cpu(self) -> Self:  # pragma: no cover
         r"""
         Move all tensors to cpu.
 
@@ -897,7 +902,7 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.to(TorchDevice("cpu"))
 
-    def gpu(self) -> FlatDict:  # pragma: no cover
+    def gpu(self) -> Self:  # pragma: no cover
         r"""
         Move all tensors to gpu.
 
@@ -919,13 +924,13 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.to(TorchDevice("cuda"))
 
-    def cuda(self) -> FlatDict:  # pragma: no cover
+    def cuda(self) -> Self:  # pragma: no cover
         r"""
         Alias of [`gpu`][chanfig.FlatDict.gpu].
         """
         return self.gpu()
 
-    def tpu(self) -> FlatDict:  # pragma: no cover
+    def tpu(self) -> Self:  # pragma: no cover
         r"""
         Move all tensors to tpu.
 
@@ -947,13 +952,13 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.to(TorchDevice("xla"))
 
-    def xla(self) -> FlatDict:  # pragma: no cover
+    def xla(self) -> Self:  # pragma: no cover
         r"""
         Alias of [`tpu`][chanfig.FlatDict.tpu].
         """
         return self.tpu()
 
-    def copy(self) -> FlatDict:
+    def copy(self) -> Self:
         r"""
         Create a shallow copy of `FlatDict`.
 
@@ -975,7 +980,7 @@ class FlatDict(dict, metaclass=Dict):
 
         return copy(self)
 
-    def __deepcopy__(self, memo: Mapping | None = None) -> FlatDict:
+    def __deepcopy__(self, memo: Mapping | None = None) -> Self:
         # pylint: disable=C0103
 
         if memo is not None and id(self) in memo:
@@ -989,7 +994,7 @@ class FlatDict(dict, metaclass=Dict):
                 ret[k] = deepcopy(v)
         return ret
 
-    def deepcopy(self, memo: Mapping | None = None) -> FlatDict:  # pylint: disable=W0613
+    def deepcopy(self, memo: Mapping | None = None) -> Self:  # pylint: disable=W0613
         r"""
         Create a deep copy of `FlatDict`.
 
@@ -1017,7 +1022,7 @@ class FlatDict(dict, metaclass=Dict):
 
         return deepcopy(self)
 
-    def clone(self, memo: Mapping | None = None) -> FlatDict:
+    def clone(self, memo: Mapping | None = None) -> Self:
         r"""
         Alias of [`deepcopy`][chanfig.FlatDict.deepcopy].
         """
@@ -1065,9 +1070,7 @@ class FlatDict(dict, metaclass=Dict):
         return self.save(file, method, *args, **kwargs)
 
     @classmethod
-    def load(  # pylint: disable=W1113
-        cls, file: File, method: str | None = None, *args: Any, **kwargs: Any
-    ) -> FlatDict:
+    def load(cls, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> Self:  # pylint: disable=W1113
         """
         Load `FlatDict` from file.
 
@@ -1122,7 +1125,7 @@ class FlatDict(dict, metaclass=Dict):
             fp.write(self.jsons(*args, **kwargs))
 
     @classmethod
-    def from_json(cls, file: File, *args: Any, **kwargs: Any) -> FlatDict:
+    def from_json(cls, file: File, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from json file.
 
@@ -1161,7 +1164,7 @@ class FlatDict(dict, metaclass=Dict):
         return json_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
-    def from_jsons(cls, string: str, *args: Any, **kwargs: Any) -> FlatDict:
+    def from_jsons(cls, string: str, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from json string.
 
@@ -1195,7 +1198,7 @@ class FlatDict(dict, metaclass=Dict):
             self.yamls(fp, *args, **kwargs)
 
     @classmethod
-    def from_yaml(cls, file: File, *args: Any, **kwargs: Any) -> FlatDict:
+    def from_yaml(cls, file: File, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from yaml file.
 
@@ -1233,7 +1236,7 @@ class FlatDict(dict, metaclass=Dict):
         return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
 
     @classmethod
-    def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> FlatDict:
+    def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from yaml string.
 
@@ -1295,7 +1298,7 @@ class FlatDict(dict, metaclass=Dict):
             yield file
         elif isinstance(file, (PathLike, str, bytes)):
             try:
-                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore # noqa: SIM115
+                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore  # noqa: SIM115
                 yield file  # type: ignore
             finally:
                 with suppress(Exception):
@@ -1304,7 +1307,7 @@ class FlatDict(dict, metaclass=Dict):
             raise TypeError(f"expected str, bytes, os.PathLike, IO or IOBase, not {type(file).__name__}")
 
     @classmethod
-    def empty(cls, *args: Any, **kwargs: Any) -> FlatDict:
+    def empty(cls, *args: Any, **kwargs: Any) -> Self:
         r"""
         Initialise an empty `FlatDict`.
 
@@ -1330,7 +1333,7 @@ class FlatDict(dict, metaclass=Dict):
         empty.merge(*args, **kwargs)  # pylint: disable=W0212
         return empty
 
-    def empty_like(self, *args: Any, **kwargs: Any) -> FlatDict:
+    def empty_like(self, *args: Any, **kwargs: Any) -> Self:
         r"""
         Initialise an empty copy of `FlatDict`.
 
@@ -1392,7 +1395,7 @@ class FlatDict(dict, metaclass=Dict):
         """
         yield from self.items()
 
-    def dropnull(self) -> FlatDict:
+    def dropnull(self) -> Self:
         r"""
         Drop key-value pairs with `Null` value.
 
@@ -1415,7 +1418,7 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.empty({k: v for k, v in self.all_items() if v is not Null})
 
-    def dropna(self) -> FlatDict:
+    def dropna(self) -> Self:
         r"""
         Alias of [`dropnull`][chanfig.FlatDict.dropnull].
         """
