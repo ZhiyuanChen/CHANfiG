@@ -56,7 +56,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
     def parse_config(  # pylint: disable=R0912
         self,
         args: Sequence[str] | None = None,
-        config: NestedDict | None = None,
+        config: Config | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
     ) -> Config:
@@ -127,12 +127,12 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         if config.getattr("parser", None) is not self:
             config.setattr("parser", self)
-        return config.merge(parsed)  # type: ignore
+        return config.merge(parsed)
 
     def parse(  # pylint: disable=R0912
         self,
         args: Sequence[str] | None = None,
-        config: NestedDict | None = None,
+        config: Config | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
     ) -> Config:
@@ -245,9 +245,9 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         if config.getattr("parser", None) is not self:
             config.setattr("parser", self)
-        return config.merge(parsed)  # type: ignore
+        return config.merge(parsed)
 
-    def parse_args(  # type: ignore
+    def parse_args(  # type: ignore[override]
         self, args: Sequence[str] | None = None, namespace: NestedDict | None = None, eval_str: bool = True
     ) -> NestedDict:
         r"""
@@ -262,18 +262,18 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             namespace (NestedDict | None, optional): existing configuration.
             eval_str (bool, optional): Whether to evaluate string values.
         """
-        parsed = super().parse_args(args, namespace)
+        parsed: dict | Namespace = super().parse_args(args, namespace)
         if isinstance(parsed, Namespace):
-            parsed = vars(parsed)  # type: ignore
+            parsed = vars(parsed)
         if not isinstance(parsed, NestedDict):
-            parsed = NestedDict({key: value for key, value in parsed.items() if value is not Null})  # type: ignore
+            parsed = NestedDict({key: value for key, value in parsed.items() if value is not Null})
         if eval_str:
             for key, value in parsed.all_items():
                 if isinstance(value, str):
                     with suppress(TypeError, ValueError, SyntaxError):
                         value = literal_eval(value)
                     parsed[key] = value
-        return parsed  # type: ignore
+        return parsed
 
     def add_config_arguments(self, config):
         for key, value in config.all_items():
@@ -298,7 +298,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         if default_config in parsed:
             path = parsed[default_config]
             warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
-            return NestedDict.load(path).merge(parsed)  # type: ignore
+            return NestedDict.load(path).merge(parsed)
         if no_default_config_action == "ignore":
             pass
         elif no_default_config_action == "warn":

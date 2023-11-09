@@ -63,7 +63,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
+def to_dict(obj: Any) -> Mapping | list | set | tuple:  # pylint: disable=R0911
     r"""
     Convert an object to a dict.
 
@@ -97,14 +97,14 @@ def to_dict(obj: Any) -> Mapping[str, Any]:  # pylint: disable=R0911
     if isinstance(obj, Mapping):
         return {k: to_dict(v) for k, v in obj.items()}
     if isinstance(obj, list):
-        return [to_dict(v) for v in obj]  # type: ignore
+        return [to_dict(v) for v in obj]
     if isinstance(obj, tuple):
-        return tuple(to_dict(v) for v in obj)  # type: ignore
+        return tuple(to_dict(v) for v in obj)
     if isinstance(obj, set):
         try:
-            return {to_dict(v) for v in obj}  # type: ignore
+            return {to_dict(v) for v in obj}
         except TypeError:
-            return tuple(to_dict(v) for v in obj)  # type: ignore
+            return tuple(to_dict(v) for v in obj)
     if isinstance(obj, Variable):
         return obj.value
     return obj
@@ -1028,7 +1028,9 @@ class FlatDict(dict, metaclass=Dict):
         """
         return self.deepcopy(memo=memo)
 
-    def save(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+    def save(  # pylint: disable=W1113
+        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+    ) -> None:
         r"""
         Save `FlatDict` to file.
 
@@ -1055,22 +1057,26 @@ class FlatDict(dict, metaclass=Dict):
         if method is None:
             if isinstance(file, (IOBase, IO)):
                 raise ValueError("`method` must be specified when saving to IO.")
-            method = splitext(file)[-1][1:]  # type: ignore
-        extension = method.lower()  # type: ignore
+            method = splitext(file)[-1][1:]
+        extension = method.lower()
         if extension in YAML:
             return self.yaml(file=file, *args, **kwargs)  # type: ignore
         if extension in JSON:
             return self.json(file=file, *args, **kwargs)  # type: ignore
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
-    def dump(self, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> None:  # pylint: disable=W1113
+    def dump(  # pylint: disable=W1113
+        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+    ) -> None:
         r"""
         Alias of [`save`][chanfig.FlatDict.save].
         """
         return self.save(file, method, *args, **kwargs)
 
     @classmethod
-    def load(cls, file: File, method: str | None = None, *args: Any, **kwargs: Any) -> Self:  # pylint: disable=W1113
+    def load(  # pylint: disable=W1113
+        cls, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+    ) -> Self:
         """
         Load `FlatDict` from file.
 
@@ -1101,8 +1107,8 @@ class FlatDict(dict, metaclass=Dict):
         if method is None:
             if isinstance(file, (IOBase, IO)):
                 raise ValueError("`method` must be specified when loading from IO.")
-            method = splitext(file)[-1][1:]  # type: ignore
-        extension = method.lower()  # type: ignore
+            method = splitext(file)[-1][1:]
+        extension = method.lower()
         if extension in JSON:
             return cls.from_json(file, *args, **kwargs)
         if extension in YAML:
@@ -1233,7 +1239,7 @@ class FlatDict(dict, metaclass=Dict):
 
         kwargs.setdefault("Dumper", YamlDumper)
         kwargs.setdefault("indent", self.getattr("indent", 2))
-        return yaml_dump(self.dict(), *args, **kwargs)  # type: ignore
+        return yaml_dump(self.dict(), *args, **kwargs)
 
     @classmethod
     def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> Self:

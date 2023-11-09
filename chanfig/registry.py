@@ -131,7 +131,7 @@ class Registry(NestedDict):
         # Registry.register()
         if name is not None:
             self.set(name, component)
-            return component  # type: ignore
+            return component
         # @Registry.register
         if callable(component) and name is None:
             self.set(component.__name__, component)
