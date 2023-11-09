@@ -20,6 +20,11 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any
 
+try:
+    from typing import Self
+except ImportError:
+    from typing_extensions import Self
+
 from .nested_dict import NestedDict
 from .parser import ConfigParser
 from .utils import Null
@@ -101,7 +106,7 @@ class Config(NestedDict):
             default_factory = Config
         super().__init__(*args, default_factory=default_factory, **kwargs)
 
-    def post(self) -> Config | None:
+    def post(self) -> Self | None:
         r"""
         Post process of `Config`.
 
@@ -138,7 +143,7 @@ class Config(NestedDict):
         self.validate()
         return self
 
-    def boot(self) -> Config:
+    def boot(self) -> Self:
         r"""
         Apply `post` recursively.
 
@@ -192,7 +197,7 @@ class Config(NestedDict):
         default_config: str | None = None,
         no_default_config_action: str = "raise",
         boot: bool = True,
-    ) -> Config:
+    ) -> Self:
         r"""
 
         Parse command-line arguments with `ConfigParser`.
@@ -235,7 +240,7 @@ class Config(NestedDict):
         default_config: str | None = None,
         no_default_config_action: str = "raise",
         boot: bool = True,
-    ) -> Config:
+    ) -> Self:
         r"""
 
         Parse command-line arguments with `ConfigParser`.
@@ -289,7 +294,7 @@ class Config(NestedDict):
             self.setattr("parser", ConfigParser())
         return self.getattr("parser").add_argument(*args, **kwargs)
 
-    def freeze(self, recursive: bool = True) -> Config:
+    def freeze(self, recursive: bool = True) -> Self:
         r"""
         Freeze `Config`.
 
@@ -327,7 +332,7 @@ class Config(NestedDict):
             freeze(self)
         return self
 
-    def lock(self, recursive: bool = True) -> Config:
+    def lock(self, recursive: bool = True) -> Self:
         r"""
         Alias of [`freeze`][chanfig.Config.freeze].
         """
@@ -357,7 +362,7 @@ class Config(NestedDict):
             if not was_frozen:
                 self.defrost()
 
-    def defrost(self, recursive: bool = True) -> Config:
+    def defrost(self, recursive: bool = True) -> Self:
         r"""
         Defrost `Config`.
 
@@ -399,7 +404,7 @@ class Config(NestedDict):
             defrost(self)
         return self
 
-    def unlock(self, recursive: bool = True) -> Config:
+    def unlock(self, recursive: bool = True) -> Self:
         r"""
         Alias of [`defrost`][chanfig.Config.defrost].
         """
