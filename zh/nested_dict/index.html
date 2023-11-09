@@ -2130,7 +2130,7 @@ If <code>default_factory</code> is <code>Null</code>, will create an empty insta
 <a id="__codelineno-0-562" name="__codelineno-0-562"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 <a id="__codelineno-0-563" name="__codelineno-0-563"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 <a id="__codelineno-0-564" name="__codelineno-0-564"></a>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span>  <span class="c1"># type: ignore  # pylint: disable=R0912,W0221</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span>  <span class="c1"># type: ignore[override]  # pylint: disable=R0912,W0221</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a>        <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -4470,7 +4470,7 @@ Defaults to self.convert_mapping.</p>
 <span class="normal"><a href="#__codelineno-0-638">638</a></span>
 <span class="normal"><a href="#__codelineno-0-639">639</a></span>
 <span class="normal"><a href="#__codelineno-0-640">640</a></span>
-<span class="normal"><a href="#__codelineno-0-641">641</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span>  <span class="c1"># type: ignore  # pylint: disable=R0912,W0221</span>
+<span class="normal"><a href="#__codelineno-0-641">641</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span>  <span class="c1"># type: ignore[override]  # pylint: disable=R0912,W0221</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
