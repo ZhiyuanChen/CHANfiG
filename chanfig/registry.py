@@ -93,7 +93,7 @@ class Registry(NestedDict):
         if override is not None:
             self.setattr("override", override)
 
-    def register(self, component: Any = None, name: Any | None = None) -> Callable:
+    def register(self, component: Any = None, name: Any | None = None, override: bool = False) -> Callable:
         r"""
         Register a new component.
 
@@ -125,7 +125,7 @@ class Registry(NestedDict):
             )
         """
 
-        if name in self and not self.override:
+        if name in self and not (override or self.override):
             raise ValueError(f"Component with name {name} already registered.")
 
         # Registry.register()
