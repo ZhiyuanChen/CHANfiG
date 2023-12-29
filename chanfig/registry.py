@@ -247,8 +247,8 @@ class Registry(NestedDict):
 
         if isinstance(name, Mapping):
             name = deepcopy(name)
-            name, kwargs = name.pop("name"), dict(name, **kwargs)  # type: ignore
-        return self.init(self.lookup(name), *args, **kwargs)  # type: ignore
+            name, kwargs = name.pop("name"), dict(name, **kwargs)  # type: ignore[attr-defined, arg-type]
+        return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
 
 
 GlobalRegistry = Registry()

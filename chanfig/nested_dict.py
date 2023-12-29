@@ -22,18 +22,15 @@ from inspect import ismethod
 from os import PathLike
 from typing import Any
 
+from typing_extensions import Self
+
 try:
     from functools import cached_property  # pylint: disable=C0412
 except ImportError:
     try:
-        from backports.cached_property import cached_property  # type: ignore
+        from backports.cached_property import cached_property  # type: ignore[no-redef]
     except ImportError:
-        cached_property = property  # type: ignore  # pylint: disable=C0103
-
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
+        cached_property = property  # type: ignore[misc, assignment] # pylint: disable=C0103
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
@@ -698,8 +695,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             return this
         if isinstance(that, Mapping):
             that = that.items()
-        context = this.converting() if isinstance(this, NestedDict) else nullcontext()
-        with context:
+        with this.converting() if isinstance(this, NestedDict) else nullcontext():
             for key, value in that:
                 if key in this and isinstance(this[key], Mapping):
                     if isinstance(value, Mapping):
@@ -709,8 +705,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                             this.set(key, value)
                         else:
                             this[key] = value
-                elif key in dir(this) and isinstance(getattr(this.__class__, key), (property, cached_property)):
-                    getattr(this, key).merge(value, overwrite=overwrite)
+                elif key in dir(this) and isinstance(getattr(this.__class__, key, None), (property, cached_property)):
+                    if isinstance(getattr(this, key, None), FlatDict):
+                        getattr(this, key).merge(value, overwrite=overwrite)
+                    else:
+                        setattr(this, key, value)
                 elif overwrite or key not in this:
                     if isinstance(this, NestedDict):
                         this.set(key, value)
