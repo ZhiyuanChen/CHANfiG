@@ -26,19 +26,16 @@ from re import compile, findall  # pylint: disable=W0622
 from types import GetSetDescriptorType, ModuleType
 from typing import IO, Any, Union, no_type_check
 
+import typing_extensions
+from typing_extensions import get_args, get_origin
 from yaml import SafeDumper, SafeLoader
-
-try:  # python 3.8+
-    import typing_extensions as typing
-except ImportError:
-    import typing  # type: ignore
 
 try:  # python 3.10+
     from types import UnionType  # pylint: disable=C0412
 except ImportError:
-    UnionType = Union  # type: ignore
+    UnionType = Union  # type: ignore[misc, assignment]
 
-GLOBAL_NS = {k: v for k, v in typing.__dict__.items() if not k.startswith("_")}
+GLOBAL_NS = {k: v for k, v in typing_extensions.__dict__.items() if not k.startswith("_")}
 PY310_PLUS = sys.version_info >= (3, 10)
 
 PathStr = Union[PathLike, str, bytes]
@@ -191,7 +188,7 @@ def get_annotations(  # pylint: disable=all
 
 @no_type_check
 def isvalid(data: Any, expected_type: type) -> bool:
-    expected_origin = typing.get_origin(expected_type)
+    expected_origin = get_origin(expected_type)
     if expected_origin not in (
         Callable,
         GetSetDescriptorType,
@@ -200,20 +197,20 @@ def isvalid(data: Any, expected_type: type) -> bool:
         None,
     ):
         if issubclass(expected_origin, Sequence):
-            inner_type = typing.get_args(expected_type)[0]
+            inner_type = get_args(expected_type)[0]
             return isinstance(data, expected_origin) and all(isinstance(item, inner_type) for item in data)
         if issubclass(expected_origin, Mapping):
-            key_type, value_type = typing.get_args(expected_type)
+            key_type, value_type = get_args(expected_type)
             return isinstance(data, expected_origin) and all(
                 isinstance(key, key_type) and isinstance(value, value_type) for key, value in data.items()
             )
         raise TypeError(f"Expected type {expected_type} is not supported.")
     if expected_origin is UnionType and not PY310_PLUS:
-        return any(isinstance(data, inner_type) for inner_type in typing.get_args(expected_type))
+        return any(isinstance(data, inner_type) for inner_type in get_args(expected_type))
     return isinstance(data, expected_type)
 
 
-class Dict(type(dict)):  # type: ignore
+class Dict(type(dict)):  # type: ignore[misc]
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         instance = super().__call__(*args, **kwargs)
         instance.__post_init__()
@@ -230,7 +227,7 @@ class Singleton(type):
 
     def __call__(cls, *args: Any, **kwargs: Any):
         if cls not in cls.__instances__:
-            cls.__instances__[cls] = super().__call__(*args, **kwargs)  # type: ignore
+            cls.__instances__[cls] = super().__call__(*args, **kwargs)  # type: ignore[index]
         return cls.__instances__[cls]
 
 

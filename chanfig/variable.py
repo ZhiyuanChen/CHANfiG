@@ -118,7 +118,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         self._required = required
         self._help = help
 
-    @property  # type: ignore
+    @property  # type: ignore[misc]
     def __class__(self) -> type:
         return self.value.__class__ if self.wrap_type else type(self)
 

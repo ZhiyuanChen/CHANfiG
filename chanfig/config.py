@@ -20,10 +20,7 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any
 
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
+from typing_extensions import Self
 
 from .nested_dict import NestedDict
 from .parser import ConfigParser

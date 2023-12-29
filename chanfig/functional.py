@@ -28,7 +28,7 @@ from .utils import JSON, YAML, File, PathStr
 
 
 def save(  # pylint: disable=W1113
-    obj, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+    obj, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
 ) -> None:
     r"""
     Save `FlatDict` to file.
@@ -62,7 +62,7 @@ def save(  # pylint: disable=W1113
     if method is None:
         if isinstance(file, IOBase):
             raise ValueError("`method` must be specified when saving to IO.")
-        method = splitext(file)[-1][1:]  # type: ignore
+        method = splitext(file)[-1][1:]
     extension = method.lower()
     if extension in YAML:
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103

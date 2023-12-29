@@ -28,11 +28,7 @@ from os.path import splitext
 from typing import IO, Any
 from warnings import warn
 
-try:
-    from typing import Self
-except ImportError:
-    from typing_extensions import Self
-
+from typing_extensions import Self
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
@@ -379,7 +375,7 @@ class FlatDict(dict, metaclass=Dict):
                 return self.__dict__[name]
             if name in self.__class__.__dict__:
                 return self.__class__.__dict__[name]
-            return super().getattr(name, default)  # type: ignore
+            return super().getattr(name, default)  # type: ignore[misc]
         except AttributeError:
             if default is not Null:
                 return default
@@ -466,7 +462,7 @@ class FlatDict(dict, metaclass=Dict):
         try:
             if name in self.__dict__ or name in self.__class__.__dict__:
                 return True
-            return super().hasattr(name)  # type: ignore
+            return super().hasattr(name)  # type: ignore[misc]
         except AttributeError:
             return False
 
@@ -519,7 +515,7 @@ class FlatDict(dict, metaclass=Dict):
         if obj is None:
             return cls()
         if issubclass(cls, FlatDict):
-            cls = cls.empty  # type: ignore  # pylint: disable=W0642
+            cls = cls.empty  # type: ignore[assignment] # pylint: disable=W0642
         if isinstance(obj, Mapping):
             return cls(obj)
         if isinstance(obj, Sequence):
@@ -710,7 +706,7 @@ class FlatDict(dict, metaclass=Dict):
         if len(args) == 1:
             args = args[0]
             if isinstance(args, (PathLike, str, bytes)):
-                args = self.load(args)  # type: ignore
+                args = self.load(args)  # type: ignore[assignment]
                 warn(
                     "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
                     PendingDeprecationWarning,
@@ -850,7 +846,7 @@ class FlatDict(dict, metaclass=Dict):
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty(
-            **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore
+            **{key: value for key, value in other if key not in self or self[key] != value}  # type: ignore[misc]
         )
 
     def diff(self, other: Mapping | Iterable | PathStr, *args: Any, **kwargs: Any) -> Self:
@@ -1029,7 +1025,7 @@ class FlatDict(dict, metaclass=Dict):
         return self.deepcopy(memo=memo)
 
     def save(  # pylint: disable=W1113
-        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
     ) -> None:
         r"""
         Save `FlatDict` to file.
@@ -1060,13 +1056,13 @@ class FlatDict(dict, metaclass=Dict):
             method = splitext(file)[-1][1:]
         extension = method.lower()
         if extension in YAML:
-            return self.yaml(file=file, *args, **kwargs)  # type: ignore
+            return self.yaml(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
         if extension in JSON:
-            return self.json(file=file, *args, **kwargs)  # type: ignore
+            return self.json(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
         raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
 
     def dump(  # pylint: disable=W1113
-        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+        self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
     ) -> None:
         r"""
         Alias of [`save`][chanfig.FlatDict.save].
@@ -1075,7 +1071,7 @@ class FlatDict(dict, metaclass=Dict):
 
     @classmethod
     def load(  # pylint: disable=W1113
-        cls, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore
+        cls, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
     ) -> Self:
         """
         Load `FlatDict` from file.
@@ -1149,7 +1145,7 @@ class FlatDict(dict, metaclass=Dict):
 
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
-                return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore
+                return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
     def jsons(self, *args: Any, **kwargs: Any) -> str:
@@ -1222,7 +1218,7 @@ class FlatDict(dict, metaclass=Dict):
         kwargs.setdefault("Loader", YamlLoader)
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
-                return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore
+                return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
             return cls.from_dict(yaml_load(fp, *args, **kwargs))
 
     def yamls(self, *args: Any, **kwargs: Any) -> str:
@@ -1304,11 +1300,11 @@ class FlatDict(dict, metaclass=Dict):
             yield file
         elif isinstance(file, (PathLike, str, bytes)):
             try:
-                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore  # noqa: SIM115
-                yield file  # type: ignore
+                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore[call-overload] # noqa: SIM115
+                yield file  # type: ignore[misc]
             finally:
                 with suppress(Exception):
-                    file.close()  # type: ignore
+                    file.close()  # type: ignore[union-attr]
         else:
             raise TypeError(f"expected str, bytes, os.PathLike, IO or IOBase, not {type(file).__name__}")
 
