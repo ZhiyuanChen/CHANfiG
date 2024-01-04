@@ -1681,7 +1681,7 @@ Therefore, <code>isinstance(Variable(1), int)</code> will return <code>True</cod
 <a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_required</span> <span class="o">=</span> <span class="n">required</span>
 <a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_help</span> <span class="o">=</span> <span class="n">help</span>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="nd">@property</span>  <span class="c1"># type: ignore</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="nd">@property</span>  <span class="c1"># type: ignore[misc]</span>
 <a id="__codelineno-0-122" name="__codelineno-0-122"></a>    <span class="k">def</span> <span class="nf">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">:</span>
 <a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="vm">__class__</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_type</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 <a id="__codelineno-0-124" name="__codelineno-0-124"></a>
