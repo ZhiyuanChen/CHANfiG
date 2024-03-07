@@ -138,7 +138,17 @@ class Test:
         assert self.config.deepcopy() == deepcopy(self.config)
 
 
-class ConfigDict(Config):
+class Ancestor(Config):
+    ancestor = 1
+
+
+class Parent(Ancestor):
+    parent = 2
+
+
+class ConfigDict(Parent):
+    child = 3
+
     def __init__(self):
         super().__init__()
         self.a = Config()
@@ -152,3 +162,10 @@ class TestConfigDict:
 
     def test_affinty(self):
         assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
+
+    def test_copy_class_attributes(self):
+        config = self.dict.copy_class_attributes(recursive=False)
+        assert config.child == 3
+        assert "ancestor" not in config
+        config = self.dict.copy_class_attributes()
+        assert config.ancestor == 1
