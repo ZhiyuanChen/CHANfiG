@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from contextlib import contextmanager
 from functools import wraps
 from typing import Any
@@ -96,12 +96,61 @@ class Config(NestedDict):
     """
 
     parser: None  # ConfigParser, Python 3.7 does not support forward reference
-    frozen: bool = False
+    frozen: bool
 
     def __init__(self, *args: Any, default_factory: Callable | None = None, **kwargs: Any):
         if default_factory is None:
             default_factory = Config
+        self.setattr("frozen", False)
         super().__init__(*args, default_factory=default_factory, **kwargs)
+
+    def copy_class_attributes(self, recursive: bool = True) -> Self:
+        r"""
+        Copy class attributes to instance.
+
+        Args:
+            recursive:
+
+        Returns:
+            self:
+
+        Examples:
+            >>> class Ancestor(Config):
+            ...     a = 1
+            >>> class Parent(Ancestor):
+            ...     b = 2
+            >>> class Child(Parent):
+            ...     c = 3
+            >>> c = Child()
+            >>> c
+            Child(<class 'chanfig.config.Config'>, )
+            >>> c.copy_class_attributes(recursive=False)
+            Child(<class 'chanfig.config.Config'>,('c'): 3)
+            >>> c.copy_class_attributes()  # doctest: +SKIP
+            Child(<class 'chanfig.config.Config'>,
+                ('a'): 1,
+                ('b'): 2,
+                ('c'): 3
+            )
+        """
+
+        def copy_cls_attributes(cls: type) -> Mapping:
+            return {
+                k: v
+                for k, v in cls.__dict__.items()
+                if k not in self
+                and not k.startswith("__")
+                and (not (isinstance(v, (property, staticmethod, classmethod)) or callable(v)))
+            }
+
+        if recursive:
+            for cls in self.__class__.__mro__:
+                if cls.__module__.startswith("chanfig"):
+                    break
+                self.merge(copy_cls_attributes(cls), overwrite=False)
+        else:
+            self.merge(copy_cls_attributes(self.__class__), overwrite=False)
+        return self
 
     def post(self) -> Self | None:
         r"""

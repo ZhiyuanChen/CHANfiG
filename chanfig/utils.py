@@ -31,7 +31,7 @@ from typing_extensions import get_args, get_origin
 from yaml import SafeDumper, SafeLoader
 
 try:  # python 3.10+
-    from types import UnionType  # pylint: disable=C0412
+    from types import UnionType  # type: ignore[attr-defined] # pylint: disable=C0412
 except ImportError:
     UnionType = Union  # type: ignore[misc, assignment]
 
@@ -212,6 +212,8 @@ def isvalid(data: Any, expected_type: type) -> bool:
 
 class Dict(type(dict)):  # type: ignore[misc]
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+        # if hasattr(cls, '__before_init__'):
+        #     cls.__before_init__()
         instance = super().__call__(*args, **kwargs)
         instance.__post_init__()
         instance.validate()
