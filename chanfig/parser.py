@@ -223,7 +223,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         for arg in args:
             if args == "--":
                 break
-            if arg.startswith("--"):
+            if arg.startswith("-"):
                 key_value_args.append(arg.split("=", maxsplit=1))
             else:
                 if not key_value_args:
