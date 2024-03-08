@@ -15,6 +15,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/config/"/>
     </url>
     <url>
+        <loc>https://chanfig.danling.org/configclass/</loc>
+        <lastmod>2024-03-08</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/configclass/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/configclass/"/>
+    </url>
+    <url>
         <loc>https://chanfig.danling.org/default_dict/</loc>
         <lastmod>2024-03-08</lastmod>
         <changefreq>daily</changefreq>
@@ -90,6 +97,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/config/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/config/"/>
+    </url>
+    <url>
+        <loc>https://chanfig.danling.org/zh/configclass/</loc>
+        <lastmod>2024-03-08</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/configclass/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/configclass/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/default_dict/</loc>
