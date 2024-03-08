@@ -1,0 +1,25 @@
+{
+  "name": "CHANfiG",
+  "seed": 1013,
+  "activation": "GELU",
+  "optim": {
+    "lr": 0.001
+  },
+  "dataloader": {
+    "batch_size": 64,
+    "num_workers": 4,
+    "pin_memory": true
+  },
+  "model": {
+    "encoder": {
+      "num_layers": 8,
+      "dropout": 0.1
+    },
+    "decoder": {
+      "num_layers": 8,
+      "dropout": 0.1
+    },
+    "dropout": 0.1
+  },
+  "id": "CHANfiG_1013"
+}

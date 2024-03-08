@@ -128,61 +128,8 @@ CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 ya
 
 更进一步的，如果你发现`Config`中的名字对于命令行来说过长，你可以简单的调用`self.add_argument`并设置恰当的`dest`来在命令行中使用更短的名字，正如`argparse`所做的那样。
 
-```python
-from chanfig import Config, Variable
-
-
-class Model:
-    def __init__(self, encoder, dropout=0.1, activation='ReLU'):
-        self.encoder = Encoder(**encoder)
-        self.dropout = Dropout(dropout)
-        self.activation = getattr(Activation, activation)
-
-def main(config):
-    model = Model(**config.model)
-    optimizer = Optimizer(**config.optimizer)
-    scheduler = Scheduler(**config.scheduler)
-    dataset = Dataset(**config.dataset)
-    dataloader = Dataloader(**config.dataloader)
-
-
-class TestConfig(Config):
-    def __init__(self):
-        super().__init__()
-        dropout = Variable(0.1)
-        self.name = "CHANfiG"
-        self.seed = 1013
-        self.data.batch_size = 64
-        self.model.encoder.num_layers = 6
-        self.model.decoder.num_layers = 6
-        self.model.dropout = dropout
-        self.model.encoder.dropout = dropout
-        self.model.decoder.dropout = dropout
-        self.activation = "GELU"
-        self.optim.lr = 1e-3
-        self.add_argument("--batch_size", dest="data.batch_size")
-        self.add_argument("--lr", dest="optim.lr")
-
-    def post(self):
-        self.id = f"{self.name}_{self.seed}"
-
-
-if __name__ == '__main__':
-    # config = Config.load('config.yaml')  # 如果你想读取一个 yaml
-    # config = Config.load('config.json')  # 如果你想读取一个 json
-    # existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
-    # config = Config(**existing_configs)  # 如果你有些config需要读取
-    config = TestConfig()
-    config = config.parse()
-    # config.merge('dataset.yaml')  # 如果你想合并一个 yaml
-    # config.merge('dataset.json')  # 如果你想合并一个 json
-    # 注意被合并的值具有更高的优先级
-    config.model.decoder.num_layers = 8
-    config.freeze()
-    print(config)
-    # main(config)
-    # config.yaml('config.yaml')  # 如果你想保存一个 yaml
-    # config.json('config.json')  # 如果你想保存一个 json
+```shell
+--8<-- "demo/config.py"
 ```
 
 所有你需要做的仅仅是运行一行：
@@ -201,50 +148,17 @@ python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0
 
 如果你保存了配置文件，那他应该看起来像这样：
 
-```yaml
-activation: GELU
-data:
-  batch_size: 64
-id: CHANfiG_1013
-model:
-  decoder:
-    dropout: 0.1
-    num_layers: 6
-  dropout: 0.1
-  encoder:
-    dropout: 0.1
-    num_layers: 6
-name: CHANfiG
-optim:
-  lr: 0.005
-seed: 1013
-```
+=== "yaml"
 
-```json
-{
-  "name": "CHANfiG",
-  "seed": 1013,
-  "data": {
-    "batch_size": 64
-  },
-  "model": {
-    "encoder": {
-      "num_layers": 6,
-      "dropout": 0.1
-    },
-    "decoder": {
-      "num_layers": 6,
-      "dropout": 0.1
-    },
-    "dropout": 0.1
-  },
-  "activation": "GELU",
-  "optim": {
-    "lr": 0.005
-  },
-  "id": "CHANfiG_1013"
-}
-```
+    ``` yaml
+    --8<-- "demo/config.yaml"
+    ```
+
+=== "json"
+
+    ``` json
+    --8<-- "demo/config.json"
+    ```
 
 在方法中定义默认参数，在命令行中修改，然后将剩下的交给 CHANfiG。
 
