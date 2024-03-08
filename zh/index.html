@@ -1016,7 +1016,7 @@ CHANfiG 的范式是：</p>
 <p>CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 yaml 和 json 的配置文件。</p>
 <p>如果你此前使用 yacs，只需简单将<code>CfgNode</code>替换为<code>Config</code>便可以享受所有 CHANfiG 所提供的便利。</p>
 <p>更进一步的，如果你发现<code>Config</code>中的名字对于命令行来说过长，你可以简单的调用<code>self.add_argument</code>并设置恰当的<code>dest</code>来在命令行中使用更短的名字，正如<code>argparse</code>所做的那样。</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
 <span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
 <span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
 <span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
@@ -1065,169 +1065,63 @@ CHANfiG 的范式是：</p>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
 <span class="normal"><a href="#__codelineno-0-49">49</a></span>
-<span class="normal"><a href="#__codelineno-0-50">50</a></span>
-<span class="normal"><a href="#__codelineno-0-51">51</a></span>
-<span class="normal"><a href="#__codelineno-0-52">52</a></span>
-<span class="normal"><a href="#__codelineno-0-53">53</a></span>
-<span class="normal"><a href="#__codelineno-0-54">54</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">chanfig</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Variable</span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a>import<span class="w"> </span>os
 <a id="__codelineno-0-2" name="__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoder</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;ReLU&#39;</span><span class="p">):</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">Encoder</span><span class="p">(</span><span class="o">**</span><span class="n">encoder</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">Activation</span><span class="p">,</span> <span class="n">activation</span><span class="p">)</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a>    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a>    <span class="n">scheduler</span> <span class="o">=</span> <span class="n">Scheduler</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">scheduler</span><span class="p">)</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>    <span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a>    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">Dataloader</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">dataloader</span><span class="p">)</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="k">class</span> <span class="nc">TestConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a>        <span class="n">dropout</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;CHANfiG&quot;</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">1013</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">64</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="s2">&quot;GELU&quot;</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">1e-3</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--batch_size&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;data.batch_size&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--lr&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;optim.lr&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="c1"># config = Config.load(&#39;config.yaml&#39;)  # 如果你想读取一个 yaml</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="c1"># config = Config.load(&#39;config.json&#39;)  # 如果你想读取一个 json</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="c1"># existing_configs = {&#39;data.batch_size&#39;: 64, &#39;model.encoder.num_layers&#39;: 8}</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="c1"># config = Config(**existing_configs)  # 如果你有些config需要读取</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">TestConfig</span><span class="p">()</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="c1"># config.merge(&#39;dataset.yaml&#39;)  # 如果你想合并一个 yaml</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="c1"># config.merge(&#39;dataset.json&#39;)  # 如果你想合并一个 json</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="c1"># 注意被合并的值具有更高的优先级</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">8</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="n">config</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="c1"># main(config)</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="c1"># config.yaml(&#39;config.yaml&#39;)  # 如果你想保存一个 yaml</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="c1"># config.json(&#39;config.json&#39;)  # 如果你想保存一个 json</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>from<span class="w"> </span>chanfig<span class="w"> </span>import<span class="w"> </span>Config,<span class="w"> </span>Variable,<span class="w"> </span>configclass
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a>@configclass
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a>class<span class="w"> </span>DataloaderConfig:
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="w">    </span>batch_size:<span class="w"> </span><span class="nv">int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">64</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="w">    </span>num_workers:<span class="w"> </span><span class="nv">int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">    </span>pin_memory:<span class="w"> </span><span class="nv">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a>class<span class="w"> </span>TestConfig<span class="o">(</span>Config<span class="o">)</span>:
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">    </span>def<span class="w"> </span>__init__<span class="o">(</span>self<span class="o">)</span>:
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="w">        </span>super<span class="o">()</span>.__init__<span class="o">()</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">        </span><span class="nv">dropout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>Variable<span class="o">(</span><span class="m">0</span>.1<span class="o">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">        </span>self.name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;CHANfiG&quot;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="w">        </span>self.seed<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1013</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="w">        </span>self.activation<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;GELU&quot;</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="w">        </span>self.optim.lr<span class="w"> </span><span class="o">=</span><span class="w"> </span>1e-3
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="w">        </span>self.dataloader<span class="w"> </span><span class="o">=</span><span class="w"> </span>DataloaderConfig<span class="o">()</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="w">        </span>self.model.encoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">6</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">        </span>self.model.decoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">6</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="w">        </span>self.model.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="w">        </span>self.model.encoder.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="w">        </span>self.model.decoder.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="w">        </span>self.add_argument<span class="o">(</span><span class="s2">&quot;--batch_size&quot;</span>,<span class="w"> </span><span class="nv">dest</span><span class="o">=</span><span class="s2">&quot;data.batch_size&quot;</span><span class="o">)</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">        </span>self.add_argument<span class="o">(</span><span class="s2">&quot;--lr&quot;</span>,<span class="w"> </span><span class="nv">dest</span><span class="o">=</span><span class="s2">&quot;optim.lr&quot;</span><span class="o">)</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="w">    </span>def<span class="w"> </span>post<span class="o">(</span>self<span class="o">)</span>:
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="w">        </span>self.id<span class="w"> </span><span class="o">=</span><span class="w"> </span>f<span class="s2">&quot;{self.name}_{self.seed}&quot;</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">if</span><span class="w"> </span><span class="nv">__name__</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;__main__&quot;</span>:
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="c1"># config = Config.load(&#39;config.yaml&#39;)  # read config from a yaml</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="w">    </span><span class="c1"># config = Config.load(&#39;config.json&#39;)  # read config from a json</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="w">    </span><span class="nv">existing_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="s2">&quot;model.encoder.num_layers&quot;</span>:<span class="w"> </span><span class="m">8</span><span class="o">}</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="w">    </span><span class="nv">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>TestConfig<span class="o">()</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">    </span>config.merge<span class="o">(</span>existing_config<span class="o">)</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="w">    </span><span class="c1"># config.merge(&#39;dataset.yaml&#39;)  # merge config from a yaml</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="w">    </span><span class="c1"># config.merge(&#39;dataset.json&#39;, overwrite=False)  # merge config from a json</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="w">    </span><span class="nv">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>config.parse<span class="o">()</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="w">    </span>config.model.decoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="w">    </span>config.freeze<span class="o">()</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="w">    </span>print<span class="o">(</span>config<span class="o">)</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="w">    </span><span class="c1"># main(config)</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="w">    </span><span class="nv">dir_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>os.path.dirname<span class="o">(</span>os.path.realpath<span class="o">(</span>__file__<span class="o">))</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="w">    </span>print<span class="o">(</span>dir_path<span class="o">)</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="w">    </span>config.save<span class="o">(</span>os.path.join<span class="o">(</span>dir_path,<span class="w"> </span><span class="s2">&quot;config.yaml&quot;</span><span class="o">))</span><span class="w">  </span><span class="c1"># save config to a yaml</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="w">    </span>config.save<span class="o">(</span>os.path.join<span class="o">(</span>dir_path,<span class="w"> </span><span class="s2">&quot;config.json&quot;</span><span class="o">))</span><span class="w">  </span><span class="c1"># save config to a json</span>
 </code></pre></div></td></tr></table></div>
 <p>所有你需要做的仅仅是运行一行：</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>python<span class="w"> </span>main.py<span class="w"> </span>--model.encoder.num_layers<span class="w"> </span><span class="m">8</span><span class="w"> </span>--model.dropout<span class="o">=</span><span class="m">0</span>.2<span class="w"> </span>--lr<span class="w"> </span>5e-3
 </code></pre></div></td></tr></table></div>
 <p>当然，你也可以读取一个默认配置文件然后在他基础上修改：</p>
 <p>注意，你必须指定<code>config.parse(default_config='config')</code>来正确读取默认配置文件。</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
-<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
-<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
-<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
-<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
-<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
-<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
-<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
-<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
-<span class="normal"><a href="#__codelineno-2-10">10</a></span>
-<span class="normal"><a href="#__codelineno-2-11">11</a></span>
-<span class="normal"><a href="#__codelineno-2-12">12</a></span>
-<span class="normal"><a href="#__codelineno-2-13">13</a></span>
-<span class="normal"><a href="#__codelineno-2-14">14</a></span>
-<span class="normal"><a href="#__codelineno-2-15">15</a></span>
-<span class="normal"><a href="#__codelineno-2-16">16</a></span>
-<span class="normal"><a href="#__codelineno-2-17">17</a></span>
-<span class="normal"><a href="#__codelineno-2-18">18</a></span>
-<span class="normal"><a href="#__codelineno-2-19">19</a></span>
-<span class="normal"><a href="#__codelineno-2-20">20</a></span>
-<span class="normal"><a href="#__codelineno-2-21">21</a></span>
-<span class="normal"><a href="#__codelineno-2-22">22</a></span>
-<span class="normal"><a href="#__codelineno-2-23">23</a></span>
-<span class="normal"><a href="#__codelineno-2-24">24</a></span>
-<span class="normal"><a href="#__codelineno-2-25">25</a></span>
-<span class="normal"><a href="#__codelineno-2-26">26</a></span>
-<span class="normal"><a href="#__codelineno-2-27">27</a></span>
-<span class="normal"><a href="#__codelineno-2-28">28</a></span>
-<span class="normal"><a href="#__codelineno-2-29">29</a></span>
-<span class="normal"><a href="#__codelineno-2-30">30</a></span>
-<span class="normal"><a href="#__codelineno-2-31">31</a></span>
-<span class="normal"><a href="#__codelineno-2-32">32</a></span>
-<span class="normal"><a href="#__codelineno-2-33">33</a></span>
-<span class="normal"><a href="#__codelineno-2-34">34</a></span>
-<span class="normal"><a href="#__codelineno-2-35">35</a></span>
-<span class="normal"><a href="#__codelineno-2-36">36</a></span>
-<span class="normal"><a href="#__codelineno-2-37">37</a></span>
-<span class="normal"><a href="#__codelineno-2-38">38</a></span>
-<span class="normal"><a href="#__codelineno-2-39">39</a></span>
-<span class="normal"><a href="#__codelineno-2-40">40</a></span>
-<span class="normal"><a href="#__codelineno-2-41">41</a></span>
-<span class="normal"><a href="#__codelineno-2-42">42</a></span>
-<span class="normal"><a href="#__codelineno-2-43">43</a></span>
-<span class="normal"><a href="#__codelineno-2-44">44</a></span>
-<span class="normal"><a href="#__codelineno-2-45">45</a></span>
-<span class="normal"><a href="#__codelineno-2-46">46</a></span>
-<span class="normal"><a href="#__codelineno-2-47">47</a></span>
-<span class="normal"><a href="#__codelineno-2-48">48</a></span>
-<span class="normal"><a href="#__codelineno-2-49">49</a></span>
-<span class="normal"><a href="#__codelineno-2-50">50</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>import<span class="w"> </span>os
-<a id="__codelineno-2-2" name="__codelineno-2-2"></a>
-<a id="__codelineno-2-3" name="__codelineno-2-3"></a>from<span class="w"> </span>chanfig<span class="w"> </span>import<span class="w"> </span>Config,<span class="w"> </span>Variable,<span class="w"> </span>configclass
-<a id="__codelineno-2-4" name="__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6"></a>@configclass
-<a id="__codelineno-2-7" name="__codelineno-2-7"></a>class<span class="w"> </span>DataloaderConfig:
-<a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="w">    </span>batch_size:<span class="w"> </span><span class="nv">int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">64</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="w">    </span>num_workers:<span class="w"> </span><span class="nv">int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">4</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="w">    </span>pin_memory:<span class="w"> </span><span class="nv">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>True
-<a id="__codelineno-2-11" name="__codelineno-2-11"></a>
-<a id="__codelineno-2-12" name="__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13"></a>class<span class="w"> </span>TestConfig<span class="o">(</span>Config<span class="o">)</span>:
-<a id="__codelineno-2-14" name="__codelineno-2-14"></a><span class="w">    </span>def<span class="w"> </span>__init__<span class="o">(</span>self<span class="o">)</span>:
-<a id="__codelineno-2-15" name="__codelineno-2-15"></a><span class="w">        </span>super<span class="o">()</span>.__init__<span class="o">()</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16"></a><span class="w">        </span><span class="nv">dropout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>Variable<span class="o">(</span><span class="m">0</span>.1<span class="o">)</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="w">        </span>self.name<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;CHANfiG&quot;</span>
-<a id="__codelineno-2-18" name="__codelineno-2-18"></a><span class="w">        </span>self.seed<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1013</span>
-<a id="__codelineno-2-19" name="__codelineno-2-19"></a><span class="w">        </span>self.activation<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;GELU&quot;</span>
-<a id="__codelineno-2-20" name="__codelineno-2-20"></a><span class="w">        </span>self.optim.lr<span class="w"> </span><span class="o">=</span><span class="w"> </span>1e-3
-<a id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="w">        </span>self.dataloader<span class="w"> </span><span class="o">=</span><span class="w"> </span>DataloaderConfig<span class="o">()</span>
-<a id="__codelineno-2-22" name="__codelineno-2-22"></a><span class="w">        </span>self.model.encoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">6</span>
-<a id="__codelineno-2-23" name="__codelineno-2-23"></a><span class="w">        </span>self.model.decoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">6</span>
-<a id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="w">        </span>self.model.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
-<a id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="w">        </span>self.model.encoder.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
-<a id="__codelineno-2-26" name="__codelineno-2-26"></a><span class="w">        </span>self.model.decoder.dropout<span class="w"> </span><span class="o">=</span><span class="w"> </span>dropout
-<a id="__codelineno-2-27" name="__codelineno-2-27"></a><span class="w">        </span>self.add_argument<span class="o">(</span><span class="s2">&quot;--batch_size&quot;</span>,<span class="w"> </span><span class="nv">dest</span><span class="o">=</span><span class="s2">&quot;data.batch_size&quot;</span><span class="o">)</span>
-<a id="__codelineno-2-28" name="__codelineno-2-28"></a><span class="w">        </span>self.add_argument<span class="o">(</span><span class="s2">&quot;--lr&quot;</span>,<span class="w"> </span><span class="nv">dest</span><span class="o">=</span><span class="s2">&quot;optim.lr&quot;</span><span class="o">)</span>
-<a id="__codelineno-2-29" name="__codelineno-2-29"></a>
-<a id="__codelineno-2-30" name="__codelineno-2-30"></a><span class="w">    </span>def<span class="w"> </span>post<span class="o">(</span>self<span class="o">)</span>:
-<a id="__codelineno-2-31" name="__codelineno-2-31"></a><span class="w">        </span>self.id<span class="w"> </span><span class="o">=</span><span class="w"> </span>f<span class="s2">&quot;{self.name}_{self.seed}&quot;</span>
-<a id="__codelineno-2-32" name="__codelineno-2-32"></a>
-<a id="__codelineno-2-33" name="__codelineno-2-33"></a>
-<a id="__codelineno-2-34" name="__codelineno-2-34"></a><span class="k">if</span><span class="w"> </span><span class="nv">__name__</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;__main__&quot;</span>:
-<a id="__codelineno-2-35" name="__codelineno-2-35"></a><span class="w">    </span><span class="c1"># config = Config.load(&#39;config.yaml&#39;)  # read config from a yaml</span>
-<a id="__codelineno-2-36" name="__codelineno-2-36"></a><span class="w">    </span><span class="c1"># config = Config.load(&#39;config.json&#39;)  # read config from a json</span>
-<a id="__codelineno-2-37" name="__codelineno-2-37"></a><span class="w">    </span><span class="nv">existing_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="s2">&quot;model.encoder.num_layers&quot;</span>:<span class="w"> </span><span class="m">8</span><span class="o">}</span>
-<a id="__codelineno-2-38" name="__codelineno-2-38"></a><span class="w">    </span><span class="nv">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>TestConfig<span class="o">()</span>
-<a id="__codelineno-2-39" name="__codelineno-2-39"></a><span class="w">    </span>config.merge<span class="o">(</span>existing_config<span class="o">)</span>
-<a id="__codelineno-2-40" name="__codelineno-2-40"></a><span class="w">    </span><span class="c1"># config.merge(&#39;dataset.yaml&#39;)  # merge config from a yaml</span>
-<a id="__codelineno-2-41" name="__codelineno-2-41"></a><span class="w">    </span><span class="c1"># config.merge(&#39;dataset.json&#39;, overwrite=False)  # merge config from a json</span>
-<a id="__codelineno-2-42" name="__codelineno-2-42"></a><span class="w">    </span><span class="nv">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>config.parse<span class="o">()</span>
-<a id="__codelineno-2-43" name="__codelineno-2-43"></a><span class="w">    </span>config.model.decoder.num_layers<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">8</span>
-<a id="__codelineno-2-44" name="__codelineno-2-44"></a><span class="w">    </span>config.freeze<span class="o">()</span>
-<a id="__codelineno-2-45" name="__codelineno-2-45"></a><span class="w">    </span>print<span class="o">(</span>config<span class="o">)</span>
-<a id="__codelineno-2-46" name="__codelineno-2-46"></a><span class="w">    </span><span class="c1"># main(config)</span>
-<a id="__codelineno-2-47" name="__codelineno-2-47"></a><span class="w">    </span><span class="nv">dir_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>os.path.dirname<span class="o">(</span>os.path.realpath<span class="o">(</span>__file__<span class="o">))</span>
-<a id="__codelineno-2-48" name="__codelineno-2-48"></a><span class="w">    </span>print<span class="o">(</span>dir_path<span class="o">)</span>
-<a id="__codelineno-2-49" name="__codelineno-2-49"></a><span class="w">    </span>config.save<span class="o">(</span>os.path.join<span class="o">(</span>dir_path,<span class="w"> </span><span class="s2">&quot;config.yaml&quot;</span><span class="o">))</span><span class="w">  </span><span class="c1"># save config to a yaml</span>
-<a id="__codelineno-2-50" name="__codelineno-2-50"></a><span class="w">    </span>config.save<span class="o">(</span>os.path.join<span class="o">(</span>dir_path,<span class="w"> </span><span class="s2">&quot;config.json&quot;</span><span class="o">))</span><span class="w">  </span><span class="c1"># save config to a json</span>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>python<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>meow.yaml<span class="w"> </span>--model.encoder.num_layers<span class="w"> </span><span class="m">8</span><span class="w"> </span>--model.dropout<span class="o">=</span><span class="m">0</span>.2<span class="w"> </span>--lr<span class="w"> </span>5e-3
 </code></pre></div></td></tr></table></div>
 <p>如果你保存了配置文件，那他应该看起来像这样：</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="yaml" name="__tabbed_1" type="radio" /><input id="json" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="yaml">yaml</label><label for="json">json</label></div>
