@@ -1121,11 +1121,9 @@ It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yam
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a>python<span class="w"> </span>main.py<span class="w"> </span>--config<span class="w"> </span>meow.yaml<span class="w"> </span>--model.encoder.num_layers<span class="w"> </span><span class="m">8</span><span class="w"> </span>--model.dropout<span class="o">=</span><span class="m">0</span>.2<span class="w"> </span>--lr<span class="w"> </span>5e-3
 </code></pre></div></td></tr></table></div>
 <p>If you have made it dump current configurations, this should be in the written file:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="yaml" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="yaml">yaml</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="yaml" name="__tabbed_1" type="radio" /><input id="json" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="yaml">yaml</label><label for="json">json</label></div>
 <div class="tabbed-content">
-<div class="tabbed-block"></div>
-</div>
-</div>
+<div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">YAML</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
 <span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
 <span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
@@ -1162,11 +1160,8 @@ It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yam
 <a id="__codelineno-3-17" name="__codelineno-3-17"></a><span class="w">  </span><span class="nt">lr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
 <a id="__codelineno-3-18" name="__codelineno-3-18"></a><span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1013</span>
 </code></pre></div></td></tr></table></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="json" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="json">json</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block"></div>
 </div>
-</div>
+<div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">JSON</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
 <span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
 <span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
@@ -1217,6 +1212,9 @@ It also provides <code>from_json</code>, <code>from_jsons</code>, <code>from_yam
 <a id="__codelineno-4-24" name="__codelineno-4-24"></a><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CHANfiG_1013&quot;</span>
 <a id="__codelineno-4-25" name="__codelineno-4-25"></a><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <p>Define the default arguments in function, put alterations in CLI, and leave the rest to CHANfiG.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Install the most recent stable version on pypi:</p>
