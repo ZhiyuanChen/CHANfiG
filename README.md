@@ -130,60 +130,7 @@ And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all th
 Moreover, if you find a name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
 ```python
-from chanfig import Config, Variable
-
-
-class Model:
-    def __init__(self, encoder, dropout=0.1, activation='ReLU'):
-        self.encoder = Encoder(**encoder)
-        self.dropout = Dropout(dropout)
-        self.activation = getattr(Activation, activation)
-
-def main(config):
-    model = Model(**config.model)
-    optimizer = Optimizer(**config.optimizer)
-    scheduler = Scheduler(**config.scheduler)
-    dataset = Dataset(**config.dataset)
-    dataloader = Dataloader(**config.dataloader)
-
-
-class TestConfig(Config):
-    def __init__(self):
-        super().__init__()
-        dropout = Variable(0.1)
-        self.name = "CHANfiG"
-        self.seed = 1013
-        self.data.batch_size = 64
-        self.model.encoder.num_layers = 6
-        self.model.decoder.num_layers = 6
-        self.model.dropout = dropout
-        self.model.encoder.dropout = dropout
-        self.model.decoder.dropout = dropout
-        self.activation = "GELU"
-        self.optim.lr = 1e-3
-        self.add_argument("--batch_size", dest="data.batch_size")
-        self.add_argument("--lr", dest="optim.lr")
-
-    def post(self):
-        self.id = f"{self.name}_{self.seed}"
-
-
-if __name__ == '__main__':
-    # config = Config.load('config.yaml')  # in case you want to read from a yaml
-    # config = Config.load('config.json')  # in case you want to read from a json
-    # existing_configs = {'data.batch_size': 64, 'model.encoder.num_layers': 8}
-    # config = Config(**existing_configs)  # in case you have some config in dict to load
-    config = TestConfig()
-    config = config.parse()
-    # config.merge('dataset.yaml')  # in case you want to merge a yaml
-    # config.merge('dataset.json')  # in case you want to merge a json
-    # note that the value of merge will override current values
-    config.model.decoder.num_layers = 8
-    config.freeze()
-    print(config)
-    # main(config)
-    # config.yaml('config.yaml')  # in case you want to save a yaml
-    # config.json('config.json')  # in case you want to save a json
+--8<-- "demo/config.py"
 ```
 
 All you need to do is just run a line:
@@ -202,50 +149,17 @@ python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0
 
 If you have made it dump current configurations, this should be in the written file:
 
-```yaml
-activation: GELU
-data:
-  batch_size: 64
-id: CHANfiG_1013
-model:
-  decoder:
-    dropout: 0.1
-    num_layers: 6
-  dropout: 0.1
-  encoder:
-    dropout: 0.1
-    num_layers: 6
-name: CHANfiG
-optim:
-  lr: 0.005
-seed: 1013
-```
+=== "yaml"
 
-```json
-{
-  "name": "CHANfiG",
-  "seed": 1013,
-  "data": {
-    "batch_size": 64
-  },
-  "model": {
-    "encoder": {
-      "num_layers": 6,
-      "dropout": 0.1
-    },
-    "decoder": {
-      "num_layers": 6,
-      "dropout": 0.1
-    },
-    "dropout": 0.1
-  },
-  "activation": "GELU",
-  "optim": {
-    "lr": 0.005
-  },
-  "id": "CHANfiG_1013"
-}
-```
+    ``` yaml
+    --8<-- "demo/config.yaml"
+    ```
+
+=== "json"
+
+    ``` json
+    --8<-- "demo/config.json"
+    ```
 
 Define the default arguments in function, put alterations in CLI, and leave the rest to CHANfiG.
 

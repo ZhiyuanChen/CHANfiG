@@ -1,0 +1,18 @@
+activation: GELU
+dataloader:
+  batch_size: 64
+  num_workers: 4
+  pin_memory: true
+id: CHANfiG_1013
+model:
+  decoder:
+    dropout: 0.1
+    num_layers: 8
+  dropout: 0.1
+  encoder:
+    dropout: 0.1
+    num_layers: 8
+name: CHANfiG
+optim:
+  lr: 0.001
+seed: 1013

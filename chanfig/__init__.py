@@ -21,6 +21,7 @@ from yaml.representer import SafeRepresenter
 from . import utils
 from ._version import __version__, __version_tuple__, version
 from .config import Config
+from .configclasses import configclass
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, to_dict
 from .functional import load, save
@@ -31,6 +32,7 @@ from .variable import Variable
 
 __all__ = [
     "Variable",
+    "configclass",
     "Config",
     "NestedDict",
     "FlatDict",
