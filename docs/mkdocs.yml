@@ -175,6 +175,8 @@ plugins:
         python:
           rendering:
             members_order: source
+          import:
+            - https://docs.python.org/3/objects.inv
   - i18n:
       docs_structure: suffix
       fallback_to_default: true
