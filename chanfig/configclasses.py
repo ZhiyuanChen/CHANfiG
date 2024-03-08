@@ -21,12 +21,12 @@ from .config import Config
 
 def configclass(cls=None, recursive: bool = False):
     """
-    Construct a Config in `dataclass` style.
+    Construct a Config in [`dataclass`][dataclasses.dataclass] style.
 
     This decorator creates a Config instance with the provided class attributes.
 
     See Also:
-        [`dataclass`]
+        [`dataclass`][dataclasses.dataclass]
 
     Args:
         cls (Type[Any]): The class to be enhanced, provided directly if no parentheses are used.
@@ -34,6 +34,20 @@ def configclass(cls=None, recursive: bool = False):
 
     Returns:
         A modified class with Config functionalities or a decorator with bound parameters.
+
+    Examples:
+        >>> @configclass
+        ... class DataloaderConfig:
+        ...     batch_size: int = 64
+        ...     num_workers: int = 4
+        ...     pin_memory: bool = True
+        >>> config = DataloaderConfig()
+        >>> print(config)
+        DataloaderConfig(<class 'chanfig.config.Config'>,
+          ('batch_size'): 64
+          ('num_workers'): 4
+          ('pin_memory'): True
+        )
     """
 
     def decorator(cls: Type[Any]):

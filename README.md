@@ -21,7 +21,7 @@ Most of the configs are just replicates of the default arguments of certain func
 It is also very hard to alter the configurations.
 One needs to navigate and open the right configuration file, make changes, save and exit.
 These had wasted an uncountable[^uncountable] amount of precious time ~~and are no doubt a crime~~.
-Using `argparse` could relieve the burdens to some extent.
+Using [`argparse`][argparse] could relieve the burdens to some extent.
 However, it takes a lot of work to make it compatible with existing config files, and its lack of nesting limits its potential.
 
 CHANfiG would like to make a change.
@@ -53,71 +53,74 @@ Although there have been some other works that achieve a similar functionality o
 Their Config object either uses a separate dict to store information from attribute-style access (EasyDict), which may lead to inconsistency between attribute-style access and dict-style access;
 or reuse the existing `__dict__` and redirect dict-style access (ml_collections), which may result in confliction between attributes and members of Config.
 
-To overcome the aforementioned limitations, we inherit the Python built-in `dict` to create `FlatDict`, `DefaultDict`, `NestedDict`, `Config`, and `Registry`.
-We also introduce `Variable` to allow sharing a value across multiple places, and `ConfigParser` to parse command line arguments.
+To overcome the aforementioned limitations, we inherit the Python built-in [`dict`][dict] to create [`FlatDict`][chanfig.FlatDict], [`DefaultDict`][chanfig.DefaultDict], [`NestedDict`][chanfig.NestedDict], [`Config`][chanfig.Config], and [`Registry`][chanfig.Registry].
+We also introduce [`Variable`][chanfig.Variable] to allow sharing a value across multiple places, and [`ConfigParser`][chanfig.ConfigParser] to parse command line arguments.
 
 ### FlatDict
 
-`FlatDict` improves the default `dict` in 3 aspects.
+[`FlatDict`][chanfig.FlatDict] improves the default [`dict`][dict] in 3 aspects.
 
 #### Dict Operations
 
-`FlatDict` incorporates a `merge` method that allows you to merge a `Mapping`, an `Iterable`, or a path to the `FlatDict`.
-Different from built-in `update`, `merge` assign values instead of replace, which makes it works better with `DefaultDict`.
+[`FlatDict`][chanfig.FlatDict] supports variable interpolation.
+Set a member's value to another member's name wrapped in `${}`, then call [`interpolate`][chanfig.FlatDict.interpolate] method. The value of this member will be automatically replaced with the value of another member.
 
-`dict` in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a `dict`. `FlatDict`supports`sort` to help you manage your dict.
+[`dict`][dict] in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a [`dict`][dict]. [`FlatDict`][chanfig.FlatDict]supports [`sort`][chanfig.FlatDict.sort] to help you manage your dict.
 
-Moreover, `FlatDict` comes with `difference` and `intersect`, which makes it very easy to compare a `FlatDict` with other `Mapping`, `Iterable`, or a path.
+[`FlatDict`][chanfig.FlatDict] incorporates a [`merge`][chanfig.FlatDict.merge] method that allows you to merge a `Mapping`, an `Iterable`, or a path to the [`FlatDict`][chanfig.FlatDict].
+Different from built-in [`update`][dict.update], [`merge`][chanfig.FlatDict.merge] assign values instead of replace, which makes it work better with [`DefaultDict`][chanfig.DefaultDict].
+
+Moreover, [`FlatDict`][chanfig.FlatDict] comes with [`difference`][chanfig.FlatDict.difference] and [`intersect`][chanfig.FlatDict.intersect], which makes it very easy to compare a [`FlatDict`][chanfig.FlatDict] with other `Mapping`, `Iterable`, or a path.
 
 #### ML Operations
 
-`FlatDict` supports `to` method similar to PyTorch Tensors.
-You can simply convert all member values of `FlatDict` to a certain type or pass to a device in the same way.
+[`FlatDict`][chanfig.FlatDict] supports [`to`][chanfig.FlatDict.to] method similar to PyTorch Tensor.
+You can simply convert all member values of [`FlatDict`][chanfig.FlatDict] to a certain type or pass to a device in the same way.
 
-`FlatDict` also integrates `cpu`, `gpu` (`cuda`), and `tpu` (`xla`) methods for easier access.
+[`FlatDict`][chanfig.FlatDict] also integrates `cpu`, `gpu` (`cuda`), and `tpu` (`xla`) methods for easier access.
 
 #### IO Operations
 
-`FlatDict` provides `json`, `jsons`, `yaml` and `yamls` methods to dump `FlatDict` to a file or string.
-It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a `FlatDict` from a string or file.
+[`FlatDict`][chanfig.FlatDict] provides `json`, `jsons`, `yaml` and `yamls` methods to dump [`FlatDict`][chanfig.FlatDict] to a file or string.
+It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a [`FlatDict`][chanfig.FlatDict] from a string or file.
 
-`FlatDict` also includes `dump` and `load` methods which determines the type by its extension and dump/load `FlatDict` to/from a file.
+[`FlatDict`][chanfig.FlatDict] also includes `dump` and `load` methods which determine the type by their extension and dump/load [`FlatDict`][chanfig.FlatDict] to/from a file.
 
 ### DefaultDict
 
-To facility the needs of default values, we incorporate `DefaultDict` which accepts `default_factory` and works just like a `collections.defaultdict`.
+To facilitate the needs of default values, we incorporate [`DefaultDict`][chanfig.DefaultDict] which accepts `default_factory` and works just like a [`collections.defaultdict`][collections.defaultdict].
 
 ### NestedDict
 
-Since most Configs are in a nested structure, we further propose a `NestedDict`.
+Since most Configs are in a nested structure, we further propose a [`NestedDict`][chanfig.NestedDict].
 
-Based on `DefaultDict`, `NestedDict` provides `all_keys`, `all_values`, and `all_items` methods to allow iterating over the whole nested structure at once.
+Based on [`DefaultDict`][chanfig.DefaultDict], [`NestedDict`][chanfig.NestedDict] provides [`all_keys`][chanfig.NestedDict.all_keys], [`all_values`][chanfig.NestedDict.all_values], and [`all_items`][chanfig.NestedDict.all_items] methods to allow iterating over the whole nested structure at once.
 
-`NestedDict` also comes with `apply` and `apply_` methods, which made it easier to manipulate the nested structure.
+[`NestedDict`][chanfig.NestedDict] also comes with [`apply`][chanfig.NestedDict.apply] and [`apply_`][chanfig.NestedDict.apply_] methods, which make it easier to manipulate the nested structure.
 
 ### Config
 
-`Config` extends the functionality by supporting `freeze` and `defrost`, and by adding a built-in `ConfigParser` to pare command line arguments.
+[`Config`][chanfig.Config] extends the functionality by supporting [`freeze`][chanfig.Config.freeze] and [`defrost`][chanfig.Config.defrost], and by adding a built-in [`ConfigParser`][chanfig.ConfigParser] to pare command line arguments.
 
-Note that `Config` also has `default_factory=Config()` by default for convenience.
+Note that [`Config`][chanfig.Config] also has `default_factory=Config()` by default for convenience.
 
 ### Registry
 
-`Registry` extends the `NestedDict` and supports `register`, `lookup`, and `build` to help you register constructors and build objects from a `Config`.
+[`Registry`][chanfig.Registry] extends the [`NestedDict`][chanfig.NestedDict] and supports [`register`][chanfig.Registry.register], [`lookup`][chanfig.Registry.lookup], and [`build`][chanfig.Registry.build] to help you register constructors and build objects from a [`Config`][chanfig.Config].
 
 ### Variable
 
 Have one value for multiple names at multiple places? We got you covered.
 
-Just wrap the value with `Variable`, and one alteration will be reflected everywhere.
+Just wrap the value with [`Variable`][chanfig.Variable], and one alteration will be reflected everywhere.
 
-`Variable` also supports `type`, `choices`, `validator`, and `required` to ensure the correctness of the value.
+[`Variable`][chanfig.Variable] supports `type`, `choices`, `validator`, and `required` to ensure the correctness of the value.
 
-To make it even easier, `Variable` also supports `help` to provide a description when using `ConfigParser`.
+To make it even easier, [`Variable`][chanfig.Variable] also support `help` to provide a description when using [`ConfigParser`][chanfig.ConfigParser].
 
 ### ConfigParser
 
-`ConfigParser` extends `ArgumentParser` and provides `parse` and `parse_config` to parse command line arguments.
+[`ConfigParser`][chanfig.ConfigParser] extends [`ArgumentParser`][argparse.ArgumentParser] and provides [`parse`][chanfig.ConfigParser.parse] and [`parse_config`][chanfig.ConfigParser.parse_config] to parse command line arguments.
 
 ## Usage
 
@@ -125,9 +128,9 @@ CHANfiG has great backward compatibility with previous configs.
 
 No matter if your old config is json or yaml, you could directly read from them.
 
-And if you are using yacs, just replace `CfgNode` with `Config` and enjoy all the additional benefits that CHANfiG provides.
+And if you are using yacs, just replace `CfgNode` with [`Config`][chanfig.Config] and enjoy all the additional benefits that CHANfiG provides.
 
-Moreover, if you find a name in the config is too long for command-line, you could simply call `self.add_argument` with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
+Moreover, if you find a name in the config is too long for command-line, you could simply call [`self.add_argument`][chanfig.Config.add_argument] with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
 ```python
 --8<-- "demo/config.py"
@@ -165,17 +168,17 @@ Define the default arguments in function, put alterations in CLI, and leave the 
 
 ## Installation
 
-Install the most recent stable version on pypi:
+=== "Install the most recent stable version on pypi"
 
-```shell
-pip install chanfig
-```
+    ```shell
+    pip install chanfig
+    ```
 
-Install the latest version from source:
+=== "Install the latest version from source"
 
-```shell
-pip install git+https://github.com/ZhiyuanChen/CHANfiG
-```
+    ```shell
+    pip install git+https://github.com/ZhiyuanChen/CHANfiG
+    ```
 
 It works the way it should have worked.
 
@@ -183,12 +186,41 @@ It works the way it should have worked.
 
 CHANfiG is multi-licensed under the following licenses:
 
-- The Unlicense
-- GNU Affero General Public License v3.0 or later
-- GNU General Public License v2.0 or later
-- BSD 4-Clause "Original" or "Old" License
-- MIT License
-- Apache License 2.0
+=== "The Unlicense"
+
+    ```
+    --8<-- "LICENSES/LICENSE.Unlicense"
+    ```
+
+=== "GNU Affero General Public License v3.0 or later"
+
+    ```
+    --8<-- "LICENSES/LICENSE.AGPL"
+    ```
+
+=== "GNU General Public License v2.0 or later"
+
+    ```
+    --8<-- "LICENSES/LICENSE.GPLv2"
+    ```
+
+=== "BSD 4-Clause "Original" or "Old" License"
+
+    ```
+    --8<-- "LICENSES/LICENSE.BSD"
+    ```
+
+=== "MIT License"
+
+    ```
+    --8<-- "LICENSES/LICENSE.MIT"
+    ```
+
+=== "Apache License 2.0"
+
+    ```
+    --8<-- "LICENSES/LICENSE.Apache"
+    ```
 
 You can choose any (one or more) of these licenses if you use this work.
 

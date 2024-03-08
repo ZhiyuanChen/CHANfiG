@@ -36,7 +36,6 @@ class TestConfig(AncestorConfig):
 
 
 class Test:
-
     def test_configclass(self):
         config = TestConfig()
         assert config.name == "CHANfiG"
