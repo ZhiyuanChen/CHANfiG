@@ -553,7 +553,7 @@ class FlatDict(dict, metaclass=Dict):
         return self
 
     def interpolate(  # pylint: disable=R0912
-        self, use_variable: bool = True, interpolators: MutableMapping | None = None
+        self, use_variable: bool = True, interpolators: MutableMapping | None = None, unsafe_eval: bool = False
     ) -> Self:
         r"""
         Perform Variable interpolation.
@@ -563,6 +563,7 @@ class FlatDict(dict, metaclass=Dict):
         Args:
             use_variable: Whether to convert values to `Variable` objects.
             interpolators: Mapping contains values for interpolation. Defaults to `self`.
+            unsafe_eval: Whether to evaluate interpolated values.
 
         Raises:
             ValueError: If value is not interpolatable.
@@ -573,6 +574,11 @@ class FlatDict(dict, metaclass=Dict):
             [Variable][`chanfig.Variable`]: Mutable wrapper of immutable objects.
 
         Examples:
+            >>> d = FlatDict(a=1, b="${a}", c="${a}.${b}")
+            >>> d.dict()
+            {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
+            >>> d.interpolate(unsafe_eval=True).dict()
+            {'a': 1, 'b': 1, 'c': 1.1}
             >>> d = FlatDict(a=1, b="${a}", c="${a}.${b}")
             >>> d.dict()
             {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
@@ -646,6 +652,9 @@ class FlatDict(dict, metaclass=Dict):
                     self[key][k] = self.substitute(v, interpolators, value)
             else:
                 self[key] = self.substitute(self[key], interpolators, value)
+            if unsafe_eval and isinstance(self[key], str):
+                with suppress(SyntaxError):
+                    self[key] = eval(self[key])  # pylint: disable=W0123
         return self
 
     @staticmethod
