@@ -77,12 +77,12 @@ Moreover, [`FlatDict`][chanfig.FlatDict] comes with [`difference`][chanfig.FlatD
 [`FlatDict`][chanfig.FlatDict] supports [`to`][chanfig.FlatDict.to] method similar to PyTorch Tensor.
 You can simply convert all member values of [`FlatDict`][chanfig.FlatDict] to a certain type or pass to a device in the same way.
 
-[`FlatDict`][chanfig.FlatDict] also integrates `cpu`, `gpu` (`cuda`), and `tpu` (`xla`) methods for easier access.
+[`FlatDict`][chanfig.FlatDict] also integrates [`cpu`][chanfig.FlatDict.cpu], [`gpu`][chanfig.FlatDict.gpu] ([`cuda`][chanfig.FlatDict.cuda]), and [`tpu`][chanfig.FlatDict.tpu] ([`xla`][chanfig.FlatDict.xla]) methods for easier access.
 
 #### IO Operations
 
-[`FlatDict`][chanfig.FlatDict] provides `json`, `jsons`, `yaml` and `yamls` methods to dump [`FlatDict`][chanfig.FlatDict] to a file or string.
-It also provides `from_json`, `from_jsons`, `from_yaml` and `from_yamls` methods to build a [`FlatDict`][chanfig.FlatDict] from a string or file.
+[`FlatDict`][chanfig.FlatDict] provides [`json`][chanfig.FlatDict.json], [`jsons`][chanfig.FlatDict.jsons], [`yaml`][chanfig.FlatDict.yaml] and [`yamls`][chanfig.FlatDict.yamls] methods to dump [`FlatDict`][chanfig.FlatDict] to a file or string.
+It also provides [`from_json`][chanfig.FlatDict.from_json], [`from_jsons`][chanfig.FlatDict.from_jsons], [`from_yaml`][chanfig.FlatDict.from_yaml] and [`from_yamls`][chanfig.FlatDict.from_yamls] methods to build a [`FlatDict`][chanfig.FlatDict] from a string or file.
 
 [`FlatDict`][chanfig.FlatDict] also includes `dump` and `load` methods which determine the type by their extension and dump/load [`FlatDict`][chanfig.FlatDict] to/from a file.
 

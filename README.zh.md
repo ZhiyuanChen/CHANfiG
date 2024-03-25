@@ -73,12 +73,12 @@ Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内�
 [`FlatDict`][chanfig.FlatDict]支持与 Pytorch Tensor 类似的[`to`][chanfig.FlatDict.to]方法。
 你可以很简单的通过相同的方式将所有[`FlatDict`][chanfig.FlatDict]的成员值转换为某种类型或者转移到某个设备上。
 
-[`FlatDict`][chanfig.FlatDict]同时集成了`cpu`、`gpu` (`cuda`)、`tpu` (`xla`)方法来提供更便捷的访问。
+[`FlatDict`][chanfig.FlatDict]同时集成了[`cpu`][chanfig.FlatDict.cpu]、[`gpu`][chanfig.FlatDict.gpu] ([`cuda`][chanfig.FlatDict.cuda])、[`tpu`][chanfig.FlatDict.tpu] ([`xla`][chanfig.FlatDict.xla])方法来提供更便捷的访问。
 
 #### IO 操作
 
-[`FlatDict`][chanfig.FlatDict]支持`json`、`jsons`、`yaml`和`yamls`方法来将[`FlatDict`][chanfig.FlatDict]存储到文件或者转换成字符串。
-它还提供了`from_json`、`from_jsons`、`from_yaml`和`from_yamls`来从一个字符串或者文件中构建[`FlatDict`][chanfig.FlatDict]。
+[`FlatDict`][chanfig.FlatDict]支持[`json`][chanfig.FlatDict.json]、[`jsons`][chanfig.FlatDict.jsons]、[`yaml`][chanfig.FlatDict.yaml]和[`yamls`][chanfig.FlatDict.yamls]方法来将[`FlatDict`][chanfig.FlatDict]存储到文件或者转换成字符串。
+它还提供了[`from_json`][chanfig.FlatDict.from_json]、[`from_jsons`][chanfig.FlatDict.from_jsons]、[`from_yaml`][chanfig.FlatDict.from_yaml]和[`from_yamls`][chanfig.FlatDict.from_yamls]来从一个字符串或者文件中构建[`FlatDict`][chanfig.FlatDict]。
 
 [`FlatDict`][chanfig.FlatDict]也包括了`dump`和`load`方法，他们可以从文件扩展名中自动推断类型然后将[`FlatDict`][chanfig.FlatDict]存储到文件中/从文件中加载[`FlatDict`][chanfig.FlatDict]。
 
