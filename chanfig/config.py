@@ -164,7 +164,8 @@ class Config(NestedDict):
         Note that you should always call `boot` to apply `post` rather than calling `post` directly,
         as `boot` recursively call `post` on sub-configs.
 
-        See Also: [`boot`][chanfig.Config.boot]
+        See Also:
+            [`boot`][chanfig.Config.boot]
 
         Returns:
             self:
@@ -199,7 +200,8 @@ class Config(NestedDict):
         By default, `boot` is called after `Config` is parsed.
         If you don't need to parse command-line arguments, you should call `boot` manually.
 
-        See Also: [`post`][chanfig.Config.post]
+        See Also:
+            [`post`][chanfig.Config.post]
 
         Returns:
             self:

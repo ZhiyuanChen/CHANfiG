@@ -27,7 +27,7 @@ from .flat_dict import FlatDict, to_dict
 from .functional import load, save
 from .nested_dict import NestedDict, apply, apply_
 from .parser import ConfigParser
-from .registry import GlobalRegistry, Registry
+from .registry import ConfigRegistry, GlobalRegistry, Registry
 from .variable import Variable
 
 __all__ = [
@@ -37,6 +37,7 @@ __all__ = [
     "NestedDict",
     "FlatDict",
     "Registry",
+    "ConfigRegistry",
     "GlobalRegistry",
     "DefaultDict",
     "ConfigParser",
@@ -56,7 +57,11 @@ add_representer(FlatDict, SafeRepresenter.represent_dict)
 add_representer(NestedDict, SafeRepresenter.represent_dict)
 add_representer(DefaultDict, SafeRepresenter.represent_dict)
 add_representer(Config, SafeRepresenter.represent_dict)
+add_representer(Registry, SafeRepresenter.represent_dict)
+add_representer(ConfigRegistry, SafeRepresenter.represent_dict)
 SafeRepresenter.add_representer(FlatDict, SafeRepresenter.represent_dict)
 SafeRepresenter.add_representer(NestedDict, SafeRepresenter.represent_dict)
 SafeRepresenter.add_representer(DefaultDict, SafeRepresenter.represent_dict)
 SafeRepresenter.add_representer(Config, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(Registry, SafeRepresenter.represent_dict)
+SafeRepresenter.add_representer(ConfigRegistry, SafeRepresenter.represent_dict)
