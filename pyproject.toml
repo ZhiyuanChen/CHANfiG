@@ -15,7 +15,6 @@ keywords = [
   "dict",
   "machine-learning",
 ]
-license = {file = "LICENSE"}
 maintainers = [
     {name = "Zhiyuan Chen", email = "this@zyc.ai"},
 ]
@@ -53,6 +52,7 @@ include = [
 [project.urls]
 documentation = "https://chanfig.danling.org"
 homepage = "https://chanfig.danling.org"
+license-expression = "Unlicense OR AGPL-3.0-or-later OR GPL-2.0-or-later OR BSD-4-Clause OR MIT OR Apache-2.0"
 repository = "https://github.com/ZhiyuanChen/CHANfiG"
 
 [tool.setuptools]
