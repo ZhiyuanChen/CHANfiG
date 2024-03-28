@@ -27,7 +27,7 @@ class Registry(NestedDict):
     """
     `Registry` for components.
 
-    Registry provides 3 core functionalities:
+    `Registry` provides 3 core functionalities:
 
     - Register a new component.
     - Lookup for a component.
@@ -54,6 +54,9 @@ class Registry(NestedDict):
         Therefore, `Registry` comes in a nested structure by nature.
         You could create a sub-registry by simply calling `registry.sub_registry = Registry`,
         and access through `registry.sub_registry.register()`.
+
+    See Also:
+        [`ConfigRegistry`][chanfig.ConfigRegistry]: Optimised for components that can be initialised with a `config`.
 
     Examples:
         >>> registry = Registry()
@@ -252,6 +255,127 @@ class Registry(NestedDict):
         if name is None:
             name, kwargs = kwargs.pop(self.getattr("key")), dict(**kwargs)
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
+
+
+class ConfigRegistry(Registry):
+    """
+    `ConfigRegistry` for components that can be initialised with a `config`.
+
+    `ConfigRegistry` is purcutularly useful when you want to construct a component from a configuration, such as a
+    Hugginface Transformers model.
+
+    See Also:
+        [`Registry`][chanfig.Registry]: General purpose Registry.
+
+    Examples:
+        >>> from dataclasses import dataclass, field
+        >>> @dataclass
+        ... class Config:
+        ...     a: int
+        ...     b: int
+        ...     mode: str = "proj"
+        >>> registry = ConfigRegistry(key="mode")
+        >>> @registry.register("proj")
+        ... class Proj:
+        ...     def __init__(self, config):
+        ...         self.a = config.a
+        ...         self.b = config.b
+        >>> @registry.register("inv")
+        ... class Inv:
+        ...     def __init__(self, config):
+        ...         self.a = config.b
+        ...         self.b = config.a
+        >>> registry
+        ConfigRegistry(
+          ('proj'): <class 'chanfig.registry.Proj'>
+          ('inv'): <class 'chanfig.registry.Inv'>
+        )
+        >>> config = Config(a=0, b=1)
+        >>> module = registry.build(config)
+        >>> module.a, module.b
+        (0, 1)
+        >>> config = Config(a=0, b=1, mode="inv")
+        >>> module = registry.build(config)
+        >>> module.a, module.b
+        (1, 0)
+        >>> @dataclass
+        ... class ModuleConfig:
+        ...     a: int = 0
+        ...     b: int = 1
+        ...     mode: str = "proj"
+        >>> @dataclass
+        ... class NestedConfig:
+        ...     module: ModuleConfig = field(default_factory=ModuleConfig)
+        >>> nested_registry = ConfigRegistry(key="module.mode")
+        >>> @nested_registry.register("proj")
+        ... class Proj:
+        ...     def __init__(self, config):
+        ...         self.a = config.module.a
+        ...         self.b = config.module.b
+        >>> @nested_registry.register("inv")
+        ... class Inv:
+        ...     def __init__(self, config):
+        ...         self.a = config.module.b
+        ...         self.b = config.module.a
+        >>> nested_config = NestedConfig()
+        >>> module = nested_registry.build(nested_config)
+        >>> module.a, module.b
+        (0, 1)
+    """
+
+    def build(self, config) -> Any:  # type: ignore[override]
+        r"""
+        Build a component.
+
+        Args:
+            config
+
+        Returns:
+            (Any):
+
+        Raises:
+            KeyError: If the component is not registered.
+
+        Examples:
+            >>> from dataclasses import dataclass, field
+            >>> registry = ConfigRegistry(key="module.mode")
+            >>> @registry.register("proj")
+            ... class Proj:
+            ...     def __init__(self, config):
+            ...         self.a = config.module.a
+            ...         self.b = config.module.b
+            >>> @registry.register("inv")
+            ... class Inv:
+            ...     def __init__(self, config):
+            ...         self.a = config.module.b
+            ...         self.b = config.module.a
+            >>> @dataclass
+            ... class ModuleConfig:
+            ...     a: int = 0
+            ...     b: int = 1
+            ...     mode: str = "proj"
+            >>> @dataclass
+            ... class Config:
+            ...     module: ModuleConfig = field(default_factory=ModuleConfig)
+            >>> config = Config()
+            >>> module = registry.build(config)
+            >>> type(module)
+            <class 'chanfig.registry.Proj'>
+            >>> module.a, module.b
+            (0, 1)
+            >>> type(module)
+            <class 'chanfig.registry.Proj'>
+        """
+
+        key = self.key
+        config_ = deepcopy(config)
+
+        while "." in key:
+            key, rest = key.split(".", 1)
+            config_, key = getattr(config_, key), rest
+        name = getattr(config_, key)
+
+        return self.init(self.lookup(name), config)  # type: ignore[arg-type]
 
 
 GlobalRegistry = Registry()
