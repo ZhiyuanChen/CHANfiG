@@ -106,6 +106,9 @@ Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内�
 
 [`Registry`][chanfig.Registry]继承自[`NestedDict`][chanfig.NestedDict]，并且提供[`register`][chanfig.Registry.register]、[`lookup`][chanfig.Registry.lookup]和[`build`][chanfig.Registry.build]来帮助你注册构造函数并从[`Config`][chanfig.Config]来创建对象。
 
+[`ConfigRegistry`][chanfig.ConfigRegistry]是一个[`Registry`][chanfig.Registry]的子类，他专为从一个[`Config`][chanfig.Config]或者一个[`dataclass`][dataclasses.dataclass]来构建一个对象而设计。
+只需在创建注册表时指定`key`，然后在调用`build`方法时传入`config`，你就会得到你想要的对象。
+
 ### Variable
 
 有一个值在多个地方以多个名字出现？我们给你提供掩护。
