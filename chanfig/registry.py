@@ -213,14 +213,12 @@ class Registry(NestedDict):
             ...     def __init__(self, a, b):
             ...         self.a = a
             ...         self.b = b
-            >>> kwargs = {"a": 1, "b": 2}
+            >>> kwargs = {"a": 0, "b": 1}
             >>> module = Registry.init(Module, **kwargs)
             >>> type(module)
             <class 'chanfig.registry.Module'>
-            >>> module.a
-            1
-            >>> module.b
-            2
+            >>> module.a, module.b
+            (0, 1)
         """
 
         return cls(*args, **kwargs)
@@ -275,7 +273,7 @@ class ConfigRegistry(Registry):
     """
     `ConfigRegistry` for components that can be initialised with a `config`.
 
-    `ConfigRegistry` is purcutularly useful when you want to construct a component from a configuration, such as a
+    `ConfigRegistry` is particularly useful when you want to construct a component from a configuration, such as a
     Hugginface Transformers model.
 
     See Also:
@@ -337,7 +335,34 @@ class ConfigRegistry(Registry):
         (0, 1)
     """
 
-    def build(self, config) -> Any:  # type: ignore[override]
+    @staticmethod
+    def init(cls: Callable, config, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W0211
+        r"""
+        Constructor of component.
+
+        Args:
+            cls: The component to construct.
+            *args: The arguments to pass to the component.
+            **kwargs: The keyword arguments to pass to the component.
+
+        Returns:
+            (Any):
+
+        Examples:
+            >>> class Module:
+            ...     def __init__(self, config, a=None, b=None):
+            ...         self.config = config
+            ...         self.a = config.a if a is None else a
+            ...         self.b = config.b if b is None else b
+            >>> config = NestedDict({"a": 0, "b": 1})
+            >>> module = ConfigRegistry.init(Module, config, b=2)
+            >>> module.a, module.b
+            (0, 2)
+        """
+
+        return cls(config, *args, **kwargs)
+
+    def build(self, config, *args, **kwargs) -> Any:  # type: ignore[override]
         r"""
         Build a component.
 
@@ -389,7 +414,7 @@ class ConfigRegistry(Registry):
             config_, key = getattr(config_, key), rest
         name = getattr(config_, key)
 
-        return self.init(self.lookup(name), config)  # type: ignore[arg-type]
+        return self.init(self.lookup(name), config, *args, **kwargs)  # type: ignore[arg-type]
 
 
 GlobalRegistry = Registry()

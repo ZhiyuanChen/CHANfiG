@@ -108,6 +108,9 @@ Note that [`Config`][chanfig.Config] also has `default_factory=Config()` by defa
 
 [`Registry`][chanfig.Registry] extends the [`NestedDict`][chanfig.NestedDict] and supports [`register`][chanfig.Registry.register], [`lookup`][chanfig.Registry.lookup], and [`build`][chanfig.Registry.build] to help you register constructors and build objects from a [`Config`][chanfig.Config].
 
+[`ConfigRegistry`][chanfig.ConfigRegistry] is a subclass of [`Registry`][chanfig.Registry] that is specifically designed for building objects from a [`Config`][chanfig.Config] or a [`dataclass`][dataclasses.dataclass].
+Just specify the `key` when creating the registry and pass `config` to the `build` method, and you will get the object you want.
+
 ### Variable
 
 Have one value for multiple names at multiple places? We got you covered.
