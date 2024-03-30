@@ -21,6 +21,7 @@ from functools import wraps
 from typing import Any
 
 from .nested_dict import NestedDict
+from .utils import Null
 
 
 class Registry(NestedDict):
@@ -61,7 +62,7 @@ class Registry(NestedDict):
     Examples:
         >>> registry = Registry()
         >>> @registry.register
-        ... @registry.register("Module1")
+        ... @registry.register("Module1", default=True)
         ... class Module:
         ...     def __init__(self, a, b):
         ...         self.a = a
@@ -78,26 +79,33 @@ class Registry(NestedDict):
         ValueError: Component with name Module already registered.
         >>> registry.lookup("Module")
         <class 'chanfig.registry.Module'>
-        >>> config = {"module": {"name": "Module", "a": 1, "b": 2}}
+        >>> config = {"module": {"name": "Module", "a": 0, "b": 1}}
         >>> # registry.register(Module)
         >>> module = registry.build(config["module"])
         >>> type(module)
         <class 'chanfig.registry.Module'>
-        >>> module.a
-        1
-        >>> module.b
-        2
+        >>> module.a, module.b
+        (0, 1)
+        >>> config = {"module": {"name": "NE", "a": 1, "b": 0}}
+        >>> module = registry.build(config["module"])
+        >>> module.a, module.b
+        (1, 0)
     """
 
     override: bool = False
+    key: str = "name"
+    default: Any = None
 
     def __init__(self, override: bool | None = None, key: str = "name", fallback: bool | None = None):
         super().__init__(fallback=fallback)
-        self.setattr("key", key)
         if override is not None:
             self.setattr("override", override)
+        self.setattr("key", key)
+        self.setattr("default", Null)
 
-    def register(self, component: Any = None, name: Any | None = None, override: bool = False) -> Callable:
+    def register(
+        self, component: Any = None, name: Any | None = None, override: bool = False, default: bool = False
+    ) -> Callable:
         r"""
         Register a new component.
 
@@ -135,10 +143,14 @@ class Registry(NestedDict):
         # Registry.register()
         if name is not None:
             self.set(name, component)
+            if default:
+                self.setattr("default", component)
             return component
         # @Registry.register
         if callable(component) and name is None:
             self.set(component.__name__, component)
+            if default:
+                self.setattr("default", component)
             return component
 
         # @Registry.register()
@@ -149,6 +161,8 @@ class Registry(NestedDict):
                     self.set(component.__name__, component)
                 else:
                     self.set(name, component)
+                if default:
+                    self.setattr("default", component)
                 return component
 
             return wrapper
@@ -179,7 +193,7 @@ class Registry(NestedDict):
             <class 'chanfig.registry.Module'>
         """
 
-        return self[name]
+        return self.get(name, self.getattr("default", Null))
 
     @staticmethod
     def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W0211
