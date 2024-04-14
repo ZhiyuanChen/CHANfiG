@@ -21,7 +21,7 @@ from functools import wraps
 from typing import Any
 
 from .nested_dict import NestedDict
-from .utils import Null
+from .utils import NULL, Null
 
 
 class Registry(NestedDict):
@@ -104,7 +104,7 @@ class Registry(NestedDict):
         self.setattr("default", Null)
 
     def register(
-        self, component: Any = None, name: Any | None = None, override: bool = False, default: bool = False
+        self, component: Any = Null, name: Any = Null, override: bool = False, default: bool = False
     ) -> Callable:
         r"""
         Register a new component.
@@ -141,23 +141,23 @@ class Registry(NestedDict):
             raise ValueError(f"Component with name {name} already registered.")
 
         # Registry.register()
-        if name is not None:
+        if name is not Null:
             self.set(name, component)
             if default:
                 self.setattr("default", component)
             return component
         # @Registry.register
-        if callable(component) and name is None:
+        if callable(component) and name is Null:
             self.set(component.__name__, component)
             if default:
                 self.setattr("default", component)
             return component
 
         # @Registry.register()
-        def decorator(name: Any | None = None):
+        def decorator(name: Any = Null):
             @wraps(self.register)
             def wrapper(component):
-                if name is None:
+                if name is Null:
                     self.set(component.__name__, component)
                 else:
                     self.set(name, component)
@@ -223,7 +223,7 @@ class Registry(NestedDict):
 
         return cls(*args, **kwargs)
 
-    def build(self, name: str | MutableMapping | None = None, *args: Any, **kwargs: Any) -> Any:
+    def build(self, name: str | MutableMapping | NULL = Null, *args: Any, **kwargs: Any) -> Any:
         r"""
         Build a component.
 
@@ -264,7 +264,7 @@ class Registry(NestedDict):
         if isinstance(name, MutableMapping):
             name = deepcopy(name)
             name, kwargs = name.pop(self.getattr("key", "name")), dict(name, **kwargs)  # type: ignore[arg-type]
-        if name is None:
+        if name is Null:
             name, kwargs = kwargs.pop(self.getattr("key")), dict(**kwargs)
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
 
