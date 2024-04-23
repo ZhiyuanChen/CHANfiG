@@ -91,6 +91,11 @@ class Test:
         assert d.get("n.a.d", fallback=True) == 0.1
         assert d.get("n.b.d", fallback=True) == 0.5
 
+    def test_to_dict(self):
+        d = NestedDict({"i.d": 1013, "f.n": "chang"})
+        assert d.dict() == {"i": {"d": 1013}, "f": {"n": "chang"}}
+        assert d.dict(flatten=True) == {"i.d": 1013, "f.n": "chang"}
+
 
 class ConfigDict(NestedDict):
     def __init__(self):

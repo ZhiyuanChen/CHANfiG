@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
 from io import IOBase
@@ -59,7 +59,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-def to_dict(obj: Any) -> Mapping | list | set | tuple:  # pylint: disable=R0911
+def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
     r"""
     Convert an object to a dict.
 
@@ -90,6 +90,8 @@ def to_dict(obj: Any) -> Mapping | list | set | tuple:  # pylint: disable=R0911
         {'a': ({'b': 1},)}
     """
 
+    if flatten and isinstance(obj, FlatDict):
+        return {k: to_dict(v) for k, v in obj.all_items()}
     if isinstance(obj, Mapping):
         return {k: to_dict(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -466,11 +468,12 @@ class FlatDict(dict, metaclass=Dict):
         except AttributeError:
             return False
 
-    def dict(self, cls: Callable = dict) -> Mapping:
+    def dict(self, flatten: bool = False) -> Mapping | Sequence | Set:
         r"""
         Convert `FlatDict` to other `Mapping`.
 
         Args:
+            flatten: Whether to flatten [`NestedDict`][chanfig.NestedDict].
             cls: Target class to be converted to.
 
         Returns:
@@ -479,13 +482,24 @@ class FlatDict(dict, metaclass=Dict):
         See Also:
             [`to_dict`][chanfig.flat_dict.to_dict]: Implementation of `dict`.
 
+        **Alias**:
+
+        + `to_dict`
+
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
             >>> d.dict()
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        return cls(to_dict(self))
+        return to_dict(self, flatten)
+
+    def to_dict(self, flatten: bool = False) -> Mapping | Sequence | Set:
+        r"""
+        Alias of [`dict`][chanfig.FlatDict.dict].
+        """
+
+        return self.dict(flatten)
 
     @classmethod
     def from_dict(cls, obj: Mapping | Sequence) -> Any:  # pylint: disable=R0911
