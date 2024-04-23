@@ -21,6 +21,9 @@ nav:
   - Utilities: utils.md
   # - package: package.md
   # - Blog: blog/index.md
+  - Development:
+    - Test: test.md
+    - Coverage: coverage.md
 
 theme:
   name: material
@@ -193,6 +196,11 @@ plugins:
       reconfigure_search: true
   - git-revision-date-localized:
       type: iso_datetime
+      enable_creation_date: true
+      fallback_to_build_date: true
+      exclude:
+          - coverage.md
+  - macros
   - rss:
       match_path: .*
       date_from_meta:
