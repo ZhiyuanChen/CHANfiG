@@ -20,6 +20,7 @@ from __future__ import annotations
 from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
+from dataclasses import asdict, is_dataclass
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -105,6 +106,10 @@ def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
             return tuple(to_dict(v) for v in obj)
     if isinstance(obj, Variable):
         return obj.value
+    if is_dataclass(obj):
+        return asdict(obj)
+    if hasattr(obj, "to_dict"):
+        return obj.to_dict()
     return obj
 
 
