@@ -40,7 +40,7 @@
         <link rel="alternate" type="application/rss+xml" title="RSS feed of updated content" href="../feed_rss_updated.xml">
       
       <link rel="icon" href="../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.18">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
     
     
       
@@ -1022,8 +1022,7 @@
 
           <details class="quote">
             <summary>Source code in <code>chanfig/flat_dict.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-62"> 62</a></span>
-<span class="normal"><a href="#__codelineno-0-63"> 63</a></span>
+            <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-63"> 63</a></span>
 <span class="normal"><a href="#__codelineno-0-64"> 64</a></span>
 <span class="normal"><a href="#__codelineno-0-65"> 65</a></span>
 <span class="normal"><a href="#__codelineno-0-66"> 66</a></span>
@@ -1068,53 +1067,58 @@
 <span class="normal"><a href="#__codelineno-0-105">105</a></span>
 <span class="normal"><a href="#__codelineno-0-106">106</a></span>
 <span class="normal"><a href="#__codelineno-0-107">107</a></span>
-<span class="normal"><a href="#__codelineno-0-108">108</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">flatten</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="n">Set</span><span class="p">:</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">    Convert an object to a dict.</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    Note that when converting a `set` object, it may be converted to a `tuple` object if its values is not hashable.</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        obj: Object to be converted.</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        A dict.</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        &gt;&gt;&gt; to_dict(1)</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        1</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">        &gt;&gt;&gt; to_dict([1, 2, 3])</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">        [1, 2, 3]</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        &gt;&gt;&gt; to_dict((1, 2, 3))</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        (1, 2, 3)</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">        &gt;&gt;&gt; to_dict({1, 2, 3})</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        {1, 2, 3}</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">        &gt;&gt;&gt; to_dict({&#39;a&#39;: 1, &#39;b&#39;: 2})</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        &gt;&gt;&gt; to_dict(Variable(1))</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">        1</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        &gt;&gt;&gt; to_dict(FlatDict(a=[[[[[FlatDict(b=1)]]]]]))</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        {&#39;a&#39;: [[[[[{&#39;b&#39;: 1}]]]]]}</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        &gt;&gt;&gt; to_dict(FlatDict(a={FlatDict(b=1)}))</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        {&#39;a&#39;: ({&#39;b&#39;: 1},)}</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">all_items</span><span class="p">()}</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>        <span class="k">return</span> <span class="p">[</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a>            <span class="k">return</span> <span class="p">{</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">}</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Variable</span><span class="p">):</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">value</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a>    <span class="k">return</span> <span class="n">obj</span>
+<span class="normal"><a href="#__codelineno-0-108">108</a></span>
+<span class="normal"><a href="#__codelineno-0-109">109</a></span>
+<span class="normal"><a href="#__codelineno-0-110">110</a></span>
+<span class="normal"><a href="#__codelineno-0-111">111</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">flatten</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span> <span class="o">|</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="n">Set</span><span class="p">:</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    Convert an object to a dict.</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    Note that when converting a `set` object, it may be converted to a `tuple` object if its values is not hashable.</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        obj: Object to be converted.</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        A dict.</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        &gt;&gt;&gt; to_dict(1)</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">        1</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">        &gt;&gt;&gt; to_dict([1, 2, 3])</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        [1, 2, 3]</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        &gt;&gt;&gt; to_dict((1, 2, 3))</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">        (1, 2, 3)</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        &gt;&gt;&gt; to_dict({1, 2, 3})</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">        {1, 2, 3}</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        &gt;&gt;&gt; to_dict({&#39;a&#39;: 1, &#39;b&#39;: 2})</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">        &gt;&gt;&gt; to_dict(Variable(1))</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        1</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        &gt;&gt;&gt; to_dict(FlatDict(a=[[[[[FlatDict(b=1)]]]]]))</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        {&#39;a&#39;: [[[[[{&#39;b&#39;: 1}]]]]]}</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        &gt;&gt;&gt; to_dict(FlatDict(a={FlatDict(b=1)}))</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        {&#39;a&#39;: ({&#39;b&#39;: 1},)}</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="k">if</span> <span class="n">flatten</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">all_items</span><span class="p">()}</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>        <span class="k">return</span> <span class="p">[</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>            <span class="k">return</span> <span class="p">{</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">}</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a>        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">to_dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Variable</span><span class="p">):</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">value</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>    <span class="k">if</span> <span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a>    <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2022,7 +2026,7 @@ heading_level: 0</p>
     <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.3220b9d7.min.js"></script>
+      <script src="../assets/javascripts/bundle.dd8806f2.min.js"></script>
       
         <script src="../assets/_markdown_exec_pyodide.js"></script>
       
