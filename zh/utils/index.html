@@ -38,7 +38,7 @@
         <link rel="alternate" type="application/rss+xml" title="已更新内容的 RSS 订阅" href="../../feed_rss_updated.xml">
       
       <link rel="icon" href="../../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
     
     
       
@@ -46,7 +46,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -949,18 +949,16 @@
 
 
 <a id="chanfig.utils.Singleton"></a>
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code></p>
 
-  
+
       <p>Metaclass for Singleton Classes.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>chanfig/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-223">223</a></span>
-<span class="normal"><a href="#__codelineno-0-224">224</a></span>
-<span class="normal"><a href="#__codelineno-0-225">225</a></span>
+              <details class="quote">
+                <summary>Source code in <code>chanfig/utils.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-225">225</a></span>
 <span class="normal"><a href="#__codelineno-0-226">226</a></span>
 <span class="normal"><a href="#__codelineno-0-227">227</a></span>
 <span class="normal"><a href="#__codelineno-0-228">228</a></span>
@@ -968,21 +966,23 @@
 <span class="normal"><a href="#__codelineno-0-230">230</a></span>
 <span class="normal"><a href="#__codelineno-0-231">231</a></span>
 <span class="normal"><a href="#__codelineno-0-232">232</a></span>
-<span class="normal"><a href="#__codelineno-0-233">233</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="k">class</span> <span class="nc">Singleton</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="sd">    Metaclass for Singleton Classes.</span>
-<a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">__instances__</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="normal"><a href="#__codelineno-0-233">233</a></span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span>
+<span class="normal"><a href="#__codelineno-0-235">235</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-225" name="__codelineno-0-225"></a><span class="k">class</span> <span class="nc">Singleton</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a><span class="sd">    Metaclass for Singleton Classes.</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-229" name="__codelineno-0-229"></a>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a>        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">:</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="n">__instances__</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a>
+<a id="__codelineno-0-232" name="__codelineno-0-232"></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a>        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">:</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>            <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[index]</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__instances__</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -998,8 +998,7 @@
 
   </div>
 
-  </div>
-
+    </div>
 
 </div><p>options:
 heading_level: 0</p>
@@ -1013,19 +1012,17 @@ heading_level: 0</p>
 
 
 <a id="chanfig.utils.NULL"></a>
-  <div class="doc doc-contents first">
+    <div class="doc doc-contents first">
 
-  
+
       <p>NULL class.</p>
 <p><code>get</code> method in CHANfiG may accept <code>None</code> or <code>Ellipse</code>(<code>...</code>) as value of <code>default</code>.
 Therefore, it is mandatory to have a different default value for <code>default</code>.</p>
 <p><code>Null</code> is an instance of <code>NULL</code> and is recommended to be used as <code>obj is Null</code>.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>chanfig/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-236">236</a></span>
-<span class="normal"><a href="#__codelineno-0-237">237</a></span>
-<span class="normal"><a href="#__codelineno-0-238">238</a></span>
+              <details class="quote">
+                <summary>Source code in <code>chanfig/utils.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-238">238</a></span>
 <span class="normal"><a href="#__codelineno-0-239">239</a></span>
 <span class="normal"><a href="#__codelineno-0-240">240</a></span>
 <span class="normal"><a href="#__codelineno-0-241">241</a></span>
@@ -1058,46 +1055,48 @@ Therefore, it is mandatory to have a different default value for <code>default</
 <span class="normal"><a href="#__codelineno-0-268">268</a></span>
 <span class="normal"><a href="#__codelineno-0-269">269</a></span>
 <span class="normal"><a href="#__codelineno-0-270">270</a></span>
-<span class="normal"><a href="#__codelineno-0-271">271</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="k">class</span> <span class="nc">NULL</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="sd">    NULL class.</span>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    `get` method in CHANfiG may accept `None` or `Ellipse`(`...`) as value of `default`.</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    Therefore, it is mandatory to have a different default value for `default`.</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    `Null` is an instance of `NULL` and is recommended to be used as `obj is Null`.</span>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="k">return</span> <span class="s2">&quot;Null&quot;</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a>    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="k">return</span> <span class="mi">0</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a>        <span class="k">return</span> <span class="bp">self</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>        <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a>
-<a id="__codelineno-0-261" name="__codelineno-0-261"></a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-262" name="__codelineno-0-262"></a>        <span class="k">return</span> <span class="bp">self</span>
-<a id="__codelineno-0-263" name="__codelineno-0-263"></a>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a>        <span class="k">raise</span> <span class="ne">StopIteration</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a>        <span class="k">return</span> <span class="bp">self</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a>        <span class="k">return</span> <span class="bp">self</span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
+<span class="normal"><a href="#__codelineno-0-272">272</a></span>
+<span class="normal"><a href="#__codelineno-0-273">273</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="k">class</span> <span class="nc">NULL</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    NULL class.</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">    `get` method in CHANfiG may accept `None` or `Ellipse`(`...`) as value of `default`.</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    Therefore, it is mandatory to have a different default value for `default`.</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    `Null` is an instance of `NULL` and is recommended to be used as `obj is Null`.</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a>        <span class="k">return</span> <span class="s2">&quot;Null&quot;</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a>    <span class="k">def</span> <span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="k">return</span> <span class="mi">0</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>        <span class="k">return</span> <span class="bp">self</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>        <span class="k">return</span> <span class="bp">self</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a>        <span class="k">raise</span> <span class="ne">StopIteration</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a>    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a>        <span class="k">return</span> <span class="bp">self</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>        <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1113,8 +1112,7 @@ Therefore, it is mandatory to have a different default value for <code>default</
 
   </div>
 
-  </div>
-
+    </div>
 
 </div><p>options:
 heading_level: 0</p>
@@ -1125,36 +1123,36 @@ heading_level: 0</p>
 
 
 <a id="chanfig.utils.JsonEncoder"></a>
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><a class="autorefs autorefs-external" title="json.JSONEncoder" href="https://docs.python.org/3/library/json.html#json.JSONEncoder">JSONEncoder</a></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-external" title="json.JSONEncoder" href="https://docs.python.org/3/library/json.html#json.JSONEncoder">JSONEncoder</a></code></p>
 
-  
+
       <p>JSON encoder for Config.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>chanfig/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-274">274</a></span>
-<span class="normal"><a href="#__codelineno-0-275">275</a></span>
-<span class="normal"><a href="#__codelineno-0-276">276</a></span>
+              <details class="quote">
+                <summary>Source code in <code>chanfig/utils.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-276">276</a></span>
 <span class="normal"><a href="#__codelineno-0-277">277</a></span>
 <span class="normal"><a href="#__codelineno-0-278">278</a></span>
 <span class="normal"><a href="#__codelineno-0-279">279</a></span>
 <span class="normal"><a href="#__codelineno-0-280">280</a></span>
 <span class="normal"><a href="#__codelineno-0-281">281</a></span>
-<span class="normal"><a href="#__codelineno-0-282">282</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="k">class</span> <span class="nc">JsonEncoder</span><span class="p">(</span><span class="n">JSONEncoder</span><span class="p">):</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    JSON encoder for Config.</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="s2">&quot;__json__&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a>            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">__json__</span><span class="p">()</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-282">282</a></span>
+<span class="normal"><a href="#__codelineno-0-283">283</a></span>
+<span class="normal"><a href="#__codelineno-0-284">284</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="k">class</span> <span class="nc">JsonEncoder</span><span class="p">(</span><span class="n">JSONEncoder</span><span class="p">):</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    JSON encoder for Config.</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="s2">&quot;__json__&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>            <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">__json__</span><span class="p">()</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1170,8 +1168,7 @@ heading_level: 0</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div><p>options:
 heading_level: 0</p>
@@ -1182,32 +1179,32 @@ heading_level: 0</p>
 
 
 <a id="chanfig.utils.YamlDumper"></a>
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="yaml.SafeDumper">SafeDumper</span></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="yaml.SafeDumper">SafeDumper</span></code></p>
 
-  
+
       <p>YAML Dumper for Config.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>chanfig/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-285">285</a></span>
-<span class="normal"><a href="#__codelineno-0-286">286</a></span>
-<span class="normal"><a href="#__codelineno-0-287">287</a></span>
+              <details class="quote">
+                <summary>Source code in <code>chanfig/utils.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-287">287</a></span>
 <span class="normal"><a href="#__codelineno-0-288">288</a></span>
 <span class="normal"><a href="#__codelineno-0-289">289</a></span>
 <span class="normal"><a href="#__codelineno-0-290">290</a></span>
-<span class="normal"><a href="#__codelineno-0-291">291</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="k">class</span> <span class="nc">YamlDumper</span><span class="p">(</span><span class="n">SafeDumper</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0903</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    YAML Dumper for Config.</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">def</span> <span class="nf">increase_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">indentless</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>  <span class="c1"># pylint: disable=W0235</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">increase_indent</span><span class="p">(</span><span class="n">flow</span><span class="p">,</span> <span class="n">indentless</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-291">291</a></span>
+<span class="normal"><a href="#__codelineno-0-292">292</a></span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="k">class</span> <span class="nc">YamlDumper</span><span class="p">(</span><span class="n">SafeDumper</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0903</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    YAML Dumper for Config.</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a>    <span class="k">def</span> <span class="nf">increase_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">indentless</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>  <span class="c1"># pylint: disable=W0235</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a>        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">increase_indent</span><span class="p">(</span><span class="n">flow</span><span class="p">,</span> <span class="n">indentless</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  
+
 
   <div class="doc doc-children">
 
@@ -1223,8 +1220,7 @@ heading_level: 0</p>
 
   </div>
 
-  </div>
-
+    </div>
 
 </div><p>options:
 heading_level: 0</p>
@@ -1235,27 +1231,26 @@ heading_level: 0</p>
 
 
 <a id="chanfig.utils.YamlLoader"></a>
-  <div class="doc doc-contents first">
-          <p class="doc doc-class-bases">
-            Bases: <code><span title="yaml.SafeLoader">SafeLoader</span></code></p>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="yaml.SafeLoader">SafeLoader</span></code></p>
 
-  
+
       <p>YAML Loader for Config.</p>
 
-            <details class="quote">
-              <summary>Source code in <code>chanfig/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-294">294</a></span>
-<span class="normal"><a href="#__codelineno-0-295">295</a></span>
-<span class="normal"><a href="#__codelineno-0-296">296</a></span>
-<span class="normal"><a href="#__codelineno-0-297">297</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="k">class</span> <span class="nc">YamlLoader</span><span class="p">(</span><span class="n">SafeLoader</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0901,R0903</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="sd">    YAML Loader for Config.</span>
-<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="sd">    &quot;&quot;&quot;</span>
+              <details class="quote">
+                <summary>Source code in <code>chanfig/utils.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-296">296</a></span>
+<span class="normal"><a href="#__codelineno-0-297">297</a></span>
+<span class="normal"><a href="#__codelineno-0-298">298</a></span>
+<span class="normal"><a href="#__codelineno-0-299">299</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="k">class</span> <span class="nc">YamlLoader</span><span class="p">(</span><span class="n">SafeLoader</span><span class="p">):</span>  <span class="c1"># pylint: disable=R0901,R0903</span>
+<a id="__codelineno-0-297" name="__codelineno-0-297"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-298" name="__codelineno-0-298"></a><span class="sd">    YAML Loader for Config.</span>
+<a id="__codelineno-0-299" name="__codelineno-0-299"></a><span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
-            </details>
+              </details>
 
-  </div>
-
+    </div>
 
 </div><p>options:
 heading_level: 0</p>
@@ -1356,7 +1351,7 @@ heading_level: 0</p>
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      All rights reserved &copy; 2022-2023, CHANfiG Contributors
+      All rights reserved &copy; 2022-Present, CHANfiG Contributors
     </div>
   
   
@@ -1449,7 +1444,7 @@ heading_level: 0</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="../../assets/javascripts/bundle.081f42fc.min.js"></script>
       
         <script src="../../assets/_markdown_exec_pyodide.js"></script>
       

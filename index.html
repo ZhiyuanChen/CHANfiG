@@ -38,7 +38,7 @@
         <link rel="alternate" type="application/rss+xml" title="RSS feed of updated content" href="feed_rss_updated.xml">
       
       <link rel="icon" href="assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.20">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
     
     
       
@@ -46,7 +46,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
@@ -1160,56 +1160,90 @@ Just specify the <code>key</code> when creating the registry and pass <code>conf
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
 <span class="normal"><a href="#__codelineno-0-49">49</a></span>
-<span class="normal"><a href="#__codelineno-0-50">50</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">os</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="kn">from</span> <span class="nn">chanfig</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">configclass</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="nd">@configclass</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="k">class</span> <span class="nc">DataloaderConfig</span><span class="p">:</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8"></a>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9"></a>    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10"></a>    <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11"></a>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span>
+<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span>
+<span class="normal"><a href="#__codelineno-0-63">63</a></span>
+<span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># CHANfiG, Easier Configuration.</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="c1"># Copyright (c) 2022-Present, CHANfiG Contributors</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="c1"># it under the terms of the following licenses:</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="c1"># - The Unlicense</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="c1"># - GNU Affero General Public License v3.0 or later</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="c1"># - GNU General Public License v2.0 or later</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="c1"># - BSD 4-Clause &quot;Original&quot; or &quot;Old&quot; License</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="c1"># - MIT License</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="c1"># - Apache License 2.0</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="k">class</span> <span class="nc">TestConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a>        <span class="n">dropout</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;CHANfiG&quot;</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">1013</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="s2">&quot;GELU&quot;</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">1e-3</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataloaderConfig</span><span class="p">()</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--batch_size&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;data.batch_size&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--lr&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;optim.lr&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="c1"># See the LICENSE file for more details.</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="kn">import</span> <span class="nn">os</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="kn">from</span> <span class="nn">chanfig</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">configclass</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="nd">@configclass</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="k">class</span> <span class="nc">DataloaderConfig</span><span class="p">:</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">pin_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="c1"># config = Config.load(&#39;config.yaml&#39;)  # read config from a yaml</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="c1"># config = Config.load(&#39;config.json&#39;)  # read config from a json</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">existing_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model.encoder.num_layers&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">TestConfig</span><span class="p">()</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">config</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">existing_config</span><span class="p">)</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="c1"># config.merge(&#39;dataset.yaml&#39;)  # merge config from a yaml</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="c1"># config.merge(&#39;dataset.json&#39;, overwrite=False)  # merge config from a json</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">8</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">config</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="c1"># main(config)</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s2">&quot;config.yaml&quot;</span><span class="p">))</span>  <span class="c1"># save config to a yaml</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))</span>  <span class="c1"># save config to a json</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="k">class</span> <span class="nc">TestConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>        <span class="n">dropout</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;CHANfiG&quot;</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">1013</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="s2">&quot;GELU&quot;</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataloaderConfig</span><span class="p">()</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">6</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">encoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">dropout</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--batch_size&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;data.batch_size&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--lr&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;optim.lr&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="c1"># config = Config.load(&#39;config.yaml&#39;)  # read config from a yaml</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="c1"># config = Config.load(&#39;config.json&#39;)  # read config from a json</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="n">existing_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;model.encoder.num_layers&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">TestConfig</span><span class="p">()</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">config</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">existing_config</span><span class="p">)</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="c1"># config.merge(&#39;dataset.yaml&#39;)  # merge config from a yaml</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="c1"># config.merge(&#39;dataset.json&#39;, overwrite=False)  # merge config from a json</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="n">config</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">8</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="n">config</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>    <span class="c1"># main(config)</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>    <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s2">&quot;config.yaml&quot;</span><span class="p">))</span>  <span class="c1"># save config to a yaml</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>    <span class="n">config</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="s2">&quot;config.json&quot;</span><span class="p">))</span>  <span class="c1"># save config to a json</span>
 </code></pre></div></td></tr></table></div>
 <p>All you need to do is just run a line:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Bash</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a>python<span class="w"> </span>main.py<span class="w"> </span>--model.encoder.num_layers<span class="w"> </span><span class="m">8</span><span class="w"> </span>--model.dropout<span class="o">=</span><span class="m">0</span>.2<span class="w"> </span>--lr<span class="w"> </span>5e-3
@@ -3421,7 +3455,7 @@ Just specify the <code>key</code> when creating the registry and pass <code>conf
 <span class="normal"><a href="#__codelineno-10-32">32</a></span>
 <span class="normal"><a href="#__codelineno-10-33">33</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a>BSD 4-Clause License
 <a id="__codelineno-10-2" name="__codelineno-10-2"></a>
-<a id="__codelineno-10-3" name="__codelineno-10-3"></a>Copyright (c) 2022-2023, CHANfiG Contributors
+<a id="__codelineno-10-3" name="__codelineno-10-3"></a>Copyright (c) 2022-Present, CHANfiG Contributors
 <a id="__codelineno-10-4" name="__codelineno-10-4"></a>All rights reserved.
 <a id="__codelineno-10-5" name="__codelineno-10-5"></a>
 <a id="__codelineno-10-6" name="__codelineno-10-6"></a>Redistribution and use in source and binary forms, with or without
@@ -3477,7 +3511,7 @@ Just specify the <code>key</code> when creating the registry and pass <code>conf
 <span class="normal"><a href="#__codelineno-11-20">20</a></span>
 <span class="normal"><a href="#__codelineno-11-21">21</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a>MIT License
 <a id="__codelineno-11-2" name="__codelineno-11-2"></a>
-<a id="__codelineno-11-3" name="__codelineno-11-3"></a>Copyright (c) 2022-2023, CHANfiG Contributors
+<a id="__codelineno-11-3" name="__codelineno-11-3"></a>Copyright (c) 2022-Present, CHANfiG Contributors
 <a id="__codelineno-11-4" name="__codelineno-11-4"></a>
 <a id="__codelineno-11-5" name="__codelineno-11-5"></a>Permission is hereby granted, free of charge, to any person obtaining a copy
 <a id="__codelineno-11-6" name="__codelineno-11-6"></a>of this software and associated documentation files (the &quot;Software&quot;), to deal
@@ -4011,7 +4045,7 @@ Just specify the <code>key</code> when creating the registry and pass <code>conf
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      All rights reserved &copy; 2022-2023, CHANfiG Contributors
+      All rights reserved &copy; 2022-Present, CHANfiG Contributors
     </div>
   
   
@@ -4104,7 +4138,7 @@ Just specify the <code>key</code> when creating the registry and pass <code>conf
     <script id="__config" type="application/json">{"base": ".", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.prune", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.follow", "toc.integrate"], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="assets/javascripts/bundle.dd8806f2.min.js"></script>
+      <script src="assets/javascripts/bundle.081f42fc.min.js"></script>
       
         <script src="assets/_markdown_exec_pyodide.js"></script>
       
