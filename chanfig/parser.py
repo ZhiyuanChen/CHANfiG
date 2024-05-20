@@ -1,5 +1,6 @@
 # CHANfiG, Easier Configuration.
-# Copyright (c) 2022-2023, CHANfiG Contributors
+# Copyright (c) 2022-Present, CHANfiG Contributors
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the following licenses:
 # - The Unlicense
@@ -8,6 +9,7 @@
 # - BSD 4-Clause "Original" or "Old" License
 # - MIT License
 # - Apache License 2.0
+
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
