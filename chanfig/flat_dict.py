@@ -19,6 +19,7 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
 from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
@@ -181,6 +182,16 @@ class FlatDict(dict, metaclass=Dict):
     # pylint: disable=R0904
 
     indent: int = 2
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, (PathLike, str, bytes)):
+                arg = self.load(arg)
+            elif isinstance(arg, (Namespace,)):
+                arg = vars(arg)
+            args = (arg,)
+        super().__init__(*args, **kwargs)
 
     def __post_init__(self, *args, **kwargs) -> None:
         pass
