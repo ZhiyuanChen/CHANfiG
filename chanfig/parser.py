@@ -22,11 +22,14 @@ from argparse import ArgumentParser, Namespace, _StoreAction
 from ast import literal_eval
 from collections.abc import Sequence
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any
+from dataclasses import Field
+from inspect import isclass
+from types import NoneType, UnionType
+from typing import TYPE_CHECKING, Any, _UnionGenericAlias, get_args  # type: ignore[attr-defined]
 from warnings import warn
 
 from .nested_dict import NestedDict
-from .utils import Null, parse_bool
+from .utils import Null, get_annotations, parse_bool
 from .variable import Variable
 
 if TYPE_CHECKING:
@@ -277,23 +280,38 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                     parsed[key] = value
         return parsed
 
-    def add_config_arguments(self, config):
+    def add_config_arguments(self, config: Config):
+        for key, dtype in get_annotations(config).items():
+            self.add_config_argument(key, dtype=dtype)
         for key, value in config.all_items():
+            self.add_config_argument(key, value)
+
+    def add_config_argument(self, key, value: Any | None = None, dtype: type | None = None):
+        if dtype is None:
             if isinstance(value, Variable):
                 dtype = value._type or value.dtype  # pylint: disable=W0212
+            elif isinstance(value, Field):
+                dtype = value.type
             elif value is not None:
                 dtype = type(value)
-            else:
-                dtype = None
-            name = "--" + key
-            if name not in self:
-                help = value._help if isinstance(value, Variable) else None  # pylint: disable=W0212,W0622
-                if isinstance(value, (list, tuple, dict, set)):
-                    self.add_argument(name, type=dtype, nargs="+", help=help, dest=key)
-                elif isinstance(value, bool):
-                    self.add_argument(name, type=parse_bool, help=help, dest=key)
-                else:
-                    self.add_argument(name, type=dtype, help=help, dest=key)
+        if isinstance(dtype, (UnionType, _UnionGenericAlias)):
+            args = get_args(dtype)
+            if len(args) == 2 and NoneType in args:
+                dtype = args[0] if args[0] is not NoneType else args[1]
+        name = "--" + key
+        if name not in self:
+            help = None  # pylint: disable=W0622
+            if isinstance(value, Variable):
+                help = value._help  # pylint: disable=W0212
+            elif isinstance(value, Field):
+                help = value.metadata.get("help")
+            if dtype is None or not isclass(dtype):
+                return self.add_argument(name, help=help, dest=key)
+            if issubclass(dtype, (list, tuple, dict, set)):
+                return self.add_argument(name, type=dtype, nargs="+", help=help, dest=key)
+            if issubclass(dtype, bool):
+                return self.add_argument(name, type=parse_bool, help=help, dest=key)
+            return self.add_argument(name, type=dtype, help=help, dest=key)
 
     def merge_default_config(self, parsed, default_config: str, no_default_config_action: str = "raise") -> NestedDict:
         message = f"default_config is set to {default_config}, but not found in args."
