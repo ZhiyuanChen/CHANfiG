@@ -17,7 +17,10 @@
 
 from __future__ import annotations
 
+import sys
 from typing import List, Optional
+
+import pytest
 
 from chanfig import Config
 
@@ -32,8 +35,16 @@ class TestConfig(Config):
     f: bool
     false: bool
     n: bool
-    no: bool | None
+    no: Optional[bool]
     not_recognized: List[bool]
+
+
+class TestConfigPEP604(Config):
+    __test__ = False
+
+    true: bool | None
+    false: bool | None
+    not_recognized: list[bool]
 
 
 class Test:
@@ -86,3 +97,27 @@ class Test:
         )
         assert config.t and config.true and config.y and config.yes
         assert not config.f and not config.false and not config.n and not config.no
+
+    @pytest.mark.skipif(sys.version_info < (3, 10), reason="PEP604 is available in Python 3.10+")
+    def test_parse_pep604(self):
+        config = TestConfigPEP604()
+        config.parse(
+            [
+                "--true",
+                "true",
+                "--false",
+                "false",
+            ]
+        )
+        assert config.true and not config.false
+
+        config = TestConfigPEP604()
+        config.parse(
+            [
+                "--true",
+                "True",
+                "--false",
+                "False",
+            ]
+        )
+        assert config.true and not config.false

@@ -24,9 +24,15 @@ from collections.abc import Sequence
 from contextlib import suppress
 from dataclasses import Field
 from inspect import isclass
-from types import NoneType, UnionType
-from typing import TYPE_CHECKING, Any, _UnionGenericAlias, get_args  # type: ignore[attr-defined]
+from typing import TYPE_CHECKING, Any
 from warnings import warn
+
+from typing_extensions import _should_collect_from_parameters, get_args  # type: ignore[attr-defined]
+
+try:
+    from types import NoneType
+except ImportError:
+    NoneType = type(None)  # type: ignore[misc, assignment]
 
 from .nested_dict import NestedDict
 from .utils import Null, get_annotations, parse_bool
@@ -294,7 +300,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 dtype = value.type
             elif value is not None:
                 dtype = type(value)
-        if isinstance(dtype, (UnionType, _UnionGenericAlias)):
+        if _should_collect_from_parameters(dtype):
             args = get_args(dtype)
             if len(args) == 2 and NoneType in args:
                 dtype = args[0] if args[0] is not NoneType else args[1]

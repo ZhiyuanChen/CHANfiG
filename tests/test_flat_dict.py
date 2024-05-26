@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+from argparse import ArgumentParser
 from copy import copy, deepcopy
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -97,3 +98,15 @@ class TestConfigDict:
         ConfigDict(optional_str=None)
         with raises(TypeError):
             ConfigDict(optional_str=1)
+
+    def test_construct_file(self):
+        d = FlatDict("tests/test.json")
+        assert d == FlatDict({"a": 1, "b": 2, "c": 3})
+
+    def test_construct_namespace(self):
+        parser = ArgumentParser()
+        parser.add_argument("--name", type=str)
+        parser.add_argument("--seed", type=int)
+        d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1013"]))
+        assert d.name == "chang"
+        assert d.seed == 1013
