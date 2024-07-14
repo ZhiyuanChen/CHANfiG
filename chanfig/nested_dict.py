@@ -358,21 +358,21 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         if fallback is None:
             fallback = self.getattr("fallback", False)
         fallback_name = name.split(delimiter)[-1] if isinstance(name, str) else name
-        fallback_values = []
+        fallback_value = Null
         try:
             while isinstance(name, str) and delimiter in name:
                 if fallback and fallback_name in self:
-                    fallback_values.append(self.get(fallback_name))
+                    fallback_value = self.get(fallback_name)
                 name, rest = name.split(delimiter, 1)
                 self, name = self[name], rest  # pylint: disable=W0642
         except (KeyError, AttributeError, TypeError):
-            if fallback and fallback_values:
-                return fallback_values[-1]
+            if fallback and fallback_value is not Null:
+                return fallback_value
             if default is not Null:
                 return default
             raise KeyError(name) from None
-        if (fallback and fallback_values) and (not isinstance(self, Iterable) or name not in self):
-            return fallback_values[-1]
+        if (fallback and fallback_value is not Null) and (not isinstance(self, Iterable) or name not in self):
+            return fallback_value
         # if value is a python dict
         if not isinstance(self, NestedDict):
             if name not in self and default is not Null:
