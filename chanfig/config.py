@@ -173,6 +173,16 @@ class Config(NestedDict):
             self:
 
         Examples:
+            >>> c = Config()
+            >>> c.dne
+            Config(<class 'chanfig.config.Config'>, )
+            >>> c.post()
+            Config(
+              ('dne'): Config()
+            )
+            >>> c.dne2
+            Traceback (most recent call last):
+            AttributeError: 'Config' object has no attribute 'dne2'
             >>> class PostConfig(Config):
             ...     def post(self):
             ...         if isinstance(self.data, str):
@@ -190,6 +200,7 @@ class Config(NestedDict):
 
         self.interpolate()
         self.validate()
+        self.apply_(lambda c: c.setattr("default_factory", None) if isinstance(c, Config) else None)
         return self
 
     def boot(self) -> Self:
