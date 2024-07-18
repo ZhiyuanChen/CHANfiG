@@ -110,3 +110,13 @@ class TestConfigDict:
         d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1013"]))
         assert d.name == "chang"
         assert d.seed == 1013
+
+    def test_conflicts(self):
+        d = FlatDict(keys=0, values=1, items=2)
+        p = {"keys": 0, "values": 1, "items": 2}
+        assert d["keys"] == 0
+        assert d["values"] == 1
+        assert d["items"] == 2
+        assert d.keys() == p.keys()
+        assert list(d.values()) == list(p.values())  # dict_values can't be compared directly
+        assert d.items() == p.items()
