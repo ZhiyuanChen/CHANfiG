@@ -197,7 +197,11 @@ class FlatDict(dict, metaclass=Dict):
         pass
 
     def __getattribute__(self, name: Any) -> Any:
-        if (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__"))) and name in self:
+        if (
+            (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__")))
+            and name not in dir(self.__class__)
+            and name in self
+        ):
             return self.get(name)
         return super().__getattribute__(name)
 
