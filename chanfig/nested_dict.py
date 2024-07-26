@@ -142,6 +142,16 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             ('n'): 'chang'
           )
         )
+        >>> NestedDict({"i.d": [{'c': 1013}, {'k': 1031}]})
+        NestedDict(
+          ('i'): NestedDict(
+            ('d'): [NestedDict(
+              ('c'): 1013
+            ), NestedDict(
+              ('k'): 1031
+            )]
+          )
+        )
         >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
         >>> d.i.d = 1013
         >>> d['i.d']
@@ -455,14 +465,20 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         if (
             convert_mapping
-            and isinstance(value, Mapping)
             and not isinstance(value, default_factory if isinstance(default_factory, type) else type(self))
             and not isinstance(value, Variable)
         ):
-            try:
-                value = default_factory(**value)
-            except TypeError:
-                value = default_factory(value)
+            if isinstance(value, Mapping):
+                try:
+                    value = default_factory(**value)
+                except TypeError:
+                    value = default_factory(value)
+            if isinstance(value, list):
+                value = [default_factory(v) if isinstance(v, Mapping) else v for v in value]
+            if isinstance(value, tuple):
+                value = tuple(default_factory(v) if isinstance(v, Mapping) else v for v in value)
+            if isinstance(value, set):
+                value = {default_factory(v) if isinstance(v, Mapping) else v for v in list(value)}
         if isinstance(self, NestedDict):
             super().set(name, value)
         elif isinstance(self, Mapping):
@@ -682,7 +698,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             {'a': 1, 'b': {'e': {'f': [1]}, 'd': 3, 'c': 2}}
             >>> l.append(2)
             >>> d.b.e.f
-            [1, 2]
+            [1]
         """
 
         if recursive:
