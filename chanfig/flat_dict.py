@@ -496,7 +496,6 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             flatten: Whether to flatten [`NestedDict`][chanfig.NestedDict].
-            cls: Target class to be converted to.
 
         Returns:
             (Mapping):
