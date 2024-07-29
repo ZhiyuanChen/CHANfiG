@@ -78,6 +78,13 @@
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/variable/"/>
     </url>
     <url>
+        <loc>https://chanfig.danling.org/about/</loc>
+        <lastmod>2024-07-29</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/"/>
+    </url>
+    <url>
         <loc>https://chanfig.danling.org/about/license/</loc>
         <lastmod>2024-07-29</lastmod>
         <changefreq>daily</changefreq>
@@ -174,6 +181,13 @@
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/variable/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/variable/"/>
+    </url>
+    <url>
+        <loc>https://chanfig.danling.org/zh/about/</loc>
+        <lastmod>2024-07-29</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/about/license/</loc>
