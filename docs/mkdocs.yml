@@ -8,7 +8,7 @@ repo_name: CHANfiG
 repo_url: https://github.com/ZhiyuanChen/CHANfiG
 
 nav:
-  - CHANfiG: index.md
+  - index.md
   - Variable: variable.md
   - Config: config.md
   - NestedDict: nested_dict.md
@@ -25,6 +25,7 @@ nav:
     - Test: test.md
     - Coverage: coverage.md
   - About:
+      - about/index.md
       - License: about/license.md
       - Privacy Notice: about/privacy.md
 
