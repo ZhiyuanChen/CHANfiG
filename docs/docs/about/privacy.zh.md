@@ -3,7 +3,7 @@
     本文内容为机器翻译版本，旨在为用户提供方便。
     我们已经尽力确保翻译的准确性。
     但请注意，翻译内容可能包含错误，仅供参考。
-    请以英文[原文](https://multimolecule.danling.org/about/privacy)为准。
+    请以英文[原文](https://chanfig.danling.org/about/privacy)为准。
 
     为满足合规性与执法要求，翻译文档中的任何不准确或歧义之处均不具有约束力，也不具备法律效力。
 
@@ -15,7 +15,7 @@
 
 本隐私声明适用于丹灵团队（也被称作丹灵）（以下简称“我们”），描述了当您使用我们的服务（“服务”）时，我们如何以及为何可能收集、存储、使用和/或共享（“处理”）您的信息。例如当您：
 
-- 访问我们的网站 [danling.org](https://multimolecule.danling.org) 或任何链接到本隐私声明的我们的网站时
+- 访问我们的网站 [chanfig.danling.org](https://chanfig.danling.org) 或任何链接到本隐私声明的我们的网站时
 
 您可以随时通过点击下面的按钮更改您的隐私设置：
 
@@ -264,8 +264,6 @@
 
 !!! info "过去十二（12）个月我们与之共享个人信息的第三方类别："
 
-    - **广告、直销和潜在客户生成**
-        - Google AdSense
     - **网络和移动分析**
         - Google Analytics
 
@@ -282,16 +280,23 @@
 
 [隐私控制](#__consent){ .md-button }
 
-<!-- 关于我们如何使用此类技术以及您如何拒绝某些cookies的具体信息，请查看我们的Cookie声明：multimolecule.danling.org/about/cookie。 -->
+<!-- 关于我们如何使用此类技术以及您如何拒绝某些cookies的具体信息，请查看我们的Cookie声明：chanfig.danling.org/about/cookie。 -->
 
 ### Google Analytics
 
 我们可能会与Google Analytics共享您的信息，以跟踪和分析服务的使用情况。
 我们可能使用的Google Analytics广告功能包括：
-Google Analytics的再营销、Google Display Network印象报告和Google Analytics人口统计和兴趣报告。
-要选择退出在服务中通过Google Analytics跟踪您，请访问https://tools.google.com/dlpage/gaoptout。
+
+- Google Analytics的再营销
+- Google Display Network印象报告
+- Google Analytics人口统计和兴趣报告
+
+要选择退出在服务中通过Google Analytics跟踪您，请访问[https://tools.google.com/dlpage/gaoptout](https://tools.google.com/dlpage/gaoptout)。
+
 您可以通过[广告设置](https://adssettings.google.com)和移动应用的广告设置来选择退出Google Analytics广告功能。
+
 其他退出方式包括[http://optout.networkadvertising.org/](http://optout.networkadvertising.org/)和[http://www.networkadvertising.org/mobile-choice](http://www.networkadvertising.org/mobile-choice)。
+
 有关Google隐私做法的更多信息，请访问[Google隐私与条款](https://policies.google.com/privacy)。
 
 ## 6. 我们保留您的信息多久？
