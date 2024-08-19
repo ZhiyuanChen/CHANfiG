@@ -96,14 +96,18 @@ class Registry(NestedDict):
 
     override: bool = False
     key: str = "name"
-    default: Any = None
+    default: Any = Null
 
-    def __init__(self, override: bool | None = None, key: str = "name", fallback: bool | None = None):
+    def __init__(
+        self, override: bool | None = None, key: str | None = None, fallback: bool | None = None, default: Any = None
+    ):
         super().__init__(fallback=fallback)
         if override is not None:
             self.setattr("override", override)
-        self.setattr("key", key)
-        self.setattr("default", Null)
+        if key is not None:
+            self.setattr("key", key)
+        if default is not None:
+            self.setattr("default", default)
 
     def register(
         self, component: Any = Null, name: Any = Null, override: bool = False, default: bool = False
@@ -149,7 +153,7 @@ class Registry(NestedDict):
                 self.setattr("default", component)
             return component
         # @Registry.register
-        if callable(component) and name is Null:
+        if component is not Null and callable(component) and name is Null:
             self.set(component.__name__, component)
             if default:
                 self.setattr("default", component)
@@ -171,7 +175,7 @@ class Registry(NestedDict):
 
         return decorator(component)
 
-    def lookup(self, name: str) -> Any:
+    def lookup(self, name: str, default: Any = Null) -> Any:
         r"""
         Lookup for a component.
 
@@ -195,7 +199,9 @@ class Registry(NestedDict):
             <class 'chanfig.registry.Module'>
         """
 
-        return self.get(name, self.getattr("default", Null))
+        if default is Null:
+            default = self.getattr("default", Null)
+        return self.get(name, default)
 
     @staticmethod
     def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W0211
@@ -267,7 +273,7 @@ class Registry(NestedDict):
             name = deepcopy(name)
             name, kwargs = name.pop(self.getattr("key", "name")), dict(name, **kwargs)  # type: ignore[arg-type]
         if name is Null:
-            name, kwargs = kwargs.pop(self.getattr("key")), dict(**kwargs)
+            name, kwargs = kwargs.pop(self.getattr("key"), None), dict(**kwargs)
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
 
 
@@ -408,7 +414,7 @@ class ConfigRegistry(Registry):
             <class 'chanfig.registry.Proj'>
         """
 
-        key = self.key
+        key = self.getattr("key")
         config_ = deepcopy(config)
 
         while "." in key:
