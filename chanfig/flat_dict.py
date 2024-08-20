@@ -397,8 +397,9 @@ class FlatDict(dict, metaclass=Dict):
         try:
             if name in self.__dict__:
                 return self.__dict__[name]
-            if name in self.__class__.__dict__:
-                return self.__class__.__dict__[name]
+            for cls in self.__class__.__mro__:
+                if name in cls.__dict__:
+                    return cls.__dict__[name]
             return super().getattr(name, default)  # type: ignore[misc]
         except AttributeError:
             if default is not Null:
