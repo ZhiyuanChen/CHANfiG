@@ -445,7 +445,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         delimiter = self.getattr("delimiter", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
-        default_factory = self.getattr("default_factory", self.empty)
+        default_factory = self.getattr("default_factory", self.empty) or self.empty
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
@@ -459,7 +459,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                 else:
                     self, name = self[name], rest
                 if isinstance(self, NestedDict):
-                    default_factory = self.getattr("default_factory", self.empty)
+                    default_factory = self.getattr("default_factory", self.empty) or self.empty
         except (AttributeError, TypeError):
             raise KeyError(name) from None
 
@@ -612,7 +612,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         delimiter = self.getattr("delimiter", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
-        default_factory = self.getattr("default_factory", self.empty)
+        default_factory = self.getattr("default_factory", self.empty) or self.empty
         try:
             while isinstance(name, str) and delimiter in name:
                 name, rest = name.split(delimiter, 1)
@@ -626,7 +626,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                 else:
                     self, name = self[name], rest
                 if isinstance(self, NestedDict):
-                    default_factory = self.getattr("default_factory", self.empty)
+                    default_factory = self.getattr("default_factory", self.empty) or self.empty
         except (AttributeError, TypeError):
             raise KeyError(name) from None
 
