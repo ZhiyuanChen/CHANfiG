@@ -2,210 +2,210 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://chanfig.danling.org/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/config/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/config/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/config/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/configclass/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/configclass/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/configclass/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/default_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/default_dict/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/default_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/flat_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/flat_dict/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/flat_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/functional/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/functional/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/functional/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/nested_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/nested_dict/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/nested_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/parser/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/parser/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/parser/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/registry/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/registry/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/registry/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/utils/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/utils/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/utils/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/variable/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/variable/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/variable/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/about/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/about/license/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/license/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/license/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/about/privacy/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/privacy/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/privacy/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/blog/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/blog/"/>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/blog/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/config/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/config/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/config/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/configclass/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/configclass/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/configclass/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/default_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/default_dict/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/default_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/flat_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/flat_dict/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/flat_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/functional/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/functional/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/functional/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/nested_dict/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/nested_dict/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/nested_dict/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/parser/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/parser/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/parser/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/registry/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/registry/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/registry/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/utils/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/utils/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/utils/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/variable/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/variable/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/variable/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/about/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/about/license/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/license/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/license/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/about/privacy/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/about/privacy/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/about/privacy/"/>
     </url>
     <url>
         <loc>https://chanfig.danling.org/zh/blog/</loc>
-        <lastmod>2024-08-20</lastmod>
+        <lastmod>2024-08-21</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="zh" href="https://chanfig.danling.org/zh/blog/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://chanfig.danling.org/blog/"/>

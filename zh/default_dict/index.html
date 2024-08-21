@@ -1165,7 +1165,9 @@ You can still creates them manually with <code>DefaultDict.fromkeys</code> or <c
 <span class="normal"><a href="#__codelineno-0-119">119</a></span>
 <span class="normal"><a href="#__codelineno-0-120">120</a></span>
 <span class="normal"><a href="#__codelineno-0-121">121</a></span>
-<span class="normal"><a href="#__codelineno-0-122">122</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span> <span class="nc">DefaultDict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-122">122</a></span>
+<span class="normal"><a href="#__codelineno-0-123">123</a></span>
+<span class="normal"><a href="#__codelineno-0-124">124</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span> <span class="nc">DefaultDict</span><span class="p">(</span><span class="n">FlatDict</span><span class="p">):</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    `DefaultDict` inherits from `FlatDict` and incorporates support of `default_factory`</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    in the same manner as `collections.defaultdict`.</span>
@@ -1223,44 +1225,46 @@ You can still creates them manually with <code>DefaultDict.fromkeys</code> or <c
 <a id="__codelineno-0-82" name="__codelineno-0-82"></a>        <span class="k">return</span> <span class="n">default</span>
 <a id="__codelineno-0-83" name="__codelineno-0-83"></a>
 <a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a>            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>        <span class="n">super_repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="p">:]</span>  <span class="c1"># noqa: E203</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">super_repr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="si">}</span><span class="s2">, )&quot;</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="si">}</span><span class="s2">,&quot;</span> <span class="o">+</span> <span class="n">super_repr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">        Add a new default factory to the dictionary.</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">            name:</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">            ValueError: If `default_factory` is None.</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">        Examples:</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">            &gt;&gt;&gt; d = DefaultDict(default_factory=DefaultDict)</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">            &gt;&gt;&gt; d.add(&#39;d&#39;)</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">            DefaultDict()</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">            &gt;&gt;&gt; d.get(&#39;d&#39;)</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">            DefaultDict()</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">            &gt;&gt;&gt; d[&#39;n&#39;] = &#39;chang&#39;</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">            &gt;&gt;&gt; d.n</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">            &#39;chang&#39;</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">            &gt;&gt;&gt; d.n = &#39;liu&#39;</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">            &gt;&gt;&gt; d[&#39;n&#39;]</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">            &#39;liu&#39;</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">            &gt;&gt;&gt; d = DefaultDict()</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">            &gt;&gt;&gt; d.add(&#39;a&#39;)</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">            Traceback (most recent call last):</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">            ValueError: Cannot add to a DefaultDict with no default_factory</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add to a DefaultDict with no default_factory&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">())</span>  <span class="c1"># pylint: disable=E1102</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">default_factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;default_factory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="k">if</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a>            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="n">super_repr</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="p">:]</span>  <span class="c1"># noqa: E203</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">super_repr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">default_factory</span><span class="si">}</span><span class="s2">, )&quot;</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">default_factory</span><span class="si">}</span><span class="s2">,&quot;</span> <span class="o">+</span> <span class="n">super_repr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">        Add a new default factory to the dictionary.</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">            name:</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">            ValueError: If `default_factory` is None.</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        Examples:</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">            &gt;&gt;&gt; d = DefaultDict(default_factory=DefaultDict)</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">            &gt;&gt;&gt; d.add(&#39;d&#39;)</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">            DefaultDict()</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">            &gt;&gt;&gt; d.get(&#39;d&#39;)</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">            DefaultDict()</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">            &gt;&gt;&gt; d[&#39;n&#39;] = &#39;chang&#39;</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">            &gt;&gt;&gt; d.n</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">            &#39;chang&#39;</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">            &gt;&gt;&gt; d.n = &#39;liu&#39;</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">            &gt;&gt;&gt; d[&#39;n&#39;]</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">            &#39;liu&#39;</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">            &gt;&gt;&gt; d = DefaultDict()</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">            &gt;&gt;&gt; d.add(&#39;a&#39;)</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">            Traceback (most recent call last):</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">            ValueError: Cannot add to a DefaultDict with no default_factory</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="n">default_factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;default_factory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="k">if</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add to a DefaultDict with no default_factory&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">())</span>  <span class="c1"># pylint: disable=E1102</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1362,8 +1366,7 @@ You can still creates them manually with <code>DefaultDict.fromkeys</code> or <c
 
             <details class="quote">
               <summary>Source code in <code>chanfig/default_dict.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
-<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Python</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
 <span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
 <span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
 <span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
@@ -1392,37 +1395,40 @@ You can still creates them manually with <code>DefaultDict.fromkeys</code> or <c
 <span class="normal"><a href="#__codelineno-0-119">119</a></span>
 <span class="normal"><a href="#__codelineno-0-120">120</a></span>
 <span class="normal"><a href="#__codelineno-0-121">121</a></span>
-<span class="normal"><a href="#__codelineno-0-122">122</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">    Add a new default factory to the dictionary.</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">        name:</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">        ValueError: If `default_factory` is None.</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">    Examples:</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        &gt;&gt;&gt; d = DefaultDict(default_factory=DefaultDict)</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">        &gt;&gt;&gt; d.add(&#39;d&#39;)</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">        DefaultDict()</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        &gt;&gt;&gt; d.get(&#39;d&#39;)</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        DefaultDict()</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        &gt;&gt;&gt; d[&#39;n&#39;] = &#39;chang&#39;</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        &gt;&gt;&gt; d.n</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        &#39;chang&#39;</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        &gt;&gt;&gt; d.n = &#39;liu&#39;</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        &gt;&gt;&gt; d[&#39;n&#39;]</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">        &#39;liu&#39;</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        &gt;&gt;&gt; d = DefaultDict()</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">        &gt;&gt;&gt; d.add(&#39;a&#39;)</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">        Traceback (most recent call last):</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">        ValueError: Cannot add to a DefaultDict with no default_factory</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add to a DefaultDict with no default_factory&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_factory</span><span class="p">())</span>  <span class="c1"># pylint: disable=E1102</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-122">122</a></span>
+<span class="normal"><a href="#__codelineno-0-123">123</a></span>
+<span class="normal"><a href="#__codelineno-0-124">124</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">    Add a new default factory to the dictionary.</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="sd">        name:</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">        ValueError: If `default_factory` is None.</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    Examples:</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">        &gt;&gt;&gt; d = DefaultDict(default_factory=DefaultDict)</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">        &gt;&gt;&gt; d.add(&#39;d&#39;)</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        DefaultDict()</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        &gt;&gt;&gt; d.get(&#39;d&#39;)</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        DefaultDict()</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        &gt;&gt;&gt; d[&#39;n&#39;] = &#39;chang&#39;</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        &gt;&gt;&gt; d.n</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        &#39;chang&#39;</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        &gt;&gt;&gt; d.n = &#39;liu&#39;</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">        &gt;&gt;&gt; d[&#39;n&#39;]</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        &#39;liu&#39;</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">        &gt;&gt;&gt; d = DefaultDict()</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a><span class="sd">        &gt;&gt;&gt; d.add(&#39;a&#39;)</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">        Traceback (most recent call last):</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">        ValueError: Cannot add to a DefaultDict with no default_factory</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>    <span class="n">default_factory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getattr</span><span class="p">(</span><span class="s2">&quot;default_factory&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">if</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot add to a DefaultDict with no default_factory&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">())</span>  <span class="c1"># pylint: disable=E1102</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
