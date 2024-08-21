@@ -21,17 +21,15 @@ from copy import copy, deepcopy
 from functools import partial
 from io import StringIO
 
+from pytest import raises
+
 from chanfig import Config, Variable
 
 
 class DataConfig(Config):
     __test__ = False
-
-    def __init__(self, name, *args, **kwargs):
-        super().__init__()
-        self.name = name
-        self.max_length = 1024
-        self.merge(*args, **kwargs)
+    name: str
+    max_length: int = 1024
 
     def post(self):
         self.name = self.name.lower()
@@ -146,6 +144,14 @@ class Test:
         config = TestConfig()
         assert config.copy() == copy(config)
         assert config.deepcopy() == deepcopy(config)
+
+    def test_class_attribute(self):
+        config = TestConfig()
+        config.datas.a.name = "CIFAR100"
+        config.datas.b.name = "MNIST"
+        assert config.datas.a.max_length == config.datas.b.max_length == 1024
+        with raises(AttributeError):
+            config.datas.a.getattr("max_length")
 
 
 class Ancestor(Config):
