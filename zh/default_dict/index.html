@@ -1016,7 +1016,6 @@ by calling <code>dict.setattr('default_factory', FlatDict)</code> for existing <
           <tr class="doc-section-item">
             <td><code><span title="chanfig.DefaultDict.default_factory">default_factory</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-external" title="typing.Optional" href="https://docs.python.org/3/library/typing.html#typing.Optional">Optional</a>[<a class="autorefs autorefs-external" title="collections.abc.Callable" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable">Callable</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1200,7 +1199,7 @@ You can still creates them manually with <code>DefaultDict.fromkeys</code> or <c
 <a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">        TypeError: `default_factory=[]` must be Callable, but got &lt;class &#39;list&#39;&gt;.</span>
 <a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-59" name="__codelineno-0-59"></a>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="n">default_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>    <span class="n">default_factory</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-61" name="__codelineno-0-61"></a>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># pylint: disable=W1113</span>
 <a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="bp">self</span><span class="p">,</span> <span class="n">default_factory</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
