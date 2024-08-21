@@ -78,9 +78,8 @@ class TestConfigDict:
         ConfigDict(int_value=1, str_value="1", float_value=1.0)
         with raises(TypeError):
             ConfigDict(int_value="1", str_value="1", float_value=1.0)
-        with raises(TypeError):
-            self.dict.int_value = "1"
-            self.dict.validate()
+        self.dict.int_value = "1"
+        assert isinstance(self.dict.int_value, int)
         ConfigDict(list_int=[1, 2, 3])
         with raises(TypeError):
             ConfigDict(list_int=[1, "2", 3])
