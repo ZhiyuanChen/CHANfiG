@@ -20,7 +20,7 @@ import os
 from chanfig import Config, Variable
 
 
-class DataloaderConfig:
+class DataloaderConfig(Config):
     batch_size: int = 64
     num_workers: int = 4
     pin_memory: bool = True
@@ -28,14 +28,15 @@ class DataloaderConfig:
 
 
 class TestConfig(Config):
+    name: str = "CHANfiG"
+    seed: int = 1013
+    activation: str = "GELU"
+    dataloader: DataloaderConfig = DataloaderConfig()
+
     def __init__(self):
         super().__init__()
         dropout = Variable(0.1)
-        self.name = "CHANfiG"
-        self.seed = 1013
-        self.activation = "GELU"
         self.optim.lr = 1e-3
-        self.dataloader = DataloaderConfig()
         self.model.encoder.num_layers = 6
         self.model.decoder.num_layers = 6
         self.model.dropout = dropout
