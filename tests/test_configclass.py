@@ -25,7 +25,7 @@ class AncestorConfig:
     seed: int = Variable(1013, help="random seed")
 
 
-@configclass(recursive=True)
+@configclass
 class ChildConfig(AncestorConfig):
     __test__ = False
     name: str = "CHANfiG"
@@ -40,10 +40,5 @@ class TestConfig(AncestorConfig):
 class Test:
     def test_configclass(self):
         config = TestConfig()
-        assert config.name == "CHANfiG"
-        assert "seed" not in config
-
-    def test_configclass_recursive(self):
-        config = ChildConfig()
         assert config.name == "CHANfiG"
         assert "seed" in config

@@ -15,13 +15,13 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from functools import wraps
 from typing import Any, Type
+from warnings import warn
 
 from .config import Config
 
 
-def configclass(cls=None, recursive: bool = False):
+def configclass(cls=None):
     """
     Construct a Config in [`dataclass`][dataclasses.dataclass] style.
 
@@ -32,7 +32,6 @@ def configclass(cls=None, recursive: bool = False):
 
     Args:
         cls (Type[Any]): The class to be enhanced, provided directly if no parentheses are used.
-        recursive (bool): If True, recursively copy class attributes. Only applicable if used with parentheses.
 
     Returns:
         A modified class with Config functionalities or a decorator with bound parameters.
@@ -52,24 +51,20 @@ def configclass(cls=None, recursive: bool = False):
         )
     """
 
+    warn(
+        "This decorator is deprecated and may be removed in the future release. "
+        "All chanfig classes will copy variable identified in `__annotations__` by default."
+        "This decorator is equivalent to inheriting from `Config`.",
+        PendingDeprecationWarning,
+    )
+
     def decorator(cls: Type[Any]):
         if not issubclass(cls, Config):
             config_cls = type(cls.__name__, (Config, cls), dict(cls.__dict__))
             cls = config_cls
 
-        cls_init = cls.__init__
-
-        @wraps(cls_init)
-        def init(self, *args, **kwargs):
-            cls_init(self)
-            self.copy_class_attributes(recursive=recursive)
-            self.merge(*args, **kwargs)
-
-        setattr(cls, "__init__", init)  # noqa: B010
-
         return cls
 
     if cls is None:
         return decorator
-    else:
-        return decorator(cls)
+    return decorator(cls)

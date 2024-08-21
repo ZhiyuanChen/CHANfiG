@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 from .flat_dict import FlatDict
 from .utils import Null
@@ -57,7 +57,7 @@ class DefaultDict(FlatDict):
         TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
     """
 
-    default_factory: Optional[Callable] = None
+    default_factory = None
 
     def __init__(  # pylint: disable=W1113
         self, default_factory: Callable | None = None, *args: Any, **kwargs: Any
@@ -82,12 +82,13 @@ class DefaultDict(FlatDict):
         return default
 
     def __repr__(self) -> str:
-        if self.default_factory is None:
+        default_factory = self.getattr("default_factory", None)
+        if default_factory is None:
             return super().__repr__()
         super_repr = super().__repr__()[len(self.__class__.__name__) :]  # noqa: E203
         if len(super_repr) == 2:
-            return f"{self.__class__.__name__}({self.default_factory}, )"
-        return f"{self.__class__.__name__}({self.default_factory}," + super_repr[1:]
+            return f"{self.__class__.__name__}({default_factory}, )"
+        return f"{self.__class__.__name__}({default_factory}," + super_repr[1:]
 
     def add(self, name: Any):
         r"""
@@ -116,7 +117,8 @@ class DefaultDict(FlatDict):
             Traceback (most recent call last):
             ValueError: Cannot add to a DefaultDict with no default_factory
         """
-        if self.default_factory is None:
+        default_factory = self.getattr("default_factory", None)
+        if default_factory is None:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")
-        self.set(name, self.default_factory())  # pylint: disable=E1102
+        self.set(name, default_factory())  # pylint: disable=E1102
         return self.get(name)
