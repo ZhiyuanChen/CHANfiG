@@ -17,14 +17,14 @@
 
 import os
 
-from chanfig import Config, Variable, configclass
+from chanfig import Config, Variable
 
 
-@configclass
 class DataloaderConfig:
     batch_size: int = 64
     num_workers: int = 4
     pin_memory: bool = True
+    attribute = "None"  # this will not be copied to the config
 
 
 class TestConfig(Config):

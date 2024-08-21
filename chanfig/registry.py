@@ -94,9 +94,9 @@ class Registry(NestedDict):
         (1, 0)
     """
 
-    override: bool = False
-    key: str = "name"
-    default: Any = Null
+    override = False
+    key = "name"
+    default = Null
 
     def __init__(
         self, override: bool | None = None, key: str | None = None, fallback: bool | None = None, default: Any = None

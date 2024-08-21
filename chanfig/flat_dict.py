@@ -181,7 +181,7 @@ class FlatDict(dict, metaclass=Dict):
 
     # pylint: disable=R0904
 
-    indent: int = 2
+    indent = 2
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         if len(args) == 1:
@@ -192,6 +192,28 @@ class FlatDict(dict, metaclass=Dict):
                 arg = vars(arg)
             args = (arg,)
         super().__init__(*args, **kwargs)
+        self.move_class_attributes()
+
+    def move_class_attributes(self, recursive: bool = True) -> Self:
+        r"""
+        Move class attributes to instance.
+
+        Args:
+            recursive:
+
+        Returns:
+            self:
+        """
+
+        def move_cls_attributes(cls: type) -> Mapping:
+            return {k: cls.__dict__[k] for k in get_annotations(cls).keys() if k in cls.__dict__}
+
+        if recursive:
+            for cls in self.__class__.__mro__:
+                self.merge(move_cls_attributes(cls), overwrite=False)
+        else:
+            self.merge(move_cls_attributes(self.__class__), overwrite=False)
+        return self
 
     def __post_init__(self, *args, **kwargs) -> None:
         pass
@@ -398,7 +420,8 @@ class FlatDict(dict, metaclass=Dict):
             if name in self.__dict__:
                 return self.__dict__[name]
             for cls in self.__class__.__mro__:
-                if name in cls.__dict__:
+                annotations = get_annotations(cls)
+                if name in cls.__dict__ and name not in annotations:
                     return cls.__dict__[name]
             return super().getattr(name, default)  # type: ignore[misc]
         except AttributeError:

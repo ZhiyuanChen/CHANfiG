@@ -162,9 +162,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         {'f': {'n': 'chang'}, 'i': {'d': 1013}}
     """
 
-    convert_mapping: bool = False
-    delimiter: str = "."
-    fallback: bool = False
+    convert_mapping = False
+    delimiter = "."
+    fallback = False
 
     def __init__(
         self,

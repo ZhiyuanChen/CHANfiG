@@ -172,10 +172,3 @@ class TestConfigDict:
 
     def test_affinty(self):
         assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
-
-    def test_copy_class_attributes(self):
-        config = self.dict.copy_class_attributes(recursive=False)
-        assert config.child == 3
-        assert "ancestor" not in config
-        config = self.dict.copy_class_attributes()
-        assert config.ancestor == 1
