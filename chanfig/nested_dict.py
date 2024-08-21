@@ -36,7 +36,7 @@ except ImportError:
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
-from .utils import Null, PathStr
+from .utils import NULL, Null, PathStr
 from .variable import Variable
 
 
@@ -169,7 +169,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
     def __init__(
         self,
         *args: Any,
-        default_factory: Callable | None = None,
+        default_factory: Callable | NULL = Null,
         convert_mapping: bool | None = None,
         fallback: bool | None = None,
         **kwargs: Any,

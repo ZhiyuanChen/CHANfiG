@@ -26,7 +26,7 @@ from typing_extensions import Self
 
 from .nested_dict import NestedDict
 from .parser import ConfigParser
-from .utils import Null
+from .utils import NULL, Null
 
 
 def frozen_check(func: Callable):
@@ -100,8 +100,8 @@ class Config(NestedDict):
     parser = None  # ConfigParser, Python 3.7 does not support forward reference
     frozen = False
 
-    def __init__(self, *args: Any, default_factory: Callable | None = None, **kwargs: Any):
-        if default_factory is None:
+    def __init__(self, *args: Any, default_factory: Callable | NULL = Null, **kwargs: Any):
+        if default_factory is Null:
             default_factory = Config
         self.setattr("frozen", False)
         super().__init__(*args, default_factory=default_factory, **kwargs)
@@ -152,7 +152,7 @@ class Config(NestedDict):
 
         self.interpolate()
         self.validate()
-        self.apply_(lambda c: c.setattr("default_factory", None) if isinstance(c, Config) else None)
+        self.apply_(lambda c: c.setattr("default_factory", Null) if isinstance(c, Config) else None)
         return self
 
     def boot(self) -> Self:
