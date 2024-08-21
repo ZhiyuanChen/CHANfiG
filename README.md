@@ -65,12 +65,18 @@ We also introduce [`Variable`][chanfig.Variable] to allow sharing a value across
 [`FlatDict`][chanfig.FlatDict] supports variable interpolation.
 Set a member's value to another member's name wrapped in `${}`, then call [`interpolate`][chanfig.FlatDict.interpolate] method. The value of this member will be automatically replaced with the value of another member.
 
-[`dict`][dict] in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a [`dict`][dict]. [`FlatDict`][chanfig.FlatDict]supports [`sort`][chanfig.FlatDict.sort] to help you manage your dict.
+[`dict`][dict] in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a [`dict`][dict]. [`FlatDict`][chanfig.FlatDict] supports [`sort`][chanfig.FlatDict.sort] to help you manage your dict.
 
 [`FlatDict`][chanfig.FlatDict] incorporates a [`merge`][chanfig.FlatDict.merge] method that allows you to merge a `Mapping`, an `Iterable`, or a path to the [`FlatDict`][chanfig.FlatDict].
 Different from built-in [`update`][dict.update], [`merge`][chanfig.FlatDict.merge] assign values instead of replace, which makes it work better with [`DefaultDict`][chanfig.DefaultDict].
 
 Moreover, [`FlatDict`][chanfig.FlatDict] comes with [`difference`][chanfig.FlatDict.difference] and [`intersect`][chanfig.FlatDict.intersect], which makes it very easy to compare a [`FlatDict`][chanfig.FlatDict] with other `Mapping`, `Iterable`, or a path.
+
+#### Dataclass Operations
+
+[`FlatDict`][chanfig.FlatDict] is compatible with [PEP 557](https://peps.python.org/pep-0557/), and will inspect the type annotations in subclasses and make them as members of the [`FlatDict`][chanfig.FlatDict].
+It also features [`validate`](chanfig.FlatDict.validate) method which will be called internally to validate the type of the members.
+Even better, if a member of the [`FlatDict`][chanfig.FlatDict] have type annotations, the value will be automatically converted to the type of the annotation when setting the value.
 
 #### ML Operations
 

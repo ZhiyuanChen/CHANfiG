@@ -68,6 +68,12 @@ Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内�
 
 此外，[`FlatDict`][chanfig.FlatDict]引入了[`difference`][chanfig.FlatDict.difference]和[`intersect`][chanfig.FlatDict.intersect]，这些使其可以非常简单的将[`FlatDict`][chanfig.FlatDict]和其他`Mapping`、`Iterable`或者一个路径进行对比。
 
+#### 数据类操作
+
+[`FlatDict`][chanfig.FlatDict]遵守[PEP 557](https://peps.python.org/pep-0557/)提案，他会检查子类的类型注解，并将它们添加成为[`FlatDict`][chanfig.FlatDict]的成员。
+他还支持[`validate`](chanfig.FlatDict.validate)方法来检查成员是否符合类型注解，这个方法会在内部被调用。
+更好的是，如果一个[`FlatDict`][chanfig.FlatDict]成员有类型注解，那么他会在被赋值时自动转换为正确的类型。
+
 #### 机器学习操作
 
 [`FlatDict`][chanfig.FlatDict]支持与 Pytorch Tensor 类似的[`to`][chanfig.FlatDict.to]方法。
