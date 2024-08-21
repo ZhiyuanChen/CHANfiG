@@ -57,7 +57,7 @@ class DefaultDict(FlatDict):
         TypeError: `default_factory=[]` must be Callable, but got <class 'list'>.
     """
 
-    default_factory = None
+    default_factory = Null
 
     def __init__(  # pylint: disable=W1113
         self, default_factory: Callable | None = None, *args: Any, **kwargs: Any
@@ -73,7 +73,7 @@ class DefaultDict(FlatDict):
 
     def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
-            if self.getattr("default_factory", None) in (None, Null) or (name.startswith("__") and name.endswith("__")):
+            if self.getattr("default_factory") is Null or (name.startswith("__") and name.endswith("__")):
                 raise KeyError(name) from None
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
@@ -83,7 +83,7 @@ class DefaultDict(FlatDict):
 
     def __repr__(self) -> str:
         default_factory = self.getattr("default_factory", None)
-        if default_factory is None:
+        if default_factory is Null:
             return super().__repr__()
         super_repr = super().__repr__()[len(self.__class__.__name__) :]  # noqa: E203
         if len(super_repr) == 2:
@@ -117,8 +117,8 @@ class DefaultDict(FlatDict):
             Traceback (most recent call last):
             ValueError: Cannot add to a DefaultDict with no default_factory
         """
-        default_factory = self.getattr("default_factory", None)
-        if default_factory is None:
+        default_factory = self.getattr("default_factory")
+        if default_factory is Null:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")
         self.set(name, default_factory())  # pylint: disable=E1102
         return self.get(name)
