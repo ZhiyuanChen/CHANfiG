@@ -17,8 +17,20 @@
 
 from __future__ import annotations
 
-from yaml import add_representer
+from yaml import add_multi_representer
 from yaml.representer import SafeRepresenter
+
+try:
+    from enum import StrEnum
+except ImportError:
+    StrEnum = None  # type: ignore
+
+try:
+    from strenum import LowercaseStrEnum
+    from strenum import StrEnum as UppercaseStrEnum
+except ImportError:
+    UppercaseStrEnum = None
+    LowercaseStrEnum = None
 
 from . import utils
 from ._version import __version__, __version_tuple__, version
@@ -55,15 +67,15 @@ __all__ = [
 ]
 
 
-add_representer(FlatDict, SafeRepresenter.represent_dict)
-add_representer(NestedDict, SafeRepresenter.represent_dict)
-add_representer(DefaultDict, SafeRepresenter.represent_dict)
-add_representer(Config, SafeRepresenter.represent_dict)
-add_representer(Registry, SafeRepresenter.represent_dict)
-add_representer(ConfigRegistry, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(FlatDict, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(NestedDict, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(DefaultDict, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(Config, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(Registry, SafeRepresenter.represent_dict)
-SafeRepresenter.add_representer(ConfigRegistry, SafeRepresenter.represent_dict)
+add_multi_representer(FlatDict, SafeRepresenter.represent_dict)
+SafeRepresenter.add_multi_representer(FlatDict, SafeRepresenter.represent_dict)
+
+if StrEnum is not None:
+    add_multi_representer(StrEnum, SafeRepresenter.represent_str)
+    SafeRepresenter.add_multi_representer(StrEnum, SafeRepresenter.represent_str)
+if UppercaseStrEnum is not None:
+    add_multi_representer(UppercaseStrEnum, SafeRepresenter.represent_str)
+    SafeRepresenter.add_multi_representer(UppercaseStrEnum, SafeRepresenter.represent_str)
+if LowercaseStrEnum is not None:
+    add_multi_representer(LowercaseStrEnum, SafeRepresenter.represent_str)
+    SafeRepresenter.add_multi_representer(LowercaseStrEnum, SafeRepresenter.represent_str)
