@@ -99,9 +99,14 @@ class Registry(NestedDict):
     default = Null
 
     def __init__(
-        self, override: bool | None = None, key: str | None = None, fallback: bool | None = None, default: Any = None
+        self,
+        override: bool | None = None,
+        key: str | None = None,
+        fallback: bool | None = None,
+        default: Any = None,
+        default_factory: Callable | NULL = Null,
     ):
-        super().__init__(fallback=fallback)
+        super().__init__(default_factory=default_factory, fallback=fallback)
         if override is not None:
             self.setattr("override", override)
         if key is not None:
@@ -201,7 +206,10 @@ class Registry(NestedDict):
 
         if default is Null:
             default = self.getattr("default", Null)
-        return self.get(name, default)
+        element = self.get(name, default)
+        if isinstance(element, Registry):
+            return element.getattr("default")
+        return element
 
     @staticmethod
     def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W0211
