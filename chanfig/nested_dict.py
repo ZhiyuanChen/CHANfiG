@@ -106,8 +106,8 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
 
 class NestedDict(DefaultDict):  # pylint: disable=E1136
     r"""
-    `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `delimiter`.
-    By default, `delimiter` is `.`, but it could be modified in subclass or by calling `dict.setattr('delimiter', D)`.
+    `NestedDict` further extends `DefaultDict` object by introducing a nested structure with `separator`.
+    By default, `separator` is `.`, but it could be modified in subclass or by calling `dict.setattr('separator', S)`.
 
     `d = NestedDict({"a.b.c": 1})` is equivalent to `d = NestedDict({"a": {"b": {"c": 1}}})`,
     and you can access members either by `d["a.b.c"]` or more simply by `d.a.b.c`.
@@ -126,8 +126,8 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         convert_mapping: bool = False
             If `True`, all new values with type of `Mapping` will be converted to `default_factory`.
             If `default_factory` is `Null`, will create an empty instance via `self.empty` as `default_factory`.
-        delimiter: str = "."
-            Delimiter for nested structure.
+        separator: str = "."
+            separator for nested structure.
 
     Notes:
         When `convert_mapping` specified, all new values with type of `Mapping` will be converted to `default_factory`.
@@ -163,7 +163,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
     """
 
     convert_mapping = False
-    delimiter = "."
+    separator = "."
     fallback = False
 
     def __init__(
@@ -194,13 +194,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             ['a', 'b.c', 'b.d']
         """
 
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
 
         @wraps(self.all_keys)
         def all_keys(self, prefix=Null):
             for key, value in self.items():
                 if prefix is not Null:
-                    key = str(prefix) + str(delimiter) + str(key)
+                    key = str(prefix) + str(separator) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_keys(value, key)
                 else:
@@ -240,13 +240,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             [('a', 1), ('b.c', 2), ('b.d', 3)]
         """
 
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
 
         @wraps(self.all_items)
         def all_items(self, prefix=Null):
             for key, value in self.items():
                 if prefix is not Null:
-                    key = str(prefix) + str(delimiter) + str(key)
+                    key = str(prefix) + str(separator) + str(key)
                 if isinstance(value, NestedDict):
                     yield from all_items(value, key)
                 else:
@@ -364,16 +364,16 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             AttributeError: 'dict' object has no attribute 'f'
         """
 
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         if fallback is None:
             fallback = self.getattr("fallback", False)
-        fallback_name = name.split(delimiter)[-1] if isinstance(name, str) else name
+        fallback_name = name.split(separator)[-1] if isinstance(name, str) else name
         fallback_value = Null
         try:
-            while isinstance(name, str) and delimiter in name:
+            while isinstance(name, str) and separator in name:
                 if fallback and fallback_name in self:
                     fallback_value = self.get(fallback_name)
-                name, rest = name.split(delimiter, 1)
+                name, rest = name.split(separator, 1)
                 self, name = self[name], rest  # pylint: disable=W0642
         except (KeyError, AttributeError, TypeError):
             if fallback and fallback_value is not Null:
@@ -442,13 +442,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         # pylint: disable=W0642
 
         full_name = name
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
         default_factory = self.getattr("default_factory", self.empty) or self.empty
         try:
-            while isinstance(name, str) and delimiter in name:
-                name, rest = name.split(delimiter, 1)
+            while isinstance(name, str) and separator in name:
+                name, rest = name.split(separator, 1)
                 if name in dir(self) and isinstance(getattr(self.__class__, name), (property, cached_property)):
                     self, name = getattr(self, name), rest
                 elif name not in self and isinstance(self, Mapping):
@@ -485,7 +485,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             dict.__setitem__(self, name, value)
         else:
             raise ValueError(
-                f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
+                f"Cannot set `{full_name}` to `{value}`, as `{separator.join(full_name.split(separator)[:-1])}={self}`."
             )
 
     def delete(self, name: Any) -> None:
@@ -523,10 +523,10 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             >>> del d['e.a.b']
         """
 
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         try:
-            while isinstance(name, str) and delimiter in name:
-                name, rest = name.split(delimiter, 1)
+            while isinstance(name, str) and separator in name:
+                name, rest = name.split(separator, 1)
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
@@ -564,10 +564,10 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             KeyError: 'f'
         """
 
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         try:
-            while isinstance(name, str) and delimiter in name:
-                name, rest = name.split(delimiter, 1)
+            while isinstance(name, str) and separator in name:
+                name, rest = name.split(separator, 1)
                 self, name = self[name], rest  # pylint: disable=W0642
         except (AttributeError, TypeError):
             raise KeyError(name) from None
@@ -609,13 +609,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         # pylint: disable=W0642
 
         full_name = name
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
         default_factory = self.getattr("default_factory", self.empty) or self.empty
         try:
-            while isinstance(name, str) and delimiter in name:
-                name, rest = name.split(delimiter, 1)
+            while isinstance(name, str) and separator in name:
+                name, rest = name.split(separator, 1)
                 if name in dir(self) and isinstance(getattr(self.__class__, name), (property, cached_property)):
                     self, name = getattr(self, name), rest
                 elif name not in self and isinstance(self, Mapping):
@@ -651,7 +651,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             dict.__setitem__(self, name, value)
         else:
             raise ValueError(
-                f"Cannot set `{full_name}` to `{value}`, as `{delimiter.join(full_name.split(delimiter)[:-1])}={self}`."
+                f"Cannot set `{full_name}` to `{value}`, as `{separator.join(full_name.split(separator)[:-1])}={self}`."
             )
         return value
 
@@ -840,10 +840,10 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             self.setattr("convert_mapping", convert_mapping)
 
     def __contains__(self, name: Any) -> bool:
-        delimiter = self.getattr("delimiter", ".")
+        separator = self.getattr("separator", ".")
         try:
-            while isinstance(name, str) and delimiter in name:
-                name, rest = name.split(delimiter, 1)
+            while isinstance(name, str) and separator in name:
+                name, rest = name.split(separator, 1)
                 if super().__contains__(name):
                     self, name = self[name], rest  # pylint: disable=W0642
                 else:
