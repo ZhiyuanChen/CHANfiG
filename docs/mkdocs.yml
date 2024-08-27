@@ -21,9 +21,9 @@ nav:
   - Utilities: utils.md
   # - package: package.md
   # - Blog: blog/index.md
-  - Development:
-    - Test: test.md
-    - Coverage: coverage.md
+  # - Development:
+  #   - Test: test.md
+  #   - Coverage: coverage.md
   - About:
       - about/index.md
       - License: about/license.md
@@ -56,13 +56,16 @@ theme:
     # - content.action.view
     - content.code.annotate
     - content.code.copy
+    - content.code.select
     - content.tabs.link
     - content.tooltips
     - header.autohide
     - navigation.expand
     - navigation.footer
     - navigation.indexes
-    # - navigation.instant
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.prune
     - navigation.sections
     - navigation.tabs
@@ -125,8 +128,10 @@ markdown_extensions:
   - abbr
   - admonition
   - attr_list
+  - callouts
   - def_list
   - footnotes
+  - markdown_gfm_admonition
   - md_in_html
   - mdx_math
   - meta
@@ -138,10 +143,12 @@ markdown_extensions:
   - pymdownx.critic
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:materialy.gemoji
+      emoji_generator: !!python/name:materialy.to_png
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
       auto_title: true
       linenums: true
   - pymdownx.inlinehilite
@@ -180,10 +187,18 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          rendering:
+          options:
             members_order: source
+            parameter_headings: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
           import:
             - https://docs.python.org/3/objects.inv
+  - section-index
   - i18n:
       docs_structure: suffix
       fallback_to_default: true

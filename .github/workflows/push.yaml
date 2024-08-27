@@ -12,6 +12,7 @@ jobs:
       - uses: pre-commit/action@v3.0.0
   test:
     runs-on: ubuntu-latest
+    environment: test
     strategy:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -21,12 +22,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
-      - name: Install dependencies
-        run: pip install -r requirements.txt && pip install -e .
       - name: Install dependencies for testing
         run: pip install pytest pytest-cov
+      - name: Install module
+        run: pip install -r requirements.txt && pip install -e .
       - name: pytest
-        run: pytest --cov=materialx --cov-report=xml --cov-report=html .
+        run: pytest --cov=materiaslx --cov-report=xml --cov-report=html .
       - name: Upload coverage report for documentation
         uses: actions/upload-artifact@v3
         with:
@@ -110,6 +111,8 @@ jobs:
     if: contains(fromJson('["refs/heads/master", "refs/heads/main"]'), github.ref)
     needs: [lint, test]
     environment: pypi
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
