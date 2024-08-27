@@ -15,13 +15,13 @@ keywords = [
   "dict",
   "machine-learning",
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 maintainers = [
-    {name = "Zhiyuan Chen", email = "this@zyc.ai"},
+  { name = "Zhiyuan Chen", email = "this@zyc.ai" },
 ]
 authors = [
-    {name = "Zhiyuan Chen", email = "this@zyc.ai"},
-    {name = "Evian C. Liu", email = "evian.liu@outlook.com"},
+  { name = "Zhiyuan Chen", email = "this@zyc.ai" },
+  { name = "Evian C. Liu", email = "evian.liu@outlook.com" },
 ]
 requires-python = ">=3.7"
 classifiers = [
@@ -46,17 +46,15 @@ dependencies = [
   "pyyaml",
   "typing-extensions",
 ]
-[project.optional-dependencies]
-include = [
+optional-dependencies.include = [
   "pyyaml-include",
 ]
-[project.urls]
-documentation = "https://chanfig.danling.org"
-homepage = "https://chanfig.danling.org"
-repository = "https://github.com/ZhiyuanChen/CHANfiG"
+urls.documentation = "https://chanfig.danling.org"
+urls.homepage = "https://chanfig.danling.org"
+urls.repository = "https://github.com/ZhiyuanChen/CHANfiG"
 
 [tool.setuptools]
-packages = ["chanfig"]
+packages = [ "chanfig" ]
 
 [tool.setuptools_scm]
 write_to = "chanfig/_version.py"
@@ -93,10 +91,10 @@ addopts = "--doctest-modules --cov"
 
 [tool.coverage.run]
 branch = true
-include = ["chanfig/**"]
+include = [ "chanfig/**" ]
 
 [tool.coverage.paths]
-source = ["chanfig"]
+source = [ "chanfig" ]
 
 [tool.coverage.xml]
 output = "coverage.xml"
