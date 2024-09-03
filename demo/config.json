@@ -1,6 +1,6 @@
 {
   "name": "CHANfiG",
-  "seed": 1013,
+  "seed": 1016,
   "activation": "GELU",
   "optim": {
     "lr": 0.001
@@ -21,5 +21,5 @@
     },
     "dropout": 0.1
   },
-  "id": "CHANfiG_1013"
+  "id": "CHANfiG_1016"
 }

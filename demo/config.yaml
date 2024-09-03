@@ -3,7 +3,7 @@ dataloader:
   batch_size: 64
   num_workers: 4
   pin_memory: true
-id: CHANfiG_1013
+id: CHANfiG_1016
 model:
   decoder:
     dropout: 0.1
@@ -15,4 +15,4 @@ model:
 name: CHANfiG
 optim:
   lr: 0.001
-seed: 1013
+seed: 1016

@@ -22,7 +22,7 @@ from chanfig import Variable, configclass
 class AncestorConfig:
     __test__ = False
     name: str = "Chang"
-    seed: int = Variable(1013, help="random seed")
+    seed: int = Variable(1016, help="random seed")
 
 
 @configclass

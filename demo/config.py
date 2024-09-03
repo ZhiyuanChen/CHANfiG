@@ -29,7 +29,7 @@ class DataloaderConfig(Config):
 
 class TestConfig(Config):
     name: str = "CHANfiG"
-    seed: int = 1013
+    seed: int = 1016
     activation: str = "GELU"
     dataloader: DataloaderConfig = DataloaderConfig()
 

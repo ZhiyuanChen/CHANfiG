@@ -42,7 +42,7 @@ class TestConfig(Config):
         super().__init__(*args, **kwargs)
         num_classes = Variable(10)
         self.name = "CHANfiG"
-        self.seed = Variable(1013, help="random seed")
+        self.seed = Variable(1016, help="random seed")
         data_factory = partial(DataConfig, name="CIFAR10")
         self.datasets = Config(default_factory=data_factory)
         self.datas = Config(default_factory=data_factory)
@@ -71,7 +71,7 @@ class Test:
         config = TestConfig()
         config.boot()
         assert config.name == "chanfig"
-        assert config.id == "chanfig_1013"
+        assert config.id == "chanfig_1016"
         assert config.datasets.a.name == "cifar10"
 
     def test_parse(self):
@@ -126,7 +126,7 @@ class Test:
 
     def test_fstring(self):
         config = TestConfig()
-        assert f"seed{config.seed}" == "seed1013"
+        assert f"seed{config.seed}" == "seed1016"
 
     def test_load(self):
         config = TestConfig()

@@ -147,7 +147,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Data type of the object wrapped in `Variable`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> type(id)
             <class 'chanfig.variable.Variable'>
             >>> id.dtype
@@ -238,11 +238,11 @@ class Variable(Generic[V]):  # pylint: disable=R0902
             cls: The type to convert to.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> id.to(float)
-            1013.0
+            1016.0
             >>> id.to(str)
-            '1013.0'
+            '1016.0'
         """
 
         self.value = cls(self.value)
@@ -253,9 +253,9 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Convert the object wrapped in `Variable` to python `int`.
 
         Examples:
-            >>> id = Variable(1013.0)
+            >>> id = Variable(1016.0)
             >>> id.int()
-            1013
+            1016
         """
 
         return self.to(int)
@@ -265,9 +265,9 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Convert the object wrapped in `Variable` to python `float`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> id.float()
-            1013.0
+            1016.0
         """
 
         return self.to(float)
@@ -277,9 +277,9 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Convert the object wrapped in `Variable` to python `float`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> id.str()
-            '1013'
+            '1016'
         """
 
         return self.to(str)
@@ -289,7 +289,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Wrap the type of `Variable`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> id.unwrap()
             >>> isinstance(id, int)
             False
@@ -305,7 +305,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Unwrap the type of `Variable`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> id.unwrap()
             >>> isinstance(id, int)
             False
@@ -319,7 +319,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Context manager which temporarily unwrap the `Variable`.
 
         Examples:
-            >>> id = Variable(1013)
+            >>> id = Variable(1016)
             >>> isinstance(id, int)
             True
             >>> with id.unwrapped():

@@ -21,15 +21,15 @@ from chanfig import NestedDict, Variable
 
 
 class Test:
-    dict = NestedDict({"i.d": 1013, "f.n": "chang"})
+    dict = NestedDict({"i.d": 1016, "f.n": "chang"})
 
     def test_dict(self):
-        assert self.dict == NestedDict({"i.d": 1013, "f.n": "chang"})
-        assert self.dict == NestedDict(**{"i.d": 1013, "f.n": "chang"})
+        assert self.dict == NestedDict({"i.d": 1016, "f.n": "chang"})
+        assert self.dict == NestedDict(**{"i.d": 1016, "f.n": "chang"})
 
     def test_list(self):
-        assert self.dict == NestedDict([("i.d", 1013), ("f.n", "chang")])
-        assert self.dict == NestedDict(*[("i.d", 1013), ("f.n", "chang")])
+        assert self.dict == NestedDict([("i.d", 1016), ("f.n", "chang")])
+        assert self.dict == NestedDict(*[("i.d", 1016), ("f.n", "chang")])
 
     def test_contains(self):
         assert "f" in self.dict
@@ -43,7 +43,7 @@ class Test:
         assert self.dict["n.l"] == "liu"
 
     def test_interpolate(self):
-        d = NestedDict({"i.d": 1013, "i.i.d": "${i.d}"})
+        d = NestedDict({"i.d": 1016, "i.i.d": "${i.d}"})
         d.interpolate()
         assert d.i.d is d.i.i.d
 
@@ -94,9 +94,9 @@ class Test:
         assert d.get("n.b.d", fallback=True) == 0.5
 
     def test_to_dict(self):
-        d = NestedDict({"i.d": 1013, "f.n": "chang"})
-        assert d.dict() == {"i": {"d": 1013}, "f": {"n": "chang"}}
-        assert d.dict(flatten=True) == {"i.d": 1013, "f.n": "chang"}
+        d = NestedDict({"i.d": 1016, "f.n": "chang"})
+        assert d.dict() == {"i": {"d": 1016}, "f": {"n": "chang"}}
+        assert d.dict(flatten=True) == {"i.d": 1016, "f.n": "chang"}
 
 
 class ConfigDict(NestedDict):
