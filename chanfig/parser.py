@@ -182,8 +182,8 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         Examples:
             Note that all examples uses NestedDict instead of Config for avoiding circular import.
             >>> p = ConfigParser()
-            >>> p.parse(['--i.d', '1013', '--f.n', 'chang']).dict()
-            {'i': {'d': 1013}, 'f': {'n': 'chang'}}
+            >>> p.parse(['--i.d', '1016', '--f.n', 'chang']).dict()
+            {'i': {'d': 1016}, 'f': {'n': 'chang'}}
 
             Values in command line overrides values in `default_config` file.
             >>> p = ConfigParser()

@@ -106,9 +106,9 @@ class TestConfigDict:
         parser = ArgumentParser()
         parser.add_argument("--name", type=str)
         parser.add_argument("--seed", type=int)
-        d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1013"]))
+        d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1016"]))
         assert d.name == "chang"
-        assert d.seed == 1013
+        assert d.seed == 1016
 
     def test_conflicts(self):
         d = FlatDict(keys=0, values=1, items=2)

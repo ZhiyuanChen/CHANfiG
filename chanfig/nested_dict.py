@@ -142,24 +142,24 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             ('n'): 'chang'
           )
         )
-        >>> NestedDict({"i.d": [{'c': 1013}, {'k': 1031}]})
+        >>> NestedDict({"i.d": [{'c': 1016}, {'k': 1031}]})
         NestedDict(
           ('i'): NestedDict(
             ('d'): [NestedDict(
-              ('c'): 1013
+              ('c'): 1016
             ), NestedDict(
               ('k'): 1031
             )]
           )
         )
         >>> d = NestedDict({"f.n": "chang"}, default_factory=NestedDict)
-        >>> d.i.d = 1013
+        >>> d.i.d = 1016
         >>> d['i.d']
-        1013
+        1016
         >>> d.i.d
-        1013
+        1016
         >>> d.dict()
-        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
+        {'f': {'n': 'chang'}, 'i': {'d': 1016}}
     """
 
     convert_mapping = False
@@ -333,22 +333,22 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             TypeError: If `name` is not hashable.
 
         Examples:
-            >>> d = NestedDict({"i.d": 1013}, default_factory=NestedDict)
+            >>> d = NestedDict({"i.d": 1016}, default_factory=NestedDict)
             >>> d.get('i.d')
-            1013
+            1016
             >>> d['i.d']
-            1013
+            1016
             >>> d.i.d
-            1013
+            1016
             >>> d.get('i.d', None)
-            1013
+            1016
             >>> d.get('f', 2)
             2
             >>> d.get('a.b', None)
             >>> d.f
             NestedDict(<class 'chanfig.nested_dict.NestedDict'>, )
             >>> del d.f
-            >>> d = NestedDict({"i.d": 1013})
+            >>> d = NestedDict({"i.d": 1016})
             >>> d.e
             Traceback (most recent call last):
             AttributeError: 'NestedDict' object has no attribute 'e'
@@ -407,11 +407,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         Examples:
             >>> d = NestedDict(default_factory=NestedDict)
-            >>> d.set('i.d', 1013)
+            >>> d.set('i.d', 1016)
             >>> d.get('i.d')
-            1013
+            1016
             >>> d.dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> d['f.n'] = 'chang'
             >>> d.f.n
             'chang'
@@ -496,9 +496,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             name:
 
         Examples:
-            >>> d = NestedDict({"i.d": 1013, "f.n": "chang"})
+            >>> d = NestedDict({"i.d": 1016, "f.n": "chang"})
             >>> d.i.d
-            1013
+            1016
             >>> d.f.n
             'chang'
             >>> d.delete('i.d')
@@ -548,9 +548,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             value: If `NestedDict` does not contain `name`, return `default`.
 
         Examples:
-            >>> d = NestedDict({"i.d": 1013, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
+            >>> d = NestedDict({"i.d": 1016, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
             >>> d.pop('i.d')
-            1013
+            1016
             >>> d.pop('i.d', True)
             True
             >>> d.pop('i.d')
@@ -596,12 +596,12 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             value: If `NestedDict` does not contain `name`, return `value`.
 
         Examples:
-            >>> d = NestedDict({"i.d": 1013, "f.n": "chang", "n.a.b.c": 1})
+            >>> d = NestedDict({"i.d": 1016, "f.n": "chang", "n.a.b.c": 1})
             >>> d.setdefault("d.i", 1031)
             1031
             >>> d.setdefault("i.d", "chang")
-            1013
-            >>> d.setdefault("f.n", 1013)
+            1016
+            >>> d.setdefault("f.n", 1016)
             'chang'
             >>> d.setdefault("n.a.b.d", 2)
             2

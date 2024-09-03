@@ -78,14 +78,14 @@ class Config(NestedDict):
 
     Examples:
         >>> c = Config(**{"f.n": "chang"})
-        >>> c.i.d = 1013
+        >>> c.i.d = 1016
         >>> c.i.d
-        1013
+        1016
         >>> c.d.i
         Config(<class 'chanfig.config.Config'>, )
         >>> c.freeze().dict()
-        {'f': {'n': 'chang'}, 'i': {'d': 1013}, 'd': {'i': {}}}
-        >>> c.d.i = 1013
+        {'f': {'n': 'chang'}, 'i': {'d': 1016}, 'd': {'i': {}}}
+        >>> c.d.i = 1016
         Traceback (most recent call last):
         ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
         >>> c.d.e
@@ -94,7 +94,7 @@ class Config(NestedDict):
         >>> with c.unlocked():
         ...     del c.d
         >>> c.dict()
-        {'f': {'n': 'chang'}, 'i': {'d': 1013}}
+        {'f': {'n': 'chang'}, 'i': {'d': 1016}}
     """
 
     parser = None  # ConfigParser, Python 3.7 does not support forward reference
@@ -319,17 +319,17 @@ class Config(NestedDict):
         + `lock`
 
         Examples:
-            >>> c = Config(**{'i.d': 1013})
+            >>> c = Config(**{'i.d': 1016})
             >>> c.getattr('frozen')
             False
             >>> c.freeze(recursive=False).dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> c.getattr('frozen')
             True
             >>> c.i.getattr('frozen')
             False
             >>> c.lock().dict()  # alias
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> c.i.getattr('frozen')
             True
         """
@@ -359,12 +359,12 @@ class Config(NestedDict):
         Examples:
             >>> c = Config()
             >>> with c.locked():
-            ...     c['i.d'] = 1013
+            ...     c['i.d'] = 1016
             Traceback (most recent call last):
             ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
-            >>> c.i.d = 1013
+            >>> c.i.d = 1016
             >>> c.dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
         """
 
         was_frozen = self.getattr("frozen", False)
@@ -387,21 +387,21 @@ class Config(NestedDict):
         + `unlock`
 
         Examples:
-            >>> c = Config(**{'i.d': 1013})
+            >>> c = Config(**{'i.d': 1016})
             >>> c.getattr('frozen')
             False
             >>> c.freeze().dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> c.getattr('frozen')
             True
             >>> c.defrost(recursive=False).dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> c.getattr('frozen')
             False
             >>> c.i.getattr('frozen')
             True
             >>> c.unlock().dict()  # alias
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
             >>> c.i.getattr('frozen')
             False
         """
@@ -433,9 +433,9 @@ class Config(NestedDict):
             >>> c.freeze().dict()
             {}
             >>> with c.unlocked():
-            ...     c['i.d'] = 1013
+            ...     c['i.d'] = 1016
             >>> c.defrost().dict()
-            {'i': {'d': 1013}}
+            {'i': {'d': 1016}}
         """
 
         was_frozen = self.getattr("frozen", False)
@@ -465,13 +465,13 @@ class Config(NestedDict):
             KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
 
         Examples:
-            >>> d = Config(**{"i.d": 1013})
+            >>> d = Config(**{"i.d": 1016})
             >>> d.get('i.d')
-            1013
+            1016
             >>> d['i.d']
-            1013
+            1016
             >>> d.i.d
-            1013
+            1016
             >>> d.get('f', 2)
             2
             >>> d.f
@@ -480,7 +480,7 @@ class Config(NestedDict):
             >>> d.freeze()
             Config(<class 'chanfig.config.Config'>,
               ('i'): Config(<class 'chanfig.config.Config'>,
-                ('d'): 1013
+                ('d'): 1016
               )
             )
             >>> d.f
@@ -518,19 +518,19 @@ class Config(NestedDict):
 
         Examples:
             >>> c = Config()
-            >>> c['i.d'] = 1013
+            >>> c['i.d'] = 1016
             >>> c.i.d
-            1013
+            1016
             >>> c.freeze().dict()
-            {'i': {'d': 1013}}
-            >>> c['i.d'] = 1013
+            {'i': {'d': 1016}}
+            >>> c['i.d'] = 1016
             Traceback (most recent call last):
             ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
             >>> c.defrost().dict()
-            {'i': {'d': 1013}}
-            >>> c['i.d'] = 1013
+            {'i': {'d': 1016}}
+            >>> c['i.d'] = 1016
             >>> c.i.d
-            1013
+            1016
         """
 
         return super().set(name, value, convert_mapping)
@@ -544,9 +544,9 @@ class Config(NestedDict):
             name:
 
         Examples:
-            >>> d = Config(**{"i.d": 1013, "f.n": "chang"})
+            >>> d = Config(**{"i.d": 1016, "f.n": "chang"})
             >>> d.i.d
-            1013
+            1016
             >>> d.f.n
             'chang'
             >>> d.delete('i.d')
@@ -580,21 +580,21 @@ class Config(NestedDict):
 
         Examples:
             >>> c = Config()
-            >>> c['i.d'] = 1013
+            >>> c['i.d'] = 1016
             >>> c.pop('i.d')
-            1013
+            1016
             >>> c.pop('i.d', True)
             True
             >>> c.freeze().dict()
             {'i': {}}
-            >>> c['i.d'] = 1013
+            >>> c['i.d'] = 1016
             Traceback (most recent call last):
             ValueError: Attempting to alter a frozen config. Run config.defrost() to defrost first.
             >>> c.defrost().dict()
             {'i': {}}
-            >>> c['i.d'] = 1013
+            >>> c['i.d'] = 1016
             >>> c.pop('i.d')
-            1013
+            1016
         """
 
         return super().pop(name, default)

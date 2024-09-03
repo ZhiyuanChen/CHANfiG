@@ -155,12 +155,12 @@ class FlatDict(dict, metaclass=Dict):
 
     Examples:
         >>> d = FlatDict()
-        >>> d.d = 1013
+        >>> d.d = 1016
         >>> d['d']
-        1013
-        >>> d['i'] = 1013
+        1016
+        >>> d['i'] = 1016
         >>> d.i
-        1013
+        1016
         >>> d.a = Variable(1)
         >>> d.b = d.a
         >>> d.a, d.b
@@ -244,15 +244,15 @@ class FlatDict(dict, metaclass=Dict):
             TypeError: If `name` is not hashable.
 
         Examples:
-            >>> d = FlatDict(d=1013)
+            >>> d = FlatDict(d=1016)
             >>> d.get('d')
-            1013
+            1016
             >>> d['d']
-            1013
+            1016
             >>> d.d
-            1013
+            1016
             >>> d.get('d', None)
-            1013
+            1016
             >>> d.get('f', 2)
             2
             >>> d.get('f')
@@ -286,9 +286,9 @@ class FlatDict(dict, metaclass=Dict):
 
         Examples:
             >>> d = FlatDict()
-            >>> d.set('d', 1013)
+            >>> d.set('d', 1016)
             >>> d.get('d')
-            1013
+            1016
             >>> d['n'] = 'chang'
             >>> d.n
             'chang'
@@ -451,12 +451,12 @@ class FlatDict(dict, metaclass=Dict):
             >>> d.setattr('attr', 'value')
             >>> d.getattr('attr')
             'value'
-            >>> d.set('d', 1013)
+            >>> d.set('d', 1016)
             >>> d.setattr('d', 1031)  # RuntimeWarning: d already exists in FlatDict.
             >>> d.get('d')
-            1013
+            1016
             >>> d.d
-            1013
+            1016
             >>> d.getattr('d')
             1031
         """
