@@ -199,7 +199,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config').dict()
             Traceback (most recent call last):
-            RuntimeError: default_config is set to config, but not found in args.
+            RuntimeError: ConfigParser has default_config set to config, but it is not found in args.
 
             ValueError will be suppressed when `default_config` is specified bug not presented in command line,
             and `no_default_config_action` is set to `ignore` or `warn`.
@@ -320,11 +320,14 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             return self.add_argument(name, type=dtype, help=help, dest=key)
 
     def merge_default_config(self, parsed, default_config: str, no_default_config_action: str = "raise") -> NestedDict:
-        message = f"default_config is set to {default_config}, but not found in args."
         if default_config in parsed:
             path = parsed[default_config]
-            warn(f"Config has 'default_config={path}' specified, its values will override values in Config")
+            warn(
+                f"{self.__class__.__name__} has 'default_config={path}' specified, "
+                "its values will override values in Config"
+            )
             return NestedDict.load(path).merge(parsed)
+        message = f"{self.__class__.__name__} has default_config set to {default_config}, but it is not found in args."
         if no_default_config_action == "ignore":
             pass
         elif no_default_config_action == "warn":
