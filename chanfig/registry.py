@@ -206,10 +206,12 @@ class Registry(NestedDict):
 
         if default is Null:
             default = self.getattr("default", Null)
-        element = self.get(name, default)
-        if isinstance(element, Registry):
-            return element.getattr("default")
-        return element
+        component = self.get(name, default)
+        if isinstance(component, Registry):
+            component = component.getattr("default")
+        if component is Null:
+            raise KeyError(f"Component {name} is not registered.")
+        return component
 
     @staticmethod
     def init(cls: Callable, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W0211
