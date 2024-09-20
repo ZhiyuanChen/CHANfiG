@@ -150,7 +150,6 @@ class Config(NestedDict):
             )
         """
 
-        self.interpolate()
         self.validate()
         self.apply_(lambda c: c.setattr("default_factory", Null) if isinstance(c, Config) else None)
         return self
