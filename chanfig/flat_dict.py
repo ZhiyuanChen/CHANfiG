@@ -110,7 +110,7 @@ def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
     if isinstance(obj, Variable):
         return obj.value
     if is_dataclass(obj):
-        return asdict(obj)  # type: ignore[call-overload]
+        return asdict(obj)  # type: ignore[arg-type]
     if hasattr(obj, "to_dict"):
         return obj.to_dict()
     return obj

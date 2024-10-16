@@ -297,7 +297,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             if isinstance(value, Variable):
                 dtype = value._type or value.dtype  # pylint: disable=W0212
             elif isinstance(value, Field):
-                dtype = value.type
+                dtype = value.type  # type: ignore[assignment]
             elif value is not None:
                 dtype = type(value)
         if _should_collect_from_parameters(dtype):
