@@ -717,7 +717,10 @@ class FlatDict(dict, metaclass=Dict):
                 self[key] = self.substitute(self[key], interpolators, value)
             if unsafe_eval and isinstance(self[key], str):
                 with suppress(SyntaxError):
-                    self[key] = eval(self[key])  # pylint: disable=W0123
+                    if isinstance(self[key], Variable):
+                        self[key].set(eval(self[key].value))
+                    else:
+                        self[key] = eval(self[key])  # pylint: disable=W0123
         return self
 
     @staticmethod
