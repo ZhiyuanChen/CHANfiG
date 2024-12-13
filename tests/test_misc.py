@@ -36,3 +36,9 @@ class Test:
         assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
         assert config.model.num_heads == config.model.num_channels // 64
         assert config.model.num_hidden_size == config.model.num_channels // 64 * config.model.multiple
+
+    def test_include(self):
+        config = chanfig.load("tests/parent.yaml")
+        model = chanfig.load("tests/model.yaml")
+        assert config.model == model
+        assert config.port == 80

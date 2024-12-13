@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from argparse import ArgumentTypeError
 from collections.abc import Callable, Mapping, Sequence
@@ -31,6 +32,8 @@ from typing import IO, Any, Union, no_type_check
 import typing_extensions
 from typing_extensions import get_args, get_origin
 from yaml import SafeDumper, SafeLoader
+from yaml.constructor import ConstructorError
+from yaml.nodes import ScalarNode, SequenceNode
 
 try:  # python 3.10+
     from types import UnionType  # type: ignore[attr-defined] # pylint: disable=C0412
@@ -293,18 +296,43 @@ class YamlDumper(SafeDumper):  # pylint: disable=R0903
         return super().increase_indent(flow, indentless)
 
 
-class YamlLoader(SafeLoader):  # pylint: disable=R0901,R0903
+class YamlLoader(SafeLoader):
     r"""
     YAML Loader for Config.
     """
 
+    def __init__(self, stream):
+        super().__init__(stream)
+        self._root = os.path.abspath(os.path.dirname(stream.name)) if hasattr(stream, "name") else os.getcwd()
+        self.add_constructor("!include", self._include)
+        self.add_constructor("!includes", self._includes)
+        self.add_constructor("!env", self._env)
 
-try:
-    from yamlinclude import YamlIncludeConstructor
+    @staticmethod
+    def _include(loader: YamlLoader, node):
+        relative_path = loader.construct_scalar(node)
+        include_path = os.path.join(loader._root, relative_path)
 
-    YamlIncludeConstructor.add_to_loader_class(loader_class=YamlLoader, relative=True)
-except ImportError:
-    pass
+        if not os.path.exists(include_path):
+            raise FileNotFoundError(f"Included file not found: {include_path}")
+        from .functional import load
+
+        return load(include_path)
+
+    @staticmethod
+    def _includes(loader: YamlLoader, node):
+        if not isinstance(node, SequenceNode):
+            raise ConstructorError(None, None, f"!includes tag expects a sequence, got {node.id}", node.start_mark)
+        files = loader.construct_sequence(node)
+        return [YamlLoader._include(loader, ScalarNode("tag:yaml.org,2002:str", file)) for file in files]
+
+    @staticmethod
+    def _env(loader: YamlLoader, node):
+        env_var = loader.construct_scalar(node)
+        value = os.getenv(env_var)
+        if value is None:
+            raise ValueError(f"Environment variable '{env_var}' not set.")
+        return value
 
 
 Null = NULL()

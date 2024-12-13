@@ -47,9 +47,6 @@ dependencies = [
   "pyyaml",
   "typing-extensions",
 ]
-optional-dependencies.include = [
-  "pyyaml-include",
-]
 urls.documentation = "https://chanfig.danling.org"
 urls.homepage = "https://chanfig.danling.org"
 urls.repository = "https://github.com/ZhiyuanChen/CHANfiG"
