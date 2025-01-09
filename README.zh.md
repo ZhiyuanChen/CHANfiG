@@ -72,7 +72,7 @@ Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内�
 
 [`FlatDict`][chanfig.FlatDict]遵守[PEP 557](https://peps.python.org/pep-0557/)提案，他会检查子类的类型注解，并将它们添加成为[`FlatDict`][chanfig.FlatDict]的成员。
 他还支持[`validate`](chanfig.FlatDict.validate)方法来检查成员是否符合类型注解，这个方法会在内部被调用。
-更好的是，如果一个[`FlatDict`][chanfig.FlatDict]成员有类型注解，那么他会在被赋值时自动转换为正确的类型。
+更好的是，[`FlatDict`][chanfig.FlatDict]会在成员赋值时自动将值转换成注解的类型。
 
 #### 机器学习操作
 
