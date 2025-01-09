@@ -335,6 +335,9 @@ class FlatDict(dict, metaclass=Dict):
                     except ValueError as exc:
                         raise ValueError(f"'{name}' has invalid value. {exc}") from None
 
+    def __call__(self, name: str, default: Any = Null) -> Any:
+        return self.getattr(name, default)
+
     def getattr(self, name: str, default: Any = Null) -> Any:
         r"""
         Get attribute of `FlatDict`.
