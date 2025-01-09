@@ -76,7 +76,7 @@ Moreover, [`FlatDict`][chanfig.FlatDict] comes with [`difference`][chanfig.FlatD
 
 [`FlatDict`][chanfig.FlatDict] is compatible with [PEP 557](https://peps.python.org/pep-0557/), and will inspect the type annotations in subclasses and make them as members of the [`FlatDict`][chanfig.FlatDict].
 It also features [`validate`](chanfig.FlatDict.validate) method which will be called internally to validate the type of the members.
-Even better, if a member of the [`FlatDict`][chanfig.FlatDict] have type annotations, the value will be automatically converted to the type of the annotation when setting the value.
+Even better, [`FlatDict`][chanfig.FlatDict] will automatically convert value to the type of the annotation when setting the member.
 
 #### ML Operations
 

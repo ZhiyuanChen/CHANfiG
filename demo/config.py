@@ -16,15 +16,20 @@
 # See the LICENSE file for more details.
 
 import os
+from typing import Any
 
 from chanfig import Config, Variable
 
 
 class DataloaderConfig(Config):
+    # You must set the type annotation, or they will not be accessible as a CHANfiG member
     batch_size: int = 64
     num_workers: int = 4
     pin_memory: bool = True
-    attribute = "None"  # this will not be copied to the config
+    # If no type annotation is suitable, use `Any`
+    unknown: Any = None
+    # Attribute without type annotation are used to maintain the internal state of CHANfiG
+    attribute = "None"
 
 
 class TestConfig(Config):
