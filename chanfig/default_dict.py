@@ -73,7 +73,9 @@ class DefaultDict(FlatDict):
 
     def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
-            if self.getattr("default_factory") is Null or (name.startswith("__") and name.endswith("__")):
+            if self.getattr("default_factory") is Null or (
+                isinstance(name, str) and name.startswith("__") and name.endswith("__")
+            ):
                 raise KeyError(name) from None
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
