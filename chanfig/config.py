@@ -139,11 +139,13 @@ class Config(NestedDict):
             ...     def post(self):
             ...         if isinstance(self.data, str):
             ...             self.data = Config(feature=self.data, label=self.data)
+            ...         # should call `super().post()` in the end, otherwise, default_factory will be cleared for `self.data`  # noqa: E501
+            ...         super().post()
             ...         return self
             >>> c = PostConfig(data="path")
             >>> c.post()
-            PostConfig(<class 'chanfig.config.Config'>,
-              ('data'): Config(<class 'chanfig.config.Config'>,
+            PostConfig(
+              ('data'): Config(
                 ('feature'): 'path'
                 ('label'): 'path'
               )
