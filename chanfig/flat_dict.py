@@ -304,7 +304,7 @@ class FlatDict(dict, metaclass=Dict):
         else:
             if name in get_annotations(self):
                 anno = get_annotations(self)[name]
-                if isinstance(anno, type) and not isinstance(value, anno):
+                if anno is not Any and isinstance(anno, type) and not isinstance(value, anno):
                     value = anno(value)
             dict.__setitem__(self, name, value)
 
