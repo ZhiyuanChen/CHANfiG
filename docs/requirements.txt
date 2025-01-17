@@ -8,6 +8,7 @@ mkdocs-gen-files
 mkdocs-git-committers-plugin
 mkdocs-git-revision-date-localized-plugin
 mkdocs-literate-nav
+mkdocs-macros-plugin
 mkdocs-material
 mkdocs-material-extensions-2
 mkdocs-rss-plugin
