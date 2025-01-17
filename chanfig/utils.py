@@ -193,6 +193,8 @@ def get_annotations(  # pylint: disable=all
 
 @no_type_check
 def isvalid(data: Any, expected_type: type) -> bool:
+    if expected_type is Any:
+        return True
     expected_origin = get_origin(expected_type)
     if expected_origin not in (
         Callable,
