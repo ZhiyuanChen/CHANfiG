@@ -112,7 +112,7 @@ class Registry(NestedDict):
         if key is not None:
             self.setattr("key", key)
         if default is not None:
-            self.setattr("default", default)
+            self.setdefault(default)
 
     def register(
         self, component: Any = Null, name: Any = Null, override: bool = False, default: bool = False
@@ -155,13 +155,13 @@ class Registry(NestedDict):
         if name is not Null:
             self.set(name, component)
             if default:
-                self.setattr("default", component)
+                self.setdefault(component)
             return component
         # @Registry.register
         if component is not Null and callable(component) and name is Null:
             self.set(component.__name__, component)
             if default:
-                self.setattr("default", component)
+                self.setdefault(component)
             return component
 
         # @Registry.register()
@@ -173,7 +173,7 @@ class Registry(NestedDict):
                 else:
                     self.set(name, component)
                 if default:
-                    self.setattr("default", component)
+                    self.setdefault(component)
                 return component
 
             return wrapper
@@ -285,6 +285,10 @@ class Registry(NestedDict):
         if name is Null:
             name, kwargs = kwargs.pop(self.getattr("key"), None), dict(**kwargs)
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
+
+    def setdefault(self, component: Any) -> Any:  # type: ignore[override]
+        self.setattr("default", component)
+        return component
 
 
 class ConfigRegistry(Registry):
