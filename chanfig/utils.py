@@ -110,7 +110,7 @@ def get_annotations(  # pylint: disable=all
     """
     if isinstance(obj, type):
         # class
-        ann = getattr(obj, "__annotations__", None)
+        annos = getattr(obj, "__annotations__", None)
         obj_globalns = None
         module_name = getattr(obj, "__module__", None)
         if module_name:
@@ -121,7 +121,7 @@ def get_annotations(  # pylint: disable=all
         unwrap = obj
     elif isinstance(obj, ModuleType):
         # module
-        ann = getattr(obj, "__annotations__", None)
+        annos = getattr(obj, "__annotations__", None)
         obj_globalns = getattr(obj, "__dict__")
         obj_localns = None
         unwrap = None
@@ -129,13 +129,13 @@ def get_annotations(  # pylint: disable=all
         # this includes types.Function, types.BuiltinFunctionType,
         # types.BuiltinMethodType, functools.partial, functools.singledispatch,
         # "class funclike" from Lib/test/test_inspect... on and on it goes.
-        ann = getattr(obj, "__annotations__", None)
+        annos = getattr(obj, "__annotations__", None)
         obj_globalns = getattr(obj, "__globals__", None)
         obj_localns = None
         unwrap = obj
     else:
         # obj
-        ann = getattr(type(obj), "__annotations__", None)
+        annos = getattr(type(obj), "__annotations__", None)
         obj_globalns = None
         module_name = getattr(obj, "__module__", None)
         if module_name:
@@ -145,10 +145,10 @@ def get_annotations(  # pylint: disable=all
         obj_localns = dict(vars(obj))
         unwrap = obj
 
-    if ann is None or not ann:
+    if annos is None or not annos:
         return {}
 
-    if not isinstance(ann, dict):
+    if not isinstance(annos, dict):
         raise ValueError(f"{obj!r}.__annotations__ is neither a dict nor None")
 
     if unwrap is not None:
@@ -171,7 +171,7 @@ def get_annotations(  # pylint: disable=all
         localns = obj_localns
 
     ret = {}
-    for key, value in ann.items():
+    for key, value in annos.items():
         if eval_str and isinstance(value, str):
             try:
                 value = eval(value, globalns, localns)  # pylint: disable=W0123

@@ -219,6 +219,8 @@ class FlatDict(dict, metaclass=Dict):
         pass
 
     def __getattribute__(self, name: Any) -> Any:
+        if name in ("keys", "values", "items", "getattr", "setattr", "delattr", "hasattr", "repr", "extra_repr"):
+            return super().__getattribute__(name)
         if (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__"))) and name in self:
             if name in dir(self.__class__):
                 value = super().__getattribute__(name)
@@ -302,10 +304,9 @@ class FlatDict(dict, metaclass=Dict):
         if name in self and isinstance(self.get(name), Variable):
             self.get(name).set(value)
         else:
-            if name in get_annotations(self):
-                anno = get_annotations(self)[name]
-                if anno is not Any and isinstance(anno, type) and not isinstance(value, anno):
-                    value = anno(value)
+            anno = get_annotations(self).get(name, Any)
+            if anno is not Any and isinstance(anno, type) and not isinstance(value, anno):
+                value = anno(value)
             dict.__setitem__(self, name, value)
 
     def __setitem__(self, name: Any, value: Any) -> None:
@@ -378,10 +379,10 @@ class FlatDict(dict, metaclass=Dict):
     @staticmethod
     def _validate(obj) -> None:
         if isinstance(obj, FlatDict):
-            annotations = get_annotations(obj)
+            annos = get_annotations(obj)
             for name, value in obj.items():
-                if annotations and name in annotations and not isvalid(value, annotations[name]):
-                    raise TypeError(f"'{name}' has invalid type. Value {value} is not of type {annotations[name]}.")
+                if annos and name in annos and not isvalid(value, annos[name]):
+                    raise TypeError(f"'{name}' has invalid type. Value {value} is not of type {annos[name]}.")
                 if isinstance(value, Variable):
                     try:
                         value.validate()
@@ -420,12 +421,15 @@ class FlatDict(dict, metaclass=Dict):
             3
         """
 
+        if name in ("indent", "separator"):
+            return super().__getattribute__(name)
+
         try:
             if name in self.__dict__:
                 return self.__dict__[name]
             for cls in self.__class__.__mro__:
-                annotations = get_annotations(cls)
-                if name in cls.__dict__ and name not in annotations:
+                annos = get_annotations(cls)
+                if name in cls.__dict__ and name not in annos:
                     return cls.__dict__[name]
             return super().getattr(name, default)  # type: ignore[misc]
         except AttributeError:
@@ -1501,8 +1505,7 @@ class FlatDict(dict, metaclass=Dict):
         """
         return self.dropnull()
 
-    @staticmethod
-    def extra_repr() -> str:  # pylint: disable=C0116
+    def extra_repr(self) -> str:  # pylint: disable=C0116
         return ""
 
     def __repr__(self) -> str:
