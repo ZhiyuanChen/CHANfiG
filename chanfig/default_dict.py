@@ -81,7 +81,9 @@ class DefaultDict(FlatDict):
         if isinstance(default, FlatDict):
             default.__dict__.update(self.__dict__)
         super().set(name, default)
-        return default
+        # CHANfiG might auto convert data type during `set`, which will change the value in place.
+        # So we need to `get` the value, instead of return `default`.
+        return self.get(name)
 
     def __repr__(self) -> str:
         default_factory = self.getattr("default_factory", None)
