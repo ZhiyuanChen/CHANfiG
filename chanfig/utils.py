@@ -21,6 +21,7 @@ import os
 import sys
 from argparse import ArgumentTypeError
 from collections.abc import Callable, Mapping, Sequence
+from contextlib import suppress
 from functools import partial
 from io import IOBase
 from json import JSONEncoder
@@ -190,6 +191,79 @@ def get_annotations(  # pylint: disable=all
                 ) from None
         ret[key] = value
     return ret
+
+
+def honor_annotation(data: Any, annotation: type) -> Any:
+    r"""
+    Attempt to convert data to match the expected type annotation.
+
+    This function tries to honor the type annotation by converting the data
+    when possible, rather than rejecting it. It works with:
+    - Basic types (int, str, etc.)
+    - Container types (List, Dict, etc.)
+    - Union types (including Optional)
+    - Nested generic types
+
+    Unlike `conform_annotation` which validates type compatibility,
+    this function tries to adapt the data to match the annotation.
+
+    Examples:
+        >>> honor_annotation("42", int)
+        42
+        >>> honor_annotation(42, str)
+        '42'
+        >>> honor_annotation("name", Union[int, str])
+        'name'
+        >>> honor_annotation(123, Union[int, str])
+        123
+    """
+    if data is None or annotation is Any:
+        return data
+    origin_type = get_origin(annotation)
+    arg_types = get_args(annotation)
+    with suppress(Exception):
+        if origin_type is Union or origin_type is UnionType:
+            if any(conform_annotation(data, t) for t in arg_types):
+                return data
+            for t in arg_types:
+                if t is not type(None):
+                    with suppress(ValueError, TypeError):
+                        return t(data)
+            return data
+        if origin_type is not None and arg_types:
+            if issubclass(origin_type, tuple) and len(arg_types) == len(data):
+                return origin_type(honor_annotation(item, arg) for item, arg in zip(data, arg_types))
+            if isinstance(data, origin_type):
+                if not data:
+                    return data
+                if origin_type is tuple and len(arg_types) > 1 and arg_types[-1] is not Ellipsis:
+                    if len(data) == len(arg_types):
+                        return tuple(honor_annotation(item, arg) for item, arg in zip(data, arg_types))
+                    return data
+                if issubclass(origin_type, Sequence) and not isinstance(data, str):
+                    item_type = arg_types[0]
+                    item_origin = get_origin(item_type)
+                    item_args = get_args(item_type)
+                    if item_origin is not None and item_args:
+                        return origin_type([honor_annotation(item, item_type) for item in data])
+                    return origin_type(honor_annotation(item, item_type) for item in data)
+                if issubclass(origin_type, Mapping):
+                    key_type, value_type = arg_types[:2]
+                    return origin_type(
+                        {honor_annotation(k, key_type): honor_annotation(v, value_type) for k, v in data.items()}
+                    )
+                if issubclass(origin_type, (set, frozenset)):
+                    item_type = arg_types[0]
+                    return origin_type(honor_annotation(item, item_type) for item in data)
+            else:
+                with suppress(ValueError, TypeError):
+                    return origin_type(data)
+            return data
+        if isinstance(annotation, type) and not isinstance(data, annotation):
+            with suppress(ValueError, TypeError):
+                return annotation(data)
+            return data
+    return data
 
 
 def conform_annotation(data: Any, annotation: type) -> bool:

@@ -15,10 +15,12 @@
 
 from __future__ import annotations
 
+import sys
 from argparse import ArgumentParser
 from copy import copy, deepcopy
 from typing import Dict, List, Optional, Tuple, Union
 
+import pytest
 from pytest import raises
 
 from chanfig import FlatDict, Variable
@@ -119,3 +121,44 @@ class TestConfigDict:
         assert d.keys() == p.keys()
         assert list(d.values()) == list(p.values())  # dict_values can't be compared directly
         assert d.items() == p.items()
+
+
+class AnnoDict(FlatDict):
+    int_value: int
+    str_value: str
+    float_value: float
+    list_int: list[int]
+    tuple_str: tuple[str]
+    dict_float: dict[str, float]
+    union_int_float: Union[int, float]
+    optional_str: Optional[str] = None
+    nested: list[tuple[int, int]]
+
+
+class TestAnnoDict:
+
+    @pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9")
+    def test_validate(self):
+        anno_dict = AnnoDict()
+        anno_dict.int_value = "1"
+        assert isinstance(anno_dict.int_value, int)
+        anno_dict.str_value = 1
+        assert isinstance(anno_dict.str_value, str)
+        anno_dict.float_value = 1
+        assert isinstance(anno_dict.float_value, float)
+        anno_dict.list_int = ("1", "2", "3")
+        assert isinstance(anno_dict.list_int, list)
+        anno_dict.tuple_str = [1, 2, 3]
+        assert isinstance(anno_dict.tuple_str, tuple)
+        anno_dict.dict_float = [("a", 1), ("b", 2)]
+        assert isinstance(anno_dict.dict_float, dict)
+        assert isinstance(anno_dict.dict_float["a"], int)
+        anno_dict.union_int_float = "1"
+        assert isinstance(anno_dict.union_int_float, int)
+        assert anno_dict.optional_str is None
+        anno_dict.optional_str = 1
+        assert isinstance(anno_dict.optional_str, str)
+        anno_dict.nested = [["1", "2"]]
+        assert isinstance(anno_dict.nested, list)
+        assert isinstance(anno_dict.nested[0], tuple)
+        assert isinstance(anno_dict.nested[0][0], int)
