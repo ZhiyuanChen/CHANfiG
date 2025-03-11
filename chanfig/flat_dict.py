@@ -51,6 +51,7 @@ from .utils import (
     find_circular_reference,
     find_placeholders,
     get_annotations,
+    honor_annotation,
 )
 from .variable import Variable
 
@@ -359,13 +360,18 @@ class FlatDict(dict, metaclass=Dict):
 
         if name is Null:
             raise ValueError("name must not be null")
+
         if name in self and isinstance(self.get(name), Variable):
             self.get(name).set(value)
-        else:
-            anno = get_annotations(self).get(name, Any)
-            if anno is not Any and isinstance(anno, type) and not isinstance(value, anno):
-                value = anno(value)
-            dict.__setitem__(self, name, value)
+            return
+
+        annotations = get_annotations(self)
+        anno = annotations.get(name, Any)
+
+        if anno is not Any:
+            value = honor_annotation(value, anno)
+
+        dict.__setitem__(self, name, value)
 
     def __setitem__(self, name: Any, value: Any) -> None:
         self.set(name, value)
