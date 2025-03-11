@@ -191,6 +191,27 @@ def get_annotations(  # pylint: disable=all
     return ret
 
 
+def honor_annotation(data: Any, annotation: type) -> Any:
+    if data is None:
+        return data
+    origin_type = get_origin(annotation)
+    arg_types = get_args(annotation)
+    try:
+        if origin_type is Union:
+            if not any(isinstance(data, t) for t in arg_types if t is not type(None)):
+                for t in arg_types:
+                    if t is not type(None):
+                        return t(data)
+            return data
+        if origin_type is not None and arg_types and not isinstance(data, origin_type):
+            return origin_type(data)
+        if isinstance(annotation, type) and not isinstance(data, annotation):
+            return annotation(data)
+    except (ValueError, TypeError):
+        return data
+    return data
+
+
 @no_type_check
 def isvalid(data: Any, expected_type: type) -> bool:
     if expected_type is Any:
