@@ -116,6 +116,64 @@ def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
     return obj
 
 
+def to_chanfig(obj: Any, cls: type | None = None) -> Any:
+    r"""
+    Convert arbitrary data structure to CHANfiG objects when possible.
+
+    This function recursively converts mappings to FlatDict instances
+    and handles nested structures of arbitrary depth.
+
+    Args:
+        obj: Object to be converted.
+        cls: Class to use for creating FlatDict instances. Defaults to FlatDict.
+
+    Returns:
+        Converted object.
+
+    Examples:
+        >>> to_chanfig({'a': 1, 'b': 2})
+        FlatDict(
+          ('a'): 1
+          ('b'): 2
+        )
+        >>> to_chanfig([1, 2, 3])
+        [1, 2, 3]
+        >>> to_chanfig([{'a': 1}, {'b': 2}])
+        [FlatDict(('a'): 1), FlatDict(('b'): 2)]
+        >>> to_chanfig([[1, 2], [3, 4]])
+        FlatDict(
+          (1): 2
+          (3): 4
+        )
+        >>> to_chanfig([[1, 2, 3], [4, 5, 6]])
+        [[1, 2, 3], [4, 5, 6]]
+    """
+    if cls is None:
+        cls = FlatDict
+
+    if isinstance(obj, Mapping):
+        result = cls()
+        for k, v in obj.items():
+            result[k] = to_chanfig(v, cls)
+        return result
+    if isinstance(obj, (list, tuple)) and all(isinstance(item, (list, tuple)) and len(item) == 2 for item in obj):
+        try:
+            result = cls()
+            for k, v in obj:
+                result[k] = to_chanfig(v, cls)
+            return result
+        except (ValueError, TypeError):
+            pass
+    if isinstance(obj, (list, tuple)):
+        return type(obj)(to_chanfig(item, cls) for item in obj)
+    if isinstance(obj, set):
+        try:
+            return {to_chanfig(item, cls) for item in obj}
+        except TypeError:
+            return tuple(to_chanfig(item, cls) for item in obj)
+    return obj
+
+
 class FlatDict(dict, metaclass=Dict):
     r"""
     `FlatDict` with attribute-style access.
@@ -575,22 +633,10 @@ class FlatDict(dict, metaclass=Dict):
             >>> FlatDict.from_dict([{'a': 1}, {'b': 2}, {'c': 3}])
             [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
             >>> FlatDict.from_dict({1, 2, 3})
-            Traceback (most recent call last):
-            TypeError: Expected Mapping or Sequence, but got <class 'set'>.
+            {1, 2, 3}
         """
 
-        if obj is None:
-            return cls()
-        if issubclass(cls, FlatDict):
-            cls = cls.empty  # type: ignore[assignment] # pylint: disable=W0642
-        if isinstance(obj, Mapping):
-            return cls(obj)
-        if isinstance(obj, Sequence):
-            try:
-                return cls(obj)
-            except ValueError:
-                return [cls(json) for json in obj]
-        raise TypeError(f"Expected Mapping or Sequence, but got {type(obj)}.")
+        return to_chanfig(obj, cls)
 
     def sort(self, key: Callable | None = None, reverse: bool = False) -> Self:
         r"""
@@ -1298,7 +1344,8 @@ class FlatDict(dict, metaclass=Dict):
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
                 return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
-            return cls.from_dict(yaml_load(fp, *args, **kwargs))
+            content = yaml_load(fp, *args, **kwargs)
+            return cls.from_dict(content)
 
     def yamls(self, *args: Any, **kwargs: Any) -> str:
         r"""
@@ -1553,12 +1600,15 @@ class FlatDict(dict, metaclass=Dict):
     def __hash__(self):
         return hash(frozenset(self.items()))
 
+    # iptyhon
     def _ipython_display_(self):  # pragma: no cover
         return repr(self)
 
+    # iptyhon
     def _ipython_canary_method_should_not_exist_(self):  # pragma: no cover
         return None
 
+    # rich
     def aihwerij235234ljsdnp34ksodfipwoe234234jlskjdf(self):  # pragma: no cover
         return None
 
