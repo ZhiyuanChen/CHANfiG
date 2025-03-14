@@ -47,6 +47,7 @@ from .variable import Variable
 __all__ = [
     "Variable",
     "configclass",
+    "Chanfig",
     "Config",
     "NestedDict",
     "FlatDict",
@@ -65,6 +66,9 @@ __all__ = [
     "__version__",
     "__version_tuple__",
 ]
+
+
+Chanfig = Config
 
 
 add_multi_representer(FlatDict, SafeRepresenter.represent_dict)
