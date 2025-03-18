@@ -47,10 +47,10 @@ from .utils import (
     SafeLoader,
     YamlDumper,
     YamlLoader,
+    conform_annotation,
     find_circular_reference,
     find_placeholders,
     get_annotations,
-    isvalid,
 )
 from .variable import Variable
 
@@ -439,7 +439,7 @@ class FlatDict(dict, metaclass=Dict):
         if isinstance(obj, FlatDict):
             annos = get_annotations(obj)
             for name, value in obj.items():
-                if annos and name in annos and not isvalid(value, annos[name]):
+                if annos and name in annos and not conform_annotation(value, annos[name]):
                     raise TypeError(f"'{name}' has invalid type. Value {value} is not of type {annos[name]}.")
                 if isinstance(value, Variable):
                     try:
