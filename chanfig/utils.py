@@ -26,7 +26,7 @@ from io import IOBase
 from json import JSONEncoder
 from os import PathLike
 from re import compile, findall  # pylint: disable=W0622
-from types import GetSetDescriptorType, ModuleType
+from types import ModuleType
 from typing import IO, Any, Union, no_type_check
 
 import typing_extensions
@@ -56,7 +56,8 @@ PYTHON = ("py",)
 def get_annotations(  # pylint: disable=all
     obj, *, globalns: Mapping | None = None, localns: Mapping | None = None, eval_str: bool = True
 ):
-    """Compute the annotations dict for an object.
+    r"""
+    Compute the annotations dict for an object.
 
     obj may be a callable, class, or module.
     Passing in an object of any other type raises TypeError.
@@ -191,30 +192,49 @@ def get_annotations(  # pylint: disable=all
     return ret
 
 
-@no_type_check
-def isvalid(data: Any, expected_type: type) -> bool:
-    if expected_type is Any:
+def conform_annotation(data: Any, annotation: type) -> bool:
+    r"""
+    Check if data is valid according to the expected type.
+
+    This function handles complex type annotations including:
+    - Basic types (int, str, etc.)
+    - Container types (List, Dict, etc.)
+    - Union types (including Optional)
+    - Nested generic types
+    """
+    if annotation is Any:
         return True
-    expected_origin = get_origin(expected_type)
-    if expected_origin not in (
-        Callable,
-        GetSetDescriptorType,
-        UnionType,
-        Union,
-        None,
-    ):
-        if issubclass(expected_origin, Sequence):
-            inner_type = get_args(expected_type)[0]
-            return isinstance(data, expected_origin) and all(isinstance(item, inner_type) for item in data)
-        if issubclass(expected_origin, Mapping):
-            key_type, value_type = get_args(expected_type)
-            return isinstance(data, expected_origin) and all(
-                isinstance(key, key_type) and isinstance(value, value_type) for key, value in data.items()
-            )
-        raise TypeError(f"Expected type {expected_type} is not supported.")
-    if expected_origin is UnionType and not PY310_PLUS:
-        return any(isinstance(data, inner_type) for inner_type in get_args(expected_type))
-    return isinstance(data, expected_type)
+    if annotation is type(None):
+        return data is None
+    origin_type = get_origin(annotation)
+    arg_types = get_args(annotation)
+    if origin_type in (Union, UnionType):
+        return any(conform_annotation(data, arg_type) for arg_type in arg_types)
+    if origin_type is Callable:
+        return callable(data)
+    if origin_type is not None and arg_types:
+        if not isinstance(data, origin_type):
+            return False
+        if not data:
+            return True
+        if origin_type is tuple and len(arg_types) > 1 and arg_types[-1] is not Ellipsis:
+            if len(data) != len(arg_types):
+                return False
+            return all(conform_annotation(item, type_) for item, type_ in zip(data, arg_types))
+        if issubclass(origin_type, Sequence) and not isinstance(data, str):
+            item_type = arg_types[0]
+            return all(conform_annotation(item, item_type) for item in data)
+        if issubclass(origin_type, Mapping):
+            key_type, value_type = arg_types[:2]
+            return all(conform_annotation(k, key_type) and conform_annotation(v, value_type) for k, v in data.items())
+        if issubclass(origin_type, (set, frozenset)):
+            item_type = arg_types[0]
+            return all(conform_annotation(item, item_type) for item in data)
+        return isinstance(data, origin_type)
+    try:
+        return isinstance(data, annotation)
+    except TypeError:
+        return False
 
 
 class Dict(type(dict)):  # type: ignore[misc]
