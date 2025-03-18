@@ -23,8 +23,6 @@ class Registry(Registry_):
     key = "level"
 
 
-class TestRegistry:
-
-    def test_registry(self):
-        registry = Registry()
-        assert registry.getattr("key") == "level"
+def test_registry():
+    registry = Registry()
+    assert registry.getattr("key") == "level"

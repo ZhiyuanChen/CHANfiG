@@ -19,14 +19,13 @@ from __future__ import annotations
 
 import os
 import sys
-from argparse import ArgumentTypeError
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
 from functools import partial
 from io import IOBase
 from json import JSONEncoder
 from os import PathLike
-from re import compile, findall  # pylint: disable=W0622
+from re import compile
 from types import ModuleType
 from typing import IO, Any, Union, no_type_check
 
@@ -56,7 +55,7 @@ PYTHON = ("py",)
 @no_type_check
 def get_annotations(  # pylint: disable=all
     obj, *, globalns: Mapping | None = None, localns: Mapping | None = None, eval_str: bool = True
-):
+) -> Mapping:
     r"""
     Compute the annotations dict for an object.
 
@@ -380,6 +379,8 @@ class JsonEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
         if hasattr(o, "__json__"):
             return o.__json__()
+        if hasattr(o, "to_dict"):
+            return o.to_dict()
         return super().default(o)
 
 
@@ -437,12 +438,54 @@ PLACEHOLDER_PATTERN = compile(r"\${([^}]*)}")
 
 
 def find_placeholders(text: str) -> list[str]:
+    r"""Find all placeholders in text, including nested ones.
+
+    This function searches for placeholders in the format ${name} and returns a list
+    of all placeholder names found, including those that are nested within other placeholders.
+
+    Examples:
+        >>> find_placeholders("Hello ${name}")
+        ['name']
+        >>> find_placeholders("Hello ${user.${type}}")
+        ['user.${type}', 'type']
+        >>> find_placeholders("${outer${inner}}")
+        ['outer${inner}', 'inner']
+    """
     if not isinstance(text, str):
         return []
-    return findall(PLACEHOLDER_PATTERN, str(text))
+
+    results = []
+    stack = []
+    i = 0
+
+    while i < len(text):
+        if text[i : i + 2] == "${":
+            stack.append(i)
+            i += 2
+        elif text[i] == "}" and stack:
+            start = stack.pop()
+            placeholder = text[start + 2 : i]
+            if not stack:
+                results.append(placeholder)
+            i += 1
+        else:
+            i += 1
+
+    nested_results = []
+    for placeholder in results:
+        nested_results.extend(find_placeholders(placeholder))
+
+    return results + nested_results
 
 
 def find_circular_reference(graph: Mapping) -> list[str] | None:
+    r"""
+    Find circular references in a dependency graph.
+
+    This function performs a depth-first search to detect any circular references
+    in a graph represented as a mapping of nodes to their dependencies.
+    """
+
     def dfs(node, visited, path):  # pylint: disable=R1710
         path.append(node)
         if node in visited:
@@ -462,11 +505,35 @@ def find_circular_reference(graph: Mapping) -> list[str] | None:
     return None
 
 
-def parse_bool(value):
+def parse_bool(value: bool | str | int) -> bool:
+    r"""
+    Convert various types of values to boolean.
+
+    This function converts different input types (bool, str, int) to their boolean equivalent.
+
+    Examples:
+        >>> parse_bool(True)
+        True
+        >>> parse_bool("yes")
+        True
+        >>> parse_bool(1)
+        True
+        >>> parse_bool(0)
+        False
+        >>> parse_bool("false")
+        False
+    """
     if isinstance(value, bool):
         return value
-    if value.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    if value.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    raise ArgumentTypeError(f"Boolean value is expected, but got {value}.")
+    if isinstance(value, int):
+        if value == 1:
+            return True
+        if value == 0:
+            return False
+        raise ValueError(f"Only 0 or 1 is allowed for boolean value, but got {value}.")
+    if isinstance(value, str):
+        if value.lower() in ("yes", "true", "t", "y", "1"):
+            return True
+        if value.lower() in ("no", "false", "f", "n", "0"):
+            return False
+    raise ValueError(f"Boolean value is expected, but got {value}.")

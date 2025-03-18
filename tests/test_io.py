@@ -22,16 +22,15 @@ import os
 import chanfig
 
 
-class TestIO:
+def test_list():
+    list = [1, 2, 3]
+    chanfig.save(list, "test.yaml")
+    assert chanfig.load("test.yaml") == list
+    os.remove("test.yaml")
 
-    def test_list(self):
-        list = [1, 2, 3]
-        chanfig.save(list, "test.yaml")
-        assert chanfig.load("test.yaml") == list
-        os.remove("test.yaml")
 
-    def test_list_dict(self):
-        list = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
-        chanfig.save(list, "test.yaml")
-        assert chanfig.load("test.yaml") == list
-        os.remove("test.yaml")
+def test_list_dict():
+    list = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
+    chanfig.save(list, "test.yaml")
+    assert chanfig.load("test.yaml") == list
+    os.remove("test.yaml")

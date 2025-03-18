@@ -47,77 +47,76 @@ class TestConfigPEP604(Config):
     not_recognized: list[bool]
 
 
-class Test:
+def test_parse_bool():
+    config = TestConfig()
+    config.parse(
+        [
+            "--t",
+            "t",
+            "--true",
+            "true",
+            "--y",
+            "y",
+            "--yes",
+            "yes",
+            "--f",
+            "f",
+            "--false",
+            "false",
+            "--n",
+            "n",
+            "--no",
+            "no",
+        ]
+    )
+    assert config.t and config.true and config.y and config.yes
+    assert not config.f and not config.false and not config.n and not config.no
 
-    def test_parse_bool(self):
-        config = TestConfig()
-        config.parse(
-            [
-                "--t",
-                "t",
-                "--true",
-                "true",
-                "--y",
-                "y",
-                "--yes",
-                "yes",
-                "--f",
-                "f",
-                "--false",
-                "false",
-                "--n",
-                "n",
-                "--no",
-                "no",
-            ]
-        )
-        assert config.t and config.true and config.y and config.yes
-        assert not config.f and not config.false and not config.n and not config.no
+    config = TestConfig()
+    config.parse(
+        [
+            "--t",
+            "T",
+            "--true",
+            "True",
+            "--y",
+            "Y",
+            "--yes",
+            "Yes",
+            "--f",
+            "F",
+            "--false",
+            "False",
+            "--n",
+            "N",
+            "--no",
+            "No",
+        ]
+    )
+    assert config.t and config.true and config.y and config.yes
+    assert not config.f and not config.false and not config.n and not config.no
 
-        config = TestConfig()
-        config.parse(
-            [
-                "--t",
-                "T",
-                "--true",
-                "True",
-                "--y",
-                "Y",
-                "--yes",
-                "Yes",
-                "--f",
-                "F",
-                "--false",
-                "False",
-                "--n",
-                "N",
-                "--no",
-                "No",
-            ]
-        )
-        assert config.t and config.true and config.y and config.yes
-        assert not config.f and not config.false and not config.n and not config.no
 
-    @pytest.mark.skipif(sys.version_info < (3, 10), reason="PEP604 is available in Python 3.10+")
-    def test_parse_pep604(self):
-        config = TestConfigPEP604()
-        config.parse(
-            [
-                "--true",
-                "true",
-                "--false",
-                "false",
-            ]
-        )
-        assert config.true and not config.false
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="PEP604 is available in Python 3.10+")
+def test_parse_pep604():
+    config = TestConfigPEP604()
+    config.parse(
+        [
+            "--true",
+            "true",
+            "--false",
+            "false",
+        ]
+    )
+    assert config.true and not config.false
 
-        config = TestConfigPEP604()
-        config.parse(
-            [
-                "--true",
-                "True",
-                "--false",
-                "False",
-            ]
-        )
-        assert config.true and not config.false
+    config = TestConfigPEP604()
+    config.parse(
+        [
+            "--true",
+            "True",
+            "--false",
+            "False",
+        ]
+    )
+    assert config.true and not config.false
