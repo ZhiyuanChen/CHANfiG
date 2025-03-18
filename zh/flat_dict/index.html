@@ -40,7 +40,7 @@
         <link rel="alternate" type="application/rss+xml" title="已更新内容的 RSS 订阅" href="../../feed_rss_updated.xml">
       
       <link rel="icon" href="../../assets/images/logo.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.8">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.9">
     
     
       
@@ -48,7 +48,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4af4bdda.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -3566,7 +3566,7 @@ Therefore, all internal attributes should be set and get through <code>flat_dict
 </span><span id="__span-0-445"><a id="__codelineno-0-445" name="__codelineno-0-445"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">FlatDict</span><span class="p">):</span>
 </span><span id="__span-0-446"><a id="__codelineno-0-446" name="__codelineno-0-446"></a>            <span class="n">annos</span> <span class="o">=</span> <span class="n">get_annotations</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 </span><span id="__span-0-447"><a id="__codelineno-0-447" name="__codelineno-0-447"></a>            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>                <span class="k">if</span> <span class="n">annos</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">annos</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isvalid</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">annos</span><span class="p">[</span><span class="n">name</span><span class="p">]):</span>
+</span><span id="__span-0-448"><a id="__codelineno-0-448" name="__codelineno-0-448"></a>                <span class="k">if</span> <span class="n">annos</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">annos</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">conform_annotation</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">annos</span><span class="p">[</span><span class="n">name</span><span class="p">]):</span>
 </span><span id="__span-0-449"><a id="__codelineno-0-449" name="__codelineno-0-449"></a>                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; has invalid type. Value </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> is not of type </span><span class="si">{</span><span class="n">annos</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </span><span id="__span-0-450"><a id="__codelineno-0-450" name="__codelineno-0-450"></a>                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Variable</span><span class="p">):</span>
 </span><span id="__span-0-451"><a id="__codelineno-0-451" name="__codelineno-0-451"></a>                    <span class="k">try</span><span class="p">:</span>
