@@ -1,5 +1,6 @@
 # CHANfiG, Easier Configuration.
 # Copyright (c) 2022-Present, CHANfiG Contributors
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the following licenses:
 # - The Unlicense
@@ -8,10 +9,12 @@
 # - BSD 4-Clause "Original" or "Old" License
 # - MIT License
 # - Apache License 2.0
+
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
+
 
 from __future__ import annotations
 
@@ -25,31 +28,35 @@ from pytest import raises
 
 from chanfig import FlatDict, Variable
 
+# Variables moved from Test class to module level
+dict_test = FlatDict()
+dict_test[1] = 2
+dict_test[3] = 4
 
-class Test:
-    dict = FlatDict()
-    dict[1] = 2
-    dict[3] = 4
 
-    def test_dict(self):
-        assert self.dict == FlatDict({1: 2, 3: 4})
+def test_dict():
+    assert dict_test == FlatDict({1: 2, 3: 4})
 
-    def test_list(self):
-        assert self.dict == FlatDict([(1, 2), (3, 4)])
 
-    def test_args(self):
-        dict = FlatDict([("1", 2), ("3", 4)])
-        assert dict["1"] == 2
-        assert dict["3"] == 4
+def test_list():
+    assert dict_test == FlatDict([(1, 2), (3, 4)])
 
-    def test_kwargs(self):
-        dict = FlatDict(**{"1": 2, "3": 4})
-        assert dict["1"] == 2
-        assert dict["3"] == 4
 
-    def test_copy(self):
-        assert copy(self.dict) == self.dict.copy()
-        assert deepcopy(self.dict) == self.dict.deepcopy()
+def test_args():
+    dict = FlatDict([("1", 2), ("3", 4)])
+    assert dict["1"] == 2
+    assert dict["3"] == 4
+
+
+def test_kwargs():
+    dict = FlatDict(**{"1": 2, "3": 4})
+    assert dict["1"] == 2
+    assert dict["3"] == 4
+
+
+def test_copy():
+    assert copy(dict_test) == dict_test.copy()
+    assert deepcopy(dict_test) == dict_test.deepcopy()
 
 
 class ConfigDict(FlatDict):
@@ -70,57 +77,62 @@ class ConfigDict(FlatDict):
         self.d = FlatDict(a=self.a)
 
 
-class TestConfigDict:
-    dict = ConfigDict()
+# Variables moved from TestConfigDict class to module level
+config_dict = ConfigDict()
 
-    def test_affinty(self):
-        assert id(self.dict.a) == id(self.dict.b.a) == id(self.dict.c.a) == id(self.dict.d.a)
 
-    def test_validate(self):
-        ConfigDict(int_value=1, str_value="1", float_value=1.0)
-        with raises(TypeError):
-            ConfigDict(int_value="1", str_value="1", float_value=1.0)
-        self.dict.int_value = "1"
-        assert isinstance(self.dict.int_value, int)
-        ConfigDict(list_int=[1, 2, 3])
-        with raises(TypeError):
-            ConfigDict(list_int=[1, "2", 3])
-        ConfigDict(tuple_str=("1", "2", "3"))
-        with raises(TypeError):
-            ConfigDict(tuple_str=["1", "2", 3])
-        ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": 3.0})
-        with raises(TypeError):
-            ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": "3.0"})
-        ConfigDict(int_float=1)
-        ConfigDict(int_float=0.5)
-        with raises(TypeError):
-            ConfigDict(int_float="inf")
-        ConfigDict(optional_str="1")
-        ConfigDict(optional_str=None)
-        with raises(TypeError):
-            ConfigDict(optional_str=1)
+def test_affinty():
+    assert id(config_dict.a) == id(config_dict.b.a) == id(config_dict.c.a) == id(config_dict.d.a)
 
-    def test_construct_file(self):
-        d = FlatDict("tests/test.json")
-        assert d == FlatDict({"a": 1, "b": 2, "c": 3})
 
-    def test_construct_namespace(self):
-        parser = ArgumentParser()
-        parser.add_argument("--name", type=str)
-        parser.add_argument("--seed", type=int)
-        d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1016"]))
-        assert d.name == "chang"
-        assert d.seed == 1016
+def test_validate():
+    ConfigDict(int_value=1, str_value="1", float_value=1.0)
+    with raises(TypeError):
+        ConfigDict(int_value="1", str_value="1", float_value=1.0)
+    config_dict.int_value = "1"
+    assert isinstance(config_dict.int_value, int)
+    ConfigDict(list_int=[1, 2, 3])
+    with raises(TypeError):
+        ConfigDict(list_int=[1, "2", 3])
+    ConfigDict(tuple_str=("1", "2", "3"))
+    with raises(TypeError):
+        ConfigDict(tuple_str=["1", "2", 3])
+    ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": 3.0})
+    with raises(TypeError):
+        ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": "3.0"})
+    ConfigDict(int_float=1)
+    ConfigDict(int_float=0.5)
+    with raises(TypeError):
+        ConfigDict(int_float="inf")
+    ConfigDict(optional_str="1")
+    ConfigDict(optional_str=None)
+    with raises(TypeError):
+        ConfigDict(optional_str=1)
 
-    def test_conflicts(self):
-        d = FlatDict(keys=0, values=1, items=2)
-        p = {"keys": 0, "values": 1, "items": 2}
-        assert d["keys"] == 0
-        assert d["values"] == 1
-        assert d["items"] == 2
-        assert d.keys() == p.keys()
-        assert list(d.values()) == list(p.values())  # dict_values can't be compared directly
-        assert d.items() == p.items()
+
+def test_construct_file():
+    d = FlatDict("tests/test.json")
+    assert d == FlatDict({"a": 1, "b": 2, "c": 3})
+
+
+def test_construct_namespace():
+    parser = ArgumentParser()
+    parser.add_argument("--name", type=str)
+    parser.add_argument("--seed", type=int)
+    d = FlatDict(parser.parse_args(["--name", "chang", "--seed", "1016"]))
+    assert d.name == "chang"
+    assert d.seed == 1016
+
+
+def test_conflicts():
+    d = FlatDict(keys=0, values=1, items=2)
+    p = {"keys": 0, "values": 1, "items": 2}
+    assert d["keys"] == 0
+    assert d["values"] == 1
+    assert d["items"] == 2
+    assert d.keys() == p.keys()
+    assert list(d.values()) == list(p.values())  # dict_values can't be compared directly
+    assert d.items() == p.items()
 
 
 class AnnoDict(FlatDict):
@@ -135,30 +147,28 @@ class AnnoDict(FlatDict):
     nested: list[tuple[int, int]]
 
 
-class TestAnnoDict:
-
-    @pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9")
-    def test_validate(self):
-        anno_dict = AnnoDict()
-        anno_dict.int_value = "1"
-        assert isinstance(anno_dict.int_value, int)
-        anno_dict.str_value = 1
-        assert isinstance(anno_dict.str_value, str)
-        anno_dict.float_value = 1
-        assert isinstance(anno_dict.float_value, float)
-        anno_dict.list_int = ("1", "2", "3")
-        assert isinstance(anno_dict.list_int, list)
-        anno_dict.tuple_str = [1, 2, 3]
-        assert isinstance(anno_dict.tuple_str, tuple)
-        anno_dict.dict_float = [("a", 1), ("b", 2)]
-        assert isinstance(anno_dict.dict_float, dict)
-        assert isinstance(anno_dict.dict_float["a"], int)
-        anno_dict.union_int_float = "1"
-        assert isinstance(anno_dict.union_int_float, int)
-        assert anno_dict.optional_str is None
-        anno_dict.optional_str = 1
-        assert isinstance(anno_dict.optional_str, str)
-        anno_dict.nested = [["1", "2"]]
-        assert isinstance(anno_dict.nested, list)
-        assert isinstance(anno_dict.nested[0], tuple)
-        assert isinstance(anno_dict.nested[0][0], int)
+@pytest.mark.skipif(sys.version_info < (3, 9), reason="requires python3.9")
+def test_anno_validate():
+    anno_dict = AnnoDict()
+    anno_dict.int_value = "1"
+    assert isinstance(anno_dict.int_value, int)
+    anno_dict.str_value = 1
+    assert isinstance(anno_dict.str_value, str)
+    anno_dict.float_value = 1
+    assert isinstance(anno_dict.float_value, float)
+    anno_dict.list_int = ("1", "2", "3")
+    assert isinstance(anno_dict.list_int, list)
+    anno_dict.tuple_str = [1, 2, 3]
+    assert isinstance(anno_dict.tuple_str, tuple)
+    anno_dict.dict_float = [("a", 1), ("b", 2)]
+    assert isinstance(anno_dict.dict_float, dict)
+    assert isinstance(anno_dict.dict_float["a"], int)
+    anno_dict.union_int_float = "1"
+    assert isinstance(anno_dict.union_int_float, int)
+    assert anno_dict.optional_str is None
+    anno_dict.optional_str = 1
+    assert isinstance(anno_dict.optional_str, str)
+    anno_dict.nested = [["1", "2"]]
+    assert isinstance(anno_dict.nested, list)
+    assert isinstance(anno_dict.nested[0], tuple)
+    assert isinstance(anno_dict.nested[0][0], int)

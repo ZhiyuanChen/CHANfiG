@@ -18,27 +18,28 @@
 import chanfig
 
 
-class Test:
-    def test_interpolate(self):
-        config = chanfig.load("tests/interpolate.yaml").interpolate()
-        assert config.data.root == "localhost:80"
-        assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
-        assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
-        assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
-        assert config.model.num_heads == f"{config.model.num_channels} // 64"
-        assert config.model.num_hidden_size == f"{config.model.num_channels} // 64 * {config.model.multiple}"
+def test_interpolate():
+    config = chanfig.load("tests/interpolate.yaml").interpolate()
+    assert config.data.root == "localhost:80"
+    assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
+    assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
+    assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
+    assert config.model.num_heads == f"{config.model.num_channels} // 64"
+    assert config.model.num_hidden_size == f"{config.model.num_channels} // 64 * {config.model.multiple}"
 
-    def test_interpolate_eval(self):
-        config = chanfig.load("tests/interpolate.yaml").interpolate(unsafe_eval=True)
-        assert config.data.root == "localhost:80"
-        assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
-        assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
-        assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
-        assert config.model.num_heads == config.model.num_channels // 64
-        assert config.model.num_hidden_size == config.model.num_channels // 64 * config.model.multiple
 
-    def test_include(self):
-        config = chanfig.load("tests/parent.yaml")
-        model = chanfig.load("tests/model.yaml")
-        assert config.model == model
-        assert config.port == 80
+def test_interpolate_eval():
+    config = chanfig.load("tests/interpolate.yaml").interpolate(unsafe_eval=True)
+    assert config.data.root == "localhost:80"
+    assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
+    assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
+    assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
+    assert config.model.num_heads == config.model.num_channels // 64
+    assert config.model.num_hidden_size == config.model.num_channels // 64 * config.model.multiple
+
+
+def test_include():
+    config = chanfig.load("tests/parent.yaml")
+    model = chanfig.load("tests/model.yaml")
+    assert config.model == model
+    assert config.port == 80

@@ -39,8 +39,7 @@ class TaskConfig(NestedDict):
     task: Task = "regression"
 
 
-class TestDump:
-    def test_yamls(self):
-        config = TaskConfig()
-        s = config.yamls()
-        assert s == "task: regression\n"
+def test_yamls():
+    config = TaskConfig()
+    s = config.yamls()
+    assert s == "task: regression\n"

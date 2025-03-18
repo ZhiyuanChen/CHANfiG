@@ -37,8 +37,7 @@ class TestConfig(AncestorConfig):
     name: str = "CHANfiG"
 
 
-class Test:
-    def test_configclass(self):
-        config = TestConfig()
-        assert config.name == "CHANfiG"
-        assert "seed" in config
+def test_configclass():
+    config = TestConfig()
+    assert config.name == "CHANfiG"
+    assert "seed" in config
