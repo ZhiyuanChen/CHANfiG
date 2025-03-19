@@ -17,7 +17,6 @@ nav:
   - Registry: registry.md
   - ConfigParser: parser.md
   - configclass: configclass.md
-  - Functional: functional.md
   - Utilities: utils.md
   # - package: package.md
   # - Blog: blog/index.md
