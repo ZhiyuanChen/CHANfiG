@@ -26,7 +26,6 @@ from copy import copy, deepcopy
 from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
-from pytest import raises
 
 from chanfig import FlatDict, Variable
 
@@ -79,37 +78,32 @@ class ConfigDict(FlatDict):
         self.d = FlatDict(a=self.a)
 
 
-# Variables moved from TestConfigDict class to module level
-config_dict = ConfigDict()
-
-
 def test_affinty():
-    assert id(config_dict.a) == id(config_dict.b.a) == id(config_dict.c.a) == id(config_dict.d.a)
+    config = ConfigDict()
+    assert id(config.a) == id(config.b.a) == id(config.c.a) == id(config.d.a)
 
 
 def test_validate():
-    ConfigDict(int_value=1, str_value="1", float_value=1.0)
-    with raises(TypeError):
-        ConfigDict(int_value="1", str_value="1", float_value=1.0)
-    config_dict.int_value = "1"
-    assert isinstance(config_dict.int_value, int)
-    ConfigDict(list_int=[1, 2, 3])
-    with raises(TypeError):
-        ConfigDict(list_int=[1, "2", 3])
-    ConfigDict(tuple_str=("1", "2", "3"))
-    with raises(TypeError):
-        ConfigDict(tuple_str=["1", "2", 3])
-    ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": 3.0})
-    with raises(TypeError):
-        ConfigDict(dict_float={"1": 1.0, "2": 2.0, "3": "3.0"})
+    config = ConfigDict(int_value="1", str_value=1.0, float_value=1)
+    assert isinstance(config.int_value, int)
+    assert isinstance(config.str_value, str)
+    assert isinstance(config.float_value, float)
+    config.int_value = "1"
+    assert isinstance(config.int_value, int)
+    config = ConfigDict(list_int=[1, "2", 3])
+    assert all(isinstance(i, int) for i in config.list_int)
+    config = ConfigDict(tuple_str=("1", "2", 3))
+    assert all(isinstance(i, str) for i in config.tuple_str)
+    config = ConfigDict(dict_float={"1": 1.0, "2": 2, "3": "3.0"})
+    assert all(isinstance(i, float) for i in config.dict_float.values())
     ConfigDict(int_float=1)
     ConfigDict(int_float=0.5)
-    with raises(TypeError):
-        ConfigDict(int_float="inf")
+    config = ConfigDict(int_float="inf")
+    assert config.int_float > 2**32
     ConfigDict(optional_str="1")
     ConfigDict(optional_str=None)
-    with raises(TypeError):
-        ConfigDict(optional_str=1)
+    config = ConfigDict(optional_str=1)
+    assert config.optional_str == "1"
 
 
 def test_construct_file():
