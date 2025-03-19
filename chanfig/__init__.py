@@ -37,11 +37,12 @@ from ._version import __version__, __version_tuple__, version
 from .config import Config
 from .configclasses import configclass
 from .default_dict import DefaultDict
-from .flat_dict import FlatDict, to_dict
-from .functional import load, save
-from .nested_dict import NestedDict, apply, apply_
+from .flat_dict import FlatDict
+from .nested_dict import NestedDict
 from .parser import ConfigParser
 from .registry import ConfigRegistry, GlobalRegistry, Registry
+from .utils import apply, apply_, to_chanfig, to_dict
+from .utils.io import load, save
 from .variable import Variable
 
 __all__ = [
@@ -58,6 +59,7 @@ __all__ = [
     "load",
     "save",
     "to_dict",
+    "to_chanfig",
     "apply",
     "apply_",
     "utils",

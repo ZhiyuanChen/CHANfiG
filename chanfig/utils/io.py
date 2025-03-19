@@ -17,18 +17,88 @@
 
 from __future__ import annotations
 
+import os
 from io import IOBase
+from json import JSONEncoder
 from json import dumps as json_dumps
+from os import PathLike
 from os.path import splitext
-from typing import Any
+from typing import IO, Any, Union
 
+from yaml import SafeDumper, SafeLoader
 from yaml import dump as yaml_dump
+from yaml.constructor import ConstructorError
+from yaml.nodes import ScalarNode, SequenceNode
 
-from .flat_dict import FlatDict, to_dict
-from .nested_dict import NestedDict
-from .utils import JSON, YAML, File, PathStr
+PathStr = Union[PathLike, str, bytes]
+File = Union[PathStr, IO, IOBase]
+
+YAML_EXTENSIONS = ("yml", "yaml")
+JSON_EXTENSIONS = ("json",)
+PYTHON_EXTENSIONS = ("py",)
 
 
+class JsonEncoder(JSONEncoder):
+    r"""
+    JSON encoder for Config.
+    """
+
+    def default(self, o: Any) -> Any:
+        if hasattr(o, "__json__"):
+            return o.__json__()
+        if hasattr(o, "to_dict"):
+            return o.to_dict()
+        return super().default(o)
+
+
+class YamlDumper(SafeDumper):  # pylint: disable=R0903
+    r"""
+    YAML Dumper for Config.
+    """
+
+    def increase_indent(self, flow: bool = False, indentless: bool = False):  # pylint: disable=W0235
+        return super().increase_indent(flow, indentless)
+
+
+class YamlLoader(SafeLoader):
+    r"""
+    YAML Loader for Config.
+    """
+
+    def __init__(self, stream):
+        super().__init__(stream)
+        self._root = os.path.abspath(os.path.dirname(stream.name)) if hasattr(stream, "name") else os.getcwd()
+        self.add_constructor("!include", self._include)
+        self.add_constructor("!includes", self._includes)
+        self.add_constructor("!env", self._env)
+
+    @staticmethod
+    def _include(loader: YamlLoader, node):
+        relative_path = loader.construct_scalar(node)
+        include_path = os.path.join(loader._root, relative_path)
+
+        if not os.path.exists(include_path):
+            raise FileNotFoundError(f"Included file not found: {include_path}")
+
+        return load(include_path)
+
+    @staticmethod
+    def _includes(loader: YamlLoader, node):
+        if not isinstance(node, SequenceNode):
+            raise ConstructorError(None, None, f"!includes tag expects a sequence, got {node.id}", node.start_mark)
+        files = loader.construct_sequence(node)
+        return [YamlLoader._include(loader, ScalarNode("tag:yaml.org,2002:str", file)) for file in files]
+
+    @staticmethod
+    def _env(loader: YamlLoader, node):
+        env_var = loader.construct_scalar(node)
+        value = os.getenv(env_var)
+        if value is None:
+            raise ValueError(f"Environment variable '{env_var}' not set.")
+        return value
+
+
+# Merged functions from functional.py
 def save(  # pylint: disable=W1113
     obj, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
 ) -> None:
@@ -55,6 +125,8 @@ def save(  # pylint: disable=W1113
         Traceback (most recent call last):
         ValueError: `method` must be specified when saving to IO.
     """
+    # Import FlatDict here to avoid circular imports
+    from ..flat_dict import FlatDict, to_dict
 
     if isinstance(obj, FlatDict):
         obj.save(file, method, *args, **kwargs)
@@ -66,20 +138,18 @@ def save(  # pylint: disable=W1113
             raise ValueError("`method` must be specified when saving to IO.")
         method = splitext(file)[-1][1:]
     extension = method.lower()
-    if extension in YAML:
+    if extension in YAML_EXTENSIONS:
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
             yaml_dump(data, fp, *args, **kwargs)
         return
-    if extension in JSON:
+    if extension in JSON_EXTENSIONS:
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
             fp.write(json_dumps(data, *args, **kwargs))
         return
-    raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
+    raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
 
 
-def load(  # pylint: disable=W1113
-    file: PathStr, cls: type[FlatDict] = NestedDict, *args: Any, **kwargs: Any
-) -> FlatDict:
+def load(file: PathStr, cls=None, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W1113
     r"""
     Load a file into a `FlatDict`.
 
@@ -104,5 +174,10 @@ def load(  # pylint: disable=W1113
           ('c'): 3
         )
     """
+    # Import here to avoid circular imports
+    from ..nested_dict import NestedDict
+
+    if cls is None:
+        cls = NestedDict
 
     return cls.load(file, *args, **kwargs)

@@ -20,7 +20,6 @@ from __future__ import annotations
 from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager, nullcontext
 from functools import wraps
-from inspect import ismethod
 from os import PathLike
 from typing import Any
 
@@ -36,72 +35,8 @@ except ImportError:
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
-from .utils import NULL, Null, PathStr
+from .utils import NULL, Null, PathStr, apply, apply_
 from .variable import Variable
-
-
-def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
-    r"""
-    Apply `func` to all children of `obj`.
-
-    Note that this method is meant for non-in-place modification of `obj` and should return the original object.
-
-    Args:
-        obj: Object to apply function.
-        func: Function to be applied.
-        *args: Positional arguments to be passed to `func`.
-        **kwargs: Keyword arguments to be passed to `func`.
-
-    Returns:
-        (Any): Return value of `func`.
-
-    See Also:
-        [`apply_`][chanfig.nested_dict.apply_]: Apply an in-place operation.
-    """
-
-    if isinstance(obj, NestedDict):
-        return obj.empty_like(**{k: apply(v, func, *args, **kwargs) for k, v in obj.items()})
-    if isinstance(obj, Mapping):
-        return {k: apply(v, func, *args, **kwargs) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [apply(v, func, *args, **kwargs) for v in obj]
-    if isinstance(obj, tuple):
-        return tuple(apply(v, func, *args, **kwargs) for v in obj)
-    if isinstance(obj, set):
-        try:
-            return {apply(v, func, *args, **kwargs) for v in obj}
-        except TypeError:
-            tuple(apply(v, func, *args, **kwargs) for v in obj)
-    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
-
-
-def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
-    r"""
-    Apply `func` to all children of `obj`.
-
-    Note that this method is meant for non-in-place modification of `obj` and should return a new object.
-
-    Args:
-        obj: Object to apply function.
-        func: Function to be applied.
-        *args: Positional arguments to be passed to `func`.
-        **kwargs: Keyword arguments to be passed to `func`.
-
-    Returns:
-        (Any): Return value of `func`.
-
-    See Also:
-        [`apply_`][chanfig.nested_dict.apply]: Apply a non-in-place operation.
-    """
-    # pylint: disable=C0103
-
-    if isinstance(obj, Mapping):
-        for v in obj.values():
-            apply_(v, func, *args, **kwargs)
-    if isinstance(obj, (list, tuple, set)):
-        for v in obj:
-            apply_(v, func, *args, **kwargs)
-    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
 
 
 class NestedDict(DefaultDict):  # pylint: disable=E1136
@@ -266,9 +201,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         See Also:
             [`apply_`][chanfig.NestedDict.apply_]: Apply an in-place operation.
-            [`apply`][chanfig.nested_dict.apply]: Implementation of `apply`.
+            [`apply`][chanfig.utils.apply.apply]: Implementation of `apply`.
 
-        tionples:
+        Examples:
             >>> def func(d):
             ...     if isinstance(d, NestedDict):
             ...         d.t = 1
@@ -295,7 +230,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         See Also:
             [`apply`][chanfig.NestedDict.apply]: Apply a non-in-place operation.
-            [`apply_`][chanfig.nested_dict.apply_]: Implementation of `apply_` method.
+            [`apply_`][chanfig.utils.apply.apply_]: Implementation of `apply_` method.
 
         Examples:
             >>> def func(d):
