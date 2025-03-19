@@ -23,7 +23,6 @@ from argparse import Namespace
 from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
-from dataclasses import asdict, is_dataclass
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -36,15 +35,14 @@ from typing_extensions import Self
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
+from .base import Dict
 from .utils import (
-    JSON,
-    YAML,
-    Dict,
+    JSON_EXTENSIONS,
+    YAML_EXTENSIONS,
     File,
     JsonEncoder,
     Null,
     PathStr,
-    SafeLoader,
     YamlDumper,
     YamlLoader,
     conform_annotation,
@@ -52,6 +50,8 @@ from .utils import (
     find_placeholders,
     get_annotations,
     honor_annotation,
+    to_chanfig,
+    to_dict,
 )
 from .variable import Variable
 
@@ -62,117 +62,6 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-
-
-def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
-    r"""
-    Convert an object to a dict.
-
-    Note that when converting a `set` object, it may be converted to a `tuple` object if its values is not hashable.
-
-    Args:
-        obj: Object to be converted.
-
-    Returns:
-        A dict.
-
-    Examples:
-        >>> to_dict(1)
-        1
-        >>> to_dict([1, 2, 3])
-        [1, 2, 3]
-        >>> to_dict((1, 2, 3))
-        (1, 2, 3)
-        >>> to_dict({1, 2, 3})
-        {1, 2, 3}
-        >>> to_dict({'a': 1, 'b': 2})
-        {'a': 1, 'b': 2}
-        >>> to_dict(Variable(1))
-        1
-        >>> to_dict(FlatDict(a=[[[[[FlatDict(b=1)]]]]]))
-        {'a': [[[[[{'b': 1}]]]]]}
-        >>> to_dict(FlatDict(a={FlatDict(b=1)}))
-        {'a': ({'b': 1},)}
-    """
-
-    if flatten and isinstance(obj, FlatDict):
-        return {k: to_dict(v) for k, v in obj.all_items()}
-    if isinstance(obj, Mapping):
-        return {k: to_dict(v) for k, v in obj.items()}
-    if isinstance(obj, list):
-        return [to_dict(v) for v in obj]
-    if isinstance(obj, tuple):
-        return tuple(to_dict(v) for v in obj)
-    if isinstance(obj, set):
-        try:
-            return {to_dict(v) for v in obj}
-        except TypeError:
-            return tuple(to_dict(v) for v in obj)
-    if isinstance(obj, Variable):
-        return obj.value
-    if is_dataclass(obj):
-        return asdict(obj)  # type: ignore[arg-type]
-    if hasattr(obj, "to_dict"):
-        return obj.to_dict()
-    return obj
-
-
-def to_chanfig(obj: Any, cls: type | None = None) -> Any:
-    r"""
-    Convert arbitrary data structure to CHANfiG objects when possible.
-
-    This function recursively converts mappings to FlatDict instances
-    and handles nested structures of arbitrary depth.
-
-    Args:
-        obj: Object to be converted.
-        cls: Class to use for creating FlatDict instances. Defaults to FlatDict.
-
-    Returns:
-        Converted object.
-
-    Examples:
-        >>> to_chanfig({'a': 1, 'b': 2})
-        FlatDict(
-          ('a'): 1
-          ('b'): 2
-        )
-        >>> to_chanfig([1, 2, 3])
-        [1, 2, 3]
-        >>> to_chanfig([{'a': 1}, {'b': 2}])
-        [FlatDict(('a'): 1), FlatDict(('b'): 2)]
-        >>> to_chanfig([[1, 2], [3, 4]])
-        FlatDict(
-          (1): 2
-          (3): 4
-        )
-        >>> to_chanfig([[1, 2, 3], [4, 5, 6]])
-        [[1, 2, 3], [4, 5, 6]]
-    """
-    if cls is None:
-        cls = FlatDict
-
-    if isinstance(obj, Mapping):
-        result = cls()
-        for k, v in obj.items():
-            result[k] = to_chanfig(v, cls)
-        return result
-    if isinstance(obj, (list, tuple)) and all(isinstance(item, (list, tuple)) and len(item) == 2 for item in obj):
-        try:
-            result = cls()
-            for k, v in obj:
-                result[k] = to_chanfig(v, cls)
-            return result
-        except (ValueError, TypeError):
-            pass
-    if isinstance(obj, (list, tuple)):
-        return type(obj)(to_chanfig(item, cls) for item in obj)
-    if isinstance(obj, set):
-        try:
-            return {to_chanfig(item, cls) for item in obj}
-        except TypeError:
-            return tuple(to_chanfig(item, cls) for item in obj)
-    return obj
 
 
 class FlatDict(dict, metaclass=Dict):
@@ -597,7 +486,7 @@ class FlatDict(dict, metaclass=Dict):
             (Mapping):
 
         See Also:
-            [`to_dict`][chanfig.flat_dict.to_dict]: Implementation of `dict`.
+            [`to_dict`][chanfig.utils.conversion.to_dict]: Implementation of `dict`.
 
         **Alias**:
 
@@ -1186,11 +1075,11 @@ class FlatDict(dict, metaclass=Dict):
                 raise ValueError("`method` must be specified when saving to IO.")
             method = splitext(file)[-1][1:]
         extension = method.lower()
-        if extension in YAML:
+        if extension in YAML_EXTENSIONS:
             return self.yaml(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
-        if extension in JSON:
+        if extension in JSON_EXTENSIONS:
             return self.json(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
-        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
+        raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
 
     def dump(  # pylint: disable=W1113
         self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
@@ -1209,7 +1098,7 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             file: File to load from.
-            method: File type, should be in `JSON` or `YAML`.
+            method: File type, should be in `JSON_EXTENSIONS` or `YAML_EXTENSIONS`.
 
         Returns:
             (FlatDict):
@@ -1236,11 +1125,11 @@ class FlatDict(dict, metaclass=Dict):
                 raise ValueError("`method` must be specified when loading from IO.")
             method = splitext(file)[-1][1:]
         extension = method.lower()
-        if extension in JSON:
+        if extension in JSON_EXTENSIONS:
             return cls.from_json(file, *args, **kwargs)
-        if extension in YAML:
+        if extension in YAML_EXTENSIONS:
             return cls.from_yaml(file, *args, **kwargs)
-        raise TypeError(f"`file={file!r}` should be in {JSON} or {YAML}, but got {extension}.")
+        raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
 
     def json(self, file: File, *args: Any, **kwargs: Any) -> None:
         r"""
@@ -1386,7 +1275,7 @@ class FlatDict(dict, metaclass=Dict):
             [FlatDict(('a'): 1), FlatDict(('b'): 2), FlatDict(('c'): 3)]
         """
 
-        kwargs.setdefault("Loader", SafeLoader)
+        kwargs.setdefault("Loader", YamlLoader)
         return cls.from_dict(yaml_load(string, *args, **kwargs))
 
     @staticmethod
