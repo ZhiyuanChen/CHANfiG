@@ -436,7 +436,7 @@ class ConfigRegistry(Registry):
         while "." in key:
             key, rest = key.split(".", 1)
             config_, key = getattr(config_, key), rest
-        name = getattr(config_, key)
+        name = getattr(config_, key, None)
 
         return self.init(self.lookup(name), config, *args, **kwargs)  # type: ignore[arg-type]
 
