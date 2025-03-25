@@ -94,11 +94,20 @@ class Registry(NestedDict):
         >>> module = registry.build(config["module"])
         >>> module.a, module.b
         (1, 0)
+        >>> registry = Registry(case_sensitive=False)
+        >>> module = registry.register(Module)
+        >>> registry
+        Registry(
+          ('module'): <class 'chanfig.registry.Module'>
+        )
+        >>> registry.lookup("module")
+        <class 'chanfig.registry.Module'>
     """
 
     override = False
     key = "name"
     default = Null
+    case_sensitive = True
 
     def __init__(
         self,
@@ -107,6 +116,7 @@ class Registry(NestedDict):
         fallback: bool | None = None,
         default: Any = None,
         default_factory: Callable | NULL = Null,
+        case_sensitive: bool | None = None,
     ):
         super().__init__(default_factory=default_factory, fallback=fallback)
         if override is not None:
@@ -115,6 +125,8 @@ class Registry(NestedDict):
             self.setattr("key", key)
         if default is not None:
             self.setdefault(default)
+        if case_sensitive is not None:
+            self.setattr("case_sensitive", case_sensitive)
 
     def register(
         self, component: Any = Null, name: Any = Null, override: bool = False, default: bool = False
@@ -182,6 +194,11 @@ class Registry(NestedDict):
 
         return decorator(component)
 
+    def set(self, name: Any, component: Any) -> None:  # type: ignore[override]
+        if isinstance(name, str) and not self.getattr("case_sensitive", False):
+            name = name.lower()
+        super().set(name, component)
+
     def lookup(self, name: str, default: Any = Null) -> Any:
         r"""
         Lookup for a component.
@@ -208,6 +225,8 @@ class Registry(NestedDict):
 
         if default is Null:
             default = self.getattr("default", Null)
+        if isinstance(name, str) and not self.getattr("case_sensitive", False):
+            name = name.lower()
         component = self.get(name, default)
         if isinstance(component, Registry):
             component = component.getattr("default")
