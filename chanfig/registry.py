@@ -83,14 +83,14 @@ class Registry(NestedDict):
         ValueError: Component with name Module already registered.
         >>> registry.lookup("Module")
         <class 'chanfig.registry.Module'>
-        >>> config = {"module": {"name": "Module", "a": 0, "b": 1}}
+        >>> config = {"module": {"type": "Module", "a": 0, "b": 1}}
         >>> # registry.register(Module)
         >>> module = registry.build(config["module"])
         >>> type(module)
         <class 'chanfig.registry.Module'>
         >>> module.a, module.b
         (0, 1)
-        >>> config = {"module": {"name": "NE", "a": 1, "b": 0}}
+        >>> config = {"module": {"type": "NE", "a": 1, "b": 0}}
         >>> module = registry.build(config["module"])
         >>> module.a, module.b
         (1, 0)
@@ -105,7 +105,7 @@ class Registry(NestedDict):
     """
 
     override = False
-    key = "name"
+    key = "type"
     default = Null
     case_sensitive = True
 
@@ -302,9 +302,9 @@ class Registry(NestedDict):
 
         if isinstance(name, MutableMapping):
             name = deepcopy(name)
-            name, kwargs = name.pop(self.getattr("key", "name")), dict(name, **kwargs)  # type: ignore[arg-type]
+            name, kwargs = name.pop(self.getattr("key", "type")), dict(name, **kwargs)  # type: ignore[arg-type]
         if name is Null:
-            name, kwargs = kwargs.pop(self.getattr("key"), None), dict(**kwargs)
+            name, kwargs = kwargs.pop(self.getattr("key", "type"), None), dict(**kwargs)
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
 
     def setdefault(self, component: Any) -> Any:  # type: ignore[override]
