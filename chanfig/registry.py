@@ -300,11 +300,16 @@ class Registry(NestedDict):
             2
         """
 
+        key = self.getattr("key", "type")
+
         if isinstance(name, MutableMapping):
-            name = deepcopy(name)
-            name, kwargs = name.pop(self.getattr("key", "type")), dict(name, **kwargs)  # type: ignore[arg-type]
-        if name is Null:
-            name, kwargs = kwargs.pop(self.getattr("key", "type"), None), dict(**kwargs)
+            kwargs_ = deepcopy(name)
+            name, kwargs = kwargs_.pop(key), dict(kwargs_, **kwargs)
+        elif key in kwargs:
+            if name is not Null:
+                args = (name,) + args
+            name = kwargs.pop(key)
+
         return self.init(self.lookup(name), *args, **kwargs)  # type: ignore[arg-type]
 
     def setdefault(self, component: Any) -> Any:  # type: ignore[override]
