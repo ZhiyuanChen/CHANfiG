@@ -225,13 +225,15 @@ class Registry(NestedDict):
 
         if default is Null:
             default = self.getattr("default", Null)
+            if default is Null:
+                default = None
         if isinstance(name, str) and not self.getattr("case_sensitive", False):
             name = name.lower()
         component = self.get(name, default)
         if isinstance(component, Registry):
             component = component.getattr("default")
-        if component is Null:
-            raise KeyError(f"Component {name} is not registered.")
+        if component in (Null, None):
+            raise ValueError(f"Component {name} is not registered.")
         return component
 
     @staticmethod
