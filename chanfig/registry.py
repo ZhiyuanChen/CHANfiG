@@ -23,6 +23,7 @@ from collections.abc import Callable, MutableMapping
 from copy import deepcopy
 from functools import wraps
 from typing import Any
+from warnings import warn
 
 from .nested_dict import NestedDict
 from .utils import NULL, Null
@@ -231,7 +232,10 @@ class Registry(NestedDict):
             name = name.lower()
         component = self.get(name, default)
         if isinstance(component, Registry):
+            is_fallback = not component
             component = component.getattr("default")
+            if is_fallback:
+                warn(f"Component {name} is not registered, falling back to {component}.", stacklevel=2)
         if component in (Null, None):
             raise ValueError(f"Component {name} is not registered.")
         return component
