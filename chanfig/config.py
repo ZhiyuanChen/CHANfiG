@@ -121,16 +121,13 @@ class Config(NestedDict):
         as `boot` recursively call `post` on sub-configs.
 
         See Also:
-            [`boot`][chanfig.Config.boot]
-
-        Returns:
-            self:
+            [`boot`][chanfig.Config.boot]: Apply `post` recursively.
 
         Examples:
             >>> c = Config()
             >>> c.dne
             Config(<class 'chanfig.config.Config'>, )
-            >>> c.post()
+            >>> c.boot()
             Config(
               ('dne'): Config()
             )
@@ -141,11 +138,11 @@ class Config(NestedDict):
             ...     def post(self):
             ...         if isinstance(self.data, str):
             ...             self.data = Config(feature=self.data, label=self.data)
-            ...         # should call `super().post()` in the end, otherwise, default_factory will be cleared for `self.data`  # noqa: E501
+            ...         # should call `super().post()` in the end, otherwise, default_factory won't be cleared for `self.data`  # noqa: E501
             ...         super().post()
             ...         return self
             >>> c = PostConfig(data="path")
-            >>> c.post()
+            >>> c.boot()
             PostConfig(
               ('data'): Config(
                 ('feature'): 'path'
@@ -154,7 +151,7 @@ class Config(NestedDict):
             )
         """
 
-        self.validate()
+        self._validate(self)
         self.apply_(lambda c: c.setattr("default_factory", Null) if isinstance(c, Config) else None)
         return self
 
@@ -171,9 +168,6 @@ class Config(NestedDict):
         See Also:
             [`post`][chanfig.Config.post]
 
-        Returns:
-            self:
-
         Examples:
             >>> class DataConfig(Config):
             ...     def post(self):
@@ -185,15 +179,16 @@ class Config(NestedDict):
             ...         super().__init__(*args, **kwargs)
             ...         self.dataset = DataConfig(path="path")
             ...     def post(self):
+            ...         super().post()
             ...         if isinstance(self.id, str):
             ...             self.id += "_id"
             ...         return self
             >>> c = BootConfig(id="boot")
             >>> c.boot()
-            BootConfig(<class 'chanfig.config.Config'>,
+            BootConfig(
               ('id'): 'boot_id'
-              ('dataset'): DataConfig(<class 'chanfig.config.Config'>,
-                ('path'): Config(<class 'chanfig.config.Config'>,
+              ('dataset'): DataConfig(
+                ('path'): Config(
                   ('feature'): 'path'
                   ('label'): 'path'
                 )
@@ -453,17 +448,6 @@ class Config(NestedDict):
         r"""
         Get value from `Config`.
 
-        Note that `default` has higher priority than `default_factory`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `Config` does not contain `name`, return `default`.
-                If `default` is not specified, return `default_factory()`.
-
         Raises:
             KeyError: If `Config` does not contain `name` and `default`/`default_factory` is not specified.
 
@@ -573,13 +557,6 @@ class Config(NestedDict):
     def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
         Pop value from `Config`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value: If `Config` does not contain `name`, return `default`.
 
         Examples:
             >>> c = Config()

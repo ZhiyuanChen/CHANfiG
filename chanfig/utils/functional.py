@@ -35,9 +35,6 @@ def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
         obj: Object to be converted.
         flatten: Whether to flatten nested structures.
 
-    Returns:
-        A dict.
-
     Examples:
         >>> from chanfig import FlatDict, Variable
 
@@ -93,10 +90,7 @@ def to_chanfig(obj: Any, cls: type | None = None) -> Any:
 
     Args:
         obj: Object to be converted.
-        cls: Class to use for creating FlatDict instances. Defaults to FlatDict.
-
-    Returns:
-        Converted object.
+        cls: Class to use for creating FlatDict instances. Defaults to `FlatDict`.
 
     Examples:
         >>> to_chanfig({'a': 1, 'b': 2})
@@ -191,9 +185,6 @@ def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
         *args: Positional arguments to be passed to `func`.
         **kwargs: Keyword arguments to be passed to `func`.
 
-    Returns:
-        (Any): Return value of `func`.
-
     See Also:
         [`apply_`][chanfig.utils.apply.apply_]: Apply an in-place operation.
     """
@@ -227,9 +218,6 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
         func: Function to be applied.
         *args: Positional arguments to be passed to `func`.
         **kwargs: Keyword arguments to be passed to `func`.
-
-    Returns:
-        (Any): Return value of `func`.
 
     See Also:
         [`apply`][chanfig.utils.apply.apply]: Apply a non-in-place operation.

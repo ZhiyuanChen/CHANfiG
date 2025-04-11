@@ -23,7 +23,7 @@ from warnings import warn
 from .config import Config
 
 
-def configclass(cls=None):
+def configclass(cls: Any = None):
     """
     Construct a Config in [`dataclass`][dataclasses.dataclass] style.
 
@@ -31,12 +31,6 @@ def configclass(cls=None):
 
     See Also:
         [`dataclass`][dataclasses.dataclass]
-
-    Args:
-        cls (Type[Any]): The class to be enhanced, provided directly if no parentheses are used.
-
-    Returns:
-        A modified class with Config functionalities or a decorator with bound parameters.
 
     Examples:
         >>> @configclass

@@ -139,10 +139,6 @@ class Registry(NestedDict):
             component: The component to register.
             name: The name of the component.
 
-        Returns:
-            component: The registered component.
-                Registered component are expected to be `Callable`.
-
         Raises:
             ValueError: If the component with the same name already registered and `Registry.override=False`.
 
@@ -204,12 +200,6 @@ class Registry(NestedDict):
         r"""
         Lookup for a component.
 
-        Args:
-            name:
-
-        Returns:
-            (Any): The component.
-
         Raises:
             KeyError: If the component is not registered.
 
@@ -250,9 +240,6 @@ class Registry(NestedDict):
             *args: The arguments to pass to the component.
             **kwargs: The keyword arguments to pass to the component.
 
-        Returns:
-            (Any):
-
         Examples:
             >>> class Module:
             ...     def __init__(self, a, b):
@@ -278,9 +265,6 @@ class Registry(NestedDict):
                 Note that values in `kwargs` will override values in `name` if its a `MutableMapping`.
             *args: The arguments to pass to the component.
             **kwargs: The keyword arguments to pass to the component.
-
-        Returns:
-            (Any):
 
         Raises:
             KeyError: If the component is not registered.
@@ -399,9 +383,6 @@ class ConfigRegistry(Registry):
             *args: The arguments to pass to the component.
             **kwargs: The keyword arguments to pass to the component.
 
-        Returns:
-            (Any):
-
         Examples:
             >>> class Module:
             ...     def __init__(self, config, a=None, b=None):
@@ -422,9 +403,6 @@ class ConfigRegistry(Registry):
 
         Args:
             config
-
-        Returns:
-            (Any):
 
         Raises:
             KeyError: If the component is not registered.

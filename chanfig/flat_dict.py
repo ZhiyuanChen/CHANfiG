@@ -47,6 +47,7 @@ from .utils import (
     PathStr,
     YamlDumper,
     YamlLoader,
+    conform_annotation,
     find_circular_reference,
     find_placeholders,
     get_annotations,
@@ -140,28 +141,25 @@ class FlatDict(dict, metaclass=Dict):
             elif isinstance(arg, (Namespace,)):
                 arg = vars(arg)
             args = (arg,)
-        super().__init__(*args, **kwargs)
-        self.move_class_attributes()
+        self.merge(*args, **kwargs)
+        self._copy_class_attributes()
 
-    def move_class_attributes(self, recursive: bool = True) -> Self:
+    def _copy_class_attributes(self, recursive: bool = True) -> Self:
         r"""
         Move class attributes to instance.
 
         Args:
             recursive:
-
-        Returns:
-            self:
         """
 
-        def move_cls_attributes(cls: type) -> Mapping:
+        def copy_cls_attributes(cls: type) -> Mapping:
             return {k: cls.__dict__[k] for k in get_annotations(cls).keys() if k in cls.__dict__}
 
         if recursive:
             for cls in self.__class__.__mro__:
-                self.merge(move_cls_attributes(cls), overwrite=False)
+                self.merge(copy_cls_attributes(cls), overwrite=False)
         else:
-            self.merge(move_cls_attributes(self.__class__), overwrite=False)
+            self.merge(copy_cls_attributes(self.__class__), overwrite=False)
         return self
 
     def __post_init__(self, *args, **kwargs) -> None:
@@ -181,14 +179,6 @@ class FlatDict(dict, metaclass=Dict):
     def get(self, name: Any, default: Any = None) -> Any:
         r"""
         Get value from `FlatDict`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `FlatDict` does not contain `name`, return `default`.
 
         Raises:
             KeyError: If `FlatDict` does not contain `name` and `default` is not specified.
@@ -336,7 +326,7 @@ class FlatDict(dict, metaclass=Dict):
             annos = get_annotations(obj)
             for name, value in obj.items():
                 if annos and name in annos:
-                    obj[name] = honor_annotation(value, annos[name])
+                    conform_annotation(value, annos[name])
                 if isinstance(value, Variable):
                     try:
                         value.validate()
@@ -453,12 +443,6 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Determine if an attribute exists in `FlatDict`.
 
-        Args:
-            name:
-
-        Returns:
-            (bool):
-
         Examples:
             >>> d = FlatDict()
             >>> d.setattr('name', 'chang')
@@ -482,9 +466,6 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             flatten: Whether to flatten [`NestedDict`][chanfig.NestedDict].
-
-        Returns:
-            (Mapping):
 
         See Also:
             [`to_dict`][chanfig.utils.conversion.to_dict]: Implementation of `dict`.
@@ -537,9 +518,6 @@ class FlatDict(dict, metaclass=Dict):
     def sort(self, key: Callable | None = None, reverse: bool = False) -> Self:
         r"""
         Sort `FlatDict`.
-
-        Returns:
-            (FlatDict):
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
@@ -698,9 +676,6 @@ class FlatDict(dict, metaclass=Dict):
             overwrite: Whether to overwrite existing values.
             **kwargs: `Mapping` to be merged.
 
-        Returns:
-            self:
-
         **Alias**:
 
         + `union`
@@ -773,9 +748,6 @@ class FlatDict(dict, metaclass=Dict):
             *args: Passed to [`load`][chanfig.FlatDict.load].
             **kwargs: Passed to [`load`][chanfig.FlatDict.load].
 
-        Returns:
-            self:
-
         Examples:
             >>> d = FlatDict(a=1, b=1)
             >>> d.merge_from_file("tests/test.yaml").dict()
@@ -790,9 +762,6 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             other (Mapping | Iterable | PathStr):
-
-        Returns:
-            (FlatDict):
 
         **Alias**:
 
@@ -835,9 +804,6 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             other:
-
-        Returns:
-            (FlatDict):
 
         **Alias**:
 
@@ -883,9 +849,6 @@ class FlatDict(dict, metaclass=Dict):
         Args:
             cls (str | torch.device | torch.dtype):
 
-        Returns:
-            self:
-
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
             >>> d.to(int)
@@ -907,9 +870,6 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Move all tensors to cpu.
 
-        Returns:
-            self:
-
         Examples:
             >>> import torch
             >>> d = FlatDict(a=torch.tensor(1))
@@ -922,9 +882,6 @@ class FlatDict(dict, metaclass=Dict):
     def gpu(self) -> Self:  # pragma: no cover
         r"""
         Move all tensors to gpu.
-
-        Returns:
-            self:
 
         **Alias**:
 
@@ -951,9 +908,6 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Move all tensors to tpu.
 
-        Returns:
-            self:
-
         **Alias**:
 
         + `xla`
@@ -978,9 +932,6 @@ class FlatDict(dict, metaclass=Dict):
     def copy(self) -> Self:
         r"""
         Create a shallow copy of `FlatDict`.
-
-        Returns:
-            (FlatDict):
 
         Examples:
             >>> d = FlatDict(a=[])
@@ -1014,9 +965,6 @@ class FlatDict(dict, metaclass=Dict):
     def deepcopy(self, memo: Mapping | None = None) -> Self:  # pylint: disable=W0613
         r"""
         Create a deep copy of `FlatDict`.
-
-        Returns:
-            (FlatDict):
 
         **Alias**:
 
@@ -1101,9 +1049,6 @@ class FlatDict(dict, metaclass=Dict):
             file: File to load from.
             method: File type, should be in `JSON_EXTENSIONS` or `YAML_EXTENSIONS`.
 
-        Returns:
-            (FlatDict):
-
         Raises:
             ValueError: If load from `IO` and `method` is not specified.
             TypeError: If dump to unsupported extension.
@@ -1155,9 +1100,6 @@ class FlatDict(dict, metaclass=Dict):
         This method internally calls `self.from_jsons()` to construct object from json string.
         You may overwrite `from_jsons` in case something is not json serializable.
 
-        Returns:
-            (FlatDict):
-
         Examples:
             >>> d = FlatDict.from_json('tests/test.json')
             >>> d.dict()
@@ -1173,9 +1115,6 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Dump `FlatDict` to json string.
 
-        Returns:
-            (str):
-
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
             >>> d.jsons()
@@ -1190,9 +1129,6 @@ class FlatDict(dict, metaclass=Dict):
     def from_jsons(cls, string: str, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from json string.
-
-        Returns:
-            (FlatDict):
 
         Examples:
             >>> FlatDict.from_jsons('{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}').dict()
@@ -1228,9 +1164,6 @@ class FlatDict(dict, metaclass=Dict):
         This method internally calls `self.from_yamls()` to construct object from yaml string.
         You may overwrite `from_yamls` in case something is not yaml serializable.
 
-        Returns:
-            (FlatDict):
-
         Examples:
             >>> FlatDict.from_yaml('tests/test.yaml').dict()
             {'a': 1, 'b': 2, 'c': 3}
@@ -1247,9 +1180,6 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Dump `FlatDict` to yaml string.
 
-        Returns:
-            (str):
-
         Examples:
             >>> FlatDict(a=1, b=2, c=3).yamls()
             'a: 1\nb: 2\nc: 3\n'
@@ -1263,9 +1193,6 @@ class FlatDict(dict, metaclass=Dict):
     def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> Self:
         r"""
         Construct `FlatDict` from yaml string.
-
-        Returns:
-            (FlatDict):
 
         Examples:
             >>> FlatDict.from_yamls('a: 1\nb: 2\nc: 3\n').dict()
@@ -1340,9 +1267,6 @@ class FlatDict(dict, metaclass=Dict):
 
         This method will preserve everything in `FlatDict.__class__.__dict__`.
 
-        Returns:
-            (FlatDict):
-
         See Also:
             [`empty_like`][chanfig.FlatDict.empty_like]
 
@@ -1365,9 +1289,6 @@ class FlatDict(dict, metaclass=Dict):
 
         For example, `property`s are saved in `__dict__`, they will keep their original reference after calling this
         method.
-
-        Returns:
-            (FlatDict):
 
         See Also:
             [`empty`][chanfig.FlatDict.empty]
@@ -1422,9 +1343,6 @@ class FlatDict(dict, metaclass=Dict):
     def dropnull(self) -> Self:
         r"""
         Drop key-value pairs with `Null` value.
-
-        Returns:
-            (FlatDict):
 
         **Alias**:
 
