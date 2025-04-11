@@ -111,8 +111,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         fallback: bool | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(default_factory)
-        self.merge(*args, **kwargs)
+        super().__init__(default_factory, *args, **kwargs)
         if convert_mapping is not None:
             self.setattr("convert_mapping", convert_mapping)
         if fallback is not None:
@@ -121,9 +120,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
     def all_keys(self) -> Generator:
         r"""
         Get all keys of `NestedDict`.
-
-        Returns:
-            (Generator):
 
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
@@ -149,9 +145,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         r"""
         Get all values of `NestedDict`.
 
-        Returns:
-            (Generator):
-
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
             >>> list(d.all_values())
@@ -167,9 +160,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
     def all_items(self) -> Generator:
         r"""
         Get all items of `NestedDict`.
-
-        Returns:
-            (Generator):
 
         Examples:
             >>> d = NestedDict({'a': 1, 'b': {'c': 2, 'd': 3}})
@@ -255,15 +245,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         Get value from `NestedDict`.
 
         Note that `default` has higher priority than `default_factory`.
-
-        Args:
-            name:
-            default:
-
-        Returns:
-            value:
-                If `NestedDict` does not contain `name`, return `default`.
-                If `default` is not specified, return `default_factory()`.
 
         Raises:
             KeyError: If `NestedDict` does not contain `name` and `default`/`default_factory` is not specified.
@@ -477,13 +458,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         r"""
         Pop value from `NestedDict`.
 
-        Args:
-            name:
-            default:
-
-        Returns:
-            value: If `NestedDict` does not contain `name`, return `default`.
-
         Examples:
             >>> d = NestedDict({"i.d": 1016, "f.n": "chang", "n.a.b.c": 1}, default_factory=NestedDict)
             >>> d.pop('i.d')
@@ -527,10 +501,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             name:
             value:
             convert_mapping: Whether to convert `Mapping` to `NestedDict`.
-                Defaults to self.convert_mapping.
-
-        Returns:
-            value: If `NestedDict` does not contain `name`, return `value`.
+                Defaults to `self.getattr("convert_mapping", False)`.
 
         Examples:
             >>> d = NestedDict({"i.d": 1016, "f.n": "chang", "n.a.b.c": 1})
@@ -618,9 +589,6 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         Args:
             recursive (bool): Whether to apply `sort` recursively.
-
-        Returns:
-            (NestedDict):
 
         Examples:
             >>> l = [1]
