@@ -22,6 +22,7 @@ from __future__ import annotations
 from collections.abc import Callable, MutableMapping
 from copy import deepcopy
 from functools import wraps
+from inspect import signature
 from typing import Any
 from warnings import warn
 
@@ -251,9 +252,28 @@ class Registry(NestedDict):
             <class 'chanfig.registry.Module'>
             >>> module.a, module.b
             (0, 1)
+            >>> kwargs = {"a": 1, "b": 0, "enabled": True}
+            >>> if kwargs.get("enabled"):
+            ...     module = Registry.init(Module, **kwargs)
+            >>> type(module)
+            <class 'chanfig.registry.Module'>
+            >>> module.a, module.b
+            (1, 0)
         """
 
-        return cls(*args, **kwargs)
+        sig = signature(cls)
+        ignored_kwargs, passing_kwargs = {}, {}
+        for k, v in kwargs.items():
+            if k in sig.parameters:
+                passing_kwargs[k] = v
+            else:
+                ignored_kwargs[k] = v
+        if ignored_kwargs:
+            warn(
+                f"The following kwargs do not match the signature of {cls.__name__} and will be ignored: {ignored_kwargs}",  # noqa: E501
+                stacklevel=2,
+            )
+        return cls(*args, **passing_kwargs)
 
     def build(self, name: str | MutableMapping | NULL = Null, *args: Any, **kwargs: Any) -> Any:
         r"""
