@@ -199,6 +199,7 @@ class Config(NestedDict):
         for value in self.values():
             if isinstance(value, Config):
                 value.boot()
+                value.popattr("parser", None)
         self.post()
         return self
 

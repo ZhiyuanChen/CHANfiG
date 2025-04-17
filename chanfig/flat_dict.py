@@ -437,6 +437,8 @@ class FlatDict(dict, metaclass=Dict):
             AttributeError: 'FlatDict' object has no attribute 'name'
         """
 
+        if name not in self.__dict__:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
         del self.__dict__[name]
 
     def hasattr(self, name: str) -> bool:
@@ -459,6 +461,24 @@ class FlatDict(dict, metaclass=Dict):
             return super().hasattr(name)  # type: ignore[misc]
         except AttributeError:
             return False
+
+    def popattr(self, name: str, default: Any = Null) -> Any:
+        r"""
+        Pop attribute of `FlatDict`.
+
+        Examples:
+            >>> d = FlatDict(a=1, b=2, c=3)
+            >>> d.popattr('a')
+            Traceback (most recent call last):
+            AttributeError: 'FlatDict' object has no attribute 'a'
+            >>> d.setattr('a', 1)
+            >>> d.popattr('a')
+            1
+        """
+
+        if name not in self.__dict__ and default is Null:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+        return self.__dict__.pop(name, default)
 
     def dict(self, flatten: bool = False) -> Mapping | Sequence | Set:
         r"""
