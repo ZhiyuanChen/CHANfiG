@@ -334,6 +334,9 @@ class FlatDict(dict, metaclass=Dict):
                         raise TypeError(f"'{name}' has invalid type. {exc}") from None
                     except ValueError as exc:
                         raise ValueError(f"'{name}' has invalid value. {exc}") from None
+            for name, anno in annos.items():
+                if name not in obj and not conform_annotation(None, anno):
+                    warn(f"Expect {name} to be {anno}, but not found in {obj.__class__.__name__}.", RuntimeWarning)
 
     def __call__(self, name: str, default: Any = Null) -> Any:
         return self.getattr(name, default)

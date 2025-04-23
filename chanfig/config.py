@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Sequence
 from contextlib import contextmanager
 from functools import wraps
 from typing import Any
@@ -75,7 +75,6 @@ class Config(NestedDict):
         It is recommended to call `config.freeze()` or `config.to(NestedDict)` to avoid this behaviour.
 
     Attributes:
-        parser (ConfigParser): Parser for command-line arguments.
         frozen (bool): If `True`, the config is frozen and cannot be altered.
 
     Examples:
@@ -99,7 +98,6 @@ class Config(NestedDict):
         {'f': {'n': 'chang'}, 'i': {'d': 1016}}
     """
 
-    parser = None  # ConfigParser, Python 3.7 does not support forward reference
     frozen = False
 
     def __init__(self, *args: Any, default_factory: Callable | NULL = Null, **kwargs: Any):
@@ -199,13 +197,12 @@ class Config(NestedDict):
         for value in self.values():
             if isinstance(value, Config):
                 value.boot()
-                value.popattr("parser", None)
         self.post()
         return self
 
     def parse(
         self,
-        args: Iterable[str] | None = None,
+        args: Sequence[str] | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
         boot: bool = True,
@@ -239,16 +236,15 @@ class Config(NestedDict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        if self.getattr("parser") is None:
-            self.setattr("parser", ConfigParser())
-        self.getattr("parser").parse(args, self, default_config, no_default_config_action)
+        parser = ConfigParser()
+        parser.parse(args, self, default_config, no_default_config_action)
         if boot:
             self.boot()
         return self
 
     def parse_config(
         self,
-        args: Iterable[str] | None = None,
+        args: Sequence[str] | None = None,
         default_config: str | None = None,
         no_default_config_action: str = "raise",
         boot: bool = True,
@@ -281,30 +277,11 @@ class Config(NestedDict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        if self.getattr("parser") is None:
-            self.setattr("parser", ConfigParser())
-        self.getattr("parser").parse_config(args, self, default_config, no_default_config_action)
+        parser = ConfigParser()
+        parser.parse_config(args, self, default_config, no_default_config_action)
         if boot:
             self.boot()
         return self
-
-    def add_argument(self, *args: Any, **kwargs: Any) -> None:
-        r"""
-        Add an argument to `ConfigParser`.
-
-        Note that value defined in `Config` will override the default value defined in `add_argument`.
-
-        Examples:
-            >>> c = Config(a=0, c=1)
-            >>> arg = c.add_argument("--a", type=int, default=1)
-            >>> arg = c.add_argument("--b", type=int, default=2)
-            >>> c.parse(['--c', '4']).dict()
-            {'a': 1, 'c': 4, 'b': 2}
-        """
-
-        if self.getattr("parser") is None:
-            self.setattr("parser", ConfigParser())
-        return self.getattr("parser").add_argument(*args, **kwargs)
 
     def freeze(self, recursive: bool = True) -> Self:
         r"""
