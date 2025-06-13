@@ -622,7 +622,7 @@ class FlatDict(dict, metaclass=Dict):
             >>> d.interpolate().dict()
             Traceback (most recent call last):
             ValueError: d is not found in FlatDict(
-              ('a'): '1'
+              ('a'): 1
               ('b'): '${a}'
               ('c'): '${d}'
             ).
@@ -807,7 +807,7 @@ class FlatDict(dict, metaclass=Dict):
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty(other).items()
+            other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty(**{key: value for key, value in other if key in self and self[key] == value})  # type: ignore
@@ -849,7 +849,7 @@ class FlatDict(dict, metaclass=Dict):
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
-            other = self.empty(other).items()
+            other = other.items()
         if not isinstance(other, Iterable):
             raise TypeError(f"`other={other}` should be of type Mapping, Iterable or PathStr, but got {type(other)}.")
         return self.empty(
@@ -1427,9 +1427,6 @@ class FlatDict(dict, metaclass=Dict):
         text = "\n".join(lines)
         text = first + "\n" + text
         return text
-
-    def __format__(self, format_spec: str) -> str:
-        return repr(self.empty({k: v.__format__(format_spec) for k, v in self.all_items()}))
 
     def __hash__(self):
         return hash(frozenset(self.items()))
