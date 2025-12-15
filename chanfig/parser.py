@@ -37,7 +37,7 @@ except ImportError:
     NoneType = type(None)  # type: ignore[misc, assignment]
 
 from .nested_dict import NestedDict
-from .utils import Null, get_annotations, parse_bool
+from .utils import Null, get_cached_annotations, parse_bool
 from .variable import Variable
 
 if TYPE_CHECKING:
@@ -289,7 +289,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         return parsed
 
     def add_config_arguments(self, config: Config):
-        for key, dtype in get_annotations(config).items():
+        for key, dtype in get_cached_annotations(config).items():
             self.add_config_argument(key, dtype=dtype)
         for key, value in config.all_items():
             self.add_config_argument(key, value)

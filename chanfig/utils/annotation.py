@@ -22,7 +22,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
-from functools import partial
+from functools import lru_cache, partial
 from types import ModuleType
 from typing import Any, Union, no_type_check
 
@@ -177,6 +177,30 @@ def get_annotations(  # pylint: disable=all
                 ) from None
         ret[key] = value
     return ret
+
+
+@lru_cache(maxsize=512)
+def _cached_annotations_for_class(cls: type) -> Mapping:
+    return get_annotations(cls)
+
+
+def get_cached_annotations(obj) -> Mapping:
+    """
+    Lightweight cached wrapper around `get_annotations` keyed by class.
+
+    The returned mapping is copied to preserve the original `get_annotations` contract
+    of producing a fresh dict for each call.
+    """
+
+    try:
+        cls = obj if isinstance(obj, type) else obj.__class__
+    except Exception:
+        return get_annotations(obj)
+    try:
+        cached = _cached_annotations_for_class(cls)
+    except TypeError:
+        return get_annotations(obj)
+    return dict(cached)
 
 
 def honor_annotation(data: Any, annotation: type) -> Any:

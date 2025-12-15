@@ -50,7 +50,7 @@ from .utils import (
     conform_annotation,
     find_circular_reference,
     find_placeholders,
-    get_annotations,
+    get_cached_annotations,
     honor_annotation,
     to_chanfig,
     to_dict,
@@ -153,13 +153,20 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         def copy_cls_attributes(cls: type) -> Mapping:
-            return {k: cls.__dict__[k] for k in get_annotations(cls).keys() if k in cls.__dict__}
+            annos = get_cached_annotations(cls)
+            if not annos:
+                return {}
+            return {k: cls.__dict__[k] for k in annos.keys() if k in cls.__dict__}
 
         if recursive:
             for cls in self.__class__.__mro__:
-                self.merge(copy_cls_attributes(cls), overwrite=False)
+                attrs = copy_cls_attributes(cls)
+                if attrs:
+                    self.merge(attrs, overwrite=False)
         else:
-            self.merge(copy_cls_attributes(self.__class__), overwrite=False)
+            attrs = copy_cls_attributes(self.__class__)
+            if attrs:
+                self.merge(attrs, overwrite=False)
         return self
 
     def __post_init__(self, *args, **kwargs) -> None:
@@ -245,7 +252,7 @@ class FlatDict(dict, metaclass=Dict):
             self.get(name).set(value)
             return
 
-        annotations = get_annotations(self)
+        annotations = get_cached_annotations(self)
         anno = annotations.get(name, Any)
 
         if anno is not Any:
@@ -323,7 +330,7 @@ class FlatDict(dict, metaclass=Dict):
     @staticmethod
     def _validate(obj) -> None:
         if isinstance(obj, FlatDict):
-            annos = get_annotations(obj)
+            annos = get_cached_annotations(obj)
             for name, value in obj.items():
                 if annos and name in annos:
                     conform_annotation(value, annos[name])
@@ -372,7 +379,7 @@ class FlatDict(dict, metaclass=Dict):
             if name in self.__dict__:
                 return self.__dict__[name]
             for cls in self.__class__.__mro__:
-                annos = get_annotations(cls)
+                annos = get_cached_annotations(cls)
                 if name in cls.__dict__ and name not in annos:
                     return cls.__dict__[name]
             return super().getattr(name, default)  # type: ignore[misc]
@@ -631,15 +638,20 @@ class FlatDict(dict, metaclass=Dict):
 
         interpolators = interpolators or self
         placeholders: dict[str, list[str]] = {}
+
+        def collect(k, v):
+            if isinstance(v, str) and "$" in v:
+                self.find_placeholders(k, v, placeholders)
+
         for key, value in self.all_items():
             if isinstance(value, list):
                 for v in value:
-                    self.find_placeholders(key, v, placeholders)
+                    collect(key, v)
             elif isinstance(value, Mapping):
                 for v in value.values():
-                    self.find_placeholders(key, v, placeholders)
+                    collect(key, v)
             else:
-                self.find_placeholders(key, value, placeholders)
+                collect(key, value)
         circular_references = find_circular_reference(placeholders)
         if circular_references:
             raise ValueError(f"Circular reference found: {'->'.join(circular_references)}.")

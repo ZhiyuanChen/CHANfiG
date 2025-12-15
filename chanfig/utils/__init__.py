@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 
-from .annotation import conform_annotation, get_annotations, honor_annotation
+from .annotation import conform_annotation, get_annotations, get_cached_annotations, honor_annotation
 from .functional import apply, apply_, parse_bool, to_chanfig, to_dict
 from .io import (
     JSON_EXTENSIONS,
@@ -39,6 +39,7 @@ from .placeholder import find_circular_reference, find_placeholders
 
 __all__ = [
     "get_annotations",
+    "get_cached_annotations",
     "conform_annotation",
     "honor_annotation",
     "find_placeholders",
