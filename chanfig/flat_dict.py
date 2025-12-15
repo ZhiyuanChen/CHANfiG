@@ -985,15 +985,19 @@ class FlatDict(dict, metaclass=Dict):
     def __deepcopy__(self, memo: Mapping | None = None) -> Self:
         # pylint: disable=C0103
 
-        if memo is not None and id(self) in memo:
+        if memo is None:
+            memo = {}
+        if id(self) in memo:
             return memo[id(self)]
+
         ret = self.empty()
-        ret.__dict__.update(deepcopy(self.__dict__))
+        memo[id(self)] = ret  # type: ignore[index]
+        ret.__dict__.update(deepcopy(self.__dict__, memo))  # type: ignore[arg-type]
         for k, v in self.items():
             if isinstance(v, FlatDict):
                 ret[k] = v.deepcopy(memo=memo)
             else:
-                ret[k] = deepcopy(v)
+                ret[k] = deepcopy(v, memo)  # type: ignore[arg-type]
         return ret
 
     def deepcopy(self, memo: Mapping | None = None) -> Self:  # pylint: disable=W0613
@@ -1019,7 +1023,7 @@ class FlatDict(dict, metaclass=Dict):
             True
         """
 
-        return deepcopy(self)
+        return deepcopy(self, memo)  # type: ignore[arg-type]
 
     def clone(self, memo: Mapping | None = None) -> Self:
         r"""
