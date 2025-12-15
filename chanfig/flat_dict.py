@@ -33,6 +33,7 @@ from os.path import splitext
 from typing import IO, Any
 from warnings import warn
 
+from lazy_imports import try_import
 from typing_extensions import Self
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
@@ -57,13 +58,9 @@ from .utils import (
 )
 from .variable import Variable
 
-try:
+with try_import() as torch_import:
     from torch import device as TorchDevice
     from torch import dtype as TorchDType
-
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
 
 
 class FlatDict(dict, metaclass=Dict):
@@ -890,6 +887,7 @@ class FlatDict(dict, metaclass=Dict):
 
         # pylint: disable=C0103
 
+        torch_import.check()
         if isinstance(cls, (str, TorchDevice, TorchDType)):
             for k, v in self.all_items():
                 if hasattr(v, "to"):
@@ -909,6 +907,7 @@ class FlatDict(dict, metaclass=Dict):
             {'a': tensor(1, device='cpu')}
         """
 
+        torch_import.check()
         return self.to(TorchDevice("cpu"))
 
     def gpu(self) -> Self:  # pragma: no cover
@@ -928,12 +927,14 @@ class FlatDict(dict, metaclass=Dict):
             {'a': tensor(1, device='cuda:0')}
         """
 
+        torch_import.check()
         return self.to(TorchDevice("cuda"))
 
     def cuda(self) -> Self:  # pragma: no cover
         r"""
         Alias of [`gpu`][chanfig.FlatDict.gpu].
         """
+        torch_import.check()
         return self.gpu()
 
     def tpu(self) -> Self:  # pragma: no cover
@@ -959,6 +960,7 @@ class FlatDict(dict, metaclass=Dict):
         r"""
         Alias of [`tpu`][chanfig.FlatDict.tpu].
         """
+        torch_import.check()
         return self.tpu()
 
     def copy(self) -> Self:
