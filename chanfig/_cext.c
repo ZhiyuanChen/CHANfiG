@@ -268,6 +268,161 @@ FlatDictCore_setattro(PyObject *self, PyObject *name, PyObject *value)
 }
 
 static PyObject *
+FlatDictCore_merge(PyObject *self, PyObject *other, int overwrite)
+{
+    /* shallow merge; if nested Mapping encountered, signal fallback */
+    PyObject *iterable = NULL;
+    int is_mapping = PyMapping_Check(other);
+    if (is_mapping) {
+        iterable = PyMapping_Items(other);
+        if (!iterable) return NULL;
+    } else {
+        iterable = PySequence_Fast(other, "merge expects a Mapping or iterable of pairs");
+        if (!iterable) return NULL;
+    }
+
+    PyObject *item;
+    Py_ssize_t i, len = PySequence_Fast_GET_SIZE(iterable);
+    PyObject **items = PySequence_Fast_ITEMS(iterable);
+
+    for (i = 0; i < len; ++i) {
+        if (is_mapping) {
+            item = items[i];
+        } else {
+            item = items[i];
+            if (!PyTuple_Check(item) || PyTuple_GET_SIZE(item) != 2) {
+                Py_DECREF(iterable);
+                PyErr_SetString(PyExc_TypeError, "merge iterable must yield 2-item tuples");
+                return NULL;
+            }
+        }
+        PyObject *key = is_mapping ? PyTuple_GET_ITEM(item, 0) : PyTuple_GET_ITEM(item, 0);
+        PyObject *value = is_mapping ? PyTuple_GET_ITEM(item, 1) : PyTuple_GET_ITEM(item, 1);
+
+        PyObject *existing = PyDict_GetItemWithError(self, key);
+        if (existing && PyMapping_Check(existing) && PyMapping_Check(value)) {
+            /* delegate complex nested merge to Python */
+            Py_DECREF(iterable);
+            Py_RETURN_FALSE;
+        }
+        if (overwrite || !existing) {
+            if (FlatDictCore_set_item(self, key, value) == -1) {
+                Py_DECREF(iterable);
+                return NULL;
+            }
+        }
+    }
+    Py_DECREF(iterable);
+    Py_RETURN_TRUE;
+}
+
+static PyObject *
+FlatDictCore_intersect(PyObject *self, PyObject *other)
+{
+    PyObject *iterable = NULL;
+    int is_mapping = PyMapping_Check(other);
+    if (is_mapping) {
+        iterable = PyMapping_Items(other);
+        if (!iterable) return NULL;
+    } else if (PySequence_Check(other)) {
+        iterable = PySequence_Fast(other, "intersect expects a Mapping or iterable of pairs");
+        if (!iterable) return NULL;
+    } else {
+        Py_RETURN_NONE; /* signal fallback */
+    }
+
+    PyObject *result = PyDict_New();
+    if (!result) {
+        Py_DECREF(iterable);
+        return NULL;
+    }
+
+    PyObject *item;
+    Py_ssize_t i, len = PySequence_Fast_GET_SIZE(iterable);
+    PyObject **items = PySequence_Fast_ITEMS(iterable);
+
+    for (i = 0; i < len; ++i) {
+        item = items[i];
+        if (!PyTuple_Check(item) || PyTuple_GET_SIZE(item) != 2) {
+            Py_DECREF(iterable);
+            Py_DECREF(result);
+            PyErr_SetString(PyExc_TypeError, "intersect iterable must yield 2-item tuples");
+            return NULL;
+        }
+        PyObject *key = PyTuple_GET_ITEM(item, 0);
+        PyObject *value = PyTuple_GET_ITEM(item, 1);
+        PyObject *existing = PyDict_GetItemWithError(self, key);
+        if (existing && PyObject_RichCompareBool(existing, value, Py_EQ) == 1) {
+            if (PyDict_SetItem(result, key, value) == -1) {
+                Py_DECREF(iterable);
+                Py_DECREF(result);
+                return NULL;
+            }
+        } else if (PyErr_Occurred()) {
+            Py_DECREF(iterable);
+            Py_DECREF(result);
+            return NULL;
+        }
+    }
+
+    Py_DECREF(iterable);
+    return result;
+}
+
+static PyObject *
+FlatDictCore_difference(PyObject *self, PyObject *other)
+{
+    PyObject *iterable = NULL;
+    int is_mapping = PyMapping_Check(other);
+    if (is_mapping) {
+        iterable = PyMapping_Items(other);
+        if (!iterable) return NULL;
+    } else if (PySequence_Check(other)) {
+        iterable = PySequence_Fast(other, "difference expects a Mapping or iterable of pairs");
+        if (!iterable) return NULL;
+    } else {
+        Py_RETURN_NONE; /* signal fallback */
+    }
+
+    PyObject *result = PyDict_New();
+    if (!result) {
+        Py_DECREF(iterable);
+        return NULL;
+    }
+
+    PyObject *item;
+    Py_ssize_t i, len = PySequence_Fast_GET_SIZE(iterable);
+    PyObject **items = PySequence_Fast_ITEMS(iterable);
+
+    for (i = 0; i < len; ++i) {
+        item = items[i];
+        if (!PyTuple_Check(item) || PyTuple_GET_SIZE(item) != 2) {
+            Py_DECREF(iterable);
+            Py_DECREF(result);
+            PyErr_SetString(PyExc_TypeError, "difference iterable must yield 2-item tuples");
+            return NULL;
+        }
+        PyObject *key = PyTuple_GET_ITEM(item, 0);
+        PyObject *value = PyTuple_GET_ITEM(item, 1);
+        PyObject *existing = PyDict_GetItemWithError(self, key);
+        if (!existing || PyObject_RichCompareBool(existing, value, Py_EQ) != 1) {
+            if (PyDict_SetItem(result, key, value) == -1) {
+                Py_DECREF(iterable);
+                Py_DECREF(result);
+                return NULL;
+            }
+        } else if (PyErr_Occurred()) {
+            Py_DECREF(iterable);
+            Py_DECREF(result);
+            return NULL;
+        }
+    }
+
+    Py_DECREF(iterable);
+    return result;
+}
+
+static PyObject *
 py_flatdict_interpolate(PyObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *mapping = NULL;
@@ -282,6 +437,40 @@ py_flatdict_interpolate(PyObject *self, PyObject *args, PyObject *kwargs)
     if (res == -1) return NULL;
     if (res == 0) Py_RETURN_FALSE;
     Py_RETURN_TRUE;
+}
+
+static PyObject *
+py_flatdict_merge(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *mapping = NULL;
+    int overwrite = 1;
+    static char *kwlist[] = {"mapping", "overwrite", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|p:flatdict_merge", kwlist, &mapping, &overwrite)) {
+        return NULL;
+    }
+    return FlatDictCore_merge(self, mapping, overwrite);
+}
+
+static PyObject *
+py_flatdict_intersect(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *mapping = NULL;
+    static char *kwlist[] = {"mapping", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:flatdict_intersect", kwlist, &mapping)) {
+        return NULL;
+    }
+    return FlatDictCore_intersect(self, mapping);
+}
+
+static PyObject *
+py_flatdict_difference(PyObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *mapping = NULL;
+    static char *kwlist[] = {"mapping", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O:flatdict_difference", kwlist, &mapping)) {
+        return NULL;
+    }
+    return FlatDictCore_difference(self, mapping);
 }
 
 static PyTypeObject FlatDictCoreType = {
@@ -336,4 +525,13 @@ static PyMethodDef ChanfigMethods[] = {
     {"flatdict_interpolate", (PyCFunction)py_flatdict_interpolate, METH_VARARGS | METH_KEYWORDS,
      "flatdict_interpolate(mapping, use_variable=True, unsafe_eval=False) -> bool\n"
      "Attempt fast interpolation on FlatDict-like mapping. Returns True if handled, False to fallback."},
+    {"flatdict_merge", (PyCFunction)py_flatdict_merge, METH_VARARGS | METH_KEYWORDS,
+     "flatdict_merge(mapping, overwrite=True) -> bool\n"
+     "Shallow merge helper; returns True if handled, False to fall back to Python for complex cases."},
+    {"flatdict_intersect", (PyCFunction)py_flatdict_intersect, METH_VARARGS | METH_KEYWORDS,
+     "flatdict_intersect(mapping) -> dict | None\n"
+     "Shallow intersect helper; returns a dict of matching items, or None to signal fallback."},
+    {"flatdict_difference", (PyCFunction)py_flatdict_difference, METH_VARARGS | METH_KEYWORDS,
+     "flatdict_difference(mapping) -> dict | None\n"
+     "Shallow difference helper; returns a dict of differing items, or None to signal fallback."},
     {NULL, NULL, 0, NULL}};

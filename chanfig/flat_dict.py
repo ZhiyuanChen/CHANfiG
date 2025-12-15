@@ -41,10 +41,16 @@ from .base import Dict
 
 try:  # pragma: no cover - optional C acceleration
     from ._cext import FlatDictCore as _FlatDictBase
+    from ._cext import flatdict_difference as _c_difference
     from ._cext import flatdict_interpolate as _c_interpolate
+    from ._cext import flatdict_intersect as _c_intersect
+    from ._cext import flatdict_merge as _c_merge
 except Exception:  # pragma: no cover - fallback to pure Python
     _FlatDictBase = dict
     _c_interpolate = None
+    _c_merge = None
+    _c_intersect = None
+    _c_difference = None
 from .utils import (
     JSON_EXTENSIONS,
     YAML_EXTENSIONS,
@@ -746,6 +752,14 @@ class FlatDict(_FlatDictBase, metaclass=Dict):
             {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
         """
 
+        if len(args) == 1 and not kwargs and _c_merge is not None:
+            try:
+                handled = _c_merge(self, args[0], overwrite)
+                if handled:
+                    return self
+            except Exception:
+                pass
+
         if len(args) == 1:
             args = args[0]
             if isinstance(args, (PathLike, str, bytes)):
@@ -831,6 +845,14 @@ class FlatDict(_FlatDictBase, metaclass=Dict):
             {}
         """
 
+        if _c_intersect is not None and not isinstance(other, (PathLike, str, bytes)):
+            try:
+                result = _c_intersect(self, other)
+                if result is not None and result is not False:
+                    return self.empty(**dict(result))
+            except Exception:
+                pass
+
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
         if isinstance(other, (Mapping,)):
@@ -872,6 +894,14 @@ class FlatDict(_FlatDictBase, metaclass=Dict):
             >>> FlatDict(a=1, b=1, c=1).diff(FlatDict(b='b', c='c', d='d')).dict()  # alias
             {'b': 'b', 'c': 'c', 'd': 'd'}
         """
+
+        if _c_difference is not None and not isinstance(other, (PathLike, str, bytes)):
+            try:
+                result = _c_difference(self, other)
+                if result is not None and result is not False:
+                    return self.empty(**dict(result))
+            except Exception:
+                pass
 
         if isinstance(other, (PathLike, str, bytes)):
             other = self.load(other)
