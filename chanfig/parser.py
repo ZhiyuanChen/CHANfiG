@@ -234,7 +234,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         # add the command-line arguments
         key_value_args = []
         for arg in args:
-            if args == "--":
+            if arg == "--":
                 break
             if arg.startswith("-"):
                 key_value_args.append(arg.split("=", maxsplit=1))
