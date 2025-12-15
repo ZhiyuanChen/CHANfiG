@@ -541,7 +541,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         if isinstance(self, NestedDict) and name in self:
             return super().get(name)
         elif isinstance(self, Mapping) and name in self:
-            dict.__getitem__(self, name)
+            return dict.__getitem__(self, name)
 
         if (
             convert_mapping
