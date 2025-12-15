@@ -17,6 +17,31 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from setuptools import setup
+from setuptools import Extension, setup
+from setuptools.command.build_ext import build_ext
 
-setup()
+ext_modules = [
+    Extension(
+        "chanfig._cext",
+        sources=["chanfig/_cext.c"],
+    )
+]
+
+
+class BuildExtOptional(build_ext):
+    """Allow building without a C compiler; ignore failures."""
+
+    def run(self):
+        try:
+            super().run()
+        except Exception as exc:  # pragma: no cover - fallback when no compiler
+            self.announce(f"WARNING: building C extension failed ({exc}); falling back to pure Python", level=3)
+
+    def build_extension(self, ext):
+        try:
+            super().build_extension(ext)
+        except Exception as exc:  # pragma: no cover - fallback when no compiler
+            self.announce(f"WARNING: building extension {ext.name} failed ({exc}); skipping C extension", level=3)
+
+
+setup(ext_modules=ext_modules, cmdclass={"build_ext": BuildExtOptional})

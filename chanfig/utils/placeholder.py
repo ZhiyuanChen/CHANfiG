@@ -21,6 +21,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+try:  # pragma: no cover - optional C extension
+    from chanfig._cext import find_placeholders as c_find_placeholders
+except Exception:  # pragma: no cover - when extension is absent
+    c_find_placeholders = None
+
 
 def find_placeholders(text: str) -> list[str]:
     r"""Find all placeholders in text, including nested ones.
@@ -36,6 +41,12 @@ def find_placeholders(text: str) -> list[str]:
         >>> find_placeholders("${outer${inner}}")
         ['outer${inner}', 'inner']
     """
+    if c_find_placeholders is not None:
+        try:
+            return c_find_placeholders(text)
+        except Exception:
+            pass
+
     if not isinstance(text, str):
         return []
 

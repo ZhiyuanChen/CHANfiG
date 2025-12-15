@@ -38,6 +38,13 @@ from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
 from .base import Dict
+
+try:  # pragma: no cover - optional C acceleration
+    from ._cext import FlatDictCore as _FlatDictBase
+    from ._cext import flatdict_interpolate as _c_interpolate
+except Exception:  # pragma: no cover - fallback to pure Python
+    _FlatDictBase = dict
+    _c_interpolate = None
 from .utils import (
     JSON_EXTENSIONS,
     YAML_EXTENSIONS,
@@ -66,7 +73,7 @@ except ImportError:
     TORCH_AVAILABLE = False
 
 
-class FlatDict(dict, metaclass=Dict):
+class FlatDict(_FlatDictBase, metaclass=Dict):
     r"""
     `FlatDict` with attribute-style access.
 
@@ -635,6 +642,14 @@ class FlatDict(dict, metaclass=Dict):
             ).
         """
         # pylint: disable=C0103
+
+        if _c_interpolate is not None and interpolators is None:
+            try:
+                handled = _c_interpolate(self, use_variable, unsafe_eval)
+                if handled:
+                    return self
+            except Exception:
+                pass
 
         interpolators = interpolators or self
         placeholders: dict[str, list[str]] = {}
