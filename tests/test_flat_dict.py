@@ -60,6 +60,14 @@ def test_copy():
     assert deepcopy(dict_test) == dict_test.deepcopy()
 
 
+def test_deepcopy_self_reference():
+    d = FlatDict()
+    d.self = d
+    cloned = deepcopy(d)
+    assert cloned is not d
+    assert cloned.self is cloned
+
+
 class ConfigDict(FlatDict):
     int_value: int
     str_value: str
