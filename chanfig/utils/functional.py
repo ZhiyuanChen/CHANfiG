@@ -191,6 +191,11 @@ def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     # Handle circular import
     from ..nested_dict import NestedDict
 
+    is_method = ismethod(func)
+
+    def _invoke(target):
+        return func(*args, **kwargs) if is_method else func(target, *args, **kwargs)
+
     if isinstance(obj, NestedDict):
         return obj.empty_like(**{k: apply(v, func, *args, **kwargs) for k, v in obj.items()})
     if isinstance(obj, Mapping):
@@ -204,7 +209,7 @@ def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
             return {apply(v, func, *args, **kwargs) for v in obj}
         except TypeError:
             return tuple(apply(v, func, *args, **kwargs) for v in obj)
-    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
+    return _invoke(obj)
 
 
 def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
@@ -223,6 +228,10 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
         [`apply`][chanfig.utils.apply.apply]: Apply a non-in-place operation.
     """
     # pylint: disable=C0103
+    is_method = ismethod(func)
+
+    def _invoke(target):
+        return func(*args, **kwargs) if is_method else func(target, *args, **kwargs)
 
     if isinstance(obj, Mapping):
         for v in obj.values():
@@ -230,4 +239,4 @@ def apply_(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
     if isinstance(obj, (list, tuple, set)):
         for v in obj:
             apply_(v, func, *args, **kwargs)
-    return func(*args, **kwargs) if ismethod(func) else func(obj, *args, **kwargs)
+    return _invoke(obj)
