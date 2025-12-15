@@ -99,6 +99,15 @@ def test_parse_bool():
     assert not config.f and not config.false and not config.n and not config.no
 
 
+def test_parse_negative_number():
+    config = Config()
+    config.parse(["--lr", "-0.1"])
+    assert config.lr == -0.1
+    config = Config()
+    config.parse(["--wd", "-1e-4"])
+    assert config.wd == -0.0001
+
+
 @pytest.mark.skipif(sys.version_info < (3, 10), reason="PEP604 is available in Python 3.10+")
 def test_parse_pep604():
     config = TestConfigPEP604()

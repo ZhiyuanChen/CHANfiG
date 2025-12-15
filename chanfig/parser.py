@@ -231,12 +231,46 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
             )
 
+        def _is_negative_number(token: str) -> bool:
+            if not isinstance(token, str) or not token.startswith("-") or token.startswith("--"):
+                return False
+            try:
+                float(token)
+                return True
+            except ValueError:
+                return False
+
+        def _normalize_args(arg_list: Sequence[str]) -> list[str]:
+            normalized: list[str] = []
+            for token in arg_list:
+                if normalized:
+                    prev = normalized[-1]
+                    if (
+                        _is_negative_number(token)
+                        and isinstance(prev, str)
+                        and prev.startswith("-")
+                        and not _is_negative_number(prev)
+                        and "=" not in prev
+                    ):
+                        normalized[-1] = f"{prev}={token}"
+                        continue
+                normalized.append(token)
+            return normalized
+
+        if args is not None:
+            args = list(args)
+        args = _normalize_args(args or [])
+
         # add the command-line arguments
-        key_value_args = []
+        key_value_args: list[list[str]] = []
         for arg in args:
             if arg == "--":
                 break
             if arg.startswith("-"):
+                if _is_negative_number(arg):
+                    if key_value_args:
+                        key_value_args[-1].append(arg)
+                    continue
                 key_value_args.append(arg.split("=", maxsplit=1))
             else:
                 if not key_value_args:
