@@ -481,8 +481,18 @@ class Config(NestedDict):
 
         if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
             self.setattr("default_factory", Config)
-        if name in self or not self.getattr("frozen", False):
+        frozen = self.getattr("frozen", False)
+        if name in self:
             return super().get(name, default, fallback)
+        if not frozen:
+            return super().get(name, default, fallback)
+        if fallback:
+            separator = self.getattr("separator", ".")
+            fallback_name = name.split(separator)[-1] if isinstance(name, str) else name
+            if fallback_name in self:
+                return super().get(fallback_name, default, False)
+        if default is not Null:
+            return default
         raise KeyError(name)
 
     @frozen_check
