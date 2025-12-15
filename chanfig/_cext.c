@@ -52,16 +52,18 @@ find_placeholders_impl(PyObject *text, PyObject *result)
                 PyMem_Free(stack);
                 return -1;
             }
-            if (PyList_Append(result, placeholder) == -1) {
-                Py_DECREF(placeholder);
-                PyMem_Free(stack);
-                return -1;
-            }
-            /* recursively find nested placeholders */
-            if (find_placeholders_impl(placeholder, result) == -1) {
-                Py_DECREF(placeholder);
-                PyMem_Free(stack);
-                return -1;
+            if (top == 0) {
+                if (PyList_Append(result, placeholder) == -1) {
+                    Py_DECREF(placeholder);
+                    PyMem_Free(stack);
+                    return -1;
+                }
+                /* recursively find nested placeholders */
+                if (find_placeholders_impl(placeholder, result) == -1) {
+                    Py_DECREF(placeholder);
+                    PyMem_Free(stack);
+                    return -1;
+                }
             }
             Py_DECREF(placeholder);
         }
@@ -107,6 +109,7 @@ static PyObject *VariableType = NULL;
 static PyObject *VariableClass = NULL;
 static PyObject *get_cached_annotations_fn = NULL;
 static PyObject *honor_annotation_fn = NULL;
+static PyObject *find_circular_reference_fn = NULL;
 
 static int
 ensure_helpers(void)
@@ -128,6 +131,20 @@ ensure_helpers(void)
     Py_DECREF(var_mod);
     if (!VariableType) return -1;
 
+    return 0;
+}
+
+static int
+ensure_placeholder_helpers(void)
+{
+    if (find_circular_reference_fn) {
+        return 0;
+    }
+    PyObject *mod = PyImport_ImportModule("chanfig.utils.placeholder");
+    if (!mod) return -1;
+    find_circular_reference_fn = PyObject_GetAttrString(mod, "find_circular_reference");
+    Py_DECREF(mod);
+    if (!find_circular_reference_fn) return -1;
     return 0;
 }
 
@@ -238,7 +255,8 @@ is_reserved_attr(PyObject *name_obj)
     if (len >= 4 && name[0] == '_' && name[1] == '_' && name[len - 2] == '_' && name[len - 1] == '_') {
         return 1;
     }
-    if (strcmp(name, "getattr") == 0 || strcmp(name, "setattr") == 0 || strcmp(name, "delattr") == 0 ||
+    if (strcmp(name, "keys") == 0 || strcmp(name, "values") == 0 || strcmp(name, "items") == 0 ||
+        strcmp(name, "getattr") == 0 || strcmp(name, "setattr") == 0 || strcmp(name, "delattr") == 0 ||
         strcmp(name, "hasattr") == 0 || strcmp(name, "repr") == 0 || strcmp(name, "extra_repr") == 0) {
         return 1;
     }
@@ -270,14 +288,413 @@ FlatDictCore_setattro(PyObject *self, PyObject *name, PyObject *value)
     return PyObject_GenericSetAttr(self, name, value);
 }
 
+static int
+has_dollar(PyObject *text)
+{
+    if (!PyUnicode_Check(text)) {
+        return 0;
+    }
+    if (PyUnicode_READY(text) == -1) {
+        return 0;
+    }
+    Py_ssize_t pos = PyUnicode_FindChar(text, '$', 0, PyUnicode_GET_LENGTH(text), 1);
+    return pos != -1;
+}
+
+static int
+adjust_placeholders(PyObject *key, PyObject *placeholders)
+{
+    /* adjust relative placeholders and self-references */
+    if (!PyUnicode_Check(key)) {
+        return 0;
+    }
+    Py_ssize_t plen = PyList_GET_SIZE(placeholders);
+    for (Py_ssize_t i = 0; i < plen; ++i) {
+        PyObject *name = PyList_GET_ITEM(placeholders, i);
+        if (!PyUnicode_Check(name)) {
+            return 0;
+        }
+        Py_INCREF(name);
+        int updated = 0;
+        if (PyUnicode_READY(name) == -1 || PyUnicode_READY(key) == -1) {
+            Py_DECREF(name);
+            return -1;
+        }
+        void *data = PyUnicode_DATA(name);
+        int kind = PyUnicode_KIND(name);
+        if (PyUnicode_GET_LENGTH(name) > 0 && PyUnicode_READ(kind, data, 0) == '.') {
+            Py_ssize_t dot_pos = PyUnicode_FindChar(key, '.', 0, PyUnicode_GET_LENGTH(key), -1);
+            PyObject *prefix = NULL;
+            if (dot_pos == -1) {
+                prefix = Py_NewRef(key);
+            } else {
+                prefix = PyUnicode_Substring(key, 0, dot_pos);
+            }
+            if (!prefix) {
+                Py_DECREF(name);
+                return -1;
+            }
+            PyObject *combined = PyUnicode_Concat(prefix, name);
+            Py_DECREF(prefix);
+            Py_DECREF(name);
+            if (!combined) {
+                return -1;
+            }
+            name = combined;
+            updated = 1;
+        }
+        int eq = PyObject_RichCompareBool(name, key, Py_EQ);
+        if (eq == -1) {
+            Py_DECREF(name);
+            return -1;
+        }
+        if (eq == 1) {
+            PyErr_Format(PyExc_ValueError, "Cannot interpolate %U to itself.", key);
+            Py_DECREF(name);
+            return -1;
+        }
+        if (updated) {
+            Py_DECREF(PyList_GET_ITEM(placeholders, i));
+            PyList_SET_ITEM(placeholders, i, name); /* steals ref */
+        } else {
+            Py_DECREF(name);
+        }
+    }
+    return 0;
+}
+
+static int
+collect_placeholders(PyObject *mapping, PyObject **out_placeholders)
+{
+    PyObject *result = PyDict_New();
+    if (!result) return -1;
+
+    PyObject *items = PyMapping_Items(mapping);
+    if (!items) {
+        Py_DECREF(result);
+        return -1;
+    }
+
+    Py_ssize_t len = PyList_GET_SIZE(items);
+    for (Py_ssize_t i = 0; i < len; ++i) {
+        PyObject *item = PyList_GET_ITEM(items, i); /* borrowed */
+        PyObject *key = PyTuple_GET_ITEM(item, 0);
+        PyObject *value = PyTuple_GET_ITEM(item, 1);
+
+        if (!PyUnicode_Check(key)) {
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return 0; /* fallback to Python for non-string keys */
+        }
+        if (PyList_Check(value) || PyTuple_Check(value)) {
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return 0; /* fallback for list/tuple values */
+        }
+        if (PyMapping_Check(value) && !PyUnicode_Check(value)) {
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return 0; /* fallback for nested mappings */
+        }
+        if (!PyUnicode_Check(value) || !has_dollar(value)) {
+            continue;
+        }
+        PyObject *placeholder_list = PyList_New(0);
+        if (!placeholder_list) {
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return -1;
+        }
+        if (find_placeholders_impl(value, placeholder_list) == -1) {
+            Py_DECREF(placeholder_list);
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return -1;
+        }
+        if (PyList_GET_SIZE(placeholder_list) == 0) {
+            Py_DECREF(placeholder_list);
+            continue;
+        }
+        if (adjust_placeholders(key, placeholder_list) == -1) {
+            Py_DECREF(placeholder_list);
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return -1;
+        }
+        if (PyDict_SetItem(result, key, placeholder_list) == -1) {
+            Py_DECREF(placeholder_list);
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return -1;
+        }
+        Py_DECREF(placeholder_list);
+    }
+
+    Py_DECREF(items);
+    *out_placeholders = result;
+    return 1;
+}
+
+static PyObject *
+substitute_value(PyObject *template, PyObject *mapping, PyObject *names)
+{
+    if (!PyUnicode_Check(template)) {
+        PyErr_SetString(PyExc_TypeError, "template must be str");
+        return NULL;
+    }
+
+    Py_ssize_t nlen = PyList_Check(names) ? PyList_GET_SIZE(names) : 0;
+    if (nlen == 1) {
+        PyObject *name = PyList_GET_ITEM(names, 0);
+        if (PyUnicode_Check(name)) {
+            if (PyUnicode_READY(template) == -1) {
+                return NULL;
+            }
+            Py_ssize_t tlen = PyUnicode_GET_LENGTH(template);
+            if (tlen >= 3) {
+                int kind = PyUnicode_KIND(template);
+                void *data = PyUnicode_DATA(template);
+                Py_UCS4 first = PyUnicode_READ(kind, data, 0);
+                Py_UCS4 second = PyUnicode_READ(kind, data, 1);
+                Py_UCS4 last = PyUnicode_READ(kind, data, tlen - 1);
+                if (first == '$' && second == '{' && last == '}') {
+                    PyObject *value = PyObject_GetItem(mapping, name);
+                    return value;
+                }
+            }
+        }
+    }
+
+    PyObject *dollar = PyUnicode_FromString("$");
+    PyObject *empty = PyUnicode_New(0, 0);
+    if (!dollar || !empty) {
+        Py_XDECREF(dollar);
+        Py_XDECREF(empty);
+        return NULL;
+    }
+
+    PyObject *format_str = PyUnicode_Replace(template, dollar, empty, -1);
+    Py_DECREF(dollar);
+    Py_DECREF(empty);
+    if (!format_str) {
+        return NULL;
+    }
+
+    PyObject *result = PyObject_CallMethod(format_str, "format_map", "O", mapping);
+    Py_DECREF(format_str);
+    return result;
+}
+
 /* fallback interpolate: return 0 to signal Python path */
 static int
 FlatDictCore_interpolate(PyObject *self, int use_variable, int unsafe_eval)
 {
-    (void)self;
-    (void)use_variable;
-    (void)unsafe_eval;
-    return 0;
+    if (!PyMapping_Check(self)) {
+        return 0;
+    }
+
+    PyObject *placeholders = NULL;
+    int collected = collect_placeholders(self, &placeholders);
+    if (collected <= 0) {
+        return collected;
+    }
+
+    if (PyDict_Size(placeholders) == 0) {
+        Py_DECREF(placeholders);
+        return 1;
+    }
+
+    if (ensure_placeholder_helpers() == -1) {
+        Py_DECREF(placeholders);
+        return -1;
+    }
+
+    PyObject *cycle = PyObject_CallFunctionObjArgs(find_circular_reference_fn, placeholders, NULL);
+    if (!cycle) {
+        Py_DECREF(placeholders);
+        return -1;
+    }
+    if (cycle != Py_None) {
+        PyObject *arrow = PyUnicode_FromString("->");
+        PyObject *joined = arrow ? PyUnicode_Join(arrow, cycle) : NULL;
+        Py_XDECREF(arrow);
+        Py_DECREF(cycle);
+        Py_DECREF(placeholders);
+        if (!joined) {
+            return -1;
+        }
+        PyErr_Format(PyExc_ValueError, "Circular reference found: %U.", joined);
+        Py_DECREF(joined);
+        return -1;
+    }
+    Py_DECREF(cycle);
+
+    PyObject *placeholder_names = PySet_New(NULL);
+    if (!placeholder_names) {
+        Py_DECREF(placeholders);
+        return -1;
+    }
+
+    Py_ssize_t pos = 0;
+    PyObject *k = NULL;
+    PyObject *v = NULL;
+    while (PyDict_Next(placeholders, &pos, &k, &v)) {
+        Py_ssize_t list_len = PyList_GET_SIZE(v);
+        for (Py_ssize_t i = 0; i < list_len; ++i) {
+            PyObject *name = PyList_GET_ITEM(v, i);
+            if (PySet_Add(placeholder_names, name) == -1) {
+                Py_DECREF(placeholder_names);
+                Py_DECREF(placeholders);
+                return -1;
+            }
+        }
+    }
+
+    PyObject *keys = PyDict_Keys(placeholders);
+    if (!keys) {
+        Py_DECREF(placeholder_names);
+        Py_DECREF(placeholders);
+        return -1;
+    }
+    PyObject *keys_set = PySet_New(keys);
+    Py_DECREF(keys);
+    if (!keys_set) {
+        Py_DECREF(placeholder_names);
+        Py_DECREF(placeholders);
+        return -1;
+    }
+
+    PyObject *iter = PyObject_GetIter(placeholder_names);
+    if (!iter) {
+        Py_DECREF(keys_set);
+        Py_DECREF(placeholder_names);
+        Py_DECREF(placeholders);
+        return -1;
+    }
+
+    PyObject *name_obj;
+    while ((name_obj = PyIter_Next(iter)) != NULL) {
+        int in_keys = PySet_Contains(keys_set, name_obj);
+        if (in_keys == -1) {
+            Py_DECREF(name_obj);
+            Py_DECREF(iter);
+            Py_DECREF(keys_set);
+            Py_DECREF(placeholder_names);
+            Py_DECREF(placeholders);
+            return -1;
+        }
+        if (in_keys == 1) {
+            Py_DECREF(name_obj);
+            continue;
+        }
+        PyObject *value = PyObject_GetItem(self, name_obj);
+        if (!value) {
+            Py_DECREF(name_obj);
+            Py_DECREF(iter);
+            Py_DECREF(keys_set);
+            Py_DECREF(placeholder_names);
+            Py_DECREF(placeholders);
+            PyObject *repr = PyObject_Repr(self);
+            if (!repr) {
+                return -1;
+            }
+            PyErr_Format(PyExc_ValueError, "%U is not found in %U.", name_obj, repr);
+            Py_DECREF(repr);
+            return -1;
+        }
+        if (use_variable && ensure_helpers() == 0) {
+            int is_var = PyObject_IsInstance(value, VariableType);
+            if (is_var == 0) {
+                PyObject *wrapped = PyObject_CallFunctionObjArgs(VariableClass, value, NULL);
+                if (!wrapped) {
+                    Py_DECREF(value);
+                    Py_DECREF(name_obj);
+                    Py_DECREF(iter);
+                    Py_DECREF(keys_set);
+                    Py_DECREF(placeholder_names);
+                    Py_DECREF(placeholders);
+                    return -1;
+                }
+                if (PyObject_SetItem(self, name_obj, wrapped) == -1) {
+                    Py_DECREF(wrapped);
+                    Py_DECREF(value);
+                    Py_DECREF(name_obj);
+                    Py_DECREF(iter);
+                    Py_DECREF(keys_set);
+                    Py_DECREF(placeholder_names);
+                    Py_DECREF(placeholders);
+                    return -1;
+                }
+                Py_DECREF(wrapped);
+            } else if (is_var == -1) {
+                Py_DECREF(value);
+                Py_DECREF(name_obj);
+                Py_DECREF(iter);
+                Py_DECREF(keys_set);
+                Py_DECREF(placeholder_names);
+                Py_DECREF(placeholders);
+                return -1;
+            }
+        }
+        Py_DECREF(value);
+        Py_DECREF(name_obj);
+    }
+    Py_DECREF(iter);
+    Py_DECREF(keys_set);
+    Py_DECREF(placeholder_names);
+
+    pos = 0;
+    while (PyDict_Next(placeholders, &pos, &k, &v)) {
+        PyObject *current = PyObject_GetItem(self, k);
+        if (!current) {
+            Py_DECREF(placeholders);
+            return -1;
+        }
+        if (!PyUnicode_Check(current)) {
+            Py_DECREF(current);
+            Py_DECREF(placeholders);
+            return 0; /* fallback for unexpected type */
+        }
+        PyObject *replacement = substitute_value(current, self, v);
+        Py_DECREF(current);
+        if (!replacement) {
+            Py_DECREF(placeholders);
+            return -1;
+        }
+        if (PyObject_SetItem(self, k, replacement) == -1) {
+            Py_DECREF(replacement);
+            Py_DECREF(placeholders);
+            return -1;
+        }
+        if (unsafe_eval && PyUnicode_Check(replacement)) {
+            PyObject *builtins = PyEval_GetBuiltins();
+            PyObject *eval_fn = builtins ? PyDict_GetItemString(builtins, "eval") : NULL;
+            if (eval_fn) {
+                Py_INCREF(eval_fn);
+                PyObject *evaluated = PyObject_CallFunctionObjArgs(eval_fn, replacement, NULL);
+                Py_DECREF(eval_fn);
+                if (evaluated) {
+                    if (PyObject_SetItem(self, k, evaluated) == -1) {
+                        Py_DECREF(evaluated);
+                        Py_DECREF(replacement);
+                        Py_DECREF(placeholders);
+                        return -1;
+                    }
+                    Py_DECREF(evaluated);
+                } else if (PyErr_ExceptionMatches(PyExc_SyntaxError)) {
+                    PyErr_Clear();
+                } else {
+                    Py_DECREF(replacement);
+                    Py_DECREF(placeholders);
+                    return -1;
+                }
+            }
+        }
+        Py_DECREF(replacement);
+    }
+
+    Py_DECREF(placeholders);
+    return 1;
 }
 
 static int
@@ -361,37 +778,18 @@ FlatDictCore_intersect(PyObject *self, PyObject *other)
             }
             continue;
         }
-        int both_mapping = PyMapping_Check(existing) && PyMapping_Check(value);
-        if (both_mapping) {
-            PyObject *child = FlatDictCore_intersect(existing, value);
-            Py_DECREF(existing);
-            if (child == Py_None) {
-                Py_DECREF(child);
-                continue;
-            }
-            if (child && PyDict_Check(child) && PyDict_Size(child) > 0) {
-                if (PyDict_SetItem(result, key, child) == -1) {
-                    Py_DECREF(child);
-                    Py_DECREF(items);
-                    Py_DECREF(result);
-                    return NULL;
-                }
-            }
-            Py_XDECREF(child);
-        } else {
-            int eq = PyObject_RichCompareBool(existing, value, Py_EQ);
-            Py_DECREF(existing);
-            if (eq == 1) {
-                if (PyDict_SetItem(result, key, value) == -1) {
-                    Py_DECREF(items);
-                    Py_DECREF(result);
-                    return NULL;
-                }
-            } else if (eq == -1) {
+        int eq = PyObject_RichCompareBool(existing, value, Py_EQ);
+        Py_DECREF(existing);
+        if (eq == 1) {
+            if (PyDict_SetItem(result, key, value) == -1) {
                 Py_DECREF(items);
                 Py_DECREF(result);
                 return NULL;
             }
+        } else if (eq == -1) {
+            Py_DECREF(items);
+            Py_DECREF(result);
+            return NULL;
         }
     }
     Py_DECREF(items);
@@ -419,25 +817,6 @@ FlatDictCore_difference(PyObject *self, PyObject *other)
         PyObject *value = PyTuple_GET_ITEM(item, 1);
         PyObject *existing = PyObject_GetItem(self, key);
         if (existing) {
-            int both_mapping = PyMapping_Check(existing) && PyMapping_Check(value);
-            if (both_mapping) {
-                PyObject *child = FlatDictCore_difference(existing, value);
-                Py_DECREF(existing);
-                if (child == Py_None) {
-                    Py_DECREF(child);
-                    continue;
-                }
-                if (child && PyDict_Check(child) && PyDict_Size(child) > 0) {
-                    if (PyDict_SetItem(result, key, child) == -1) {
-                        Py_DECREF(child);
-                        Py_DECREF(items);
-                        Py_DECREF(result);
-                        return NULL;
-                    }
-                }
-                Py_XDECREF(child);
-                continue;
-            }
             int eq = PyObject_RichCompareBool(existing, value, Py_EQ);
             Py_DECREF(existing);
             if (eq == -1) {
@@ -462,6 +841,42 @@ FlatDictCore_difference(PyObject *self, PyObject *other)
     Py_DECREF(items);
     return result;
 }
+
+static PyObject *
+FlatDictCore_reduce(PyObject *self, PyObject *Py_UNUSED(ignored))
+{
+    PyObject *cls = PyObject_GetAttrString(self, "__class__");
+    if (!cls) {
+        return NULL;
+    }
+    PyObject *data = PyDict_Copy(self);
+    if (!data) {
+        Py_DECREF(cls);
+        return NULL;
+    }
+    PyObject *args = PyTuple_Pack(1, data);
+    if (!args) {
+        Py_DECREF(cls);
+        Py_DECREF(data);
+        return NULL;
+    }
+    PyObject *attrs = PyObject_GetAttrString(self, "__dict__");
+    if (!attrs) {
+        PyErr_Clear();
+        attrs = Py_None;
+        Py_INCREF(Py_None);
+    }
+    PyObject *result = PyTuple_Pack(3, cls, args, attrs);
+    Py_DECREF(attrs);
+    Py_DECREF(cls);
+    Py_DECREF(data);
+    Py_DECREF(args);
+    return result;
+}
+
+static PyMethodDef FlatDictCore_methods[] = {
+    {"__reduce__", (PyCFunction)FlatDictCore_reduce, METH_NOARGS, "Pickle support."},
+    {NULL, NULL, 0, NULL}};
 
 static PyObject *
 py_flatdict_interpolate(PyObject *self, PyObject *args, PyObject *kwargs)
@@ -527,6 +942,7 @@ static PyTypeObject FlatDictCoreType = {
         .mp_subscript = FlatDictCore_subscript,
         .mp_ass_subscript = FlatDictCore_ass_subscript,
     },
+    .tp_methods = FlatDictCore_methods,
 };
 
 static struct PyModuleDef chanfigmodule = {
