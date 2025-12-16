@@ -38,6 +38,13 @@ from typing_extensions import Self
 from yaml import dump as yaml_dump
 from yaml import load as yaml_load
 
+try:
+    from tomllib import load as toml_load
+    from tomllib import loads as toml_loads
+except ImportError:
+    from tomli import load as toml_load  # type: ignore[no-redef]
+    from tomli import loads as toml_loads  # type: ignore[no-redef]
+
 from .base import Dict
 from .utils import (
     JSON_EXTENSIONS,
@@ -1218,19 +1225,6 @@ class FlatDict(dict, metaclass=Dict):
             content = yaml_load(fp, *args, **kwargs)
             return cls.from_dict(content)
 
-    def yamls(self, *args: Any, **kwargs: Any) -> str:
-        r"""
-        Dump `FlatDict` to yaml string.
-
-        Examples:
-            >>> FlatDict(a=1, b=2, c=3).yamls()
-            'a: 1\nb: 2\nc: 3\n'
-        """
-
-        kwargs.setdefault("Dumper", YamlDumper)
-        kwargs.setdefault("indent", self.getattr("indent", 2))
-        return yaml_dump(self.dict(), *args, **kwargs)
-
     @classmethod
     def from_yamls(cls, string: str, *args: Any, **kwargs: Any) -> Self:
         r"""
@@ -1248,9 +1242,55 @@ class FlatDict(dict, metaclass=Dict):
         kwargs.setdefault("Loader", YamlLoader)
         return cls.from_dict(yaml_load(string, *args, **kwargs))
 
+    def yamls(self, *args: Any, **kwargs: Any) -> str:
+        r"""
+        Dump `FlatDict` to yaml string.
+
+        Examples:
+            >>> FlatDict(a=1, b=2, c=3).yamls()
+            'a: 1\nb: 2\nc: 3\n'
+        """
+
+        kwargs.setdefault("Dumper", YamlDumper)
+        kwargs.setdefault("indent", self.getattr("indent", 2))
+        return yaml_dump(self.dict(), *args, **kwargs)
+
+    @classmethod
+    def from_toml(cls, file: File, *args: Any, **kwargs: Any) -> Self:
+        r"""
+        Construct `FlatDict` from toml file.
+
+        This method internally calls `self.from_tomls()` to construct object from toml string.
+        You may overwrite `from_tomls` in case something is not toml serializable.
+
+        Examples:
+            >>> FlatDict.from_toml('tests/test.toml').dict()
+            {'a': 1, 'b': 2, 'c': 3}
+        """
+
+        with cls.open(file, mode="rb") as fp:  # pylint: disable=C0103
+            if isinstance(file, (IOBase, IO)):
+                return cls.from_tomls(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
+            content = toml_load(fp, *args, **kwargs)
+            return cls.from_dict(content)
+
+    @classmethod
+    def from_tomls(cls, string: str, *args: Any, **kwargs: Any) -> Self:
+        r"""
+        Construct `FlatDict` from toml string.
+
+        Examples:
+            >>> FlatDict.from_tomls('a = 1\nb = 2\nc = 3\n').dict()
+            {'a': 1, 'b': 2, 'c': 3}
+        """
+
+        return cls.from_dict(toml_loads(string, *args, **kwargs))
+
     @staticmethod
     @contextmanager
-    def open(file: File, *args: Any, encoding: str = "utf-8", **kwargs: Any) -> Generator[IOBase | IO, Any, Any]:
+    def open(
+        file: File, mode: str = "r", encoding: str | None = None, **kwargs: Any
+    ) -> Generator[IOBase | IO, Any, Any]:
         r"""
         Open file IO from file path or IO.
 
@@ -1258,8 +1298,10 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             file: File path or IO.
-            *args: Additional arguments passed to `open`.
-                Defaults to ().
+            mode: File mode.
+                Defaults to "r".
+            encoding: File encoding.
+                Defaults to None.
             **kwargs: Any
                 Additional keyword arguments passed to `open`.
                 Defaults to {}.
@@ -1291,7 +1333,7 @@ class FlatDict(dict, metaclass=Dict):
             yield file
         elif isinstance(file, (PathLike, str, bytes)):
             try:
-                file = open(file, *args, encoding=encoding, **kwargs)  # type: ignore[call-overload] # noqa: SIM115
+                file = open(file, mode=mode, encoding=encoding, **kwargs)  # type: ignore[call-overload] # noqa: SIM115
                 yield file  # type: ignore[misc]
             finally:
                 with suppress(Exception):

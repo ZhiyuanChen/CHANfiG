@@ -46,6 +46,7 @@ dynamic = [
 dependencies = [
   "lazy-imports",
   "pyyaml",
+  "tomli; python_version<'3.11'",
   "typing-extensions",
 ]
 urls.documentation = "https://chanfig.danling.org"
