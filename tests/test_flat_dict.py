@@ -149,6 +149,18 @@ def test_merge_plain_mapping_respects_overwrite():
     assert d.a == {"b": 2, "c": 3}
 
 
+def test_merge_flatdict_child_respects_overwrite():
+    child = FlatDict({"b": 1})
+    d = FlatDict({"a": child})
+    d.merge({"a": {"b": 2, "c": 3}}, overwrite=False)
+    assert d.a.b == 1
+    assert d.a.c == 3
+
+    d = FlatDict({"a": FlatDict({"b": 1})})
+    d.merge({"a": {"b": 2}}, overwrite=True)
+    assert d.a.b == 2
+
+
 class AnnoDict(FlatDict):
     int_value: int
     str_value: str
