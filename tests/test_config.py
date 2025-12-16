@@ -142,6 +142,43 @@ def test_convert_mapping_sequences():
     assert config.tuple_seq[0].a == 3 and config.tuple_seq[1].b == 4
 
 
+def test_parse_boot_flag():
+    class BootConfig(Config):
+        def __init__(self):
+            super().__init__()
+            self.boot_called = 0
+
+        def boot(self):
+            self.boot_called += 1
+            return super().boot()
+
+    cfg = BootConfig()
+    cfg.parse(["--a", "1"], boot=False)
+    assert cfg.boot_called == 0
+    cfg.parse(["--a", "2"])
+    assert cfg.boot_called == 1
+
+
+def test_locked_unlocked_restore_state():
+    cfg = Config()
+    with cfg.locked(), raises(ValueError):
+        cfg["x"] = 1
+    assert cfg.getattr("frozen") is False
+
+    cfg.freeze()
+    with cfg.unlocked():
+        cfg["x"] = 1
+        assert cfg.x == 1
+    assert cfg.getattr("frozen") is True
+
+
+def test_get_fallback_and_default_on_frozen():
+    cfg = Config({"b": 0.5})
+    cfg.freeze()
+    assert cfg.get("missing.b", fallback=True) == 0.5
+    assert cfg.get("missing", default=42) == 42
+
+
 def test_contains():
     config = TestConfig()
     assert "name" in config

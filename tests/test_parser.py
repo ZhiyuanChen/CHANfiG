@@ -20,11 +20,12 @@
 from __future__ import annotations
 
 import sys
-from typing import List, Optional
+from argparse import ArgumentTypeError
+from typing import Dict, List, Optional, Set, Tuple
 
 import pytest
 
-from chanfig import Config
+from chanfig import Config, ConfigParser
 
 
 class TestConfig(Config):
@@ -133,11 +134,116 @@ def test_parse_pep604():
     assert config.true and not config.false
 
 
+def test_parse_config_requires_config():
+    parser = ConfigParser()
+    with pytest.raises(ValueError):
+        parser.parse_config(["--a", "1"], config=None)
+
+
+def test_parse_invalid_default_config_action():
+    parser = ConfigParser()
+    with pytest.raises(ValueError):
+        parser.parse(["--a", "1"], default_config="config", no_default_config_action="invalid")
+
+
+def test_parse_default_config_warn_and_ignore():
+    parser = ConfigParser()
+    with pytest.warns(RuntimeWarning):
+        parser.merge_default_config(Config(), "config", no_default_config_action="warn")
+    result = parser.merge_default_config(Config(), "config", no_default_config_action="ignore")
+    assert isinstance(result, Config)
+
+
+def test_parser_contains_and_negative_normalize():
+    parser = ConfigParser()
+    parser.add_argument("--lr")
+    args = parser.parse(["--lr", "-0.1"])
+    assert parser.__contains__("--lr")
+    assert args.lr == -0.1
+    parser.add_argument("--val")
+    args = parser.parse(["--val=-2"])
+    assert args.val == -2
+
+
+class ContainerConfig(Config):
+    __test__ = False
+    list_field: List[int]
+    tuple_field: Tuple[int]
+    set_field: Set[int]
+    dict_field: Dict[str, int]
+
+
+def test_container_arguments_and_conversion():
+    parser = ConfigParser()
+    cfg = ContainerConfig()
+    parser.parse_config(
+        [
+            "--list_field",
+            "1",
+            "2",
+            "--tuple_field",
+            "3",
+            "4",
+            "--set_field",
+            "5",
+            "6",
+            "--dict_field",
+            "a=1",
+            "b=2",
+        ],
+        config=cfg,
+    )
+    assert cfg.list_field == [1, 2]
+    assert cfg.tuple_field == (3, 4)
+    assert cfg.set_field == {5, 6}
+    assert cfg.dict_field == {"a": 1, "b": 2}
+
+
+def test_convert_container_value_errors():
+    parser = ConfigParser()
+    meta = {"container_type": dict, "item_parser": parser.identity, "item_type": None}
+    with pytest.raises(ArgumentTypeError):
+        parser._convert_container_value("not-a-kv", meta)  # pylint: disable=protected-access
+
+
+def test_parse_creates_default_config_when_none_provided():
+    parser = ConfigParser()
+    cfg = parser.parse(["--a", "1"])
+    assert isinstance(cfg, Config)
+    assert cfg.a == 1
+
+
+def test_parse_args_no_eval_str():
+    parser = ConfigParser()
+    parser.add_argument("--val")
+    parsed = parser.parse_args(["--val", "1"], eval_str=False)
+    assert parsed.val == "1"
+
+
+def test_infer_container_argument_none_for_scalar():
+    parser = ConfigParser()
+    assert parser._infer_container_argument(int) is None  # pylint: disable=protected-access
+
+
+def test_merge_default_config_raise():
+    parser = ConfigParser()
+    with pytest.raises(RuntimeError):
+        parser.merge_default_config(Config(), "config", no_default_config_action="raise")
+
+
+def test_convert_container_value_non_iterable_tuple_set_paths():
+    parser = ConfigParser()
+    meta_tuple = {"container_type": tuple}
+    meta_set = {"container_type": set}
+    assert parser._convert_container_value(1, meta_tuple) == (1,)
+    assert parser._convert_container_value(1, meta_set) == {1}
+
+
 def test_parse_list_annotation_values():
     class ListConfig(Config):
         __test__ = False
 
-        numbers: list[int]
+        numbers: List[int]
 
     config = ListConfig()
     config.parse_config(["--numbers", "1", "2"])
@@ -157,7 +263,7 @@ def test_parse_dict_with_annotation():
     class DictConfig(Config):
         __test__ = False
 
-        mapping: dict[str, int]
+        mapping: Dict[str, int]
 
     config = DictConfig()
     config.parse_config(["--mapping", "a=1", "b=2"])

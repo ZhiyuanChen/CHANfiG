@@ -194,6 +194,7 @@ def test_copy_preserves_metadata():
     assert v_copy.choices == [1, 2] and v_deep.choices == [1, 2]
     assert v_copy.choices is not v.choices and v_deep.choices is not v.choices
     assert v_copy.validator is v.validator and v_deep.validator is v.validator
+    assert v_copy.storage is v_copy._storage
 
 
 def test_deepcopy_nested_value_isolated():
@@ -245,3 +246,34 @@ def test_wrapping():
 
     v.wrap()
     assert isinstance(v, int)
+
+
+def test_validate_too_many_args_and_get_set():
+    v = Variable(1)
+    with raises(ValueError):
+        v.validate(1, 2)
+    holder_value = Variable(0)
+
+    class Holder:
+        val = holder_value
+
+    h = Holder()
+    h.val = 5
+    assert isinstance(h.val, int)
+    assert holder_value.value == 5
+
+
+def test_unary_and_membership_and_next():
+    v = Variable(3)
+    assert ~v == ~3
+    assert abs(v) == 3
+    iterable = Variable(iter([1, 2]))
+    assert next(iterable) == 1
+    assert 2 in Variable([1, 2, 3])
+
+
+def test_json_and_hash_and_repr():
+    v = Variable("data")
+    assert v.__json__() == "data"
+    assert hash(v) == hash("data")
+    assert repr(v) == "'data'"
