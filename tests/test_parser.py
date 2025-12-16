@@ -154,6 +154,23 @@ def test_parse_default_config_warn_and_ignore():
     assert isinstance(result, Config)
 
 
+def test_parse_unknown_argument_suggests(capsys):
+    parser = ConfigParser()
+    parser.add_argument("--learning-rate")
+    with pytest.raises(SystemExit):
+        parser.parse_args(["--learnig-rate", "0.1"])
+    stderr = capsys.readouterr().err
+    assert "Did you mean" in stderr
+    assert "--learning-rate" in stderr
+
+
+def test_parse_warns_for_typos():
+    cfg = Config({"lr": 0.1})
+    parser = ConfigParser()
+    with pytest.warns(RuntimeWarning):
+        parser.parse(["--lrr", "0.2"], config=cfg)
+
+
 def test_parser_contains_and_negative_normalize():
     parser = ConfigParser()
     parser.add_argument("--lr")

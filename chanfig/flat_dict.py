@@ -60,6 +60,7 @@ from .utils import (
     find_placeholders,
     get_cached_annotations,
     honor_annotation,
+    suggest_key,
     to_chanfig,
     to_dict,
 )
@@ -232,8 +233,8 @@ class FlatDict(dict, metaclass=Dict):
     def __getattr__(self, name: Any) -> Any:
         try:
             return self.get(name, default=Null)
-        except KeyError:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+        except KeyError as exc:
+            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute {exc}") from None
 
     def set(self, name: Any, value: Any) -> None:
         r"""
@@ -315,7 +316,12 @@ class FlatDict(dict, metaclass=Dict):
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
     def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
-        raise KeyError(name)
+        suggestion = self._suggest_key(name)
+        message = f"{name!r}. Did you mean '{suggestion}'?" if suggestion else name
+        raise KeyError(message)
+
+    def _suggest_key(self, name: Any, cutoff: float = 0.75) -> str | None:
+        return suggest_key(name, self.keys(), cutoff=cutoff)
 
     def validate(self) -> None:
         r"""

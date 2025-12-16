@@ -20,7 +20,7 @@
 from __future__ import annotations
 
 from .annotation import conform_annotation, get_annotations, get_cached_annotations, honor_annotation
-from .functional import apply, apply_, parse_bool, to_chanfig, to_dict
+from .functional import apply, apply_, parse_bool, suggest_key, to_chanfig, to_dict
 from .io import (
     JSON_EXTENSIONS,
     YAML_EXTENSIONS,
@@ -56,6 +56,7 @@ __all__ = [
     "File",
     "PathStr",
     "parse_bool",
+    "suggest_key",
     "to_dict",
     "to_chanfig",
     "apply",

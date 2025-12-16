@@ -20,7 +20,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Generator, Iterable, Mapping
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager, nullcontext, suppress
 from functools import wraps
 from os import PathLike
 from typing import Any
@@ -37,7 +37,7 @@ except ImportError:
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, set_item
-from .utils import NULL, Null, PathStr, apply, apply_
+from .utils import NULL, Null, PathStr, apply, apply_, suggest_key
 from .variable import Variable
 
 
@@ -116,6 +116,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             self.setattr("convert_mapping", convert_mapping)
         if fallback is not None:
             self.setattr("fallback", fallback)
+
+    def _suggest_key(self, name: Any, cutoff: float = 0.75) -> str | None:
+        with suppress(Exception):
+            return suggest_key(name, self.all_keys(), cutoff=cutoff)
+        return super()._suggest_key(name, cutoff=cutoff)
 
     def all_keys(self) -> Generator:
         r"""
