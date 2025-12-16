@@ -115,6 +115,13 @@ def test_nested():
     config.network.nested.value = 1
 
 
+def test_convert_mapping_default():
+    config = Config()
+    config["a"] = {"b": 1}
+    assert isinstance(config.a, Config)
+    assert config.a.b == 1
+
+
 def test_contains():
     config = TestConfig()
     assert "name" in config
