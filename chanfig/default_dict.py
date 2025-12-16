@@ -78,7 +78,9 @@ class DefaultDict(FlatDict):
             if self.getattr("default_factory") is Null or (
                 isinstance(name, str) and name.startswith("__") and name.endswith("__")
             ):
-                raise KeyError(name) from None
+                suggestion = self._suggest_key(name)
+                message = f"{name!r}. Did you mean '{suggestion}'?" if suggestion else name
+                raise KeyError(message) from None
             default = self.getattr("default_factory")()
         if isinstance(default, FlatDict):
             default.__dict__.update(self.__dict__)

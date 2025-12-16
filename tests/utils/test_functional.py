@@ -19,6 +19,7 @@
 
 import pytest
 
+from chanfig import Config, FlatDict
 from chanfig.utils.functional import parse_bool
 from chanfig.utils.io import JsonEncoder
 
@@ -67,3 +68,17 @@ def test_json_encoder():
 
     with pytest.raises(TypeError):
         encoder.encode(complex(1, 2))
+
+
+def test_keyerror_suggests_close_match():
+    config = FlatDict(alpha=1, beta=2)
+    with pytest.raises(KeyError, match="Did you mean 'alpha'"):
+        _ = config["alpa"]
+
+
+def test_attributeerror_suggests_nested_key():
+    config = Config()
+    config.model.hidden = 128
+    config.freeze()
+    with pytest.raises(AttributeError, match="Did you mean 'hidden'"):
+        _ = config.model.hiden

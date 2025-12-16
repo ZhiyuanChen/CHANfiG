@@ -37,7 +37,7 @@ except ImportError:
     NoneType = type(None)  # type: ignore[misc, assignment]
 
 from .nested_dict import NestedDict
-from .utils import Null, get_cached_annotations, parse_bool
+from .utils import Null, get_cached_annotations, parse_bool, suggest_key
 from .variable import Variable
 
 if TYPE_CHECKING:
@@ -132,6 +132,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
             )
 
+        self._warn_argument_typos(args, config)
         # parse the command-line arguments
         parsed = self.parse_args(args)
 
@@ -284,6 +285,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 else:
                     self.add_argument(key_value[0])
 
+        self._warn_argument_typos(args, config)
         # parse the command-line arguments
         parsed = self.parse_args(args)
 
@@ -329,6 +331,64 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 continue
             parsed[dest] = self._convert_container_value(parsed_value, meta)
         return parsed
+
+    def error(self, message: str) -> None:  # type: ignore[override]
+        """
+        Override default error handler to provide typo suggestions for arguments.
+        """
+
+        suggestions = []
+        if "unrecognized arguments:" in message:
+            unknowns = message.split("unrecognized arguments:", 1)[1].strip().split()
+            candidates = self._suggestion_candidates()
+            for unknown in unknowns:
+                token = unknown.split("=", 1)[0]
+                suggestion = suggest_key(token, candidates, cutoff=0.6)
+                if suggestion:
+                    suggestions.append(f"{unknown} -> {suggestion}")
+        if suggestions:
+            message = f"{message}\nDid you mean:\n  " + "\n  ".join(suggestions)
+        super().error(message)
+
+    def _suggestion_candidates(self) -> list[str]:
+        candidates: list[str] = []
+        for action in self._actions:
+            candidates.extend(getattr(action, "option_strings", ()))
+            dest = getattr(action, "dest", None)
+            if dest:
+                candidates.append(f"--{dest}")
+        return candidates
+
+    def _warn_argument_typos(self, args: Sequence[str] | None, config: Config | None) -> None:
+        if config is None:
+            return
+        known_keys = set(config.all_keys())
+        if not known_keys:
+            return
+        if args is None:
+            args = sys.argv[1:]
+        for token in self._extract_option_tokens(args):
+            if token in known_keys:
+                continue
+            suggestion = suggest_key(token, known_keys, cutoff=0.6)
+            if suggestion:
+                warn(
+                    f"Unrecognized argument '--{token}'. Did you mean '--{suggestion}'?",  # noqa: B028
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+
+    @staticmethod
+    def _extract_option_tokens(args: Sequence[str]) -> list[str]:
+        tokens: list[str] = []
+        for arg in args:
+            if not arg.startswith("--"):
+                continue
+            token = arg[2:]
+            if "=" in token:
+                token = token.split("=", 1)[0]
+            tokens.append(token)
+        return tokens
 
     def add_config_arguments(self, config: Config):
         for key, dtype in get_cached_annotations(config).items():

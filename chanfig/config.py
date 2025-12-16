@@ -500,7 +500,9 @@ class Config(NestedDict):
                 return super().get(fallback_name, default, False)
         if default is not Null:
             return default
-        raise KeyError(name)
+        suggestion = self._suggest_key(name)
+        message = f"{name!r}. Did you mean '{suggestion}'?" if suggestion else name
+        raise KeyError(message)
 
     @frozen_check
     def set(

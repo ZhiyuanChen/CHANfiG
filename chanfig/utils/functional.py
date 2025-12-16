@@ -21,8 +21,9 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, is_dataclass
+from difflib import get_close_matches
 from inspect import ismethod
-from typing import Any, Sequence, Set
+from typing import Any, Iterable, Sequence, Set
 
 
 def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
@@ -171,6 +172,28 @@ def parse_bool(value: bool | str | int) -> bool:
         if value.lower() in ("no", "false", "f", "n", "0"):
             return False
     raise ValueError(f"Boolean value is expected, but got {value}.")
+
+
+def suggest_key(name: Any, candidates: Iterable[Any], cutoff: float = 0.75) -> str | None:
+    r"""
+    Suggest the closest key from `candidates` to `name`.
+
+    Args:
+        name: The queried name.
+        candidates: An iterable of candidate names.
+        cutoff: Similarity threshold passed to :func:`difflib.get_close_matches`.
+    """
+
+    try:
+        target = str(name)
+    except Exception:
+        return None
+    try:
+        strings = [str(candidate) for candidate in candidates]
+    except Exception:
+        return None
+    matches = get_close_matches(target, strings, n=1, cutoff=cutoff)
+    return matches[0] if matches else None
 
 
 def apply(obj: Any, func: Callable, *args: Any, **kwargs: Any) -> Any:
