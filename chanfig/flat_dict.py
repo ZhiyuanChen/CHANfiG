@@ -533,6 +533,38 @@ class FlatDict(dict, metaclass=Dict):
 
         return self.dict(flatten)
 
+    def resolved(self, flatten: bool = False) -> Mapping | Sequence | Set:
+        r"""
+        Retrieve values with interpolation applied (placeholders resolved).
+
+        This ignores placeholder restoration and returns the current in-memory values.
+        """
+
+        return self._resolved_export(self, flatten)
+
+    @classmethod
+    def _resolved_export(cls, obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
+        from .variable import Variable  # local import to avoid cycle
+
+        if flatten and isinstance(obj, FlatDict):
+            return {k: cls._resolved_export(v, flatten) for k, v in obj.all_items()}
+        if isinstance(obj, Mapping):
+            return {k: cls._resolved_export(v, flatten) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [cls._resolved_export(v, flatten) for v in obj]
+        if isinstance(obj, tuple):
+            return tuple(cls._resolved_export(v, flatten) for v in obj)
+        if isinstance(obj, set):
+            try:
+                return {cls._resolved_export(v, flatten) for v in obj}
+            except TypeError:
+                return tuple(cls._resolved_export(v, flatten) for v in obj)
+        if isinstance(obj, Variable):
+            return obj.value
+        if hasattr(obj, "to_dict"):
+            return obj.to_dict()
+        return obj
+
     @classmethod
     def from_dict(cls, obj: Mapping | Sequence) -> Any:  # pylint: disable=R0911
         r"""
@@ -583,18 +615,14 @@ class FlatDict(dict, metaclass=Dict):
             self[k] = v
         return self
 
-    def interpolate(  # pylint: disable=R0912
-        self, use_variable: bool = True, interpolators: MutableMapping | None = None, unsafe_eval: bool = False
-    ) -> Self:
+    def interpolate(self, interpolators: MutableMapping | None = None) -> Self:  # pylint: disable=R0912
         r"""
         Perform Variable interpolation.
 
         Variable interpolation allows you to set the value of one key to be the value of another key easily.
 
         Args:
-            use_variable: Whether to convert values to `Variable` objects.
             interpolators: Mapping contains values for interpolation. Defaults to `self`.
-            unsafe_eval: Whether to evaluate interpolated values.
 
         Raises:
             ValueError: If value is not interpolatable.
@@ -608,32 +636,28 @@ class FlatDict(dict, metaclass=Dict):
             >>> d = FlatDict(a=1, b="${a}", c="${a}.${b}")
             >>> d.dict()
             {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
-            >>> d.interpolate(unsafe_eval=True).dict()
-            {'a': 1, 'b': 1, 'c': 1.1}
             >>> d = FlatDict(a=1, b="${a}", c="${a}.${b}")
-            >>> d.dict()
-            {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
             >>> d.interpolate().dict()
-            {'a': 1, 'b': 1, 'c': '1.1'}
+            {'a': 1, 'b': '${a}', 'c': '${a}.${b}'}
+            >>> dict(d.interpolate())
+            {'a': 1, 'b': 1, 'c': 1.1}
             >>> isinstance(d.a, Variable)
             True
             >>> d.a += 1
-            >>> d.dict()
-            {'a': 2, 'b': 2, 'c': '1.1'}
-            >>> d.a is d.b
+            >>> dict(d)
+            {'a': 2, 'b': 2, 'c': 2.2}
+            >>> d.a == d.b
             True
-            >>> d.b is d.c
+            >>> d.b == d.c
             False
             >>> d = FlatDict(a=1, b="${a}", c="${b}")
             >>> d.dict()
             {'a': 1, 'b': '${a}', 'c': '${b}'}
-            >>> d.interpolate(False).dict()
+            >>> dict(d.interpolate())
             {'a': 1, 'b': 1, 'c': 1}
-            >>> isinstance(d.a, Variable)
-            False
             >>> d.a += 1
-            >>> d.dict()
-            {'a': 2, 'b': 1, 'c': 1}
+            >>> dict(d)
+            {'a': 2, 'b': 2, 'c': 2}
             >>> d = FlatDict(a=1, b="${b}", c="${b}")
             >>> d.interpolate().dict()
             Traceback (most recent call last):
@@ -654,6 +678,21 @@ class FlatDict(dict, metaclass=Dict):
         # pylint: disable=C0103
 
         interpolators = interpolators or self
+        flat_lookup = {str(k): v for k, v in self.all_items()}
+
+        def has_lookup(name: str) -> bool:
+            return name in flat_lookup
+
+        def lookup(name: str, unwrap: bool = False):
+            value = flat_lookup[name]
+            if unwrap and isinstance(value, Variable):
+                return value.value
+            return value
+
+        def set_lookup(name: str, value: Any):
+            flat_lookup[name] = value
+            self.set(name, value)
+
         placeholders: dict[str, list[str]] = {}
 
         def collect(k, v):
@@ -672,28 +711,46 @@ class FlatDict(dict, metaclass=Dict):
         circular_references = find_circular_reference(placeholders)
         if circular_references:
             raise ValueError(f"Circular reference found: {'->'.join(circular_references)}.")
-        if use_variable:
-            placeholder_names = {i for j in placeholders.values() for i in j}
-            for name in list(placeholder_names.difference(placeholders.keys())):
-                if name not in interpolators:
-                    raise ValueError(f"{name} is not found in {interpolators}.")
-                if not isinstance(interpolators[name], Variable):
-                    interpolators[name] = Variable(interpolators[name])
+
+        placeholder_names = {i for j in placeholders.values() for i in j}
+        for name in list(placeholder_names.difference(placeholders.keys())):
+            if not has_lookup(name):
+                raise ValueError(f"{name} is not found in {interpolators}.")
+            if not isinstance(lookup(name), Variable):
+                value = lookup(name)
+                set_lookup(name, Variable(value))
+
+        def substitute(placeholder_str, value_names):
+            if len(value_names) == 1 and placeholder_str == f"${{{value_names[0]}}}":
+                replacement = lookup(value_names[0], unwrap=False)
+                if isinstance(replacement, Variable):
+                    return replacement.share(placeholder=placeholder_str)
+                return replacement
+            deps = [lookup(name, unwrap=False) if name in flat_lookup else None for name in value_names]
+
+            def resolver():
+                result = placeholder_str
+                for name, dep in zip(value_names, deps):
+                    token = "${" + name + "}"
+                    if dep is None:
+                        result = result.replace(token, token)
+                        continue
+                    resolved = dep.value if isinstance(dep, Variable) else dep
+                    result = result.replace(token, str(resolved))
+                return result
+
+            return Variable(resolver=resolver, placeholder=placeholder_str)
+
         for key, value in placeholders.items():
             if isinstance(self[key], list):
                 for index, v in enumerate(self[key]):
-                    self[key][index] = self.substitute(v, interpolators, value)
+                    self[key][index] = substitute(v, value)
             elif isinstance(self[key], Mapping):
                 for k, v in self[key].items():
-                    self[key][k] = self.substitute(v, interpolators, value)
+                    self[key][k] = substitute(v, value)
             else:
-                self[key] = self.substitute(self[key], interpolators, value)
-            if unsafe_eval and isinstance(self[key], str):
-                with suppress(SyntaxError):
-                    if isinstance(self[key], Variable):
-                        self[key].set(eval(self[key].value))
-                    else:
-                        self[key] = eval(self[key])  # pylint: disable=W0123
+                self[key] = substitute(self[key], value)
+            flat_lookup[str(key)] = self[key]
         return self
 
     @staticmethod
@@ -706,15 +763,6 @@ class FlatDict(dict, metaclass=Dict):
                 if key == name:
                     raise ValueError(f"Cannot interpolate {key} to itself.")
             placeholders[key] = placeholder
-
-    @staticmethod
-    def substitute(placeholder, interpolators, value):
-        try:
-            if len(value) == 1 and placeholder.startswith("${") and placeholder.endswith("}"):
-                return interpolators[value[0]]
-            return placeholder.replace("$", "").format(**interpolators)
-        except KeyError as exc:
-            raise ValueError(f"{exc} is not found in {interpolators}.") from None
 
     def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> Self:
         r"""

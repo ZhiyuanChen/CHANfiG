@@ -61,6 +61,22 @@ CHANfiG 的范式是：
 将一个成员的值设置为`${}`包裹的另一个成员名，然后调用[`interpolate`][chanfig.FlatDict.interpolate]方法。
 这个成员的值将会自动替换为另一个成员的值。
 
+插值是惰性的且会保留占位符：
+
+```python
+from chanfig import FlatDict
+
+config = FlatDict(a=1, b="${a}", c="${a} * 2").interpolate()
+assert config.dict()["c"] == "${a} * 2"          # 占位符保留，便于持久化
+assert config.resolved()["c"] == 2               # 基础算术会被安全求值
+config.a += 1
+assert config.resolved()["b"] == 2               # 共享存储保持别名同步
+```
+
+目前仅支持基础算术运算（`+`、`-`、`*`、`/`、`//`、`%`、`**`），不支持的表达式会保持字符串。
+
+使用[`dict`][chanfig.FlatDict.dict]/[`yaml`][chanfig.FlatDict.yaml]来持久化占位符，使用[`resolved`][chanfig.FlatDict.resolved]获取内存中的求值结果。
+
 Python 的`dict`自 Python 3.7 之后就是有序的，但是并没有一个内置的方法来帮助你对一个`dict`进行排序。[`FlatDict`][chanfig.FlatDict]支持[`sort`][chanfig.FlatDict.sort]来帮助你管理你的字典。
 
 [`FlatDict`][chanfig.FlatDict]包括了一个[`merge`][chanfig.FlatDict.merge]方法，他使你能将一个`Mapping`、`Iterable`或者一个路径合并进入一个[`FlatDict`][chanfig.FlatDict]。

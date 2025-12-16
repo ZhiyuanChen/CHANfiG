@@ -196,15 +196,11 @@ def test_to_dict_alias():
     assert d.to_dict() == {"a": 1}
 
 
-def test_interpolate_mapping_and_unsafe_eval():
+def test_interpolate_mapping():
     d = FlatDict({"cfg": {"name": "${foo}"}, "foo": "bar"})
     d.interpolate()
     assert isinstance(d.foo, Variable)
     assert d.cfg["name"] == d.foo
-
-    d = FlatDict({"expr": "${val}", "val": "1+1"})
-    d.interpolate(use_variable=False, unsafe_eval=True)
-    assert d.expr == 2
 
 
 def test_merge_from_path_emits_warning():

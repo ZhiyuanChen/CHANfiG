@@ -52,7 +52,7 @@ def test_sub_dict():
 def test_interpolate():
     d = NestedDict({"i.d": 1016, "i.i.d": "${i.d}"})
     d.interpolate()
-    assert d.i.d is d.i.i.d
+    assert d.i.d == d.i.i.d
 
 
 def test_merge():

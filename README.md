@@ -65,6 +65,22 @@ We also introduce [`Variable`][chanfig.Variable] to allow sharing a value across
 [`FlatDict`][chanfig.FlatDict] supports variable interpolation.
 Set a member's value to another member's name wrapped in `${}`, then call [`interpolate`][chanfig.FlatDict.interpolate] method. The value of this member will be automatically replaced with the value of another member.
 
+Interpolation is lazy and placeholder-aware:
+
+```python
+from chanfig import FlatDict
+
+config = FlatDict(a=1, b="${a}", c="${a} * 2").interpolate()
+assert config.dict()["c"] == "${a} * 2"          # placeholders preserved for saving
+assert config.resolved()["c"] == 2               # arithmetic is safely auto-evaluated
+config.a += 1
+assert config.resolved()["b"] == 2               # shared storage keeps aliases in sync
+```
+
+Only basic arithmetic (`+`, `-`, `*`, `/`, `//`, `%`, `**`) is evaluated; unsupported expressions stay as strings.
+
+Use [`dict`][chanfig.FlatDict.dict] / [`yaml`][chanfig.FlatDict.yaml] to persist placeholders, and [`resolved`][chanfig.FlatDict.resolved] when you need the evaluated values in memory.
+
 [`dict`][dict] in Python is ordered since Python 3.7, but there isn't a built-in method to help you sort a [`dict`][dict]. [`FlatDict`][chanfig.FlatDict] supports [`sort`][chanfig.FlatDict.sort] to help you manage your dict.
 
 [`FlatDict`][chanfig.FlatDict] incorporates a [`merge`][chanfig.FlatDict.merge] method that allows you to merge a `Mapping`, an `Iterable`, or a path to the [`FlatDict`][chanfig.FlatDict].

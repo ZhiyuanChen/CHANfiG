@@ -26,18 +26,44 @@ def test_interpolate():
     assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
     assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
     assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
-    assert config.model.num_heads == f"{config.model.num_channels} // 64"
-    assert config.model.num_hidden_size == f"{config.model.num_channels} // 64 * {config.model.multiple}"
+    assert config.model.num_heads == config.model.num_channels // 64
+    assert config.model.num_hidden_size == config.model.num_channels // 64 * config.model.multiple
 
 
 def test_interpolate_eval():
-    config = chanfig.load("tests/interpolate.yaml").interpolate(unsafe_eval=True)
+    config = chanfig.load("tests/interpolate.yaml").interpolate()
     assert config.data.root == "localhost:80"
     assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
     assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
     assert config.data.imagenet.data_dirs[2] == "localhost:80/X-C"
     assert config.model.num_heads == config.model.num_channels // 64
     assert config.model.num_hidden_size == config.model.num_channels // 64 * config.model.multiple
+
+
+def test_interpolate_eval_updates():
+    d = chanfig.FlatDict(a=1, b="${a}", c="${a}.${b}").interpolate()
+    assert d.resolved()["c"] == 1.1
+    d.a += 1
+    assert d.resolved()["c"] == 2.2
+    assert d.dict()["c"] == "${a}.${b}"
+
+
+def test_interpolate_preserve_placeholders():
+    config = chanfig.load("tests/interpolate.yaml").interpolate()
+
+    placeholder_dict = config.dict()
+    assert placeholder_dict["data"]["root"] == "${host}:${port}"
+    assert placeholder_dict["data"]["imagenet"]["data_dirs"][0] == "${data.root}/X-A"
+    assert placeholder_dict["model"]["num_heads"] == "${model.num_channels} // 64"
+    assert placeholder_dict["model"]["num_hidden_size"] == "${model.num_heads} * ${model.multiple}"
+    resolved = config.resolved()
+    assert resolved["data"]["root"] == "localhost:80"
+    assert resolved["model"]["num_heads"] == 512 // 64
+    assert resolved["model"]["num_hidden_size"] == 512 // 64 * 256
+
+    dumped = config.yamls()
+    assert "${host}:${port}" in dumped
+    assert "${data.root}/X-A" in dumped
 
 
 def test_include():
