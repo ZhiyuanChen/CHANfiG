@@ -101,12 +101,19 @@ class Config(NestedDict):
 
     parser = None  # ConfigParser, Python 3.7 does not support forward reference
     frozen = False
+    convert_mapping = True
 
-    def __init__(self, *args: Any, default_factory: Callable | NULL = Null, **kwargs: Any):
+    def __init__(
+        self,
+        *args: Any,
+        default_factory: Callable | NULL = Null,
+        convert_mapping: bool | None = True,
+        **kwargs: Any,
+    ):
         if default_factory is Null:
             default_factory = Config
         self.setattr("frozen", False)
-        super().__init__(*args, default_factory=default_factory, **kwargs)
+        super().__init__(*args, default_factory=default_factory, convert_mapping=convert_mapping, **kwargs)
 
     def post(self) -> Self | None:
         r"""

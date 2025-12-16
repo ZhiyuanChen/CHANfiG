@@ -36,7 +36,7 @@ except ImportError:
         cached_property = property  # type: ignore[misc, assignment] # pylint: disable=C0103
 
 from .default_dict import DefaultDict
-from .flat_dict import FlatDict
+from .flat_dict import FlatDict, set_item
 from .utils import NULL, Null, PathStr, apply, apply_
 from .variable import Variable
 
@@ -651,7 +651,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         return super().sort(key=key, reverse=reverse)
 
     @staticmethod
-    def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
+    def _merge(this: Mapping, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
         if isinstance(that, Mapping):
@@ -662,20 +662,14 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                     if isinstance(value, Mapping):
                         NestedDict._merge(this[key], value, overwrite)
                     elif overwrite:
-                        if isinstance(this, NestedDict):
-                            this.set(key, value)
-                        else:
-                            this[key] = value
+                        set_item(this, key, value)
                 elif key in dir(this) and isinstance(getattr(this.__class__, key, None), (property, cached_property)):
                     if isinstance(getattr(this, key, None), FlatDict):
                         getattr(this, key).merge(value, overwrite=overwrite)
                     else:
                         setattr(this, key, value)
                 elif overwrite or key not in this:
-                    if isinstance(this, NestedDict):
-                        this.set(key, value)
-                    else:
-                        this[key] = value
+                    set_item(this, key, value)
         return this
 
     def intersect(self, other: Mapping | Iterable | PathStr, recursive: bool = True) -> Self:  # pylint: disable=W0221

@@ -63,6 +63,13 @@ with try_import() as torch_import:
     from torch import dtype as TorchDType
 
 
+def set_item(obj: Mapping, key: Any, value: Any) -> None:
+    if isinstance(obj, FlatDict):
+        obj.set(key, value)
+    else:
+        obj[key] = value  # type: ignore[index]
+
+
 class FlatDict(dict, metaclass=Dict):
     r"""
     `FlatDict` with attribute-style access.
@@ -744,7 +751,7 @@ class FlatDict(dict, metaclass=Dict):
         return self
 
     @staticmethod
-    def _merge(this: FlatDict, that: Iterable, overwrite: bool = True) -> Mapping:
+    def _merge(this: Mapping, that: Iterable, overwrite: bool = True) -> Mapping:
         if not that:
             return this
         if isinstance(that, Mapping):
@@ -752,14 +759,11 @@ class FlatDict(dict, metaclass=Dict):
         for key, value in that:
             if key in this and isinstance(this[key], Mapping):
                 if isinstance(value, Mapping):
-                    FlatDict._merge(this[key], value)
+                    FlatDict._merge(this[key], value, overwrite=overwrite)
                 elif overwrite:
-                    if isinstance(value, FlatDict):
-                        this.set(key, value)
-                    else:
-                        this[key] = value
+                    set_item(this, key, value)
             elif overwrite or key not in this:
-                this.set(key, value)
+                set_item(this, key, value)
         return this
 
     def union(self, *args: Any, **kwargs: Any) -> Self:
