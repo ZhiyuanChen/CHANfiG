@@ -185,6 +185,15 @@ def test_copy_operations():
     assert v_deepcopy.value == [1, 2, 3]
 
 
+def test_deepcopy_nested_value_isolated():
+    v = Variable([1, [2]])
+    v_deepcopy = deepcopy(v)
+    v_deepcopy.value[1].append(3)
+    assert v.value == [1, [2]]
+    assert v_deepcopy.value == [1, [2, 3]]
+    assert v.value[1] is not v_deepcopy.value[1]
+
+
 def test_format_operations():
     v = Variable(42)
     assert str(v) == "42"
