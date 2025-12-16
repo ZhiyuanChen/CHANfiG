@@ -24,7 +24,7 @@ from contextlib import contextmanager
 from copy import copy, deepcopy
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
-from .utils import Null
+from .utils import Null, SafeEvalError, safe_eval_expr
 
 V = TypeVar("V")
 
@@ -114,6 +114,8 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         validator: Callable | None = None,
         required: bool = False,
         help: str | None = None,  # pylint: disable=W0622
+        placeholder: str | None = None,
+        resolver: Callable[[], Any] | None = None,
     ) -> None:
         self._storage = [value]
         self._type = type
@@ -121,6 +123,8 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         self._validator = validator
         self._required = required
         self._help = help
+        self._placeholder = placeholder
+        self._resolver = resolver
 
     @property  # type: ignore[misc]
     def __class__(self) -> type:
@@ -132,6 +136,15 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         Fetch the object wrapped in `Variable`.
         """
 
+        if self._resolver is not None:
+            resolved = self._resolver()
+            evaluated = resolved
+            if isinstance(resolved, str):
+                try:
+                    evaluated = safe_eval_expr(resolved, {})
+                except SafeEvalError:
+                    evaluated = resolved
+            self._storage[0] = self._get_value(evaluated)
         return self._storage[0]
 
     @value.setter
@@ -141,6 +154,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         """
 
         self.validate(value)
+        self._resolver = None
         self._storage[0] = self._get_value(value)
 
     @property
@@ -159,6 +173,14 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         """
 
         return self.value.__class__
+
+    @property
+    def placeholder(self) -> str | None:
+        return self._placeholder
+
+    @placeholder.setter
+    def placeholder(self, value: str | None) -> None:
+        self._placeholder = value
 
     @property
     def storage(self) -> list[Any]:
@@ -188,6 +210,10 @@ class Variable(Generic[V]):  # pylint: disable=R0902
     def help(self) -> str:
         return self._help or ""
 
+    @property
+    def resolver(self) -> Callable | None:
+        return self._resolver
+
     def validate(self, *args) -> None:
         r"""
         Validate if the value is valid.
@@ -214,6 +240,24 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         """
 
         return self.value
+
+    def share(self, placeholder: str | None = None) -> Variable:
+        r"""
+        Create a new `Variable` sharing the same storage.
+
+        Optionally assign a placeholder string to the shared view.
+        """
+
+        shared: Variable = Variable()
+        shared._storage = self._storage  # pylint: disable=W0212
+        shared._type = self._type  # pylint: disable=W0212
+        shared._choices = self._choices  # pylint: disable=W0212
+        shared._validator = self._validator  # pylint: disable=W0212
+        shared._required = self._required  # pylint: disable=W0212
+        shared._help = self._help  # pylint: disable=W0212
+        shared._placeholder = placeholder if placeholder is not None else self._placeholder  # pylint: disable=W0212
+        shared._resolver = self._resolver  # pylint: disable=W0212
+        return shared
 
     def set(self, value) -> None:
         r"""
@@ -352,9 +396,23 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         return self.value <= self._get_value(other)
 
     def __eq__(self, other) -> bool:
+        if isinstance(other, str) and self._resolver is not None:
+            try:
+                resolved_str = self._resolver()
+                if resolved_str == other:
+                    return True
+            except Exception:
+                pass
         return self.value == self._get_value(other)
 
     def __ne__(self, other) -> bool:
+        if isinstance(other, str) and self._resolver is not None:
+            try:
+                resolved_str = self._resolver()
+                if resolved_str == other:
+                    return False
+            except Exception:
+                pass
         return self.value != self._get_value(other)
 
     def __ge__(self, other) -> bool:

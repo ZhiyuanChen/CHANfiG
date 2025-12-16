@@ -74,7 +74,7 @@ def to_dict(obj: Any, flatten: bool = False) -> Mapping | Sequence | Set:
         except TypeError:
             return tuple(to_dict(v) for v in obj)
     if isinstance(obj, Variable):
-        return obj.value
+        return obj.placeholder if obj.placeholder is not None else obj.value
     if is_dataclass(obj):
         return asdict(obj)  # type: ignore[arg-type]
     if hasattr(obj, "to_dict"):

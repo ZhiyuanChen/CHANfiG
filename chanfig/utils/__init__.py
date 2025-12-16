@@ -36,6 +36,7 @@ from .io import (
 )
 from .null import NULL, Null
 from .placeholder import find_circular_reference, find_placeholders
+from .safe_eval import SafeEvalError, safe_eval_expr
 
 __all__ = [
     "get_annotations",
@@ -59,6 +60,8 @@ __all__ = [
     "suggest_key",
     "to_dict",
     "to_chanfig",
+    "safe_eval_expr",
+    "SafeEvalError",
     "apply",
     "apply_",
     "load",
