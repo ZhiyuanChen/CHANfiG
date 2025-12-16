@@ -22,12 +22,15 @@ from __future__ import annotations
 
 import sys
 from argparse import ArgumentParser
+from builtins import PendingDeprecationWarning
 from copy import copy, deepcopy
+from io import StringIO
 from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
 from chanfig import FlatDict, Variable
+from chanfig.utils import Null, YamlLoader
 
 # Variables moved from Test class to module level
 dict_test = FlatDict()
@@ -159,6 +162,68 @@ def test_merge_flatdict_child_respects_overwrite():
     d = FlatDict({"a": FlatDict({"b": 1})})
     d.merge({"a": {"b": 2}}, overwrite=True)
     assert d.a.b == 2
+
+
+def test_copy_class_attributes_non_recursive_and_property_resolution():
+    class WithAnno(FlatDict):
+        foo: int
+        bar: int = 1
+
+        def prop(self):
+            return "prop"
+
+    obj = WithAnno()
+    obj._copy_class_attributes(recursive=False)
+    assert obj.bar == 1
+    obj["prop"] = "shadow"
+    assert callable(obj.prop)
+    assert obj.prop() == "prop"
+
+
+def test_set_null_name_raises():
+    with pytest.raises(ValueError):
+        FlatDict().set(Null, 1)
+
+
+def test_delattr_missing_raises():
+    d = FlatDict()
+    with pytest.raises(AttributeError):
+        d.delattr("nonexistent")
+
+
+def test_to_dict_alias():
+    d = FlatDict(a=1)
+    assert d.to_dict() == {"a": 1}
+
+
+def test_interpolate_mapping_and_unsafe_eval():
+    d = FlatDict({"cfg": {"name": "${foo}"}, "foo": "bar"})
+    d.interpolate()
+    assert isinstance(d.foo, Variable)
+    assert d.cfg["name"] == d.foo
+
+    d = FlatDict({"expr": "${val}", "val": "1+1"})
+    d.interpolate(use_variable=False, unsafe_eval=True)
+    assert d.expr == 2
+
+
+def test_merge_from_path_emits_warning():
+    d = FlatDict()
+    with pytest.warns(PendingDeprecationWarning):
+        d.merge("tests/test.yaml")
+    assert d.a == 1
+
+
+def test_deepcopy_with_existing_memo():
+    d = FlatDict(a=1)
+    memo = {id(d): "sentinel"}
+    assert deepcopy(d, memo) == "sentinel"
+
+
+def test_from_yaml_with_io():
+    stream = StringIO("a: 1\nb: 2\n")
+    loaded = FlatDict.from_yaml(stream, Loader=YamlLoader)
+    assert loaded.a == 1 and loaded.b == 2
 
 
 class AnnoDict(FlatDict):
