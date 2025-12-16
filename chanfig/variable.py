@@ -19,10 +19,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from contextlib import contextmanager
-from copy import copy
-from typing import Any, Generic, List, Optional, TypeVar
+from copy import copy, deepcopy
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from .utils import Null
 
@@ -463,10 +463,24 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         return self
 
     def __copy__(self):
-        return Variable(self.value)
+        return Variable(
+            self.value,
+            self._type,
+            copy(self._choices) if self._choices is not None else None,
+            self._validator,
+            self._required,
+            self._help,
+        )
 
-    def __deepcopy__(self, memo: Mapping | None = None):
-        return Variable(copy(self.value))
+    def __deepcopy__(self, memo: Dict | None = None):
+        return Variable(
+            deepcopy(self.value, memo),
+            self._type,
+            deepcopy(self._choices, memo) if self._choices is not None else None,
+            self._validator,
+            self._required,
+            self._help,
+        )
 
     def __format__(self, format_spec):
         return self.value if isinstance(self, str) else format(self.value, format_spec)
