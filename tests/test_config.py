@@ -122,6 +122,26 @@ def test_convert_mapping_default():
     assert config.a.b == 1
 
 
+def test_convert_mapping_false():
+    config = Config(convert_mapping=False)
+    config["a"] = {"b": 1}
+    assert isinstance(config.a, dict)
+    with raises(AttributeError):
+        _ = config.a.b
+
+
+def test_convert_mapping_sequences():
+    config = Config()
+    config["seq"] = [{"x": 1}, {"y": 2}]
+    assert all(isinstance(item, Config) for item in config.seq)
+    assert config.seq[0].x == 1 and config.seq[1].y == 2
+
+    config["tuple_seq"] = ({"a": 3}, {"b": 4})
+    assert isinstance(config.tuple_seq, tuple)
+    assert all(isinstance(item, Config) for item in config.tuple_seq)
+    assert config.tuple_seq[0].a == 3 and config.tuple_seq[1].b == 4
+
+
 def test_contains():
     config = TestConfig()
     assert "name" in config

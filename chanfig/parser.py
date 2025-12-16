@@ -20,16 +20,16 @@
 from __future__ import annotations
 
 import sys
-from argparse import ArgumentParser, Namespace, _StoreAction
+from argparse import ArgumentParser, ArgumentTypeError, Namespace, _StoreAction
 from ast import literal_eval
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from contextlib import suppress
 from dataclasses import Field
 from inspect import isclass
 from typing import TYPE_CHECKING, Any
 from warnings import warn
 
-from typing_extensions import _should_collect_from_parameters, get_args  # type: ignore[attr-defined]
+from typing_extensions import _should_collect_from_parameters, get_args, get_origin  # type: ignore[attr-defined]
 
 try:
     from types import NoneType
@@ -65,6 +65,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         super().__init__(*args, **kwargs)
         self._registries["action"][None] = StoreAction
         self._registries["action"]["store"] = StoreAction
+        self._container_actions: dict[str, dict[str, Any]] = {}
 
     def parse_config(  # pylint: disable=R0912
         self,
@@ -320,6 +321,13 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                     with suppress(TypeError, ValueError, SyntaxError):
                         value = literal_eval(value)
                     parsed[key] = value
+        for dest, meta in self._container_actions.items():
+            if dest not in parsed:
+                continue
+            parsed_value = parsed[dest]
+            if parsed_value in (Null, None):
+                continue
+            parsed[dest] = self._convert_container_value(parsed_value, meta)
         return parsed
 
     def add_config_arguments(self, config: Config):
@@ -347,13 +355,144 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 help = value._help  # pylint: disable=W0212
             elif isinstance(value, Field):
                 help = value.metadata.get("help")
+            container_meta = self._infer_container_argument(dtype, value)
+            if container_meta is not None:
+                action = self.add_argument(
+                    name,
+                    nargs="+",
+                    type=container_meta["item_parser"],
+                    help=help,
+                    dest=key,
+                )
+                self._container_actions[key] = container_meta
+                return action
             if dtype is None or not isclass(dtype):
                 return self.add_argument(name, help=help, dest=key)
-            if issubclass(dtype, (list, tuple, dict, set)):
-                return self.add_argument(name, type=dtype, nargs="+", help=help, dest=key)
             if issubclass(dtype, bool):
                 return self.add_argument(name, type=parse_bool, help=help, dest=key)
             return self.add_argument(name, type=dtype, help=help, dest=key)
+
+    def _infer_container_argument(self, dtype: Any, value: Any | None = None) -> dict[str, Any] | None:
+        """
+        Determine if the argument represents a container (list/tuple/set/dict) and
+        provide parsing metadata when applicable.
+        """
+
+        def first_type(iterable):
+            try:
+                item = next(iter(iterable))
+            except Exception:
+                return None
+            return type(item)
+
+        origin = get_origin(dtype) or dtype
+        args = get_args(dtype)
+        container_type = None
+        key_type = None
+        value_type = None
+        item_type = None
+
+        if origin in (list, tuple, set, dict):
+            container_type = origin
+            if origin is dict and args:
+                key_type, value_type = (args + (None, None))[:2]
+            elif args:
+                item_type = args[0]
+        elif isinstance(dtype, type) and issubclass(dtype, (list, tuple, set, dict)):
+            container_type = dtype
+
+        if container_type is None:
+            # Try to infer from value when dtype is unavailable
+            if isinstance(value, (list, tuple, set)):
+                container_type = type(value)
+                item_type = first_type(value)
+            elif isinstance(value, dict):
+                container_type = dict
+                key_type = first_type(value.keys())
+                value_type = first_type(value.values())
+        else:
+            if item_type is None and isinstance(value, (list, tuple, set)):
+                item_type = first_type(value)
+            if container_type is dict and isinstance(value, dict):
+                if key_type is None:
+                    key_type = first_type(value.keys())
+                if value_type is None:
+                    value_type = first_type(value.values())
+
+        if container_type is None:
+            return None
+
+        def build_item_parser(expected_type):
+            if expected_type is None:
+                return self.identity
+            if expected_type in (bool,):
+                return parse_bool
+            if isclass(expected_type):
+                return expected_type
+            origin_type = get_origin(expected_type)
+            if origin_type in (list, tuple, set, dict):
+                return self.identity
+            return self.identity
+
+        if container_type is dict:
+            key_parser = build_item_parser(key_type)
+            value_parser = build_item_parser(value_type)
+
+            def parse_kv(token: str):
+                if "=" not in token:
+                    raise ArgumentTypeError(f"Expected KEY=VALUE, got {token!r}")
+                raw_key, raw_value = token.split("=", 1)
+                return key_parser(raw_key), value_parser(raw_value)
+
+            item_parser = parse_kv
+        else:
+            item_parser = build_item_parser(item_type)
+
+        return {
+            "container_type": container_type,
+            "item_parser": item_parser,
+            "item_type": item_type,
+        }
+
+    def _convert_container_value(self, value: Any, meta: Mapping[str, Any]) -> Any:
+        container_type = meta["container_type"]
+        if container_type is dict:
+            if isinstance(value, dict):
+                return value
+            pairs: list[tuple] = []
+            if isinstance(value, (list, tuple, set)):
+                for item in value:
+                    if isinstance(item, dict):
+                        pairs.extend(item.items())
+                    elif isinstance(item, (list, tuple)) and len(item) == 2:
+                        pairs.append((item[0], item[1]))
+                    else:
+                        raise ArgumentTypeError(f"Cannot parse {item!r} as key-value pair.")
+            else:
+                raise ArgumentTypeError(f"Cannot parse {value!r} as key-value pairs.")
+            return dict(pairs)
+
+        if container_type is list:
+            if isinstance(value, list):
+                return value
+            if isinstance(value, tuple):
+                return list(value)
+            return [value]
+
+        if container_type is tuple:
+            if isinstance(value, tuple):
+                return value
+            if isinstance(value, list):
+                return tuple(value)
+            return (value,)
+
+        if container_type is set:
+            if isinstance(value, set):
+                return value
+            if isinstance(value, (list, tuple)):
+                return set(value)
+            return {value}
+        return value
 
     def merge_default_config(self, parsed, default_config: str, no_default_config_action: str = "raise") -> NestedDict:
         if default_config in parsed:

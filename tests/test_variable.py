@@ -185,6 +185,17 @@ def test_copy_operations():
     assert v_deepcopy.value == [1, 2, 3]
 
 
+def test_copy_preserves_metadata():
+    v = Variable(1, type=int, choices=[1, 2], validator=lambda x: x > 0, required=True, help="number")
+    v_copy = copy(v)
+    v_deep = deepcopy(v)
+    assert v_copy.type is int and v_copy.required and v_copy.help == "number"
+    assert v_deep.type is int and v_deep.required and v_deep.help == "number"
+    assert v_copy.choices == [1, 2] and v_deep.choices == [1, 2]
+    assert v_copy.choices is not v.choices and v_deep.choices is not v.choices
+    assert v_copy.validator is v.validator and v_deep.validator is v.validator
+
+
 def test_deepcopy_nested_value_isolated():
     v = Variable([1, [2]])
     v_deepcopy = deepcopy(v)

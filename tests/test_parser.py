@@ -131,3 +131,34 @@ def test_parse_pep604():
         ]
     )
     assert config.true and not config.false
+
+
+def test_parse_list_annotation_values():
+    class ListConfig(Config):
+        __test__ = False
+
+        numbers: list[int]
+
+    config = ListConfig()
+    config.parse_config(["--numbers", "1", "2"])
+    assert config.numbers == [1, 2]
+    assert all(isinstance(v, int) for v in config.numbers)
+
+
+def test_parse_list_from_default_preserves_flat_shape():
+    config = Config()
+    config.lst = [1, 2]
+    config.parse(["--lst", "3", "4"])
+    assert config.lst == [3, 4]
+    assert all(isinstance(v, int) for v in config.lst)
+
+
+def test_parse_dict_with_annotation():
+    class DictConfig(Config):
+        __test__ = False
+
+        mapping: dict[str, int]
+
+    config = DictConfig()
+    config.parse_config(["--mapping", "a=1", "b=2"])
+    assert config.mapping == {"a": 1, "b": 2}
