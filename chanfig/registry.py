@@ -169,6 +169,7 @@ class Registry(NestedDict):
             if default:
                 self.setdefault(component)
             return component
+
         # @Registry.register
         if component is not Null and callable(component) and name is Null:
             self.set(component.__name__, component)

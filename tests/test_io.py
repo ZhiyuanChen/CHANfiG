@@ -17,22 +17,76 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from __future__ import annotations
-
+import json
 import os
 
-import chanfig
+from pytest import raises
+
+from chanfig import FlatDict
+from chanfig.io import JsonEncoder, YamlDumper, YamlLoader, load, save
+
+
+def test_yaml_dumper():
+    dumper = YamlDumper(None)
+
+    assert dumper.increase_indent(flow=True, indentless=False) == super(YamlDumper, dumper).increase_indent(
+        flow=True, indentless=False
+    )
+    assert dumper.increase_indent(flow=False, indentless=True) == super(YamlDumper, dumper).increase_indent(
+        flow=False, indentless=True
+    )
+
+
+def test_yaml_loader():
+    test_yaml = """
+    include: !include tests/test.yaml
+    includes: !includes [tests/parent.yaml, tests/child.yaml]
+    env: !env HOME
+    """
+    save(FlatDict.from_yamls(test_yaml), "test_include.yaml")
+
+    with open("test_include.yaml") as f:
+        loader = YamlLoader(f)
+    data = loader.get_data()
+
+    assert data["env"] == os.environ["HOME"]
+    assert data["include"] == load("tests/test.yaml")
+
+    os.remove("test_include.yaml")
+
+
+def test_json_encoder():
+    class JsonObject:
+        def __json__(self):
+            return {"type": "json_object"}
+
+    class DictObject:
+        def to_dict(self):
+            return {"type": "dict_object"}
+
+    class RegularObject:
+        pass
+
+    json_obj = JsonObject()
+    assert json.dumps(json_obj, cls=JsonEncoder) == '{"type": "json_object"}'
+
+    dict_obj = DictObject()
+    assert json.dumps(dict_obj, cls=JsonEncoder) == '{"type": "dict_object"}'
+
+    reg_obj = RegularObject()
+    with raises(TypeError):
+        json.dumps(reg_obj, cls=JsonEncoder)
 
 
 def test_list():
     list = [1, 2, 3]
-    chanfig.save(list, "test.yaml")
-    assert chanfig.load("test.yaml") == list
+    save(list, "test.yaml")
+    assert load("test.yaml") == list
     os.remove("test.yaml")
 
 
 def test_list_dict():
     list = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
-    chanfig.save(list, "test.yaml")
-    assert chanfig.load("test.yaml") == list
+    save(list, "test.yaml")
+    assert load("test.yaml") == list
     os.remove("test.yaml")

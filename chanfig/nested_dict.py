@@ -37,7 +37,8 @@ except ImportError:
 
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict, set_item
-from .utils import NULL, Null, PathStr, apply, apply_, suggest_key
+from .io import PathStr
+from .utils import NULL, Null, apply, apply_, suggest_key
 from .variable import Variable
 
 

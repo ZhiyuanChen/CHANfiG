@@ -20,8 +20,8 @@
 import pytest
 
 from chanfig import Config, FlatDict
+from chanfig.io import JsonEncoder
 from chanfig.utils.functional import parse_bool
-from chanfig.utils.io import JsonEncoder
 
 
 def test_parse_bool():

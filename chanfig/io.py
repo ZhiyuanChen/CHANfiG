@@ -128,7 +128,7 @@ def save(  # pylint: disable=W1113
         ValueError: `method` must be specified when saving to IO.
     """
     # Import FlatDict here to avoid circular imports
-    from ..flat_dict import FlatDict, to_dict
+    from .flat_dict import FlatDict, to_dict
 
     if isinstance(obj, FlatDict):
         obj.save(file, method, *args, **kwargs)
@@ -177,7 +177,7 @@ def load(file: PathStr, cls=None, *args: Any, **kwargs: Any) -> Any:  # pylint: 
         )
     """
     # Import here to avoid circular imports
-    from ..nested_dict import NestedDict
+    from .nested_dict import NestedDict
 
     if cls is None:
         cls = NestedDict
