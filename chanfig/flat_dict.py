@@ -46,15 +46,9 @@ except ImportError:
     from tomli import loads as toml_loads  # type: ignore[no-redef]
 
 from .base import Dict
+from .io import JSON_EXTENSIONS, YAML_EXTENSIONS, File, JsonEncoder, PathStr, YamlDumper, YamlLoader
 from .utils import (
-    JSON_EXTENSIONS,
-    YAML_EXTENSIONS,
-    File,
-    JsonEncoder,
     Null,
-    PathStr,
-    YamlDumper,
-    YamlLoader,
     conform_annotation,
     find_circular_reference,
     find_placeholders,

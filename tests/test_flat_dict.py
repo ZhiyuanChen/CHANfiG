@@ -30,7 +30,8 @@ from typing import Dict, List, Optional, Tuple, Union
 import pytest
 
 from chanfig import FlatDict, Variable
-from chanfig.utils import Null, YamlLoader
+from chanfig.io import YamlLoader
+from chanfig.utils import Null
 
 # Variables moved from Test class to module level
 dict_test = FlatDict()

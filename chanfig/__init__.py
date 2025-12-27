@@ -40,11 +40,11 @@ from .config import Config
 from .configclasses import configclass
 from .default_dict import DefaultDict
 from .flat_dict import FlatDict
+from .io import load, save
 from .nested_dict import NestedDict
 from .parser import ConfigParser
 from .registry import ConfigRegistry, GlobalRegistry, Registry
 from .utils import apply, apply_, to_chanfig, to_dict
-from .utils.io import load, save
 from .variable import Variable
 
 __all__ = [

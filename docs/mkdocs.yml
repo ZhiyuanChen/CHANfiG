@@ -18,6 +18,7 @@ nav:
   - ConfigParser: parser.md
   - configclass: configclass.md
   - Utilities: utils.md
+  - I/O: io.md
   # - package: package.md
   # - Blog: blog/index.md
   # - Development:
