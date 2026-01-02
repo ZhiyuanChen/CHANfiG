@@ -216,6 +216,17 @@ def test_container_arguments_and_conversion():
     assert cfg.dict_field == {"a": 1, "b": 2}
 
 
+def test_parse_heterogeneous_tuple_values():
+    class MixedTupleConfig(Config):
+        __test__ = False
+
+        mixed: Tuple[int, bool, str]
+
+    config = MixedTupleConfig()
+    config.parse_config(["--mixed", "1", "false", "name"])
+    assert config.mixed == (1, False, "name")
+
+
 def test_convert_container_value_errors():
     parser = ConfigParser()
     meta = {"container_type": dict, "item_parser": parser.identity, "item_type": None}

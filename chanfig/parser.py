@@ -417,9 +417,10 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 help = value.metadata.get("help")
             container_meta = self._infer_container_argument(dtype, value)
             if container_meta is not None:
+                nargs = container_meta.get("nargs", "+")
                 action = self.add_argument(
                     name,
-                    nargs="+",
+                    nargs=nargs,
                     type=container_meta["item_parser"],
                     help=help,
                     dest=key,
@@ -451,13 +452,17 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         key_type = None
         value_type = None
         item_type = None
+        tuple_item_types = None
 
         if origin in (list, tuple, set, dict):
             container_type = origin
             if origin is dict and args:
                 key_type, value_type = (args + (None, None))[:2]
             elif args:
-                item_type = args[0]
+                if origin is tuple and len(args) > 1 and args[-1] is not Ellipsis:
+                    tuple_item_types = args
+                else:
+                    item_type = args[0]
         elif isinstance(dtype, type) and issubclass(dtype, (list, tuple, set, dict)):
             container_type = dtype
 
@@ -494,6 +499,18 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 return self.identity
             return self.identity
 
+        nargs = "+"
+        if container_type is tuple and tuple_item_types is not None:
+            item_parser = self.identity
+            tuple_item_parsers = [build_item_parser(item) for item in tuple_item_types]
+            nargs = len(tuple_item_parsers)  # type: ignore[assignment]
+            return {
+                "container_type": container_type,
+                "item_parser": item_parser,
+                "item_type": item_type,
+                "tuple_item_parsers": tuple_item_parsers,
+                "nargs": nargs,
+            }
         if container_type is dict:
             key_parser = build_item_parser(key_type)
             value_parser = build_item_parser(value_type)
@@ -512,6 +529,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             "container_type": container_type,
             "item_parser": item_parser,
             "item_type": item_type,
+            "nargs": nargs,
         }
 
     def _convert_container_value(self, value: Any, meta: Mapping[str, Any]) -> Any:
@@ -540,6 +558,23 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             return [value]
 
         if container_type is tuple:
+            tuple_item_parsers = meta.get("tuple_item_parsers")
+            if tuple_item_parsers:
+                if isinstance(value, tuple):
+                    items = list(value)
+                elif isinstance(value, list):
+                    items = value
+                else:
+                    items = [value]
+                if len(items) != len(tuple_item_parsers):
+                    raise ArgumentTypeError(f"Expected {len(tuple_item_parsers)} values for tuple, got {len(items)}.")
+                converted = []
+                for parser, item in zip(tuple_item_parsers, items):
+                    try:
+                        converted.append(parser(item))
+                    except (TypeError, ValueError) as exc:
+                        raise ArgumentTypeError(f"Cannot parse tuple item {item!r}.") from exc
+                return tuple(converted)
             if isinstance(value, tuple):
                 return value
             if isinstance(value, list):
