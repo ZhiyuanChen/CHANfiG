@@ -216,6 +216,12 @@ def test_interpolate_mapping():
     assert d.cfg["name"] == d.foo
 
 
+def test_interpolate_relative_placeholder_non_string_key():
+    d = FlatDict({1: "${.b}", "b": 2})
+    with pytest.raises(ValueError, match="relative placeholder"):
+        d.interpolate()
+
+
 def test_merge_from_path_emits_warning():
     d = FlatDict()
     with pytest.warns(PendingDeprecationWarning):
