@@ -353,8 +353,8 @@ class FlatDict(dict, metaclass=Dict):
         if isinstance(obj, FlatDict):
             annos = get_cached_annotations(obj)
             for name, value in obj.items():
-                if annos and name in annos:
-                    conform_annotation(value, annos[name])
+                if annos and name in annos and not conform_annotation(value, annos[name]):
+                    raise TypeError(f"'{name}' has invalid type. Value {value!r} is not of type {annos[name]!r}.")
                 if isinstance(value, Variable):
                     try:
                         value.validate()
