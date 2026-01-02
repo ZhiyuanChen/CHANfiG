@@ -18,6 +18,8 @@
 # See the LICENSE file for more details.
 
 
+import pytest
+
 from chanfig import ConfigRegistry as Registry_
 
 
@@ -28,3 +30,28 @@ class Registry(Registry_):
 def test_registry():
     registry = Registry()
     assert registry.getattr("key") == "level"
+
+
+def test_register_case_insensitive_duplicate_explicit():
+    registry = Registry(case_sensitive=False)
+
+    class Module:
+        pass
+
+    registry.register(Module, "Foo")
+    with pytest.raises(ValueError):
+        registry.register(Module, "FOO")
+
+
+def test_register_case_insensitive_duplicate_auto_name():
+    registry = Registry(case_sensitive=False)
+
+    class Foo:
+        pass
+
+    class FOO:
+        pass
+
+    registry.register(Foo)
+    with pytest.raises(ValueError):
+        registry.register(FOO)
