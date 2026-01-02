@@ -1205,7 +1205,9 @@ class FlatDict(dict, metaclass=Dict):
 
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
-                return cls.from_jsons(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
+                if hasattr(fp, "seek") and fp.seekable():
+                    fp.seek(0)
+                return cls.from_jsons(fp.read(), *args, **kwargs)
             return cls.from_jsons(fp.read(), *args, **kwargs)
 
     def jsons(self, *args: Any, **kwargs: Any) -> str:
@@ -1269,7 +1271,9 @@ class FlatDict(dict, metaclass=Dict):
         kwargs.setdefault("Loader", YamlLoader)
         with cls.open(file) as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
-                return cls.from_yamls(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
+                if hasattr(fp, "seek") and fp.seekable():
+                    fp.seek(0)
+                return cls.from_yamls(fp.read(), *args, **kwargs)
             content = yaml_load(fp, *args, **kwargs)
             return cls.from_dict(content)
 
@@ -1318,7 +1322,9 @@ class FlatDict(dict, metaclass=Dict):
 
         with cls.open(file, mode="rb") as fp:  # pylint: disable=C0103
             if isinstance(file, (IOBase, IO)):
-                return cls.from_tomls(fp.getvalue(), *args, **kwargs)  # type: ignore[union-attr]
+                if hasattr(fp, "seek") and fp.seekable():
+                    fp.seek(0)
+                return cls.from_tomls(fp.read(), *args, **kwargs)
             content = toml_load(fp, *args, **kwargs)
             return cls.from_dict(content)
 
@@ -1332,6 +1338,8 @@ class FlatDict(dict, metaclass=Dict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
+        if isinstance(string, bytes):
+            string = string.decode()
         return cls.from_dict(toml_loads(string, *args, **kwargs))
 
     @staticmethod

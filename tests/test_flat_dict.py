@@ -223,6 +223,45 @@ def test_from_yaml_with_io():
     assert loaded.a == 1 and loaded.b == 2
 
 
+def test_from_json_with_io_resets_cursor():
+    stream = StringIO('{"a": 1, "b": 2}')
+    stream.read()
+    loaded = FlatDict.from_json(stream)
+    assert loaded.a == 1 and loaded.b == 2
+
+
+def test_from_json_with_file_handle(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text('{"a": 1, "b": 2}')
+    with path.open() as handle:
+        loaded = FlatDict.from_json(handle)
+    assert loaded.a == 1 and loaded.b == 2
+
+
+def test_from_yaml_with_file_handle(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text("a: 1\nb: 2\n")
+    with path.open() as handle:
+        loaded = FlatDict.from_yaml(handle)
+    assert loaded.a == 1 and loaded.b == 2
+
+
+def test_from_toml_with_file_handle(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text("a = 1\nb = 2\n")
+    with path.open() as handle:
+        loaded = FlatDict.from_toml(handle)
+    assert loaded.a == 1 and loaded.b == 2
+
+
+def test_from_toml_with_binary_handle(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text("a = 1\nb = 2\n")
+    with path.open("rb") as handle:
+        loaded = FlatDict.from_toml(handle)
+    assert loaded.a == 1 and loaded.b == 2
+
+
 class AnnoDict(FlatDict):
     int_value: int
     str_value: str
