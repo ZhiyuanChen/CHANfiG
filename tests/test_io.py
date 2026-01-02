@@ -26,6 +26,17 @@ from chanfig import FlatDict
 from chanfig.io import JsonEncoder, YamlDumper, YamlLoader, load, save
 
 
+def _toml_writer_available():
+    try:
+        import tomli_w  # noqa: F401
+    except ImportError:
+        try:
+            import toml  # noqa: F401
+        except ImportError:
+            return False
+    return True
+
+
 def test_yaml_dumper():
     dumper = YamlDumper(None)
 
@@ -90,3 +101,14 @@ def test_list_dict():
     save(list, "test.yaml")
     assert load("test.yaml") == list
     os.remove("test.yaml")
+
+
+def test_toml_save_and_load():
+    data = {"a": 1, "b": 2}
+    if _toml_writer_available():
+        save(data, "test.toml")
+        assert load("test.toml") == data
+        os.remove("test.toml")
+    else:
+        with raises(TypeError, match="TOML"):
+            save(data, "test.toml")
