@@ -763,7 +763,10 @@ class FlatDict(dict, metaclass=Dict):
         if placeholder:
             for index, name in enumerate(placeholder):
                 if name.startswith("."):
-                    placeholder[index] = key.rsplit(".", 1)[0] + name
+                    if isinstance(key, str):
+                        placeholder[index] = key.rsplit(".", 1)[0] + name
+                    else:
+                        raise ValueError(f"Cannot resolve relative placeholder {name!r} for non-string key {key!r}.")
                 if key == name:
                     raise ValueError(f"Cannot interpolate {key} to itself.")
             placeholders[key] = placeholder
