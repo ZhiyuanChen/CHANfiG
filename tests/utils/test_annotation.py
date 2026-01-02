@@ -75,6 +75,22 @@ def test_get_annotations_with_module():
     assert isinstance(result, dict)
 
 
+def test_get_annotations_missing_module_globals():
+    import sys
+
+    missing_module = "chanfig_missing_module_for_test"
+    if missing_module in sys.modules:
+        del sys.modules[missing_module]
+
+    missing_class = type(
+        "MissingModuleClass",
+        (),
+        {"__annotations__": {"a": "int"}, "__module__": missing_module},
+    )
+    result = get_annotations(missing_class)
+    assert result["a"] is int
+
+
 def test_get_annotations_without_annotations():
     class NoAnnotations:
         pass

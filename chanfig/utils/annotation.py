@@ -154,7 +154,9 @@ def get_annotations(  # pylint: disable=all
     # globalns = GLOBAL_NS | globalns if globalns is not None else obj_globalns
     if globalns is None:
         globalns = obj_globalns
-    globalns = {**GLOBAL_NS, **globalns}
+    if globalns is None:
+        globalns = {}
+    globalns = {**GLOBAL_NS, **dict(globalns)}
     if localns is None:
         localns = obj_localns
 
