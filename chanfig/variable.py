@@ -528,6 +528,8 @@ class Variable(Generic[V]):  # pylint: disable=R0902
             self._validator,
             self._required,
             self._help,
+            placeholder=self._placeholder,
+            resolver=self._resolver,
         )
 
     def __deepcopy__(self, memo: Dict | None = None):
@@ -538,6 +540,8 @@ class Variable(Generic[V]):  # pylint: disable=R0902
             self._validator,
             self._required,
             self._help,
+            placeholder=self._placeholder,
+            resolver=self._resolver,
         )
 
     def __format__(self, format_spec):

@@ -197,6 +197,22 @@ def test_copy_preserves_metadata():
     assert v_copy.storage is v_copy._storage
 
 
+def test_copy_preserves_placeholder_and_resolver():
+    def resolver():
+        return "1 + 1"
+
+    v = Variable(resolver=resolver, placeholder="${a} + 1")
+    v_copy = copy(v)
+    v_deep = deepcopy(v)
+
+    assert v_copy.placeholder == "${a} + 1"
+    assert v_deep.placeholder == "${a} + 1"
+    assert v_copy.resolver is resolver
+    assert v_deep.resolver is resolver
+    assert v_copy.value == 2
+    assert v_deep.value == 2
+
+
 def test_deepcopy_nested_value_isolated():
     v = Variable([1, [2]])
     v_deepcopy = deepcopy(v)
