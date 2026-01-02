@@ -37,6 +37,7 @@ File = Union[PathStr, IO, IOBase]
 
 YAML_EXTENSIONS = ("yml", "yaml")
 JSON_EXTENSIONS = ("json",)
+TOML_EXTENSIONS = ("toml",)
 PYTHON_EXTENSIONS = ("py",)
 
 
@@ -121,7 +122,7 @@ def save(  # pylint: disable=W1113
         >>> save(obj, "test.json")
         >>> save(obj, "test.conf")
         Traceback (most recent call last):
-        TypeError: `file='test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+        TypeError: `file='test.conf'` should be in ('json',), ('yml', 'yaml') or ('toml',), but got conf.
         >>> with open("test.yaml", "w") as f:
         ...     save(obj, f)
         Traceback (most recent call last):
@@ -148,7 +149,29 @@ def save(  # pylint: disable=W1113
         with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
             fp.write(json_dumps(data, *args, **kwargs))
         return
-    raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
+    if extension in TOML_EXTENSIONS:
+        with FlatDict.open(file, mode="w") as fp:  # pylint: disable=C0103
+            fp.write(toml_dumps(data, *args, **kwargs))
+        return
+    raise TypeError(
+        f"`file={file!r}` should be in {JSON_EXTENSIONS}, {YAML_EXTENSIONS} or {TOML_EXTENSIONS}, but got {extension}."
+    )
+
+
+def toml_dumps(obj: Any, *args: Any, **kwargs: Any) -> str:
+    r"""
+    Dump object to toml string when a writer is available.
+    """
+
+    try:
+        import tomli_w
+    except ImportError:
+        try:
+            import toml
+        except ImportError as exc:
+            raise TypeError("TOML dump requires 'tomli-w' or 'toml'.") from exc
+        return toml.dumps(obj, *args, **kwargs)
+    return tomli_w.dumps(obj, *args, **kwargs)
 
 
 def load(file: PathStr, cls=None, *args: Any, **kwargs: Any) -> Any:  # pylint: disable=W1113

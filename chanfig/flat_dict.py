@@ -46,7 +46,17 @@ except ImportError:
     from tomli import loads as toml_loads  # type: ignore[no-redef]
 
 from .base import Dict
-from .io import JSON_EXTENSIONS, YAML_EXTENSIONS, File, JsonEncoder, PathStr, YamlDumper, YamlLoader
+from .io import (
+    JSON_EXTENSIONS,
+    TOML_EXTENSIONS,
+    YAML_EXTENSIONS,
+    File,
+    JsonEncoder,
+    PathStr,
+    YamlDumper,
+    YamlLoader,
+    toml_dumps,
+)
 from .utils import (
     Null,
     conform_annotation,
@@ -1109,7 +1119,7 @@ class FlatDict(dict, metaclass=Dict):
             >>> d.save("tests/test.yaml")
             >>> d.save("test.conf")
             Traceback (most recent call last):
-            TypeError: `file='test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            TypeError: `file='test.conf'` should be in ('json',), ('yml', 'yaml') or ('toml',), but got conf.
             >>> with open("test.yaml", "w") as f:
             ...     d.save(f)
             Traceback (most recent call last):
@@ -1125,7 +1135,12 @@ class FlatDict(dict, metaclass=Dict):
             return self.yaml(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
         if extension in JSON_EXTENSIONS:
             return self.json(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
-        raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
+        if extension in TOML_EXTENSIONS:
+            return self.toml(file=file, *args, **kwargs)  # type: ignore[misc]  # noqa: B026
+        raise TypeError(
+            f"`file={file!r}` should be in {JSON_EXTENSIONS}, {YAML_EXTENSIONS} or {TOML_EXTENSIONS}, "
+            f"but got {extension}."
+        )
 
     def dump(  # pylint: disable=W1113
         self, file: File, method: str = None, *args: Any, **kwargs: Any  # type: ignore[assignment]
@@ -1144,7 +1159,7 @@ class FlatDict(dict, metaclass=Dict):
 
         Args:
             file: File to load from.
-            method: File type, should be in `JSON_EXTENSIONS` or `YAML_EXTENSIONS`.
+            method: File type, should be in `JSON_EXTENSIONS`, `YAML_EXTENSIONS` or `TOML_EXTENSIONS`.
 
         Raises:
             ValueError: If load from `IO` and `method` is not specified.
@@ -1156,7 +1171,7 @@ class FlatDict(dict, metaclass=Dict):
             {'a': 1, 'b': 2, 'c': 3}
             >>> d.load("tests/test.conf")
             Traceback (most recent call last):
-            TypeError: `file='tests/test.conf'` should be in ('json',) or ('yml', 'yaml'), but got conf.
+            TypeError: `file='tests/test.conf'` should be in ('json',), ('yml', 'yaml') or ('toml',), but got conf.
             >>> with open("tests/test.yaml") as f:
             ...     d.load(f)
             Traceback (most recent call last):
@@ -1172,7 +1187,12 @@ class FlatDict(dict, metaclass=Dict):
             return cls.from_json(file, *args, **kwargs)
         if extension in YAML_EXTENSIONS:
             return cls.from_yaml(file, *args, **kwargs)
-        raise TypeError(f"`file={file!r}` should be in {JSON_EXTENSIONS} or {YAML_EXTENSIONS}, but got {extension}.")
+        if extension in TOML_EXTENSIONS:
+            return cls.from_toml(file, *args, **kwargs)
+        raise TypeError(
+            f"`file={file!r}` should be in {JSON_EXTENSIONS}, {YAML_EXTENSIONS} or {TOML_EXTENSIONS}, "
+            f"but got {extension}."
+        )
 
     def json(self, file: File, *args: Any, **kwargs: Any) -> None:
         r"""
@@ -1306,6 +1326,24 @@ class FlatDict(dict, metaclass=Dict):
         kwargs.setdefault("Dumper", YamlDumper)
         kwargs.setdefault("indent", self.getattr("indent", 2))
         return yaml_dump(self.dict(), *args, **kwargs)
+
+    def toml(self, file: File, *args: Any, **kwargs: Any) -> None:
+        r"""
+        Dump `FlatDict` to toml file.
+
+        This method internally calls `self.tomls()` to generate toml string.
+        You may overwrite `tomls` in case something is not toml serializable.
+        """
+
+        with self.open(file, mode="w") as fp:  # pylint: disable=C0103
+            fp.write(self.tomls(*args, **kwargs))
+
+    def tomls(self, *args: Any, **kwargs: Any) -> str:
+        r"""
+        Dump `FlatDict` to toml string.
+        """
+
+        return toml_dumps(self.dict(), *args, **kwargs)
 
     @classmethod
     def from_toml(cls, file: File, *args: Any, **kwargs: Any) -> Self:

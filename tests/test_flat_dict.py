@@ -33,6 +33,18 @@ from chanfig import FlatDict, Variable
 from chanfig.io import YamlLoader
 from chanfig.utils import Null
 
+
+def _toml_writer_available():
+    try:
+        import tomli_w  # noqa: F401
+    except ImportError:
+        try:
+            import toml  # noqa: F401
+        except ImportError:
+            return False
+    return True
+
+
 # Variables moved from Test class to module level
 dict_test = FlatDict()
 dict_test[1] = 2
@@ -260,6 +272,25 @@ def test_from_toml_with_binary_handle(tmp_path):
     with path.open("rb") as handle:
         loaded = FlatDict.from_toml(handle)
     assert loaded.a == 1 and loaded.b == 2
+
+
+def test_load_toml_extension(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text("a = 1\nb = 2\n")
+    loaded = FlatDict.load(path)
+    assert loaded.a == 1 and loaded.b == 2
+
+
+def test_save_toml_extension(tmp_path):
+    path = tmp_path / "config.toml"
+    config = FlatDict(a=1, b=2)
+    if _toml_writer_available():
+        config.save(path)
+        loaded = FlatDict.load(path)
+        assert loaded.a == 1 and loaded.b == 2
+    else:
+        with pytest.raises(TypeError, match="TOML"):
+            config.save(path)
 
 
 class AnnoDict(FlatDict):
