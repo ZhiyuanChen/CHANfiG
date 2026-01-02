@@ -160,11 +160,21 @@ class Registry(NestedDict):
             )
         """
 
-        if name in self and not (override or self.override):
-            raise ValueError(f"Component with name {name} already registered.")
+        override_allowed = override or self.override
+
+        def normalize_name(key: Any) -> Any:
+            if isinstance(key, str) and not self.getattr("case_sensitive", False):
+                return key.lower()
+            return key
+
+        def ensure_available(key: Any) -> None:
+            normalized = normalize_name(key)
+            if normalized in self and not override_allowed:
+                raise ValueError(f"Component with name {key} already registered.")
 
         # Registry.register()
         if name is not Null:
+            ensure_available(name)
             self.set(name, component)
             if default:
                 self.setdefault(component)
@@ -172,6 +182,7 @@ class Registry(NestedDict):
 
         # @Registry.register
         if component is not Null and callable(component) and name is Null:
+            ensure_available(component.__name__)
             self.set(component.__name__, component)
             if default:
                 self.setdefault(component)
@@ -181,10 +192,9 @@ class Registry(NestedDict):
         def decorator(name: Any = Null):
             @wraps(self.register)
             def wrapper(component):
-                if name is Null:
-                    self.set(component.__name__, component)
-                else:
-                    self.set(name, component)
+                resolved_name = component.__name__ if name is Null else name
+                ensure_available(resolved_name)
+                self.set(resolved_name, component)
                 if default:
                     self.setdefault(component)
                 return component
