@@ -681,8 +681,8 @@ class FlatDict(dict, metaclass=Dict):
         """
         # pylint: disable=C0103
 
-        interpolators = interpolators or self
-        flat_lookup = {str(k): v for k, v in self.all_items()}
+        interpolators = to_chanfig(interpolators) if interpolators is not None else self
+        flat_lookup = {str(k): v for k, v in interpolators.all_items()}
 
         def has_lookup(name: str) -> bool:
             return name in flat_lookup
