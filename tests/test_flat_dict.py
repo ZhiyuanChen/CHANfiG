@@ -216,6 +216,13 @@ def test_interpolate_mapping():
     assert d.cfg["name"] == d.foo
 
 
+def test_interpolate_with_external_mapping():
+    d = FlatDict(a="${x}")
+    d.interpolate({"x": 1})
+    assert isinstance(d.a, Variable)
+    assert d.a.value == 1
+
+
 def test_interpolate_relative_placeholder_non_string_key():
     d = FlatDict({1: "${.b}", "b": 2})
     with pytest.raises(ValueError, match="relative placeholder"):
