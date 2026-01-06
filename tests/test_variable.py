@@ -213,6 +213,23 @@ def test_copy_preserves_placeholder_and_resolver():
     assert v_deep.value == 2
 
 
+def test_copy_does_not_evaluate_resolver():
+    calls = {"count": 0}
+
+    def resolver():
+        calls["count"] += 1
+        return "1"
+
+    v = Variable(resolver=resolver)
+    v_copy = copy(v)
+    v_deep = deepcopy(v)
+
+    assert calls["count"] == 0
+    assert v_copy.value == 1
+    assert v_deep.value == 1
+    assert calls["count"] == 2
+
+
 def test_deepcopy_nested_value_isolated():
     v = Variable([1, [2]])
     v_deepcopy = deepcopy(v)

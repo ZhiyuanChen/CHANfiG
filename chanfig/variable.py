@@ -522,7 +522,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
 
     def __copy__(self):
         return Variable(
-            self.value,
+            self._storage[0],
             self._type,
             copy(self._choices) if self._choices is not None else None,
             self._validator,
@@ -534,7 +534,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
 
     def __deepcopy__(self, memo: Dict | None = None):
         return Variable(
-            deepcopy(self.value, memo),
+            deepcopy(self._storage[0], memo),
             self._type,
             deepcopy(self._choices, memo) if self._choices is not None else None,
             self._validator,
