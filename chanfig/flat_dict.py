@@ -25,6 +25,7 @@ from argparse import Namespace
 from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
+from functools import lru_cache
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -73,6 +74,11 @@ from .variable import Variable
 with try_import() as torch_import:
     from torch import device as TorchDevice
     from torch import dtype as TorchDType
+
+
+@lru_cache(maxsize=128)
+def _cached_class_dir(cls: type) -> frozenset[str]:
+    return frozenset(dir(cls))
 
 
 def set_item(obj: Mapping, key: Any, value: Any) -> None:
@@ -192,7 +198,7 @@ class FlatDict(dict, metaclass=Dict):
         if name in ("keys", "values", "items", "getattr", "setattr", "delattr", "hasattr", "repr", "extra_repr"):
             return super().__getattribute__(name)
         if (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__"))) and name in self:
-            if name in dir(self.__class__):
+            if name in _cached_class_dir(self.__class__):
                 value = super().__getattribute__(name)
                 if isinstance(value, (property, staticmethod, classmethod)) or callable(value):
                     return value
