@@ -246,6 +246,64 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         apply_(self, func, *args, **kwargs)
         return self
 
+    def _split_path(self, name: Any) -> tuple[list[str] | None, Any]:
+        separator = self.getattr("separator", ".")
+        parts = name.split(separator) if isinstance(name, str) else None
+        if parts and len(parts) > 1:
+            return parts, parts[-1]
+        if parts:
+            return parts, parts[0]
+        return None, name
+
+    def _resolve_target(
+        self,
+        name: Any,
+        *,
+        create_missing: bool = False,
+        resolve_properties: bool = False,
+        track_fallback: bool = False,
+        strict_existing: bool = False,
+    ) -> tuple[Any, Any, Any, Any]:
+        parts, leaf = NestedDict._split_path(self, name)
+        if not parts or len(parts) <= 1:
+            return self, leaf, Null, Null
+
+        current: Any = self
+        fallback_value: Any = Null
+        default_factory = self.getattr("default_factory", self.empty) or self.empty
+        for part in parts[:-1]:
+            if track_fallback and isinstance(current, Mapping) and leaf in current:
+                try:
+                    fallback_value = current.get(leaf)
+                except Exception:  # pragma: no cover - defensive
+                    fallback_value = current[leaf]
+
+            if (
+                resolve_properties
+                and part in dir(current)
+                and isinstance(getattr(current.__class__, part, None), (property, cached_property))
+            ):
+                current = getattr(current, part)
+            elif strict_existing:
+                if not isinstance(current, Mapping) or part not in current:
+                    return current, leaf, part, fallback_value
+                current = current[part]
+            elif create_missing and isinstance(current, Mapping) and part not in current:
+                current = (
+                    current.__missing__(part, default_factory())  # type: ignore[attr-defined]
+                    if hasattr(current, "__missing__")
+                    else default_factory()
+                )
+            else:
+                try:
+                    current = current[part]
+                except (KeyError, AttributeError, TypeError):
+                    return current, leaf, part, fallback_value
+
+            if isinstance(current, NestedDict):
+                default_factory = current.getattr("default_factory", self.empty) or self.empty
+        return current, leaf, Null, fallback_value
+
     def get(self, name: Any, default: Any = None, fallback: bool | None = None) -> Any:
         r"""
         Get value from `NestedDict`.
@@ -288,41 +346,27 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             AttributeError: 'dict' object has no attribute 'f'
         """
 
-        separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
         if fallback is None:
             fallback = self.getattr("fallback", False)
-        fallback_name = parts[-1] if parts else name
-        fallback_value = Null
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                if fallback and isinstance(current, Mapping) and fallback_name in current:
-                    try:
-                        fallback_value = current.get(fallback_name)
-                    except Exception:  # pragma: no cover - defensive
-                        fallback_value = current[fallback_name]
-                try:
-                    current = current[part]
-                except (KeyError, AttributeError, TypeError):
-                    if fallback and fallback_value is not Null:
-                        return fallback_value
-                    if default is not Null:
-                        return default
-                    raise KeyError(part) from None
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
-        if (fallback and fallback_value is not Null) and (not isinstance(self, Iterable) or name not in self):
+
+        target, key, missing_part, fallback_value = NestedDict._resolve_target(self, name, track_fallback=fallback)
+        if missing_part is not Null:
+            if fallback and fallback_value is not Null:
+                return fallback_value
+            if default is not Null:
+                return default
+            raise KeyError(missing_part) from None
+
+        if (fallback and fallback_value is not Null) and (not isinstance(target, Iterable) or key not in target):
             return fallback_value
-        if not isinstance(self, NestedDict):
-            if isinstance(self, Mapping):
-                if name not in self and default is not Null:
+
+        if not isinstance(target, NestedDict):
+            if isinstance(target, Mapping):
+                if key not in target and default is not Null:
                     return default
-                return self[name]
-            raise KeyError(name)
-        return super().get(name, default)
+                return target[key]
+            raise KeyError(key)
+        return FlatDict.get(target, key, default)
 
     def set(  # pylint: disable=W0221
         self,
@@ -373,41 +417,23 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             >>> d['e.f']['c.d']
             1
         """
-        # pylint: disable=W0642
-
         full_name = name
         separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
+        target, key, missing_part, _ = NestedDict._resolve_target(
+            self, name, create_missing=True, resolve_properties=True
+        )
+        if missing_part is not Null:
+            raise KeyError(missing_part) from None
+
         default_factory = self.getattr("default_factory", self.empty) or self.empty
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                if part in dir(current) and isinstance(getattr(current.__class__, part), (property, cached_property)):
-                    current = getattr(current, part)
-                elif part not in current and isinstance(current, Mapping):
-                    default = (
-                        current.__missing__(part, default_factory())  # type: ignore[attr-defined]
-                        if hasattr(current, "__missing__")
-                        else default_factory()
-                    )
-                    current = default
-                else:
-                    try:
-                        current = current[part]
-                    except Exception:  # pragma: no cover - defensive fallback
-                        raise KeyError(part) from None
-                if isinstance(current, NestedDict):
-                    default_factory = current.getattr("default_factory", self.empty) or self.empty
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
+        if isinstance(target, NestedDict):
+            default_factory = target.getattr("default_factory", self.empty) or self.empty
 
         if (
             convert_mapping
-            and not isinstance(value, default_factory if isinstance(default_factory, type) else type(self))
+            and not isinstance(value, default_factory if isinstance(default_factory, type) else type(target))
             and not isinstance(value, Variable)
         ):
             if isinstance(value, Mapping):
@@ -421,14 +447,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                 value = tuple(default_factory(v) if isinstance(v, Mapping) else v for v in value)
             if isinstance(value, set):
                 value = {default_factory(v) if isinstance(v, Mapping) else v for v in list(value)}
-        if isinstance(self, NestedDict):
-            super().set(name, value)
-        elif isinstance(self, Mapping):
-            dict.__setitem__(self, name, value)
+        if isinstance(target, NestedDict):
+            FlatDict.set(target, key, value)
+        elif isinstance(target, dict):
+            dict.__setitem__(target, key, value)
         else:
-            raise ValueError(
-                f"Cannot set `{full_name}` to `{value}`, as `{separator.join(full_name.split(separator)[:-1])}={self}`."
-            )
+            path = separator.join(full_name.split(separator)[:-1]) if isinstance(full_name, str) else full_name
+            raise ValueError(f"Cannot set `{full_name}` to `{value}`, as `{path}={target}`.")
 
     def delete(self, name: Any) -> None:
         r"""
@@ -465,24 +490,14 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             >>> del d['e.a.b']
         """
 
-        separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                try:
-                    current = current[part]
-                except (AttributeError, TypeError, KeyError):
-                    raise KeyError(part) from None
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
-        # if value is a python dict
-        if not isinstance(self, NestedDict):
-            del self[name]
+        target, key, missing_part, _ = NestedDict._resolve_target(self, name, strict_existing=True)
+        if missing_part is not Null:
+            raise KeyError(missing_part) from None
+
+        if not isinstance(target, NestedDict):
+            del target[key]
             return
-        super().delete(name)
+        dict.__delitem__(target, key)
 
     def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
@@ -505,24 +520,14 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             KeyError: 'f'
         """
 
-        separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                try:
-                    current = current[part]
-                except (AttributeError, TypeError, KeyError):
-                    raise KeyError(part) from None
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
-        if not isinstance(self, dict) or name not in self:
+        target, key, missing_part, _ = NestedDict._resolve_target(self, name)
+        if missing_part is not Null:
+            raise KeyError(missing_part) from None
+        if not isinstance(target, dict) or key not in target:
             if default is not Null:
                 return default
-            raise KeyError(name)
-        return super().pop(name)
+            raise KeyError(key)
+        return dict.pop(target, key)
 
     def setdefault(  # type: ignore[override]  # pylint: disable=R0912,W0221
         self,
@@ -550,61 +555,42 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             >>> d.setdefault("n.a.b.d", 2)
             2
         """
-        # pylint: disable=W0642
-
         full_name = name
         separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
-        default_factory = self.getattr("default_factory", self.empty) or self.empty
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                if part in dir(current) and isinstance(getattr(current.__class__, part), (property, cached_property)):
-                    current = getattr(current, part)
-                elif part not in current and isinstance(current, Mapping):
-                    default = (
-                        current.__missing__(part, default_factory())  # type: ignore[attr-defined]
-                        if hasattr(current, "__missing__")
-                        else default_factory()
-                    )
-                    current = default
-                else:
-                    try:
-                        current = current[part]
-                    except Exception:
-                        raise KeyError(part) from None
-                if isinstance(current, NestedDict):
-                    default_factory = current.getattr("default_factory", self.empty) or self.empty
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
+        target, key, missing_part, _ = NestedDict._resolve_target(
+            self, name, create_missing=True, resolve_properties=True
+        )
+        if missing_part is not Null:
+            raise KeyError(missing_part) from None
 
-        if isinstance(self, NestedDict) and name in self:
-            return super().get(name)
-        elif isinstance(self, Mapping) and name in self:
-            return dict.__getitem__(self, name)
+        if isinstance(target, NestedDict) and key in target:
+            return FlatDict.get(target, key)
+        if isinstance(target, Mapping) and key in target:
+            return target[key]
+
+        default_factory = self.getattr("default_factory", self.empty) or self.empty
+        if isinstance(target, NestedDict):
+            default_factory = target.getattr("default_factory", self.empty) or self.empty
 
         if (
             convert_mapping
             and isinstance(value, Mapping)
-            and not isinstance(value, default_factory if isinstance(default_factory, type) else type(self))
+            and not isinstance(value, default_factory if isinstance(default_factory, type) else type(target))
             and not isinstance(value, Variable)
         ):
             try:
                 value = default_factory(**value)
             except TypeError:
                 value = default_factory(value)
-        if isinstance(self, NestedDict):
-            super().set(name, value)
-        elif isinstance(self, Mapping):
-            dict.__setitem__(self, name, value)
+        if isinstance(target, NestedDict):
+            FlatDict.set(target, key, value)
+        elif isinstance(target, dict):
+            dict.__setitem__(target, key, value)
         else:
-            raise ValueError(
-                f"Cannot set `{full_name}` to `{value}`, as `{separator.join(full_name.split(separator)[:-1])}={self}`."
-            )
+            path = separator.join(full_name.split(separator)[:-1]) if isinstance(full_name, str) else full_name
+            raise ValueError(f"Cannot set `{full_name}` to `{value}`, as `{path}={target}`.")
         return value
 
     def validate(self) -> None:
@@ -783,22 +769,14 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             self.setattr("convert_mapping", convert_mapping)
 
     def __contains__(self, name: Any) -> bool:
-        separator = self.getattr("separator", ".")
-        parts = name.split(separator) if isinstance(name, str) else None
-        if parts and len(parts) > 1:
-            current = self
-            for part in parts[:-1]:
-                try:
-                    if not isinstance(current, Mapping) or part not in current:
-                        return False
-                    current = current[part]
-                except Exception:
-                    return False
-            name = parts[-1]
-            self = current  # pylint: disable=W0642
-        elif parts:
-            name = parts[0]
+        target, key, missing_part, _ = NestedDict._resolve_target(self, name, strict_existing=True)
+        if missing_part is not Null:
+            return False
         try:
-            return super().__contains__(name)
+            if isinstance(target, NestedDict):
+                return dict.__contains__(target, key)
+            if isinstance(target, Mapping):
+                return key in target
+            return False
         except (TypeError, KeyError):
             return False

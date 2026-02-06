@@ -193,6 +193,26 @@ def test_copy_class_attributes_non_recursive_and_property_resolution():
     assert obj.prop() == "prop"
 
 
+def test_mutable_class_defaults_are_isolated_per_instance():
+    class MutableDefaults(FlatDict):
+        tags: list[str] = []
+        metadata: dict[str, list[int]] = {"ids": []}
+
+    left = MutableDefaults()
+    right = MutableDefaults()
+
+    left.tags.append("left")
+    left.metadata["ids"].append(1)
+
+    assert left.tags == ["left"]
+    assert right.tags == []
+    assert left.tags is not right.tags
+    assert left.metadata == {"ids": [1]}
+    assert right.metadata == {"ids": []}
+    assert left.metadata is not right.metadata
+    assert left.metadata["ids"] is not right.metadata["ids"]
+
+
 def test_set_null_name_raises():
     with pytest.raises(ValueError):
         FlatDict().set(Null, 1)
@@ -221,6 +241,23 @@ def test_interpolate_with_external_mapping():
     d.interpolate({"x": 1})
     assert isinstance(d.a, Variable)
     assert d.a.value == 1
+
+
+def test_interpolate_mixed_placeholders_in_containers():
+    d = FlatDict(a=1, b=2, list_values=["${a}", "${b}"], dict_values={"x": "${a}", "y": "${b}"})
+    d.interpolate()
+
+    assert d.list_values[0] == 1
+    assert d.list_values[1] == 2
+    assert d.dict_values["x"] == 1
+    assert d.dict_values["y"] == 2
+
+    d.a += 1
+    d.b += 1
+    assert d.list_values[0] == 2
+    assert d.list_values[1] == 3
+    assert d.dict_values["x"] == 2
+    assert d.dict_values["y"] == 3
 
 
 def test_interpolate_relative_placeholder_non_string_key():

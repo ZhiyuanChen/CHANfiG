@@ -172,36 +172,36 @@ class Registry(NestedDict):
             if normalized in self and not override_allowed:
                 raise ValueError(f"Component with name {key} already registered.")
 
-        # Registry.register()
-        if name is not Null:
-            ensure_available(name)
-            self.set(name, component)
+        def register_component(component_: Any, name_: Any) -> Any:
+            ensure_available(name_)
+            self.set(name_, component_)
             if default:
-                self.setdefault(component)
-            return component
+                self.setdefault(component_)
+            return component_
 
-        # @Registry.register
-        if component is not Null and callable(component) and name is Null:
-            ensure_available(component.__name__)
-            self.set(component.__name__, component)
-            if default:
-                self.setdefault(component)
-            return component
+        # Registry.register(component) / Registry.register(component, name=...)
+        if component is not Null and callable(component):
+            resolved_name = component.__name__ if name is Null else name
+            return register_component(component, resolved_name)
+
+        # Registry.register(component, name=...) for non-callable component
+        if component is not Null and name is not Null:
+            return register_component(component, name)
+
+        # @Registry.register("Name")
+        if component is not Null and name is Null:
+            name = component
 
         # @Registry.register()
-        def decorator(name: Any = Null):
+        def decorator(component_: Any):
             @wraps(self.register)
-            def wrapper(component):
-                resolved_name = component.__name__ if name is Null else name
-                ensure_available(resolved_name)
-                self.set(resolved_name, component)
-                if default:
-                    self.setdefault(component)
-                return component
+            def wrapper():
+                resolved_name = component_.__name__ if name is Null else name
+                return register_component(component_, resolved_name)
 
-            return wrapper
+            return wrapper()
 
-        return decorator(component)
+        return decorator
 
     def set(self, name: Any, component: Any) -> None:  # type: ignore[override]
         if isinstance(name, str) and not self.getattr("case_sensitive", False):
