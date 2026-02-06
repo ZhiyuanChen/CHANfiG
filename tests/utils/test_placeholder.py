@@ -38,3 +38,4 @@ def test_find_circular_reference():
     assert find_circular_reference({}) is None
     result = find_circular_reference({"a": ["b"], "b": ["a"], "c": ["d"], "d": ["c"]})
     assert result in [["a", "b", "a"], ["c", "d", "c"]]
+    assert find_circular_reference({"a": ["b", "c"], "b": [], "c": ["a"]}) == ["a", "c", "a"]

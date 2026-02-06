@@ -55,3 +55,13 @@ def test_register_case_insensitive_duplicate_auto_name():
     registry.register(Foo)
     with pytest.raises(ValueError):
         registry.register(FOO)
+
+
+def test_register_named_decorator():
+    registry = Registry()
+
+    @registry.register(name="NamedModule")
+    class Module:
+        pass
+
+    assert Module is registry.lookup("NamedModule")

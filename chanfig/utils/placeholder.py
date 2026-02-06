@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import Any
 
 
 def find_placeholders(text: str) -> list[str]:
@@ -71,19 +72,34 @@ def find_circular_reference(graph: Mapping) -> list[str] | None:
     in a graph represented as a mapping of nodes to their dependencies.
     """
 
-    def dfs(node, visited, path):  # pylint: disable=R1710
-        path.append(node)
+    visited: set[Any] = set()
+    path: list[Any] = []
+    path_indices: dict[Any, int] = {}
+
+    def dfs(node):
+        if node in path_indices:
+            cycle_start = path_indices[node]
+            return path[cycle_start:] + [node]
         if node in visited:
-            return path
-        visited.add(node)
+            return None
+
+        path_indices[node] = len(path)
+        path.append(node)
+
         for child in graph.get(node, []):
-            result = dfs(child, visited, path)
+            result = dfs(child)
             if result is not None:
                 return result
-        visited.remove(node)
+
+        path.pop()
+        path_indices.pop(node, None)
+        visited.add(node)
+        return None
 
     for key in graph:
-        result = dfs(key, set(), [])
+        if key in visited:
+            continue
+        result = dfs(key)
         if result is not None:
             return result
 

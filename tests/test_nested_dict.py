@@ -156,6 +156,13 @@ def test_delete_plain_dict_branch():
     assert "plain" not in d
 
 
+def test_pop_plain_dict_branch():
+    d = NestedDict()
+    d["plain"] = {"k": 1}
+    assert d.pop("plain.k") == 1
+    assert d.plain == {}
+
+
 def test_contains_nested_path():
     d = NestedDict({"a.b": 1})
     assert "a.b" in d

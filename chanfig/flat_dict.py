@@ -178,7 +178,16 @@ class FlatDict(dict, metaclass=Dict):
             annos = get_cached_annotations(cls)
             if not annos:
                 return {}
-            return {k: cls.__dict__[k] for k in annos.keys() if k in cls.__dict__}
+
+            def copy_default(value: Any) -> Any:
+                # Ensure mutable defaults declared at class scope are not shared across instances.
+                with suppress(Exception):
+                    return deepcopy(value)
+                with suppress(Exception):
+                    return copy(value)
+                return value
+
+            return {k: copy_default(cls.__dict__[k]) for k in annos.keys() if k in cls.__dict__}
 
         if recursive:
             for cls in self.__class__.__mro__:
@@ -703,21 +712,28 @@ class FlatDict(dict, metaclass=Dict):
             flat_lookup[name] = value
             self.set(name, value)
 
-        placeholders: dict[str, list[str]] = {}
+        placeholders: dict[Any, list[str]] = {}
+        placeholder_entries: list[tuple[Any, Any, str, list[str]]] = []
 
-        def collect(k, v):
+        def collect(k: Any, v: Any, item_key: Any = Null) -> None:
             if isinstance(v, str) and "$" in v:
-                self.find_placeholders(k, v, placeholders)
+                value_names = self.find_placeholders(k, v)
+                if value_names:
+                    deps = placeholders.setdefault(k, [])
+                    for dep in value_names:
+                        if dep not in deps:
+                            deps.append(dep)
+                    placeholder_entries.append((k, item_key, v, value_names))
 
         for key, value in self.all_items():
             if isinstance(value, list):
-                for v in value:
-                    collect(key, v)
+                for index, v in enumerate(value):
+                    collect(key, v, index)
             elif isinstance(value, Mapping):
-                for v in value.values():
-                    collect(key, v)
+                for subkey, v in value.items():
+                    collect(key, v, subkey)
             else:
-                collect(key, value)
+                collect(key, value, Null)
         circular_references = find_circular_reference(placeholders)
         if circular_references:
             raise ValueError(f"Circular reference found: {'->'.join(circular_references)}.")
@@ -751,20 +767,19 @@ class FlatDict(dict, metaclass=Dict):
 
             return Variable(resolver=resolver, placeholder=placeholder_str)
 
-        for key, value in placeholders.items():
-            if isinstance(self[key], list):
-                for index, v in enumerate(self[key]):
-                    self[key][index] = substitute(v, value)
-            elif isinstance(self[key], Mapping):
-                for k, v in self[key].items():
-                    self[key][k] = substitute(v, value)
+        for key, item_key, placeholder_str, value_names in placeholder_entries:
+            replacement = substitute(placeholder_str, value_names)
+            if item_key is Null:
+                self[key] = replacement
+            elif isinstance(self[key], (list, Mapping)):
+                self[key][item_key] = replacement
             else:
-                self[key] = substitute(self[key], value)
+                self[key] = replacement
             flat_lookup[str(key)] = self[key]
         return self
 
     @staticmethod
-    def find_placeholders(key, value, placeholders):
+    def find_placeholders(key, value, placeholders=None):
         placeholder = find_placeholders(value)
         if placeholder:
             for index, name in enumerate(placeholder):
@@ -775,7 +790,9 @@ class FlatDict(dict, metaclass=Dict):
                         raise ValueError(f"Cannot resolve relative placeholder {name!r} for non-string key {key!r}.")
                 if key == name:
                     raise ValueError(f"Cannot interpolate {key} to itself.")
-            placeholders[key] = placeholder
+            if placeholders is not None:
+                placeholders[key] = placeholder
+        return placeholder
 
     def merge(self, *args: Any, overwrite: bool = True, **kwargs: Any) -> Self:
         r"""
