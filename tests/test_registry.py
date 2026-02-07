@@ -21,6 +21,7 @@
 import pytest
 
 from chanfig import ConfigRegistry as Registry_
+from chanfig.registry import Registry as BaseRegistry
 
 
 class Registry(Registry_):
@@ -65,3 +66,24 @@ def test_register_named_decorator():
         pass
 
     assert Module is registry.lookup("NamedModule")
+
+
+def test_registry_init_preserves_var_kwargs():
+    class Module:
+        def __init__(self, a, **kwargs):
+            self.a = a
+            self.kwargs = kwargs
+
+    module = BaseRegistry.init(Module, a=1, b=2, c=3)
+    assert module.a == 1
+    assert module.kwargs == {"b": 2, "c": 3}
+
+
+def test_registry_init_warns_without_var_kwargs():
+    class Module:
+        def __init__(self, a):
+            self.a = a
+
+    with pytest.warns(UserWarning, match="will be ignored"):
+        module = BaseRegistry.init(Module, a=1, b=2)
+    assert module.a == 1
