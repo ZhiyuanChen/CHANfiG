@@ -474,12 +474,12 @@ class ConfigRegistry(Registry):
         """
 
         key = self.getattr("key")
-        config_ = deepcopy(config)
+        parts = key.split(".")
+        config_ = config
 
-        while "." in key:
-            key, rest = key.split(".", 1)
-            config_, key = getattr(config_, key), rest
-        name = getattr(config_, key, None)
+        for part in parts[:-1]:
+            config_ = getattr(config_, part)
+        name = getattr(config_, parts[-1], None)
 
         return self.init(self.lookup(name), config, *args, **kwargs)  # type: ignore[arg-type]
 

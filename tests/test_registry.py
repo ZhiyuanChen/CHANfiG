@@ -87,3 +87,27 @@ def test_registry_init_warns_without_var_kwargs():
     with pytest.warns(UserWarning, match="will be ignored"):
         module = BaseRegistry.init(Module, a=1, b=2)
     assert module.a == 1
+
+
+def test_config_registry_build_avoids_deepcopy():
+    registry = Registry_(key="module.mode")
+
+    @registry.register("proj")
+    class Proj:
+        def __init__(self, config):
+            self.config = config
+
+    class ModuleConfig:
+        mode = "proj"
+
+    class NonDeepcopyableConfig:
+        def __init__(self):
+            self.module = ModuleConfig()
+
+        def __deepcopy__(self, memo):
+            raise RuntimeError("deepcopy should not be called")
+
+    config = NonDeepcopyableConfig()
+    module = registry.build(config)
+    assert isinstance(module, Proj)
+    assert module.config is config
