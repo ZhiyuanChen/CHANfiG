@@ -175,7 +175,7 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         def copy_cls_attributes(cls: type) -> Mapping:
-            annos = get_cached_annotations(cls)
+            annos = get_cached_annotations(cls, copy=False)
             if not annos:
                 return {}
 
@@ -206,12 +206,17 @@ class FlatDict(dict, metaclass=Dict):
     def __getattribute__(self, name: Any) -> Any:
         if name in ("keys", "values", "items", "getattr", "setattr", "delattr", "hasattr", "repr", "extra_repr"):
             return super().__getattribute__(name)
-        if (name not in ("getattr",) and not (name.startswith("__") and name.endswith("__"))) and name in self:
-            if name in _cached_class_dir(self.__class__):
-                value = super().__getattribute__(name)
-                if isinstance(value, (property, staticmethod, classmethod)) or callable(value):
-                    return value
-            return self.get(name)
+        if name not in ("getattr",) and not (name.startswith("__") and name.endswith("__")):
+            try:
+                has_key = dict.__contains__(self, name)
+            except TypeError:
+                has_key = False
+            if has_key:
+                if name in _cached_class_dir(self.__class__):
+                    value = super().__getattribute__(name)
+                    if isinstance(value, (property, staticmethod, classmethod)) or callable(value):
+                        return value
+                return self.get(name)
         return super().__getattribute__(name)
 
     def get(self, name: Any, default: Any = None) -> Any:
@@ -283,7 +288,7 @@ class FlatDict(dict, metaclass=Dict):
             self.get(name).set(value)
             return
 
-        annotations = get_cached_annotations(self)
+        annotations = get_cached_annotations(self, copy=False)
         anno = annotations.get(name, Any)
 
         if anno is not Any:
@@ -366,7 +371,7 @@ class FlatDict(dict, metaclass=Dict):
     @staticmethod
     def _validate(obj) -> None:
         if isinstance(obj, FlatDict):
-            annos = get_cached_annotations(obj)
+            annos = get_cached_annotations(obj, copy=False)
             for name, value in obj.items():
                 if annos and name in annos and not conform_annotation(value, annos[name]):
                     raise TypeError(f"'{name}' has invalid type. Value {value!r} is not of type {annos[name]!r}.")
@@ -415,7 +420,7 @@ class FlatDict(dict, metaclass=Dict):
             if name in self.__dict__:
                 return self.__dict__[name]
             for cls in self.__class__.__mro__:
-                annos = get_cached_annotations(cls)
+                annos = get_cached_annotations(cls, copy=False)
                 if name in cls.__dict__ and name not in annos:
                     return cls.__dict__[name]
             return super().getattr(name, default)  # type: ignore[misc]

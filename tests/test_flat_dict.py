@@ -195,8 +195,8 @@ def test_copy_class_attributes_non_recursive_and_property_resolution():
 
 def test_mutable_class_defaults_are_isolated_per_instance():
     class MutableDefaults(FlatDict):
-        tags: list[str] = []
-        metadata: dict[str, list[int]] = {"ids": []}
+        tags: List[str] = []
+        metadata: Dict[str, List[int]] = {"ids": []}
 
     left = MutableDefaults()
     right = MutableDefaults()

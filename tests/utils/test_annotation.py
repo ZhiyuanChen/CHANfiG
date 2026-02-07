@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import pytest
 
-from chanfig.utils.annotation import conform_annotation, get_annotations, honor_annotation
+from chanfig.utils.annotation import conform_annotation, get_annotations, get_cached_annotations, honor_annotation
 
 
 class TestClass:
@@ -141,6 +141,20 @@ def test_get_annotations_partial_function():
     partial_func = partial(func, a=10)
     result = get_annotations(partial_func)
     assert isinstance(result, dict)
+
+
+def test_get_cached_annotations_copy_modes():
+    class AnnotatedClass:
+        value: int
+
+    copied = get_cached_annotations(AnnotatedClass)
+    copied["value"] = str
+    assert get_cached_annotations(AnnotatedClass)["value"] is int
+
+    cached_view = get_cached_annotations(AnnotatedClass, copy=False)
+    assert cached_view["value"] is int
+    with pytest.raises(TypeError):
+        cached_view["value"] = str
 
 
 def test_honor_annotation_basic_types():
