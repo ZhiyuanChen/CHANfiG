@@ -23,7 +23,7 @@ import sys
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
 from functools import lru_cache, partial
-from types import ModuleType
+from types import MappingProxyType, ModuleType
 from typing import Any, Union, no_type_check
 
 import typing_extensions
@@ -183,26 +183,32 @@ def get_annotations(  # pylint: disable=all
 
 @lru_cache(maxsize=512)
 def _cached_annotations_for_class(cls: type) -> Mapping:
-    return get_annotations(cls)
+    return MappingProxyType(get_annotations(cls))
 
 
-def get_cached_annotations(obj) -> Mapping:
+def get_cached_annotations(obj, copy: bool = True) -> Mapping:
     """
     Lightweight cached wrapper around `get_annotations` keyed by class.
 
-    The returned mapping is copied to preserve the original `get_annotations` contract
-    of producing a fresh dict for each call.
+    By default, the returned mapping is copied to preserve the original
+    `get_annotations` contract of producing a fresh dict for each call.
+    Internal callers may set `copy=False` to retrieve a read-only cached mapping
+    and avoid per-call dict allocations in hot paths.
     """
 
     try:
         cls = obj if isinstance(obj, type) else obj.__class__
     except Exception:
-        return get_annotations(obj)
+        annotations = get_annotations(obj)
+        return dict(annotations) if copy else annotations
     try:
         cached = _cached_annotations_for_class(cls)
     except TypeError:
-        return get_annotations(obj)
-    return dict(cached)
+        annotations = get_annotations(obj)
+        return dict(annotations) if copy else annotations
+    if copy:
+        return dict(cached)
+    return cached
 
 
 def honor_annotation(data: Any, annotation: type) -> Any:
