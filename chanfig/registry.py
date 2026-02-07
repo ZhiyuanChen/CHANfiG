@@ -22,7 +22,7 @@ from __future__ import annotations
 from collections.abc import Callable, MutableMapping
 from copy import deepcopy
 from functools import wraps
-from inspect import signature
+from inspect import Parameter, signature
 from typing import Any
 from warnings import warn
 
@@ -273,6 +273,10 @@ class Registry(NestedDict):
         """
 
         sig = signature(cls)
+        has_var_keyword = any(parameter.kind == Parameter.VAR_KEYWORD for parameter in sig.parameters.values())
+        if has_var_keyword:
+            return cls(*args, **kwargs)
+
         ignored_kwargs, passing_kwargs = {}, {}
         for k, v in kwargs.items():
             if k in sig.parameters:
