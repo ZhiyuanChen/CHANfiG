@@ -72,6 +72,7 @@ from .utils import (
 from .variable import Variable
 
 with try_import() as torch_import:
+    from torch import Tensor as TorchTensor
     from torch import device as TorchDevice
     from torch import dtype as TorchDType
 
@@ -971,12 +972,12 @@ class FlatDict(dict, metaclass=Dict):
         """
         return self.difference(other, *args, **kwargs)
 
-    def to(self, cls: str | TorchDevice | TorchDType) -> Self:  # pragma: no cover
+    def to(self, dest: str | TorchDevice | TorchDType, non_blocking: bool = True) -> Self:  # pragma: no cover
         r"""
-        Convert values of `FlatDict` to target `cls`.
+        Convert values of `FlatDict` to target `dest`.
 
         Args:
-            cls (str | torch.device | torch.dtype):
+            dest (str | torch.device | torch.dtype):
 
         Examples:
             >>> d = FlatDict(a=1, b=2, c=3)
@@ -987,14 +988,13 @@ class FlatDict(dict, metaclass=Dict):
 
         # pylint: disable=C0103
 
-        torch_import.check()
-        if isinstance(cls, (str, TorchDevice, TorchDType)):
+        if isinstance(dest, (str, TorchDevice, TorchDType)):
             for k, v in self.all_items():
-                if hasattr(v, "to"):
-                    self[k] = v.to(cls)
+                if isinstance(v, TorchTensor):
+                    self[k] = v.to(dest, non_blocking=non_blocking)
             return self
 
-        raise TypeError(f"to() only support torch.dtype and torch.device, but got {cls}.")
+        raise TypeError(f"to() only support torch.dtype and torch.device, but got {dest}.")
 
     def cpu(self) -> Self:  # pragma: no cover
         r"""
