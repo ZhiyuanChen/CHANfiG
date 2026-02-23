@@ -19,11 +19,14 @@
 
 import json
 import os
+from pathlib import Path
 
 from pytest import raises
 
 from chanfig import FlatDict
 from chanfig.io import JsonEncoder, YamlDumper, YamlLoader, load, save
+
+TESTS_DIR = Path(__file__).resolve().parent
 
 
 def _toml_writer_available():
@@ -48,22 +51,25 @@ def test_yaml_dumper():
     )
 
 
-def test_yaml_loader():
-    test_yaml = """
-    include: !include tests/test.yaml
-    includes: !includes [tests/parent.yaml, tests/child.yaml]
+def test_yaml_loader(tmp_path):
+    include_path = TESTS_DIR / "test.yaml"
+    parent_path = TESTS_DIR / "parent.yaml"
+    child_path = TESTS_DIR / "child.yaml"
+
+    test_yaml = f"""
+    include: !include "{include_path}"
+    includes: !includes ["{parent_path}", "{child_path}"]
     env: !env HOME
     """
-    save(FlatDict.from_yamls(test_yaml), "test_include.yaml")
+    include_output = tmp_path / "test_include.yaml"
+    save(FlatDict.from_yamls(test_yaml), include_output)
 
-    with open("test_include.yaml") as f:
+    with include_output.open() as f:
         loader = YamlLoader(f)
     data = loader.get_data()
 
     assert data["env"] == os.environ["HOME"]
-    assert data["include"] == load("tests/test.yaml")
-
-    os.remove("test_include.yaml")
+    assert data["include"] == load(include_path)
 
 
 def test_json_encoder():
@@ -89,26 +95,26 @@ def test_json_encoder():
         json.dumps(reg_obj, cls=JsonEncoder)
 
 
-def test_list():
-    list = [1, 2, 3]
-    save(list, "test.yaml")
-    assert load("test.yaml") == list
-    os.remove("test.yaml")
+def test_list(tmp_path):
+    data = [1, 2, 3]
+    output = tmp_path / "test.yaml"
+    save(data, output)
+    assert load(output) == data
 
 
-def test_list_dict():
-    list = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
-    save(list, "test.yaml")
-    assert load("test.yaml") == list
-    os.remove("test.yaml")
+def test_list_dict(tmp_path):
+    data = [{"a": 1, "b": 2}, {"c": 3, "d": 4}]
+    output = tmp_path / "test.yaml"
+    save(data, output)
+    assert load(output) == data
 
 
-def test_toml_save_and_load():
+def test_toml_save_and_load(tmp_path):
     data = {"a": 1, "b": 2}
+    output = tmp_path / "test.toml"
     if _toml_writer_available():
-        save(data, "test.toml")
-        assert load("test.toml") == data
-        os.remove("test.toml")
+        save(data, output)
+        assert load(output) == data
     else:
         with raises(TypeError, match="TOML"):
-            save(data, "test.toml")
+            save(data, output)

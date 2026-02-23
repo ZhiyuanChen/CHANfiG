@@ -263,9 +263,8 @@ class Registry(NestedDict):
             <class 'chanfig.registry.Module'>
             >>> module.a, module.b
             (0, 1)
-            >>> kwargs = {"a": 1, "b": 0, "enabled": True}
-            >>> if kwargs.get("enabled"):
-            ...     module = Registry.init(Module, **kwargs)
+            >>> kwargs = {"a": 1, "b": 0}
+            >>> module = Registry.init(Module, **kwargs)
             >>> type(module)
             <class 'chanfig.registry.Module'>
             >>> module.a, module.b

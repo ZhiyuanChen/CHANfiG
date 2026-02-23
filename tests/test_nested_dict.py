@@ -23,20 +23,25 @@ import pytest
 
 from chanfig import NestedDict, Variable
 
-dict_test = NestedDict({"i.d": 1016, "f.n": "chang"})
+
+def build_dict_test():
+    return NestedDict({"i.d": 1016, "f.n": "chang"})
 
 
 def test_dict():
+    dict_test = build_dict_test()
     assert dict_test == NestedDict({"i.d": 1016, "f.n": "chang"})
     assert dict_test == NestedDict(**{"i.d": 1016, "f.n": "chang"})
 
 
 def test_list():
+    dict_test = build_dict_test()
     assert dict_test == NestedDict([("i.d", 1016), ("f.n", "chang")])
     assert dict_test == NestedDict(*[("i.d", 1016), ("f.n", "chang")])
 
 
 def test_contains():
+    dict_test = build_dict_test()
     assert "f" in dict_test
     assert "f.n" in dict_test
     assert "n.f" not in dict_test
@@ -44,6 +49,7 @@ def test_contains():
 
 
 def test_sub_dict():
+    dict_test = build_dict_test()
     dict_test["n"] = {}
     dict_test["n.l"] = "liu"
     assert dict_test["n.l"] == "liu"
@@ -117,10 +123,8 @@ class ConfigDict(NestedDict):
         self.d = NestedDict(a=self.a)
 
 
-config_dict = ConfigDict()
-
-
 def test_affinty():
+    config_dict = ConfigDict()
     assert id(config_dict.a) == id(config_dict.b.a) == id(config_dict.c.a) == id(config_dict.d.a)
 
 
