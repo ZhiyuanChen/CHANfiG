@@ -15,7 +15,7 @@ keywords = [
   "dict",
   "machine-learning",
 ]
-license = { file = "LICENSE" }
+license = { text = "Unlicense OR AGPL-3.0-or-later OR GPL-2.0-or-later OR BSD-4-Clause OR MIT OR Apache-2.0" }
 maintainers = [
   { name = "Zhiyuan Chen", email = "this@zyc.ai" },
 ]
@@ -54,7 +54,7 @@ urls.homepage = "https://chanfig.danling.org"
 urls.repository = "https://github.com/ZhiyuanChen/CHANfiG"
 
 [tool.setuptools]
-packages = [ "chanfig" ]
+packages.find.include = [ "chanfig*" ]
 
 [tool.setuptools_scm]
 write_to = "chanfig/_version.py"
@@ -69,42 +69,28 @@ profile = "black"
 [tool.flake8]
 max-line-length = 120
 
-[tool.pylint.format]
-max-line-length = 120
-
-[tool.pylint.messages_control]
-disable = """
+[tool.pylint]
+format.max-line-length = 120
+main.fail-under = 9.8
+messages_control.disable = """
   E0012,
   E0401,
   R0201,
   R0801,
 """
+reports.output-format = "colorized"
 
-[tool.pylint.reports]
-output-format = "colorized"
+[tool.pytest]
+addopts = [ "--doctest-modules", "--cov" ]
 
-[tool.pylint.main]
-fail-under = 9.8
-
-[tool.pytest.ini_options]
-addopts = "--doctest-modules --cov"
-
-[tool.coverage.run]
-branch = true
-include = [ "chanfig/**" ]
-
-[tool.coverage.paths]
-source = [ "chanfig" ]
-
-[tool.coverage.xml]
-output = "coverage.xml"
-
-[tool.coverage.json]
-output = "coverage.json"
-
-[tool.coverage.report]
-show_missing = true
-fail_under = 80
+[tool.coverage]
+run.branch = true
+run.source = [ "chanfig" ]
+paths.source = [ "chanfig" ]
+report.fail_under = 80
+report.show_missing = true
+json.output = "coverage.json"
+xml.output = "coverage.xml"
 
 [tool.mypy]
 ignore_missing_imports = true

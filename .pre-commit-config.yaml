@@ -2,12 +2,12 @@ default_language_version:
   python: python3
 repos:
   - repo: https://github.com/PSF/black
-    rev: 25.12.0
+    rev: 26.1.0
     hooks:
       - id: black
         args: [--safe, --quiet]
   - repo: https://github.com/PyCQA/isort
-    rev: 7.0.0
+    rev: 8.0.0
     hooks:
       - id: isort
         name: isort
@@ -25,7 +25,7 @@ repos:
       - id: pyupgrade
         args: [--keep-runtime-typing]
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.11.1
+    rev: v2.16.2
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/pre-commit/mirrors-mypy
