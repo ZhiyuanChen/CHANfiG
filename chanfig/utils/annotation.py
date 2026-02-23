@@ -149,7 +149,7 @@ def get_annotations(  # pylint: disable=all
                 continue
             break
         if hasattr(unwrap, "__globals__"):
-            obj_globalns = unwrap.__globals__
+            obj_globalns = unwrap.__globals__ or {}
 
     # globalns = GLOBAL_NS | globalns if globalns is not None else obj_globalns
     if globalns is None:
