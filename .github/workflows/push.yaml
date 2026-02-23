@@ -11,7 +11,7 @@ jobs:
           cache: "pip"
       - uses: pre-commit/action@v3.0.1
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     environment: test
     strategy:
       matrix:
@@ -27,7 +27,7 @@ jobs:
       - name: Install module
         run: pip install -r requirements.txt && pip install -e .
       - name: pytest
-        run: pytest --cov=materiaslx --cov-report=xml --cov-report=html .
+        run: pytest --cov --cov-report=xml --cov-report=html .
       - name: Upload coverage report for documentation
         uses: actions/upload-artifact@v4
         if: matrix.python-version == '3.14'
