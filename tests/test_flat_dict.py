@@ -25,6 +25,7 @@ from argparse import ArgumentParser
 from builtins import PendingDeprecationWarning
 from copy import copy, deepcopy
 from io import StringIO
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
@@ -32,6 +33,8 @@ import pytest
 from chanfig import FlatDict, Variable
 from chanfig.io import YamlLoader
 from chanfig.utils import Null
+
+TESTS_DIR = Path(__file__).resolve().parent
 
 
 def _toml_writer_available():
@@ -131,7 +134,7 @@ def test_validate():
 
 
 def test_construct_file():
-    d = FlatDict("tests/test.json")
+    d = FlatDict(TESTS_DIR / "test.json")
     assert d == FlatDict({"a": 1, "b": 2, "c": 3})
 
 
@@ -269,7 +272,7 @@ def test_interpolate_relative_placeholder_non_string_key():
 def test_merge_from_path_emits_warning():
     d = FlatDict()
     with pytest.warns(PendingDeprecationWarning):
-        d.merge("tests/test.yaml")
+        d.merge(TESTS_DIR / "test.yaml")
     assert d.a == 1
 
 

@@ -17,11 +17,15 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
+from pathlib import Path
+
 import chanfig
+
+TESTS_DIR = Path(__file__).resolve().parent
 
 
 def test_interpolate():
-    config = chanfig.load("tests/interpolate.yaml").interpolate()
+    config = chanfig.load(TESTS_DIR / "interpolate.yaml").interpolate()
     assert config.data.root == "localhost:80"
     assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
     assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
@@ -31,7 +35,7 @@ def test_interpolate():
 
 
 def test_interpolate_eval():
-    config = chanfig.load("tests/interpolate.yaml").interpolate()
+    config = chanfig.load(TESTS_DIR / "interpolate.yaml").interpolate()
     assert config.data.root == "localhost:80"
     assert config.data.imagenet.data_dirs[0] == "localhost:80/X-A"
     assert config.data.imagenet.data_dirs[1] == "localhost:80/X-B"
@@ -49,7 +53,7 @@ def test_interpolate_eval_updates():
 
 
 def test_interpolate_preserve_placeholders():
-    config = chanfig.load("tests/interpolate.yaml").interpolate()
+    config = chanfig.load(TESTS_DIR / "interpolate.yaml").interpolate()
 
     placeholder_dict = config.dict()
     assert placeholder_dict["data"]["root"] == "${host}:${port}"
@@ -67,7 +71,7 @@ def test_interpolate_preserve_placeholders():
 
 
 def test_include():
-    config = chanfig.load("tests/parent.yaml")
-    model = chanfig.load("tests/model.yaml")
+    config = chanfig.load(TESTS_DIR / "parent.yaml")
+    model = chanfig.load(TESTS_DIR / "model.yaml")
     assert config.model == model
     assert config.port == 80
