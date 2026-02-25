@@ -545,7 +545,7 @@ class Variable(Generic[V]):  # pylint: disable=R0902
         )
 
     def __format__(self, format_spec):
-        return self.value if isinstance(self, str) else format(self.value, format_spec)
+        return format(self.value, format_spec)
 
     def __iter__(self):
         return iter(self.value)
