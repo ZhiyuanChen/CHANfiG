@@ -129,7 +129,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         if no_default_config_action not in ("warn", "ignore", "raise"):
             raise ValueError(
-                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
+                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', but got {no_default_config_action}"
             )
 
         self._warn_argument_typos(args, config)
@@ -215,7 +215,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
             >>> p = ConfigParser()
             >>> p.parse(['--a', '2'], default_config='config', no_default_config_action='suppress').dict()
             Traceback (most recent call last):
-            ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got suppress
+            ValueError: no_default_config_action must be one of 'warn', 'ignore', 'raise', but got suppress
         """
 
         if args is None:
@@ -230,7 +230,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
 
         if no_default_config_action not in ("warn", "ignore", "raise"):
             raise ValueError(
-                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', bug got {no_default_config_action}"
+                f"no_default_config_action must be one of 'warn', 'ignore', 'raise', but got {no_default_config_action}"
             )
 
         def _is_negative_number(token: str) -> bool:
