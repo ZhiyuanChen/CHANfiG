@@ -117,15 +117,14 @@ class Config(NestedDict):
 
     def post(self) -> Self | None:
         r"""
-        Post process of `Config`.
+        Post-processing hook for `Config`.
 
-        Some `Config` may need to do some post process after `Config` is initialised.
-        `post` is provided for this lazy-initialisation purpose.
+        Override this method to perform custom post-processing after the config is initialised.
+        There is no need to call `super().post()` -- `boot` handles framework concerns
+        (interpolation, validation, clearing `default_factory`) automatically after `post` returns.
 
-        By default, `post` calls `interpolate` to perform variable interpolation.
-
-        Note that you should always call `boot` to apply `post` rather than calling `post` directly,
-        as `boot` recursively call `post` on sub-configs.
+        Note that you should always call `boot` rather than calling `post` directly,
+        as `boot` recursively calls `post` on sub-configs.
 
         See Also:
             [`boot`][chanfig.Config.boot]: Apply `post` recursively.
@@ -145,9 +144,6 @@ class Config(NestedDict):
             ...     def post(self):
             ...         if isinstance(self.data, str):
             ...             self.data = Config(feature=self.data, label=self.data)
-            ...         # should call `super().post()` in the end, otherwise, default_factory won't be cleared for `self.data`  # noqa: E501
-            ...         super().post()
-            ...         return self
             >>> c = PostConfig(data="path")
             >>> c.boot()
             PostConfig(
@@ -158,16 +154,13 @@ class Config(NestedDict):
             )
         """
 
-        self._validate(self)
-        self.apply_(lambda c: c.setattr("default_factory", Null) if isinstance(c, Config) else None)
-        return self
-
     def boot(self) -> Self:
         r"""
-        Apply `post` recursively.
+        Apply `post` recursively, then finalise the config.
 
-        Sub-config may have their own `post` method.
-        `boot` is provided to apply `post` recursively.
+        `boot` walks the config tree bottom-up: it boots every sub-config first, then calls
+        `self.post()` for custom user logic, and finally runs the framework bookkeeping
+        (interpolation, validation, clearing `default_factory`).
 
         By default, `boot` is called after `Config` is parsed.
         If you don't need to parse command-line arguments, you should call `boot` manually.
@@ -180,16 +173,13 @@ class Config(NestedDict):
             ...     def post(self):
             ...         if isinstance(self.path, str):
             ...             self.path = Config(feature=self.path, label=self.path)
-            ...         return self
             >>> class BootConfig(Config):
             ...     def __init__(self, *args, **kwargs):
             ...         super().__init__(*args, **kwargs)
             ...         self.dataset = DataConfig(path="path")
             ...     def post(self):
-            ...         super().post()
             ...         if isinstance(self.id, str):
             ...             self.id += "_id"
-            ...         return self
             >>> c = BootConfig(id="boot")
             >>> c.boot()
             BootConfig(
@@ -203,12 +193,26 @@ class Config(NestedDict):
             )
         """
 
+        self._boot()
+        self.interpolate()
+        self._validate(self)
+        self.apply_(lambda c: c.setattr("default_factory", Null) if isinstance(c, Config) else None)
+        return self
+
+    def _boot(self) -> None:
+        r"""
+        Recursively call `post` on sub-configs, then on self.
+
+        This is the internal recursive helper for `boot`.
+        Framework-wide concerns (interpolation, validation, clearing `default_factory`)
+        are handled by the top-level `boot` after the full tree has been posted.
+        """
+
         for value in self.values():
             if isinstance(value, Config):
-                value.boot()
+                value._boot()  # noqa: SLF001
                 value.popattr("parser", None)
         self.post()
-        return self
 
     def parse(
         self,
