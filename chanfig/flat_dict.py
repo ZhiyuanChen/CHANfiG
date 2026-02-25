@@ -109,12 +109,6 @@ class FlatDict(dict, metaclass=Dict):
     Just set the value of one key to another key (surrounded by braces with $ at the begin, like ${xxx}),
     and calls `flat_dict.interpolate()`, `FlatDict` will interpolate their values and create `Variable` automatically.
 
-    `FlatDict` has many other easy to use helper methods, such as `difference`, `intersect`.
-    And has full support for IO operations, such as `json` and `yaml`.
-
-    `FlatDict` also has pytorch support built-in.
-    You can directly call `flat_dict.cpu()` or `flat_dict.to("cpu")` to move all `torch.Tensor` objects across devices.
-
     Attributes:
         indent: Indentation level in printing and dumping to json or yaml.
 
