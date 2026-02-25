@@ -1529,7 +1529,7 @@ class FlatDict(dict, metaclass=Dict):
 
     def all_values(self) -> Generator:
         r"""
-        Equivalent to `keys`.
+        Equivalent to `values`.
 
         This method is provided solely to make methods work on both `FlatDict` and `NestedDict`.
 
@@ -1540,7 +1540,7 @@ class FlatDict(dict, metaclass=Dict):
 
     def all_items(self) -> Generator:
         r"""
-        Equivalent to `keys`.
+        Equivalent to `items`.
 
         This method is provided solely to make methods work on both `FlatDict` and `NestedDict`.
 
