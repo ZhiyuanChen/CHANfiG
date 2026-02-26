@@ -154,7 +154,7 @@ CHANfiG 有着强大的前向兼容能力，能够良好的兼容以往基于 ya
 更进一步的，如果你发现[`Config`][chanfig.Config]中的名字对于命令行来说过长，你可以简单的调用[`self.add_argument`][chanfig.Config.add_argument]并设置恰当的`dest`来在命令行中使用更短的名字，正如`argparse`所做的那样。
 
 ```shell
---8<-- "demo/config.py"
+--8<-- "examples/config.py"
 ```
 
 所有你需要做的仅仅是运行一行：
@@ -176,13 +176,13 @@ python main.py --config meow.yaml --model.encoder.num_layers 8 --model.dropout=0
 === "yaml"
 
     ``` yaml
-    --8<-- "demo/config.yaml"
+    --8<-- "examples/config.yaml"
     ```
 
 === "json"
 
     ``` json
-    --8<-- "demo/config.json"
+    --8<-- "examples/config.json"
     ```
 
 在方法中定义默认参数，在命令行中修改，然后将剩下的交给 CHANfiG。

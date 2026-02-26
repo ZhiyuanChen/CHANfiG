@@ -158,7 +158,7 @@ And if you are using yacs, just replace `CfgNode` with [`Config`][chanfig.Config
 Moreover, if you find a name in the config is too long for command-line, you could simply call [`self.add_argument`][chanfig.Config.add_argument] with proper `dest` to use a shorter name in command-line, as you do with `argparse`.
 
 ```python
---8<-- "demo/config.py"
+--8<-- "examples/config.py"
 ```
 
 All you need to do is just run a line:
@@ -180,13 +180,13 @@ If you have made it dump current configurations, this should be in the written f
 === "yaml"
 
     ``` yaml
-    --8<-- "demo/config.yaml"
+    --8<-- "examples/config.yaml"
     ```
 
 === "json"
 
     ``` json
-    --8<-- "demo/config.json"
+    --8<-- "examples/config.json"
     ```
 
 Define the default arguments in function, put alterations in CLI, and leave the rest to CHANfiG.
