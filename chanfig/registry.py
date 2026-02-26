@@ -76,9 +76,9 @@ class Registry(NestedDict):
         >>> module = registry.register(Module, "Module2")
         >>> registry
         Registry(
-          ('Module1'): <class 'chanfig.registry.Module'>
-          ('Module'): <class 'chanfig.registry.Module'>
-          ('Module2'): <class 'chanfig.registry.Module'>
+          ('module1'): <class 'chanfig.registry.Module'>
+          ('module'): <class 'chanfig.registry.Module'>
+          ('module2'): <class 'chanfig.registry.Module'>
         )
         >>> module = registry.register(Module, "Module")
         Traceback (most recent call last):
@@ -96,20 +96,20 @@ class Registry(NestedDict):
         >>> module = registry.build(config["module"])
         >>> module.a, module.b
         (1, 0)
-        >>> registry = Registry(case_sensitive=False)
+        >>> registry = Registry(case_sensitive=True)
         >>> module = registry.register(Module)
         >>> registry
         Registry(
-          ('module'): <class 'chanfig.registry.Module'>
+          ('Module'): <class 'chanfig.registry.Module'>
         )
-        >>> registry.lookup("module")
+        >>> registry.lookup("Module")
         <class 'chanfig.registry.Module'>
     """
 
     override = False
     key = "type"
     default = Null
-    case_sensitive = True
+    case_sensitive = False
 
     def __init__(
         self,
@@ -154,13 +154,13 @@ class Registry(NestedDict):
             >>> module = registry.register(Module, "Module2")
             >>> registry
             Registry(
-              ('Module1'): <class 'chanfig.registry.Module'>
-              ('Module'): <class 'chanfig.registry.Module'>
-              ('Module2'): <class 'chanfig.registry.Module'>
+              ('module1'): <class 'chanfig.registry.Module'>
+              ('module'): <class 'chanfig.registry.Module'>
+              ('module2'): <class 'chanfig.registry.Module'>
             )
         """
 
-        override_allowed = override or self.override
+        override_allowed = override or self.getattr("override", False)
 
         def normalize_name(key: Any) -> Any:
             if isinstance(key, str) and not self.getattr("case_sensitive", False):
