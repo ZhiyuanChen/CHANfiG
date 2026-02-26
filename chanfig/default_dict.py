@@ -64,7 +64,8 @@ class DefaultDict(FlatDict):
     def __init__(  # pylint: disable=W1113
         self, default_factory: Callable | None = None, *args: Any, **kwargs: Any
     ) -> None:
-        super().__init__(*args, **kwargs)
+        # Set default_factory BEFORE super().__init__() so that merge() can
+        # propagate it to child dicts created during construction.
         if default_factory is not None:
             if callable(default_factory):
                 self.setattr("default_factory", default_factory)
@@ -72,18 +73,18 @@ class DefaultDict(FlatDict):
                 raise TypeError(
                     f"`default_factory={default_factory}` must be Callable, but got {type(default_factory)}."
                 )
+        super().__init__(*args, **kwargs)
 
     def __missing__(self, name: Any, default=Null) -> Any:  # pylint: disable=R1710
         if default is Null:
-            if self.getattr("default_factory") is Null or (
-                isinstance(name, str) and name.startswith("__") and name.endswith("__")
-            ):
+            factory = self.getattr("default_factory", None)
+            if not factory or (isinstance(name, str) and name.startswith("__") and name.endswith("__")):
                 suggestion = self._suggest_key(name)
                 message = f"{name!r}. Did you mean '{suggestion}'?" if suggestion else name
                 raise KeyError(message) from None
-            default = self.getattr("default_factory")()
+            default = factory()
         if isinstance(default, FlatDict):
-            default.__dict__.update(self.__dict__)
+            default.__dict__.update(self._instance_attrs())
         super().set(name, default)
         # CHANfiG might auto convert data type during `set`, which will change the value in place.
         # So we need to `get` the value, instead of return `default`.
@@ -91,7 +92,7 @@ class DefaultDict(FlatDict):
 
     def __repr__(self) -> str:
         default_factory = self.getattr("default_factory", None)
-        if default_factory is Null:
+        if not default_factory:
             return super().__repr__()
         super_repr = super().__repr__()[len(self.__class__.__name__) :]  # noqa: E203
         if len(super_repr) == 2:
@@ -125,8 +126,8 @@ class DefaultDict(FlatDict):
             Traceback (most recent call last):
             ValueError: Cannot add to a DefaultDict with no default_factory
         """
-        default_factory = self.getattr("default_factory")
-        if default_factory is Null:
+        default_factory = self.getattr("default_factory", None)
+        if not default_factory:
             raise ValueError("Cannot add to a DefaultDict with no default_factory")
         self.set(name, default_factory())  # pylint: disable=E1102
         return self.get(name)

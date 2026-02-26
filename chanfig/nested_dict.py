@@ -36,7 +36,7 @@ except ImportError:
         cached_property = property  # type: ignore[misc, assignment] # pylint: disable=C0103
 
 from .default_dict import DefaultDict
-from .flat_dict import FlatDict, set_item
+from .flat_dict import _INTERNAL_ATTRS, FlatDict, _set_item, has_annotations, method_names
 from .io import PathStr
 from .utils import NULL, Null, apply, apply_, suggest_key
 from .variable import Variable
@@ -112,11 +112,13 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         fallback: bool | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(default_factory, *args, **kwargs)
+        # Set these BEFORE super().__init__() so that merge() can
+        # propagate them to child dicts created during construction.
         if convert_mapping is not None:
             self.setattr("convert_mapping", convert_mapping)
         if fallback is not None:
             self.setattr("fallback", fallback)
+        super().__init__(default_factory, *args, **kwargs)
 
     def _suggest_key(self, name: Any, cutoff: float = 0.75) -> str | None:
         with suppress(Exception):
@@ -270,7 +272,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         current: Any = self
         fallback_value: Any = Null
-        default_factory = self.getattr("default_factory", self.empty) or self.empty
+        default_factory = self.getattr("default_factory", None) or self.empty
         for part in parts[:-1]:
             if track_fallback and isinstance(current, Mapping) and leaf in current:
                 try:
@@ -278,11 +280,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                 except Exception:  # pragma: no cover - defensive
                     fallback_value = current[leaf]
 
-            if (
-                resolve_properties
-                and part in dir(current)
-                and isinstance(getattr(current.__class__, part, None), (property, cached_property))
-            ):
+            if resolve_properties and isinstance(getattr(current.__class__, part, None), (property, cached_property)):
                 current = getattr(current, part)
             elif strict_existing:
                 if not isinstance(current, Mapping) or part not in current:
@@ -301,7 +299,7 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
                     return current, leaf, part, fallback_value
 
             if isinstance(current, NestedDict):
-                default_factory = current.getattr("default_factory", self.empty) or self.empty
+                default_factory = current.__dict__.get("default_factory") or self.empty
         return current, leaf, Null, fallback_value
 
     def get(self, name: Any, default: Any = None, fallback: bool | None = None) -> Any:
@@ -348,6 +346,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
         if fallback is None:
             fallback = self.getattr("fallback", False)
+
+        # Fast path: simple key (no separator) — skip _resolve_target entirely
+        separator = self.getattr("separator", ".")
+        if not fallback and isinstance(name, str) and separator not in name:
+            return FlatDict.get(self, name, default)
 
         target, key, missing_part, fallback_value = NestedDict._resolve_target(self, name, track_fallback=fallback)
         if missing_part is not Null:
@@ -421,15 +424,26 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         separator = self.getattr("separator", ".")
         if convert_mapping is None:
             convert_mapping = self.getattr("convert_mapping", False)
+
+        # Fast path: simple key (no separator) — skip _resolve_target entirely.
+        # Safe when no convert_mapping, or when value is not a container type
+        # that could hold Mappings needing conversion.
+        if (
+            isinstance(name, str)
+            and separator not in name
+            and (not convert_mapping or not isinstance(value, (Mapping, list, tuple, set)))
+        ):
+            return FlatDict.set(self, name, value)
+
         target, key, missing_part, _ = NestedDict._resolve_target(
             self, name, create_missing=True, resolve_properties=True
         )
         if missing_part is not Null:
             raise KeyError(missing_part) from None
 
-        default_factory = self.getattr("default_factory", self.empty) or self.empty
+        default_factory = self.getattr("default_factory", None) or self.empty
         if isinstance(target, NestedDict):
-            default_factory = target.getattr("default_factory", self.empty) or self.empty
+            default_factory = target.getattr("default_factory", None) or self.empty
 
         if (
             convert_mapping
@@ -490,6 +504,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             >>> del d['e.a.b']
         """
 
+        # Fast path: simple key (no separator)
+        separator = self.getattr("separator", ".")
+        if isinstance(name, str) and separator not in name:
+            return FlatDict.delete(self, name)
+
         target, key, missing_part, _ = NestedDict._resolve_target(self, name, strict_existing=True)
         if missing_part is not Null:
             raise KeyError(missing_part) from None
@@ -498,6 +517,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             del target[key]
             return
         dict.__delitem__(target, key)
+        # Dual-storage cleanup
+        if isinstance(key, str) and isinstance(target, FlatDict):
+            target.__dict__.pop(key, None)
 
     def pop(self, name: Any, default: Any = Null) -> Any:
         r"""
@@ -520,6 +542,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             KeyError: 'f'
         """
 
+        # Fast path: simple key (no separator)
+        separator = self.getattr("separator", ".")
+        if isinstance(name, str) and separator not in name:
+            return FlatDict.pop(self, name, *([default] if default is not Null else []))
+
         target, key, missing_part, _ = NestedDict._resolve_target(self, name)
         if missing_part is not Null:
             raise KeyError(missing_part) from None
@@ -527,7 +554,11 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             if default is not Null:
                 return default
             raise KeyError(key)
-        return dict.pop(target, key)
+        result = dict.pop(target, key)
+        # Dual-storage cleanup (only for FlatDict instances with __dict__)
+        if isinstance(target, FlatDict) and isinstance(key, str):
+            target.__dict__.pop(key, None)
+        return result
 
     def setdefault(  # type: ignore[override]  # pylint: disable=R0912,W0221
         self,
@@ -570,9 +601,9 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
         if isinstance(target, Mapping) and key in target:
             return target[key]
 
-        default_factory = self.getattr("default_factory", self.empty) or self.empty
+        default_factory = self.getattr("default_factory", None) or self.empty
         if isinstance(target, NestedDict):
-            default_factory = target.getattr("default_factory", self.empty) or self.empty
+            default_factory = target.getattr("default_factory", None) or self.empty
 
         if (
             convert_mapping
@@ -648,20 +679,55 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
             return this
         if isinstance(that, Mapping):
             that = that.items()
-        with this.converting() if isinstance(this, NestedDict) else nullcontext():
+        is_nested = isinstance(this, NestedDict)
+        with this.converting() if is_nested else nullcontext():  # type: ignore[attr-defined]
+            # Pre-compute per-merge constants to avoid repeated lookups
+            if is_nested:
+                separator = this.__dict__.get("separator", ".")
+                convert_mapping = this.__dict__.get("convert_mapping", False)
+                cls = this.__class__
+                cls_method_names = method_names(cls)
+                has_annos = has_annotations(cls)
             for key, value in that:
                 if key in this and isinstance(this[key], Mapping):
                     if isinstance(value, Mapping):
                         NestedDict._merge(this[key], value, overwrite)
                     elif overwrite:
-                        set_item(this, key, value)
-                elif key in dir(this) and isinstance(getattr(this.__class__, key, None), (property, cached_property)):
+                        _set_item(this, key, value)
+                elif isinstance(key, str) and isinstance(
+                    getattr(this.__class__, key, None), (property, cached_property)
+                ):
                     if isinstance(getattr(this, key, None), FlatDict):
                         getattr(this, key).merge(value, overwrite=overwrite)
                     else:
                         setattr(this, key, value)
                 elif overwrite or key not in this:
-                    set_item(this, key, value)
+                    # Inline fast path: simple string key with no separator and
+                    # value not needing convert_mapping processing
+                    if (
+                        is_nested
+                        and isinstance(key, str)
+                        and separator not in key
+                        and (not convert_mapping or not isinstance(value, (Mapping, list, tuple, set)))
+                    ):
+                        # Inline FlatDict.set to avoid 3-level function call chain
+                        if dict.__contains__(this, key):
+                            existing: Any = dict.__getitem__(this, key)  # type: ignore[index]
+                            if isinstance(existing, Variable):
+                                existing.set(value)
+                                continue
+                        if has_annos:
+                            from .utils import get_cached_annotations, honor_annotation
+
+                            annos = get_cached_annotations(this, copy=False)
+                            anno = annos.get(key)
+                            if anno is not None:
+                                value = honor_annotation(value, anno)
+                        dict.__setitem__(this, key, value)  # type: ignore[index]
+                        if key not in _INTERNAL_ATTRS and key not in cls_method_names:
+                            object.__setattr__(this, key, value)
+                    else:
+                        _set_item(this, key, value)
         return this
 
     def intersect(self, other: Mapping | Iterable | PathStr, recursive: bool = True) -> Self:  # pylint: disable=W0221
@@ -699,16 +765,16 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
     @staticmethod
     def _intersect(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
-        ret: NestedDict = NestedDict()
+        result: NestedDict = NestedDict()
         for key, value in that:
             if key in this:
                 if isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
                     intersects = this[key].intersect(value)
                     if intersects:
-                        ret[key] = intersects
+                        result[key] = intersects
                 elif this[key] == value:
-                    ret[key] = value
-        return ret
+                    result[key] = value
+        return result
 
     def difference(  # pylint: disable=W0221, C0103
         self, other: Mapping | Iterable | PathStr, recursive: bool = True
@@ -747,28 +813,36 @@ class NestedDict(DefaultDict):  # pylint: disable=E1136
 
     @staticmethod
     def _difference(this: NestedDict, that: Iterable, recursive: bool = True) -> Mapping:
-        ret: NestedDict = NestedDict()
+        result: NestedDict = NestedDict()
         for key, value in that:
             if key not in this:
-                ret[key] = value
+                result[key] = value
             elif isinstance(this[key], NestedDict) and isinstance(value, Mapping) and recursive:
                 differences = this[key].difference(value)
                 if differences:
-                    ret[key] = differences
+                    result[key] = differences
             elif this[key] != value:
-                ret[key] = value
-        return ret
+                result[key] = value
+        return result
 
     @contextmanager
     def converting(self):
         convert_mapping = self.getattr("convert_mapping", False)
-        try:
-            self.setattr("convert_mapping", True)
-            yield
-        finally:
-            self.setattr("convert_mapping", convert_mapping)
+        if convert_mapping:
+            yield  # already converting, skip save/restore overhead
+        else:
+            try:
+                self.setattr("convert_mapping", True)
+                yield
+            finally:
+                self.setattr("convert_mapping", False)
 
     def __contains__(self, name: Any) -> bool:
+        # Fast path: simple key (no separator) — direct dict check
+        separator = self.getattr("separator", ".")
+        if isinstance(name, str) and separator not in name:
+            return dict.__contains__(self, name)
+
         target, key, missing_part, _ = NestedDict._resolve_target(self, name, strict_existing=True)
         if missing_part is not Null:
             return False

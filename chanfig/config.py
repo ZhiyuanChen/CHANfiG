@@ -137,7 +137,7 @@ class Config(NestedDict):
             Config(
               ('dne'): Config()
             )
-            >>> c.dne2
+            >>> c.dne2  # doctest: +IGNORE_EXCEPTION_DETAIL
             Traceback (most recent call last):
             AttributeError: 'Config' object has no attribute 'dne2'
             >>> class PostConfig(Config):
@@ -255,7 +255,7 @@ class Config(NestedDict):
             {'a': 1, 'b': 2, 'c': 3}
         """
 
-        if self.getattr("parser") is None:
+        if self.getattr("parser", None) is None:
             self.setattr("parser", ConfigParser())
         parser = self.getattr("parser")
         if strict:
@@ -309,7 +309,7 @@ class Config(NestedDict):
             {'a': 1, 'c': 4, 'b': 2}
         """
 
-        if self.getattr("parser") is None:
+        if self.getattr("parser", None) is None:
             self.setattr("parser", ConfigParser())
         return self.getattr("parser").add_argument(*args, **kwargs)
 
@@ -491,7 +491,7 @@ class Config(NestedDict):
             KeyError: 'f.n'
         """
 
-        if not self.hasattr("default_factory"):  # did not call super().__init__() in sub-class
+        if self.getattr("default_factory", None) is None:  # did not call super().__init__() in sub-class
             self.setattr("default_factory", Config)
         if name in self or not self.getattr("frozen", False):
             return super().get(name, default, fallback)

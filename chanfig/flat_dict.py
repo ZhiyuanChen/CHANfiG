@@ -25,7 +25,6 @@ from argparse import Namespace
 from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence, Set
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
-from functools import lru_cache
 from io import IOBase
 from json import dumps as json_dumps
 from json import loads as json_loads
@@ -46,7 +45,7 @@ except ImportError:
     from tomli import load as toml_load  # type: ignore[no-redef]
     from tomli import loads as toml_loads  # type: ignore[no-redef]
 
-from .base import Dict
+from .base import DictMeta
 from .io import (
     JSON_EXTENSIONS,
     TOML_EXTENSIONS,
@@ -77,19 +76,86 @@ with try_import() as torch_import:
     from torch import dtype as TorchDType
 
 
-@lru_cache(maxsize=128)
-def _cached_class_dir(cls: type) -> frozenset[str]:
-    return frozenset(dir(cls))
+_MISSING = object()  # private sentinel for getattr fast path (distinct from Null)
+
+# Internal attribute names stored in __dict__ by setattr/getattr.
+# These must NOT be overwritten by dual-storage mirroring.
+_INTERNAL_ATTRS = frozenset(
+    {
+        "indent",
+        "separator",
+        "convert_mapping",
+        "fallback",
+        "frozen",
+        "parser",
+        "default_factory",
+    }
+)
 
 
-def set_item(obj: Mapping, key: Any, value: Any) -> None:
+def method_names(cls: type) -> frozenset[str]:
+    """Return names that are methods/properties/descriptors on cls.
+
+    Computed once per class and stored as ``cls._method_names_``.
+    """
+    result = cls.__dict__.get("_method_names_")
+    if result is not None:
+        return result
+    names: set[str] = set()
+    for name in dir(cls):
+        if name.startswith("__") and name.endswith("__"):
+            names.add(name)
+            continue
+        try:
+            value = getattr(cls, name)
+        except Exception:
+            continue
+        if callable(value) or isinstance(value, (property, staticmethod, classmethod)):
+            names.add(name)
+    result = frozenset(names)
+    cls._method_names_ = result  # type: ignore[attr-defined]
+    return result
+
+
+def has_annotations(cls: type) -> bool:
+    """Return True if cls or any base class has annotations.
+
+    Computed once per class and stored as ``cls._has_annotations_``.
+    """
+    result = cls.__dict__.get("_has_annotations_")
+    if result is not None:
+        return result
+    result = any(get_cached_annotations(klass, copy=False) for klass in cls.__mro__)
+    cls._has_annotations_ = result  # type: ignore[attr-defined]
+    return result
+
+
+def class_defaults(cls: type) -> dict[str, Any]:
+    """Pre-compute {attr_name: default_value} for annotated class attrs.
+
+    Computed once per class and stored as ``cls.class_defaults_``.
+    """
+    result = cls.__dict__.get("class_defaults_")
+    if result is not None:
+        return result
+    defaults: dict[str, Any] = {}
+    for klass in cls.__mro__:
+        annos = get_cached_annotations(klass, copy=False)
+        for k in annos:
+            if k not in defaults and k in klass.__dict__:
+                defaults[k] = klass.__dict__[k]
+    cls.class_defaults_ = defaults  # type: ignore[attr-defined]
+    return defaults
+
+
+def _set_item(obj: Mapping, key: Any, value: Any) -> None:
     if isinstance(obj, FlatDict):
         obj.set(key, value)
     else:
         obj[key] = value  # type: ignore[index]
 
 
-class FlatDict(dict, metaclass=Dict):
+class FlatDict(dict, metaclass=DictMeta):
     r"""
     `FlatDict` with attribute-style access.
 
@@ -113,12 +179,12 @@ class FlatDict(dict, metaclass=Dict):
         indent: Indentation level in printing and dumping to json or yaml.
 
     Notes:
-        `FlatDict` rewrite `__getattribute__` and `__getattr__` to supports attribute-style access to its members.
-        Therefore, all internal attributes should be set and get through `flat_dict.setattr` and `flat_dict.getattr`.
+        `FlatDict` uses dual storage (dict + `__dict__`) and `__getattr__` to support attribute-style access.
+        All internal attributes should be set and get through `flat_dict.setattr` and `flat_dict.getattr`.
 
         Although it is possible to override other internal methods, it is not recommended to do so.
 
-        `__class__`, `__dict__`, and `getattr` are reserved and cannot be overrode in any manner.
+        `__class__`, `__dict__`, and `getattr` are reserved and cannot be overridden in any manner.
 
     Examples:
         >>> d = FlatDict()
@@ -161,58 +227,34 @@ class FlatDict(dict, metaclass=Dict):
         self.merge(*args, **kwargs)
         self._copy_class_attributes()
 
-    def _copy_class_attributes(self, recursive: bool = True) -> Self:
+    def _copy_class_attributes(self) -> Self:
         r"""
-        Move class attributes to instance.
-
-        Args:
-            recursive:
+        Copy annotated class attributes to the instance.
         """
 
-        def copy_cls_attributes(cls: type) -> Mapping:
-            annos = get_cached_annotations(cls, copy=False)
-            if not annos:
-                return {}
-
-            def copy_default(value: Any) -> Any:
-                # Ensure mutable defaults declared at class scope are not shared across instances.
+        defaults = class_defaults(self.__class__)
+        if defaults:
+            attrs = {}
+            for k, v in defaults.items():
                 with suppress(Exception):
-                    return deepcopy(value)
+                    attrs[k] = deepcopy(v)
+                    continue
                 with suppress(Exception):
-                    return copy(value)
-                return value
-
-            return {k: copy_default(cls.__dict__[k]) for k in annos.keys() if k in cls.__dict__}
-
-        if recursive:
-            for cls in self.__class__.__mro__:
-                attrs = copy_cls_attributes(cls)
-                if attrs:
-                    self.merge(attrs, overwrite=False)
-        else:
-            attrs = copy_cls_attributes(self.__class__)
-            if attrs:
-                self.merge(attrs, overwrite=False)
+                    attrs[k] = copy(v)
+                    continue
+                attrs[k] = v
+            self.merge(attrs, overwrite=False)
         return self
 
     def __post_init__(self, *args, **kwargs) -> None:
         pass
 
-    def __getattribute__(self, name: Any) -> Any:
-        if name in ("keys", "values", "items", "getattr", "setattr", "delattr", "hasattr", "repr", "extra_repr"):
-            return super().__getattribute__(name)
-        if name not in ("getattr",) and not (name.startswith("__") and name.endswith("__")):
-            try:
-                has_key = dict.__contains__(self, name)
-            except TypeError:
-                has_key = False
-            if has_key:
-                if name in _cached_class_dir(self.__class__):
-                    value = super().__getattribute__(name)
-                    if isinstance(value, (property, staticmethod, classmethod)) or callable(value):
-                        return value
-                return self.get(name)
-        return super().__getattribute__(name)
+    def _instance_attrs(self) -> dict[str, Any]:
+        """Return __dict__ entries that are NOT dual-storage mirrors (i.e. internal attrs + user setattr values)."""
+        return {k: v for k, v in self.__dict__.items() if not dict.__contains__(self, k)}
+
+    # No __getattribute__ override — dual storage means Python's C-level
+    # object.__getattribute__ finds dict values in __dict__ directly.
 
     def get(self, name: Any, default: Any = None) -> Any:
         r"""
@@ -250,6 +292,13 @@ class FlatDict(dict, metaclass=Dict):
         return self.get(name, default=Null)
 
     def __getattr__(self, name: Any) -> Any:
+        # Called only when object.__getattribute__ fails to find *name*
+        # in __dict__ or the class MRO.  Two cases:
+        #  1. Key in dict but not mirrored (method-name collision) — fast path.
+        #  2. Key not in dict — delegate to get() for proper missing-key semantics
+        #     (frozen checks, fallback, default_factory, etc.).
+        if dict.__contains__(self, name):
+            return dict.__getitem__(self, name)
         try:
             return self.get(name, default=Null)
         except KeyError as exc:
@@ -279,17 +328,22 @@ class FlatDict(dict, metaclass=Dict):
         if name is Null:
             raise ValueError("name must not be null")
 
-        if name in self and isinstance(self.get(name), Variable):
-            self.get(name).set(value)
-            return
+        if dict.__contains__(self, name):
+            existing = dict.__getitem__(self, name)
+            if isinstance(existing, Variable):
+                existing.set(value)
+                return
 
-        annotations = get_cached_annotations(self, copy=False)
-        anno = annotations.get(name, Any)
-
-        if anno is not Any:
-            value = honor_annotation(value, anno)
+        if has_annotations(self.__class__):
+            annotations = get_cached_annotations(self, copy=False)
+            anno = annotations.get(name, Any)
+            if anno is not Any:
+                value = honor_annotation(value, anno)
 
         dict.__setitem__(self, name, value)
+        # Dual storage: mirror to __dict__ for C-level attribute access
+        if isinstance(name, str) and name not in _INTERNAL_ATTRS and name not in method_names(self.__class__):
+            object.__setattr__(self, name, value)
 
     def __setitem__(self, name: Any, value: Any) -> None:
         self.set(name, value)
@@ -324,6 +378,7 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         dict.__delitem__(self, name)
+        self.__dict__.pop(name, None)
 
     def __delitem__(self, name: Any) -> None:
         return self.delete(name)
@@ -333,6 +388,18 @@ class FlatDict(dict, metaclass=Dict):
             self.delete(name)
         except KeyError:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+
+    def clear(self) -> None:
+        dict.clear(self)
+        # Rebuild __dict__ keeping only internal attrs
+        internal = {k: v for k, v in self.__dict__.items() if k in _INTERNAL_ATTRS}
+        self.__dict__.clear()
+        self.__dict__.update(internal)
+
+    def pop(self, name: Any, *args) -> Any:
+        result = dict.pop(self, name, *args)
+        self.__dict__.pop(name, None)
+        return result
 
     def __missing__(self, name: Any) -> Any:  # pylint: disable=R1710
         suggestion = self._suggest_key(name)
@@ -366,7 +433,10 @@ class FlatDict(dict, metaclass=Dict):
     @staticmethod
     def _validate(obj) -> None:
         if isinstance(obj, FlatDict):
-            annos = get_cached_annotations(obj, copy=False)
+            if not obj:
+                return
+            has_annos = has_annotations(obj.__class__)
+            annos = get_cached_annotations(obj, copy=False) if has_annos else None
             for name, value in obj.items():
                 if annos and name in annos and not conform_annotation(value, annos[name]):
                     raise TypeError(f"'{name}' has invalid type. Value {value!r} is not of type {annos[name]!r}.")
@@ -408,21 +478,28 @@ class FlatDict(dict, metaclass=Dict):
             3
         """
 
-        if name in ("indent", "separator"):
-            return super().__getattribute__(name)
-
-        try:
-            if name in self.__dict__:
-                return self.__dict__[name]
-            for cls in self.__class__.__mro__:
-                annos = get_cached_annotations(cls, copy=False)
-                if name in cls.__dict__ and name not in annos:
-                    return cls.__dict__[name]
-            return super().getattr(name, default)  # type: ignore[misc]
-        except AttributeError:
+        # Fast path for internal attrs (frozen, separator, etc.) — simple __dict__ lookup.
+        if name in _INTERNAL_ATTRS:
+            val = self.__dict__.get(name, _MISSING)
+            if val is not _MISSING:
+                return val
             if default is not Null:
                 return default
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
+
+        # Check conflicting attrs store first (setattr values for keys also in dict)
+        conflicting = self.__dict__.get("_conflicting_attrs_")
+        if conflicting and name in conflicting:
+            return conflicting[name]
+        if name in self.__dict__ and not dict.__contains__(self, name):
+            return self.__dict__[name]
+        for cls in self.__class__.__mro__:
+            annos = get_cached_annotations(cls, copy=False)
+            if name in cls.__dict__ and name not in annos:
+                return cls.__dict__[name]
+        if default is not Null:
+            return default
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
 
     def setattr(self, name: str, value: Any) -> None:
         r"""
@@ -452,13 +529,25 @@ class FlatDict(dict, metaclass=Dict):
             1031
         """
 
+        # Fast path for internal attrs — these never conflict with dict keys.
+        if name in _INTERNAL_ATTRS:
+            self.__dict__[name] = value
+            return
+
         if name in self:
             warn(
                 f"{name} already exists in {self.__class__.__name__}.\n"
                 f"Users must call `{self.__class__.__name__}.getattr()` to retrieve conflicting attribute value.",
                 RuntimeWarning,
             )
-        self.__dict__[name] = value
+            # Store in separate sub-dict to avoid shadowing the dual-storage mirror
+            attrs = self.__dict__.get("_conflicting_attrs_")
+            if attrs is None:
+                attrs = {}
+                object.__setattr__(self, "_conflicting_attrs_", attrs)
+            attrs[name] = value
+        else:
+            self.__dict__[name] = value
 
     def delattr(self, name: str) -> None:
         r"""
@@ -480,7 +569,11 @@ class FlatDict(dict, metaclass=Dict):
             AttributeError: 'FlatDict' object has no attribute 'name'
         """
 
-        if name not in self.__dict__:
+        conflicting = self.__dict__.get("_conflicting_attrs_")
+        if conflicting and name in conflicting:
+            del conflicting[name]
+            return
+        if name not in self.__dict__ or dict.__contains__(self, name):
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
         del self.__dict__[name]
 
@@ -499,7 +592,10 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         try:
-            if name in self.__dict__ or name in self.__class__.__dict__:
+            conflicting = self.__dict__.get("_conflicting_attrs_")
+            if conflicting and name in conflicting:
+                return True
+            if (name in self.__dict__ and not dict.__contains__(self, name)) or name in self.__class__.__dict__:
                 return True
             return super().hasattr(name)  # type: ignore[misc]
         except AttributeError:
@@ -519,9 +615,14 @@ class FlatDict(dict, metaclass=Dict):
             1
         """
 
-        if name not in self.__dict__ and default is Null:
+        conflicting = self.__dict__.get("_conflicting_attrs_")
+        if conflicting and name in conflicting:
+            return conflicting.pop(name)
+        if (name not in self.__dict__ or dict.__contains__(self, name)) and default is Null:
             raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'") from None
-        return self.__dict__.pop(name, default)
+        if name in self.__dict__ and not dict.__contains__(self, name):
+            return self.__dict__.pop(name)
+        return default
 
     def dict(self, flatten: bool = False) -> Mapping | Sequence | Set:
         r"""
@@ -827,14 +928,14 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         if len(args) == 1:
-            args = args[0]
-            if isinstance(args, (PathLike, str, bytes)):
-                args = self.load(args)  # type: ignore[assignment]
+            other = args[0]
+            if isinstance(other, (PathLike, str, bytes)):
+                other = self.load(other)
                 warn(
                     "merge file is deprecated and maybe removed in a future release. Use `merge_from_file` instead.",
                     PendingDeprecationWarning,
                 )
-            self._merge(self, args, overwrite=overwrite)
+            self._merge(self, other, overwrite=overwrite)
         elif len(args) > 1:
             self._merge(self, args, overwrite=overwrite)
         if kwargs:
@@ -852,9 +953,9 @@ class FlatDict(dict, metaclass=Dict):
                 if isinstance(value, Mapping):
                     FlatDict._merge(this[key], value, overwrite=overwrite)
                 elif overwrite:
-                    set_item(this, key, value)
+                    _set_item(this, key, value)
             elif overwrite or key not in this:
-                set_item(this, key, value)
+                _set_item(this, key, value)
         return this
 
     def union(self, *args: Any, **kwargs: Any) -> Self:
@@ -1086,7 +1187,8 @@ class FlatDict(dict, metaclass=Dict):
 
         ret = self.empty()
         memo[id(self)] = ret  # type: ignore[index]
-        ret.__dict__.update(deepcopy(self.__dict__, memo))  # type: ignore[arg-type]
+        # Deepcopy instance attrs (internal attrs + setattr values), skip dual-storage mirrors.
+        ret.__dict__.update(deepcopy(self._instance_attrs(), memo))  # type: ignore[arg-type]
         for k, v in self.items():
             if isinstance(v, FlatDict):
                 ret[k] = v.deepcopy(memo=memo)
@@ -1507,7 +1609,7 @@ class FlatDict(dict, metaclass=Dict):
         """
 
         empty = self.empty(*args, **kwargs)
-        empty.__dict__.update(self.__dict__)
+        empty.__dict__.update(self._instance_attrs())
         return empty
 
     def all_keys(self) -> Generator:
@@ -1614,11 +1716,11 @@ class FlatDict(dict, metaclass=Dict):
     def __hash__(self):
         return hash(frozenset(self.items()))
 
-    # iptyhon
+    # ipython
     def _ipython_display_(self):  # pragma: no cover
         return repr(self)
 
-    # iptyhon
+    # ipython
     def _ipython_canary_method_should_not_exist_(self):  # pragma: no cover
         return None
 

@@ -180,7 +180,7 @@ def test_merge_flatdict_child_respects_overwrite():
     assert d.a.b == 2
 
 
-def test_copy_class_attributes_non_recursive_and_property_resolution():
+def test_copy_class_attributes_and_property_resolution():
     class WithAnno(FlatDict):
         foo: int
         bar: int = 1
@@ -189,7 +189,6 @@ def test_copy_class_attributes_non_recursive_and_property_resolution():
             return "prop"
 
     obj = WithAnno()
-    obj._copy_class_attributes(recursive=False)
     assert obj.bar == 1
     obj["prop"] = "shadow"
     assert callable(obj.prop)

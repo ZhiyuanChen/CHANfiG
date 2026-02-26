@@ -22,7 +22,7 @@ from __future__ import annotations
 from typing import Any
 
 
-class Dict(type(dict)):  # type: ignore[misc]
+class DictMeta(type(dict)):  # type: ignore[misc]
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         # if hasattr(cls, '__before_init__'):
         #     cls.__before_init__()
