@@ -132,6 +132,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 f"no_default_config_action must be one of 'warn', 'ignore', 'raise', but got {no_default_config_action}"
             )
 
+        args = self._normalize_dash_to_underscore(args)
         self._warn_argument_typos(args, config)
         # parse the command-line arguments
         parsed = self.parse_args(args)
@@ -262,6 +263,7 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
         if args is not None:
             args = list(args)
         args = _normalize_args(args or [])
+        args = self._normalize_dash_to_underscore(args)
 
         # add the command-line arguments
         key_value_args: list[list[str]] = []
@@ -379,12 +381,37 @@ class ConfigParser(ArgumentParser):  # pylint: disable=C0115
                 )
 
     @staticmethod
+    def _normalize_dash_to_underscore(args: Sequence[str]) -> list[str]:
+        r"""
+        Normalize command-line arguments by converting hyphens to underscores in option names.
+
+        This allows users to use either ``--push-to-hub`` or ``--push_to_hub`` interchangeably.
+
+        Examples:
+            >>> ConfigParser._normalize_dash_to_underscore(['--push-to-hub', 'true', '--learning-rate=1e-3'])
+            ['--push_to_hub', 'true', '--learning_rate=1e-3']
+            >>> ConfigParser._normalize_dash_to_underscore(['-x', '--flag', 'value'])
+            ['-x', '--flag', 'value']
+        """
+        normalized: list[str] = []
+        for arg in args:
+            if arg.startswith("--") and len(arg) > 2:
+                body = arg[2:]
+                if "=" in body:
+                    key, value = body.split("=", 1)
+                    arg = "--" + key.replace("-", "_") + "=" + value
+                else:
+                    arg = "--" + body.replace("-", "_")
+            normalized.append(arg)
+        return normalized
+
+    @staticmethod
     def _extract_option_tokens(args: Sequence[str]) -> list[str]:
         tokens: list[str] = []
         for arg in args:
             if not arg.startswith("--"):
                 continue
-            token = arg[2:]
+            token = arg[2:].replace("-", "_")
             if "=" in token:
                 token = token.split("=", 1)[0]
             tokens.append(token)
