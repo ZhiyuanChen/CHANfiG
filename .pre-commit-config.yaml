@@ -1,13 +1,13 @@
 default_language_version:
   python: python3
 repos:
-  - repo: https://github.com/PSF/black
-    rev: 26.1.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.3.0
     hooks:
       - id: black
         args: [--safe, --quiet]
   - repo: https://github.com/PyCQA/isort
-    rev: 8.0.0
+    rev: 8.0.1
     hooks:
       - id: isort
         name: isort
@@ -37,7 +37,7 @@ repos:
           - types-PyYaml
           - types-toml
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         args: [--ignore-words=.codespell-whitelist.txt]
