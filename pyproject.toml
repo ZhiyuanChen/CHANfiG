@@ -80,6 +80,9 @@ messages_control.disable = """
 """
 reports.output-format = "colorized"
 
+[tool.mypy]
+ignore_missing_imports = true
+
 [tool.pytest]
 addopts = [ "--doctest-modules", "--cov" ]
 
@@ -91,6 +94,3 @@ report.fail_under = 80
 report.show_missing = true
 json.output = "coverage.json"
 xml.output = "coverage.xml"
-
-[tool.mypy]
-ignore_missing_imports = true
