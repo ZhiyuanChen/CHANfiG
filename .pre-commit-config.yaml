@@ -1,13 +1,13 @@
 default_language_version:
   python: python3
 repos:
-  - repo: https://github.com/PSF/black
-    rev: 26.1.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.3.1
     hooks:
       - id: black
         args: [--safe, --quiet]
   - repo: https://github.com/PyCQA/isort
-    rev: 8.0.0
+    rev: 9.0.0a3
     hooks:
       - id: isort
         name: isort
@@ -25,11 +25,11 @@ repos:
       - id: pyupgrade
         args: [--keep-runtime-typing]
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.16.2
+    rev: v2.21.1
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: v1.20.2
     hooks:
       - id: mypy
         files: chanfig
@@ -37,7 +37,7 @@ repos:
           - types-PyYaml
           - types-toml
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         args: [--ignore-words=.codespell-whitelist.txt]
