@@ -17,7 +17,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the LICENSE file for more details.
 
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Union
 
 import pytest
 
@@ -171,6 +171,13 @@ def test_honor_annotation_union_types():
     assert honor_annotation("42", Union[int, str]) == "42"
 
 
+def test_honor_annotation_literal_types():
+    assert honor_annotation("train", Literal["train", "eval"]) == "train"
+    assert honor_annotation("1", Literal[1, 2]) == 1
+    assert honor_annotation("other", Literal["train", "eval"]) == "other"
+    assert honor_annotation("false", Literal[False, True]) == "false"
+
+
 def test_honor_annotation_optional_types():
     assert honor_annotation(None, Optional[int]) is None
     assert honor_annotation("42", Optional[int]) == 42
@@ -179,6 +186,7 @@ def test_honor_annotation_optional_types():
 
 def test_honor_annotation_list_types():
     assert honor_annotation(["1", "2", "3"], List[int]) == [1, 2, 3]
+    assert honor_annotation(("1", "2", "3"), List[int]) == [1, 2, 3]
     assert honor_annotation([1, 2, 3], List[str]) == ["1", "2", "3"]
     assert honor_annotation([], List[int]) == []
 
@@ -223,6 +231,13 @@ def test_conform_annotation_union_types():
     assert conform_annotation(123, Union[int, str])
     assert not conform_annotation([], Union[int, str])
     assert not conform_annotation({}, Union[int, str])
+
+
+def test_conform_annotation_literal_types():
+    assert conform_annotation("train", Literal["train", "eval"])
+    assert conform_annotation(1, Literal[1, 2])
+    assert not conform_annotation("other", Literal["train", "eval"])
+    assert not conform_annotation(True, Literal[1])
 
 
 def test_conform_annotation_optional_types():

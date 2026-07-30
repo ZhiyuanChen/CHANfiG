@@ -24,7 +24,7 @@ from collections.abc import Callable, Mapping, Sequence
 from contextlib import suppress
 from functools import lru_cache, partial
 from types import MappingProxyType, ModuleType
-from typing import Any, Union, no_type_check
+from typing import Any, Literal, Union, no_type_check
 
 import typing_extensions
 from typing_extensions import get_args, get_origin
@@ -240,6 +240,17 @@ def honor_annotation(data: Any, annotation: type) -> Any:
     origin_type = get_origin(annotation)
     arg_types = get_args(annotation)
     with suppress(Exception):
+        if origin_type is Literal:
+            if conform_annotation(data, annotation):
+                return data
+            for literal in arg_types:
+                if literal.__class__ is bool:
+                    continue
+                with suppress(ValueError, TypeError):
+                    converted = literal.__class__(data)
+                    if converted.__class__ is literal.__class__ and converted == literal:
+                        return literal
+            return data
         if origin_type is Union or origin_type is UnionType:
             if any(conform_annotation(data, t) for t in arg_types):
                 return data
@@ -275,7 +286,8 @@ def honor_annotation(data: Any, annotation: type) -> Any:
                     return origin_type(honor_annotation(item, item_type) for item in data)
             else:
                 with suppress(ValueError, TypeError):
-                    return origin_type(data)
+                    converted = origin_type(data)
+                    return honor_annotation(converted, annotation)
             return data
         if isinstance(annotation, type) and not isinstance(data, annotation):
             with suppress(ValueError, TypeError):
@@ -300,6 +312,8 @@ def conform_annotation(data: Any, annotation: type) -> bool:
         return data is None
     origin_type = get_origin(annotation)
     arg_types = get_args(annotation)
+    if origin_type is Literal:
+        return any(data.__class__ is literal.__class__ and data == literal for literal in arg_types)
     if origin_type in (Union, UnionType):
         return any(conform_annotation(data, arg_type) for arg_type in arg_types)
     if origin_type is Callable:

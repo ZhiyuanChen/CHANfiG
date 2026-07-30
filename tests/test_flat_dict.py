@@ -26,7 +26,7 @@ from builtins import PendingDeprecationWarning
 from copy import copy, deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import pytest
 
@@ -353,6 +353,7 @@ class AnnoDict(FlatDict):
     tuple_str: tuple[str]
     dict_float: dict[str, float]
     union_int_float: Union[int, float]
+    mode: Literal["train", "eval"] = "train"
     optional_str: Optional[str] = None
     nested: list[tuple[int, int]]
 
@@ -368,13 +369,17 @@ def test_anno_validate():
     assert isinstance(anno_dict.float_value, float)
     anno_dict.list_int = ("1", "2", "3")
     assert isinstance(anno_dict.list_int, list)
+    assert isinstance(anno_dict.list_int[0], int)
     anno_dict.tuple_str = [1, 2, 3]
     assert isinstance(anno_dict.tuple_str, tuple)
+    assert isinstance(anno_dict.tuple_str[0], str)
     anno_dict.dict_float = [("a", 1), ("b", 2)]
     assert isinstance(anno_dict.dict_float, dict)
-    assert isinstance(anno_dict.dict_float["a"], int)
+    assert isinstance(anno_dict.dict_float["a"], float)
     anno_dict.union_int_float = "1"
     assert isinstance(anno_dict.union_int_float, int)
+    anno_dict.mode = "eval"
+    assert anno_dict.mode == "eval"
     assert anno_dict.optional_str is None
     anno_dict.optional_str = 1
     assert isinstance(anno_dict.optional_str, str)
@@ -382,3 +387,7 @@ def test_anno_validate():
     assert isinstance(anno_dict.nested, list)
     assert isinstance(anno_dict.nested[0], tuple)
     assert isinstance(anno_dict.nested[0][0], int)
+    anno_dict.validate()
+    anno_dict.mode = "invalid"
+    with pytest.raises(TypeError, match="'mode' has invalid type"):
+        anno_dict.validate()
