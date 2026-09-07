@@ -31,6 +31,7 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -63,14 +64,13 @@ write_to = "chanfig/_version.py"
 line-length = 120
 
 [tool.isort]
-line_length = 120
 profile = "black"
+line_length = 120
 
 [tool.flake8]
 max-line-length = 120
 
 [tool.pylint]
-format.max-line-length = 120
 main.fail-under = 9.8
 messages_control.disable = """
   E0012,
@@ -79,18 +79,19 @@ messages_control.disable = """
   R0801,
 """
 reports.output-format = "colorized"
+format.max-line-length = 120
+
+[tool.mypy]
+ignore_missing_imports = true
 
 [tool.pytest]
 addopts = [ "--doctest-modules", "--cov" ]
 
 [tool.coverage]
-run.branch = true
 run.source = [ "chanfig" ]
+run.branch = true
 paths.source = [ "chanfig" ]
 report.fail_under = 80
 report.show_missing = true
 json.output = "coverage.json"
 xml.output = "coverage.xml"
-
-[tool.mypy]
-ignore_missing_imports = true
